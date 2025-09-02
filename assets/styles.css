@@ -112,7 +112,7 @@ img{max-width:100%;display:block}
 }
 
 .org-logos li{
-  background:var(--surface);
+  background: #0f1d1a;
   border:1px solid #1f2a31;
   border-radius:14px;
   padding:14px 18px;
