@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MTERMS 2026 — Capabilities</title>
+  <link rel="stylesheet" href="../assets/capabilities.css"/>
+  <style>
+    body{background:#0b1115;color:#e9f1f6;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{width:min(1000px,92vw);margin:40px auto}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .grid{display:grid;grid-template-columns:260px 1fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1 style="margin:0">MTERMS 2026 — Capabilities</h1>
+      <a class="cap-btn" href="../index.html">← Back to site</a>
+    </div>
+    <div id="cap-page"></div>
+  </div>
+
+  <script>
+    // Lightweight renderer that reuses the JSON
+    fetch('../assets/capabilities.data.json').then(r=>r.json()).then(d=>{
+      const root = document.getElementById('cap-page');
+      const nav = document.createElement('div'); nav.className='cap-nav'; 
+      const panel = document.createElement('div'); panel.className='cap-panel';
+      const grid = document.createElement('div'); grid.className='grid';
+      grid.appendChild(nav); grid.appendChild(panel); root.appendChild(grid);
+
+      d.tabs.forEach((t,i)=>{
+        const b=document.createElement('button'); b.textContent=t.label; if(i===0) b.classList.add('active');
+        b.onclick=()=>sel(t.id); nav.appendChild(b);
+      });
+      function sel(id){
+        Array.from(nav.children).forEach(btn=>btn.classList.toggle('active', btn.textContent===d.tabs.find(x=>x.id===id).label));
+        const t=d.tabs.find(x=>x.id===id) || d.tabs[0];
+        panel.innerHTML = `
+          <div class="cap-kicker">${t.kicker||''}</div>
+          <h3>${t.label}</h3>
+          <div class="cap-grid">
+            <div class="cap-card"><ul>${(t.bullets||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
+              <div class="cap-badges">${(t.badges||[]).map(b=>`<span class="cap-badge">${b}</span>`).join('')}</div>
+            </div>
+            <div class="cap-card">${t.image?`<img src="${t.image}" alt="${t.label}">`:''}</div>
+          </div>`;
+      }
+      sel(d.tabs[0].id);
+    });
+  </script>
+</body>
+</html>
