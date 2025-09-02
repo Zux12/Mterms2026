@@ -34,7 +34,8 @@
         "QR badges (PDF/Wallet) + offline fallback lists."
       ],
       "badges": ["Stripe", "FPX", "Invoicing", "Wallet passes"],
-      "image": "https://images.unsplash.com/photo-1556742400-b5c4f3c4f16a?q=80&w=1600&auto=format&fit=crop",
+<img src="https://images.template.net/523292/conference-registration-form-template-ffvmu.png?q=80&w=1600&auto=format&fit=crop" alt="Conference registration form template">
+
       "ctas": [
         {"label": "See Payment Options", "href": "#"},
         {"label": "Invoice/Receipt Help", "href": "#"}
@@ -52,7 +53,7 @@
         "Proceedings export (PDF/EPUB) with DOI stubs."
       ],
       "badges": ["Double-blind", "COI detection", "Program builder"],
-      "image": "https://images.unsplash.com/photo-1581093588401-9cbf2bdfd274?q=80&w=1600&auto=format&fit=crop",
+<img src="https://www.questjournals.org/assets/images/peer-review.jpg?q=80&w=1600&auto=format&fit=crop" alt="Peer review process illustration">
       "ctas": [
         {"label": "Submission Templates", "href": "#"},
         {"label": "Reviewer Guidelines", "href": "#"}
@@ -69,7 +70,7 @@
         "Onsite check-in with QR + offline mode."
       ],
       "badges": ["Capacity", "Waitlists", "ICS"],
-      "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1600&auto=format&fit=crop",
+<img src="https://qrcodedynamic.com/blog/content/images/2024/03/a-conference-registration-desk-with-a-large-qr-code-and-attendees.jpg?q=80&w=1600&auto=format&fit=crop" alt="Conference registration desk with large QR code for attendee check-in">
       "ctas": [
         {"label": "View Draft Agenda", "href": "#"}
       ]
