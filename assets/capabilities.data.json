@@ -1,0 +1,160 @@
+{
+  "title": "Everything MTERMS2026 Needs — Built In",
+  "intro": "From abstracts to payments to post-event impact — modular, secure, and production-ready. This popup is a live preview of the full platform we can deliver.",
+  "tabs": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "kicker": "Value at a glance",
+      "bullets": [
+        "Role-aware registration (Attendee, Speaker, Sponsor, Exhibitor, VIP, Student).",
+        "Hosted checkouts: Cards, Apple/Google Pay, FPX, PayPal.",
+        "Abstracts → Blind review → Conflict-free scheduling.",
+        "Capacity-aware agenda with smart waitlists.",
+        "Green-room tools for chairs & speakers.",
+        "Post-event media library with embargo windows."
+      ],
+      "badges": ["Modular", "Secure", "Mobile-first", "Analytics-ready"],
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Download 1-page PDF (demo)", "href": "#", "style": "primary"},
+        {"label": "Request Sandbox Login", "href": "#"}
+      ],
+      "footnote": "This is a draft preview for evaluation; all data are placeholders."
+    },
+    {
+      "id": "registration",
+      "label": "Registration & Payments",
+      "kicker": "Frictionless entry, global methods",
+      "bullets": [
+        "Stripe Payment Links: cards + Apple/Google Pay + FPX.",
+        "PayPal & local gateways (ToyyibPay/Billplz) as alternatives.",
+        "Smart pricing: early-bird, member discounts, team bundles.",
+        "Self-service transfers + refund policy engine.",
+        "QR badges (PDF/Wallet) + offline fallback lists."
+      ],
+      "badges": ["Stripe", "FPX", "Invoicing", "Wallet passes"],
+      "image": "https://images.unsplash.com/photo-1556742400-b5c4f3c4f16a?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "See Payment Options", "href": "#"},
+        {"label": "Invoice/Receipt Help", "href": "#"}
+      ]
+    },
+    {
+      "id": "abstracts",
+      "label": "Abstracts & Review",
+      "kicker": "From submission to decisions",
+      "bullets": [
+        "Rich submissions (figures, keywords, conflicts).",
+        "Blind peer review with COI auto-flags.",
+        "Score matrices & reviewer discussion threads.",
+        "Auto-program builder creates conflict-free schedules.",
+        "Proceedings export (PDF/EPUB) with DOI stubs."
+      ],
+      "badges": ["Double-blind", "COI detection", "Program builder"],
+      "image": "https://images.unsplash.com/photo-1581093588401-9cbf2bdfd274?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Submission Templates", "href": "#"},
+        {"label": "Reviewer Guidelines", "href": "#"}
+      ]
+    },
+    {
+      "id": "agenda",
+      "label": "Program & Check-in",
+      "kicker": "Capacity-aware agenda",
+      "bullets": [
+        "Live program with room capacities & seat counters.",
+        "Smart waitlists auto-backfill based on interest ranking.",
+        "Calendar ICS + reminders (email/WhatsApp opt-in).",
+        "Onsite check-in with QR + offline mode."
+      ],
+      "badges": ["Capacity", "Waitlists", "ICS"],
+      "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "View Draft Agenda", "href": "#"}
+      ]
+    },
+    {
+      "id": "speakers",
+      "label": "Speakers & Media",
+      "kicker": "Pro-grade speaker console",
+      "bullets": [
+        "Upload slides/video/poster, AV needs & consent in one place.",
+        "Auto checks: file type/size, embedded media scan.",
+        "Green-room: timers, chair signals, talk status feed.",
+        "Embargoed media unlock for attendees post-event."
+      ],
+      "badges": ["Green-room", "Auto checks", "Embargo"],
+      "image": "https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Speaker Portal (demo)", "href": "#"}
+      ]
+    },
+    {
+      "id": "sponsors",
+      "label": "Sponsors & Exhibitors",
+      "kicker": "Leads without an app",
+      "bullets": [
+        "Package tracker (deliverables, logos, stage slots).",
+        "Exhibitor hub for services, freight, staff badges.",
+        "No-app lead capture via QR microsites + consent log.",
+        "Post-event exports & ROI dashboards."
+      ],
+      "badges": ["Leads", "Consent", "ROI"],
+      "image": "https://images.unsplash.com/photo-1518600506278-4e8ef466b810?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Sponsorship Prospectus", "href": "#"},
+        {"label": "Exhibitor Services", "href": "#"}
+      ]
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics & Sustainability",
+      "kicker": "Measure impact in real time",
+      "bullets": [
+        "Dashboards: signups, revenue, abstract funnel, heatmaps.",
+        "Session popularity predictions & overflow alerts.",
+        "Sustainability metrics: paper saved, transit mix, offsets.",
+        "CSV exports for finance and reporting."
+      ],
+      "badges": ["Dashboards", "Forecasts", "Sustainability"],
+      "image": "https://images.unsplash.com/photo-1517148815978-75f6acaaf32c?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Live Dashboards (demo)", "href": "#"}
+      ]
+    },
+    {
+      "id": "security",
+      "label": "Security & Compliance",
+      "kicker": "Built for trust",
+      "bullets": [
+        "RBAC: Admin, Track Lead, Reviewer, Chair, AV, Finance, Volunteer.",
+        "PII minimization; TLS; encryption at rest for stored data.",
+        "Audit logs + exportable compliance pack (DPA template).",
+        "Regional hosting with backups."
+      ],
+      "badges": ["RBAC", "Encryption", "Audit"],
+      "image": "https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Compliance Pack (demo)", "href": "#"}
+      ]
+    },
+    {
+      "id": "contact",
+      "label": "Hire Us",
+      "kicker": "Let’s build the full platform",
+      "bullets": [
+        "Timeline & budget options available.",
+        "We’ll integrate your preferred payment gateway(s).",
+        "Admin training & handover included.",
+        "Support options for pre-event & onsite."
+      ],
+      "badges": ["Build", "Train", "Support"],
+      "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop",
+      "ctas": [
+        {"label": "Email the Secretariat", "href": "mailto:info@mterms2026.org", "style": "primary"},
+        {"label": "Download 1-pager", "href": "#"}
+      ]
+    }
+  ]
+}
