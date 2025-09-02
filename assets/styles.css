@@ -90,3 +90,58 @@ img{max-width:100%;display:block}
 .foot-links{display:flex;gap:14px}
 .foot-copy{color:#8fb2a6;font-size:14px}
 .foot-brand{font-weight:800;color:#dffbea}
+
+
+/* ===== Organizers strip ===== */
+.org-section{
+  padding:56px 0;
+  background:
+    radial-gradient(60% 50% at 70% 10%, rgba(25,195,125,.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  border-top:1px solid #1f2a31;
+  border-bottom:1px solid #1f2a31;
+}
+
+.org-head{ text-align:center; margin-bottom:18px; }
+.org-head h2{ margin:0 0 6px; }
+.org-sub{ margin:0; color:var(--muted); font-size:14px; }
+
+.org-logos{
+  list-style:none; margin:18px auto 0; padding:0;
+  display:flex; gap:28px; justify-content:center; align-items:center; flex-wrap:wrap;
+}
+
+.org-logos li{
+  background:var(--surface);
+  border:1px solid #1f2a31;
+  border-radius:14px;
+  padding:14px 18px;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.org-logos li:hover{
+  transform:translateY(-2px);
+  border-color:#2b3b45;
+  box-shadow:0 16px 32px rgba(0,0,0,.28);
+}
+
+.org-logos a{ display:block; line-height:0; }
+
+.org-logos img{
+  height:56px; width:auto; display:block;
+  filter:grayscale(100%) contrast(105%) brightness(93%);
+  opacity:.92; transition:filter .2s ease, opacity .2s ease;
+}
+
+/* Bring logos to full color on hover */
+.org-logos li:hover img{
+  filter:none; opacity:1;
+}
+
+/* Mobile tweaks */
+@media (max-width: 640px){
+  .org-logos img{ height:44px; }
+  .org-logos{ gap:18px; }
+  .org-section{ padding:44px 0; }
+}
