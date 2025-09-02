@@ -62,3 +62,39 @@
 .cap-note{color:#a6c9bd; font-size:13px}
 .cap-hidden{display:none}
 .cap-show{display:block}
+
+
+/* --- Mobile scroll fixes for Capabilities modal --- */
+
+/* Give the modal a taller viewport-based box on phones */
+.cap-modal{
+  top: 6vh;                 /* breathe from top */
+  width: min(960px, 92vw);
+  max-height: 88vh;         /* overall vertical limit */
+}
+
+/* Make the inner column(s) fully scrollable */
+.cap-body{
+  max-height: calc(88vh - 56px);  /* subtract header height */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;  /* smooth iOS scrolling */
+  overscroll-behavior: contain;       /* prevent background scroll chaining */
+  touch-action: pan-y;                 /* allow vertical touch scroll */
+}
+
+/* Ensure the left nav also scrolls, not just the panel */
+.cap-nav{
+  max-height: inherit;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* Small screens: stack layout and give maximum height */
+@media (max-width: 900px){
+  .cap-body{
+    grid-template-columns: 1fr;       /* already stacks, enforce for safety */
+    max-height: calc(100vh - 120px);  /* a bit more space on tiny viewports */
+  }
+}
