@@ -1,0 +1,86 @@
+/* Agenda Popup Modal */
+
+#agenda-fab {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg,#19c37d,#0ea5a6);
+  color: #04120b;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+#agenda-fab:hover { transform: translateY(-2px); }
+
+/* Backdrop */
+.agenda-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(6px);
+  display: none;
+  z-index: 9998;
+}
+
+/* Modal */
+.agenda-modal {
+  position: fixed;
+  top: 5%; left: 50%;
+  transform: translateX(-50%);
+  width: min(960px, 95vw);
+  max-height: 90vh;
+  background: #0e151a url('assets/hero-poster.jpg') center/cover no-repeat;
+  color: #e9f1f6;
+  border-radius: 16px;
+  border: 1px solid #1f2a31;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  display: none;
+  z-index: 10000;
+  overflow: hidden;
+}
+
+/* Header */
+.agenda-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px;
+  background: rgba(10,16,20,.85);
+  border-bottom: 1px solid #1f2a31;
+}
+.agenda-title { font-weight: 800; font-size: 20px; }
+.agenda-close {
+  background: transparent; border: none; font-size: 22px;
+  color: #cfe7dd; cursor: pointer;
+}
+
+/* Body */
+.agenda-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 60px);
+  padding: 20px;
+  background: rgba(10,16,20,.75);
+}
+.agenda-day {
+  margin-bottom: 28px;
+}
+.agenda-day h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  border-left: 4px solid #19c37d;
+  padding-left: 8px;
+}
+.agenda-item {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-left: 2px solid #2b3b45;
+  background: rgba(15,29,26,.6);
+  border-radius: 8px;
+}
+.agenda-time {
+  font-weight: 600;
+  color: #19c37d;
+  margin-bottom: 4px;
+}
+.agenda-session { font-weight: 500; }
+.agenda-speaker { font-size: 14px; color: #cfe7dd; margin-top: 2px; }
