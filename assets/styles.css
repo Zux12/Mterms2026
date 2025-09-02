@@ -129,10 +129,18 @@ img{max-width:100%;display:block}
 .org-logos a{ display:block; line-height:0; }
 
 .org-logos img{
-  height:56px; width:auto; display:block;
-  filter:grayscale(100%) contrast(105%) brightness(93%);
-  opacity:.92; transition:filter .2s ease, opacity .2s ease;
+  max-height: 48px;   /* controls vertical size */
+  max-width: 140px;   /* controls horizontal size */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: grayscale(100%) contrast(105%) brightness(93%);
+  opacity:.92;
+  transition:filter .2s ease, opacity .2s ease;
 }
+
 
 /* Bring logos to full color on hover */
 .org-logos li:hover img{
