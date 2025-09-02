@@ -13,7 +13,12 @@
           "speaker": "TBA, Institution"
         },
         {
-          "time": "09:20–10:00",
+          "time": "09:20–09:25",
+          "session": "Photo Session",
+          "speaker": "TBA"
+        },
+        {
+          "time": "09:25–10:00",
           "session": "Theme Keynote: Building Resilient TERM Ecosystems",
           "speaker": "TBA, Institution",
           "talkTitle": "Talk Title Placeholder"
