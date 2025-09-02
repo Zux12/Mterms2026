@@ -1,0 +1,104 @@
+{
+  "days": [
+    {
+      "title": "Day 1 — Plenaries & Keynotes",
+      "items": [
+        {
+          "time": "08:00–09:00",
+          "session": "Registration & Welcome Coffee"
+        },
+        {
+          "time": "09:00–09:20",
+          "session": "Opening Remarks",
+          "speaker": "TBA, Institution"
+        },
+        {
+          "time": "09:20–10:00",
+          "session": "Theme Keynote: Building Resilient TERM Ecosystems",
+          "speaker": "TBA, Institution",
+          "talkTitle": "Talk Title Placeholder"
+        },
+        {
+          "time": "10:30–12:30",
+          "session": "Plenary Block I",
+          "subSessions": [
+            { "topic": "Biomaterials & Advanced Scaffolds", "speaker": "TBA, Institution", "talkTitle": "Placeholder" },
+            { "topic": "Bioprinting Frontiers", "speaker": "TBA, Institution", "talkTitle": "Placeholder" },
+            { "topic": "Standards & Reproducibility Panel", "speaker": "Panelists TBA" }
+          ]
+        },
+        {
+          "time": "16:00–17:30",
+          "session": "Panel: Funding & Partnerships for Resilient Ecosystems"
+        },
+        {
+          "time": "18:00–19:30",
+          "session": "Welcome Reception & Poster Viewing I"
+        }
+      ]
+    },
+    {
+      "title": "Day 2 — Translation & Standards",
+      "items": [
+        {
+          "time": "09:00–09:40",
+          "session": "Industry Keynote: GMP-ready Manufacturing for TERM",
+          "speaker": "TBA"
+        },
+        {
+          "time": "11:00–12:30",
+          "session": "Parallel Sessions",
+          "subSessions": [
+            { "topic": "B1: GMP Manufacturing & Release Testing", "speaker": "TBA" },
+            { "topic": "B2: Preclinical Models & Biomarker Strategies", "speaker": "TBA" },
+            { "topic": "B3: Data, AI & Bioinformatics", "speaker": "TBA" }
+          ]
+        },
+        {
+          "time": "14:00–15:30",
+          "session": "Workshops",
+          "subSessions": [
+            { "topic": "W1: Bioprocess & Closed-System Fundamentals", "speaker": "TBA" },
+            { "topic": "W2: Biostatistics for Translational Studies", "speaker": "TBA" },
+            { "topic": "W3: Regulatory Dossier & Risk Management", "speaker": "TBA" }
+          ]
+        },
+        {
+          "time": "16:00–17:30",
+          "session": "Industry Showcase & Technology Demos"
+        },
+        {
+          "time": "19:00–21:00",
+          "session": "Awards Night & Networking Dinner"
+        }
+      ]
+    },
+    {
+      "title": "Day 3 — Clinics & Community",
+      "items": [
+        {
+          "time": "09:00–10:00",
+          "session": "Clinical Plenary: Real-world Deployment & Outcomes in TERM",
+          "speaker": "TBA"
+        },
+        {
+          "time": "10:30–12:00",
+          "session": "Parallel Sessions",
+          "subSessions": [
+            { "topic": "C1: Clinical Case Sessions & Complications Management", "speaker": "TBA" },
+            { "topic": "C2: Sustainability & Supply-Chain Resilience", "speaker": "TBA" },
+            { "topic": "C3: Education, Training & Capability Building", "speaker": "TBA" }
+          ]
+        },
+        {
+          "time": "13:30–15:00",
+          "session": "Young Investigator Talks"
+        },
+        {
+          "time": "15:20–16:40",
+          "session": "Closing Plenary & 2027 Preview"
+        }
+      ]
+    }
+  ]
+}
