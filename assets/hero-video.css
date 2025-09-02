@@ -1,0 +1,51 @@
+/* Full-bleed background video for the hero section (non-intrusive, layered behind your text) */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The video sits behind content */
+.hero .hero-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;            /* content stays above it */
+  opacity: 0;            /* fade-in after load */
+  transition: opacity .6s ease;
+}
+
+/* Soft dark gradient so your white text remains readable */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(60% 50% at 70% 20%, rgba(25,195,125,.18), transparent 60%),
+    linear-gradient(180deg, rgba(10,16,20,.55), rgba(10,16,20,.9));
+}
+
+/* Ensure your existing hero text stays above everything */
+.hero .hero-inner,
+.hero .hero-meta,
+.hero .cta-row,
+.hero .hero-credit {
+  position: relative;
+  z-index: 2;
+}
+
+/* Respect users who prefer reduced motion: we’ll just show the poster image */
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-bg-video { display: none !important; }
+}
+
+/* Small screens: allow a bit higher overlay for contrast */
+@media (max-width: 640px) {
+  .hero::before {
+    background:
+      radial-gradient(60% 50% at 70% 20%, rgba(25,195,125,.12), transparent 60%),
+      linear-gradient(180deg, rgba(10,16,20,.65), rgba(10,16,20,.92));
+  }
+}
