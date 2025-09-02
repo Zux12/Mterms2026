@@ -1,0 +1,64 @@
+/* Floating Capabilities Button (FAB) */
+#capabilities-fab{
+  position:fixed; right:20px; bottom:24px; z-index:9999;
+  display:flex; align-items:center; gap:10px;
+  background:linear-gradient(90deg,#19c37d,#0ea5a6);
+  color:#04120b; font-weight:800; border-radius:999px;
+  padding:12px 16px; border:none; cursor:pointer;
+  box-shadow:0 8px 28px rgba(0,0,0,.35);
+}
+#capabilities-fab .cap-icon{font-size:20px; line-height:1}
+#capabilities-fab:hover{transform:translateY(-2px);}
+
+/* Modal shell */
+.cap-modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  backdrop-filter: blur(6px); display:none; z-index:9998;
+}
+.cap-modal{
+  position:fixed; inset:auto; left:50%; top:8%;
+  transform:translateX(-50%); width:min(960px,92vw);
+  background:#0e151a; color:#e9f1f6; border:1px solid #1f2a31; border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6); display:none; z-index:10000;
+}
+.cap-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px; border-bottom:1px solid #1f2a31;
+}
+.cap-title{font-weight:800; font-size:20px}
+.cap-close{background:transparent; border:none; color:#cfe7dd; font-size:22px; cursor:pointer}
+.cap-body{display:grid; grid-template-columns:240px 1fr; min-height:520px}
+@media (max-width:900px){.cap-body{grid-template-columns:1fr}}
+.cap-nav{
+  border-right:1px solid #1f2a31; padding:12px; overflow:auto; max-height:70vh;
+}
+.cap-nav button{
+  width:100%; text-align:left; margin:6px 0; padding:10px 12px;
+  background:#0f1d1a; color:#cfe7dd; border:1px solid #22403a; border-radius:10px; cursor:pointer;
+}
+.cap-nav button.active{background:#142026; border-color:#2b3b45; color:#e8fff3; font-weight:700}
+.cap-panel{
+  padding:16px 18px; overflow:auto; max-height:70vh;
+}
+.cap-panel h3{margin:0 0 6px}
+.cap-kicker{color:#8fb2a6; font-size:13px; margin-bottom:10px}
+.cap-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px
+}
+@media (max-width:900px){.cap-grid{grid-template-columns:1fr}}
+.cap-card{
+  background:#0f1d1a; border:1px solid #1f2a31; border-radius:12px; padding:12px
+}
+.cap-card img{width:100%; border-radius:10px; border:1px solid #182228; margin-top:6px}
+.cap-badges{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0}
+.cap-badge{border:1px solid #22403a; background:#0f1d1a; color:#cfe7dd; border-radius:999px; padding:4px 8px; font-size:12px}
+.cap-cta-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+.cap-btn{
+  display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #1f2a31; background:#142026; color:#e8fff3; text-decoration:none; font-weight:600
+}
+.cap-btn.primary{background:linear-gradient(90deg,#19c37d,#0ea5a6); color:#06130d; border:none}
+.cap-footnote{color:#8899a6; font-size:12px; margin-top:8px}
+.cap-divider{height:1px; background:#1f2a31; margin:12px 0}
+.cap-note{color:#a6c9bd; font-size:13px}
+.cap-hidden{display:none}
+.cap-show{display:block}
