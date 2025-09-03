@@ -441,11 +441,11 @@
 <script>
 (async () => {
   try {
-    const res = await fetch('/api/pricing/table', { cache: 'no-store' });
+    const API_ORIGIN = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+    const res = await fetch(`${API_ORIGIN}/api/pricing/table`, { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
 
-    // Try to mount inside a #registration section; else append to body
     const host = document.querySelector('#registration') || document.body;
     const el = document.createElement('div');
     el.id = 'pricing-preview';
@@ -484,6 +484,7 @@
   }
 })();
 </script>
+
 
 
 
