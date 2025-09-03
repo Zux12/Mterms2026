@@ -2,12 +2,24 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+// CORS: open for now to unblock; we'll lock down later
 const cors = require('cors');
+app.use(cors({
+  origin: (origin, cb) => cb(null, true), // allow all origins for now
+  methods: ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: false,
+  maxAge: 86400
+}));
+// Ensure preflight responses
+app.options('*', cors());
+
 
 const pricingRouter = require('./routes/pricing');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
+
 const allowed = (process.env.CORS_ORIGIN || '*')
   .split(',')
   .map(s => s.trim());
@@ -19,6 +31,7 @@ app.use(cors({
     return cb(new Error('Not allowed by CORS'));
   }
 }));
+
 
 
 
