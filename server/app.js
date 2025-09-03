@@ -22,6 +22,10 @@ const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MTERM2026_DB_URI)
   .then(() => {
     console.log('MongoDB connected');
+    app.get('/', (req, res) => {
+  res.type('text/plain').send('MTERM2026 API is running. Try /api/health or /api/pricing/table');
+});
+
     app.listen(PORT, () => console.log(`Server listening on :${PORT}`));
   })
   .catch(err => {
