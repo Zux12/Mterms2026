@@ -3,7 +3,27 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
+
 const cors = require('cors');
+
+const allowed = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map(s => s.trim());
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // curl/postman
+    if (allowed.includes('*') || allowed.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: false,
+  maxAge: 86400
+}));
+app.options('*', cors());
+
+
 
 const pricingRouter = require('./routes/pricing');
 const registrationsRouter = require('./routes/registrations');
