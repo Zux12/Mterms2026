@@ -1,6 +1,16 @@
 // server/models/Registration.js
 const mongoose = require('mongoose');
 
+const UploadSchema = new mongoose.Schema({
+  type: { type: String, enum: ['studentProof','bankReceipt','abstract','slides'], required: true },
+  version: { type: Number, required: true },
+  gridFsId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  filename: String,
+  size: Number,
+  contentType: String,
+  uploadedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 const RegistrationSchema = new mongoose.Schema({
   regCode: { type: String, unique: true },
 
@@ -15,7 +25,7 @@ const RegistrationSchema = new mongoose.Schema({
   },
 
   professional: {
-    affiliation: { type: String, required: true }, // uni/company
+    affiliation: { type: String, required: true },
     department:  { type: String },
     roleTitle:   { type: String }
   },
@@ -30,14 +40,14 @@ const RegistrationSchema = new mongoose.Schema({
   },
 
   billing: {
-    billTo:   { type: String },       // for invoices/receipts
-    taxNo:    { type: String },       // GST/VAT/Tax ID (optional)
+    billTo:   { type: String },
+    taxNo:    { type: String },
     poNumber: { type: String }
   },
 
   program: {
     presenting: { type: Boolean, default: false },
-    type:       { type: String, enum: ['talk', 'poster', 'workshop', 'none'], default: 'none' },
+    type:       { type: String, enum: ['talk','poster','workshop','none'], default: 'none' },
     title:      { type: String },
     topicArea:  { type: String }
   },
@@ -49,9 +59,9 @@ const RegistrationSchema = new mongoose.Schema({
   },
 
   studentProof: {
-    required:  { type: Boolean, default: false },     // true if category = student
-    deferred:  { type: Boolean, default: false },     // user chose "upload later"
-    provided:  { type: Boolean, default: false },     // will flip true when file is uploaded (Step 4)
+    required:  { type: Boolean, default: false },
+    deferred:  { type: Boolean, default: false },
+    provided:  { type: Boolean, default: false },
     status:    { type: String, enum: ['unverified','verified','rejected'], default: 'unverified' },
     notes:     { type: String }
   },
@@ -68,16 +78,18 @@ const RegistrationSchema = new mongoose.Schema({
 
   pricingSnapshot: {
     currency: { type: String, default: 'MYR' },
-    phase:    { type: String },     // Early-bird / Regular / Late/On-site
+    phase:    { type: String },
     base:     { type: Number },
     addons:   { type: Number, default: 0 },
     total:    { type: Number }
   },
 
   payment: {
-    method: { type: String, default: 'manual' }, // placeholder until we wire Stripe
-    status: { type: String, default: 'pending' } // pending|paid|failed|refunded
-  }
+    method: { type: String, default: 'manual' },
+    status: { type: String, default: 'pending' }
+  },
+
+  uploads: [UploadSchema]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Registration', RegistrationSchema);
