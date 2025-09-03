@@ -4,7 +4,37 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 
+// ---- CORS (whitelist, robust) ----
 const cors = require('cors');
+
+
+
+// Build a normalized allow-list from env (comma-separated). Example:
+// CORS_ORIGIN="https://zux12.github.io,https://mterm2026-559f9bf571b5.herokuapp.com"
+const ALLOWED = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map(s => s.trim().replace(/\/$/, '').toLowerCase());
+
+// Vary header helps caches behave correctly with different origins
+app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow non-browser clients (curl/Postman) and same-origin
+    if (!origin) return cb(null, true);
+    const o = origin.replace(/\/$/, '').toLowerCase();
+    if (ALLOWED.includes('*') || ALLOWED.includes(o)) return cb(null, true);
+    return cb(new Error('CORS: origin not allowed'));
+  },
+  methods: ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: false,
+  maxAge: 86400
+}));
+
+// Ensure preflight OPTIONS are answered
+app.options('*', cors());
+
 
 
 
