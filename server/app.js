@@ -11,6 +11,9 @@ app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN || true }));
 const registrationsRouter = require('./routes/registrations');
 app.use('/api/registrations', registrationsRouter);
+const uploadsRouter = require('./routes/uploads');
+app.use('/api/uploads', uploadsRouter);
+
 
 
 // OPTIONAL: serve your static site if it’s in /public
