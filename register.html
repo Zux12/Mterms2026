@@ -188,279 +188,285 @@
 
   </div>
 
- <script>
-document.addEventListener('DOMContentLoaded', () => {
+<script>
+/* MTERMS 2026 — unified wiring for pricing, registration, and uploads */
+(() => {
   const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
-  // Helpers
+  // Small helpers
   const $ = (id) => document.getElementById(id);
-  const show = (el, on) => el && (el.style.display = on ? 'block' : 'none');
+  const show = (el, on) => { if (el) el.style.display = on ? 'block' : 'none'; };
 
-  // ===== Pricing preview =====
-  (async () => {
-    const mount = $('pricingMount');
-    try {
-      const r = await fetch(`${API}/api/pricing/table`, { cache: 'no-store' });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const data = await r.json();
-      mount.innerHTML = `
-        <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
-        <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
-          <thead>
-            <tr>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.rows.map(r => `
+  // Wait until the elements exist (robust in iframes even if scripts move)
+  function ready(fn, tries = 0) {
+    const need = [
+      'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields',
+      'u-regCode','u-email','u-type','u-file','u-upload','u-refresh','u-msg','u-history','u-progress','u-progress-bar','u-progress-text'
+    ];
+    const allOk = need.every(id => $(id));
+    if (allOk) return fn();
+    if (tries > 100) return console.warn('register.js: elements not found after retries');
+    setTimeout(() => ready(fn, tries + 1), 50);
+  }
+
+  ready(() => {
+    /* ===================== Pricing ===================== */
+    (async () => {
+      const mount = $('pricingMount');
+      try {
+        const r = await fetch(`${API}/api/pricing/table`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        mount.innerHTML = `
+          <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
+          <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+            <thead>
               <tr>
-                <td style="padding:8px">${r.phase}</td>
-                <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
-                <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
-                <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-        <div style="margin-top:8px;opacity:0.9">Dinner bundle: +RM ${data.dinnerAddon} (optional).</div>
-        <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
-      `;
-    } catch (e) {
-      mount.innerHTML = `<div style="color:#ff6b6b">❌ Pricing load failed: ${e.message}</div>`;
-      console.error('Pricing preview failed', e);
-    }
-  })();
-
-  // ===== Full Registration form =====
-  const form = $('fullRegForm');
-  const out  = $('fullRegResult');
-
-  const selCategory = $('f-category');
-  const studentOnly = $('studentOnly');
-  const chkPresenting = $('f-presenting');
-  const presentFields = $('presentFields');
-
-  selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
-  chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    out.textContent = 'Submitting…';
-
-    const fd = new FormData(form);
-    const payload = {
-      category: fd.get('category'),
-      addons: { dinner: fd.get('addons.dinner') === 'on' },
-      personal: {
-        firstName: fd.get('personal.firstName'),
-        lastName:  fd.get('personal.lastName'),
-        email:     fd.get('personal.email'),
-        phone:     fd.get('personal.phone'),
-        country:   fd.get('personal.country')
-      },
-      professional: {
-        affiliation: fd.get('professional.affiliation'),
-        department:  fd.get('professional.department'),
-        roleTitle:   fd.get('professional.roleTitle')
-      },
-      address: {
-        line1: fd.get('address.line1'),
-        line2: fd.get('address.line2'),
-        city:  fd.get('address.city'),
-        state: fd.get('address.state'),
-        postcode: fd.get('address.postcode'),
-        country:  fd.get('address.country')
-      },
-      billing: {
-        billTo:   fd.get('billing.billTo'),
-        taxNo:    fd.get('billing.taxNo'),
-        poNumber: fd.get('billing.poNumber')
-      },
-      program: {
-        presenting: $('f-presenting').checked,
-        type:       $('f-type')?.value || 'none',
-        title:      $('f-title')?.value || '',
-        topicArea:  $('f-topicArea')?.value || ''
-      },
-      student: (fd.get('category') === 'student') ? {
-        university: fd.get('student.university'),
-        level:      fd.get('student.level') || 'Other',
-        expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
-      } : undefined,
-      studentProof: (fd.get('category') === 'student') ? {
-        deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
-      } : undefined,
-      consents: {
-        pdpa: $('c-pdpa').checked,
-        codeOfConduct: $('c-coc').checked,
-        marketingOptIn: $('c-mkt').checked
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
+                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.rows.map(r => `
+                <tr>
+                  <td style="padding:8px">${r.phase}</td>
+                  <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
+                  <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
+                  <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          <div style="margin-top:8px;opacity:0.9">Dinner bundle: +RM ${data.dinnerAddon} (optional).</div>
+          <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
+        `;
+      } catch (e) {
+        mount.innerHTML = `<div style="color:#ff6b6b">❌ Pricing load failed: ${e.message}</div>`;
+        console.error('Pricing preview failed', e);
       }
-    };
+    })();
 
-    try {
-      const r = await fetch(`${API}/api/registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    /* ================== Registration form ================== */
+    const form = $('fullRegForm');
+    const out  = $('fullRegResult');
+    const selCategory = $('f-category');
+    const studentOnly = $('studentOnly');
+    const chkPresenting = $('f-presenting');
+    const presentFields = $('presentFields');
 
-      out.innerHTML = `
-        ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
-        Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
-        Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
-        <em>(Payment coming soon)</em>
-      `;
-      form.reset();
-      show(studentOnly, false);
-      show(presentFields, false);
-    } catch (err) {
-      out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
-      console.error('Submit failed', err);
+    selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
+    chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      out.textContent = 'Submitting…';
+
+      const fd = new FormData(form);
+      const payload = {
+        category: fd.get('category'),
+        addons: { dinner: fd.get('addons.dinner') === 'on' },
+        personal: {
+          firstName: fd.get('personal.firstName'),
+          lastName:  fd.get('personal.lastName'),
+          email:     fd.get('personal.email'),
+          phone:     fd.get('personal.phone'),
+          country:   fd.get('personal.country')
+        },
+        professional: {
+          affiliation: fd.get('professional.affiliation'),
+          department:  fd.get('professional.department'),
+          roleTitle:   fd.get('professional.roleTitle')
+        },
+        address: {
+          line1: fd.get('address.line1'),
+          line2: fd.get('address.line2'),
+          city:  fd.get('address.city'),
+          state: fd.get('address.state'),
+          postcode: fd.get('address.postcode'),
+          country:  fd.get('address.country')
+        },
+        billing: {
+          billTo:   fd.get('billing.billTo'),
+          taxNo:    fd.get('billing.taxNo'),
+          poNumber: fd.get('billing.poNumber')
+        },
+        program: {
+          presenting: $('f-presenting').checked,
+          type:       $('f-type')?.value || 'none',
+          title:      $('f-title')?.value || '',
+          topicArea:  $('f-topicArea')?.value || ''
+        },
+        student: (fd.get('category') === 'student') ? {
+          university: fd.get('student.university'),
+          level:      fd.get('student.level') || 'Other',
+          expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
+        } : undefined,
+        studentProof: (fd.get('category') === 'student') ? {
+          deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
+        } : undefined,
+        consents: {
+          pdpa: $('c-pdpa').checked,
+          codeOfConduct: $('c-coc').checked,
+          marketingOptIn: $('c-mkt').checked
+        }
+      };
+
+      try {
+        const r = await fetch(`${API}/api/registrations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        out.innerHTML = `
+          ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+          Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+          Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+          <em>(Payment coming soon)</em>
+        `;
+        form.reset();
+        show(studentOnly, false);
+        show(presentFields, false);
+      } catch (err) {
+        out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
+        console.error('Submit failed', err);
+      }
+    });
+
+    /* =================== Upload Center (XHR + progress) =================== */
+    const regCode = $('u-regCode');
+    const email   = $('u-email');
+    const typeSel = $('u-type');
+    const fileInp = $('u-file');
+    const uploadBtn = $('u-upload');
+    const refreshBtn = $('u-refresh');
+    const msg     = $('u-msg');
+    const hist    = $('u-history');
+    const progBox = $('u-progress');
+    const progBar = $('u-progress-bar');
+    const progTxt = $('u-progress-text');
+
+    function setBusy(isBusy) {
+      uploadBtn.disabled = isBusy;
+      refreshBtn.disabled = isBusy;
+      fileInp.disabled = isBusy;
+      uploadBtn.style.opacity = isBusy ? 0.6 : 1;
+      uploadBtn.style.pointerEvents = isBusy ? 'none' : 'auto';
+      uploadBtn.textContent = isBusy ? 'Uploading…' : 'Upload';
     }
-  });
-
-  // ===== Upload Center (GridFS) =====
-document.addEventListener('DOMContentLoaded', () => {
-  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
-
-  // Elements
-  const regCode = document.getElementById('u-regCode');
-  const email   = document.getElementById('u-email');
-  const typeSel = document.getElementById('u-type');
-  const fileInp = document.getElementById('u-file');
-  const uploadBtn = document.getElementById('u-upload');
-  const refreshBtn = document.getElementById('u-refresh');
-  const msg     = document.getElementById('u-msg');
-  const hist    = document.getElementById('u-history');
-  const progBox = document.getElementById('u-progress');
-  const progBar = document.getElementById('u-progress-bar');
-  const progTxt = document.getElementById('u-progress-text');
-
-  function setBusy(isBusy) {
-    uploadBtn.disabled = isBusy;
-    fileInp.disabled = isBusy;
-    uploadBtn.style.opacity = isBusy ? 0.6 : 1;
-    uploadBtn.style.pointerEvents = isBusy ? 'none' : 'auto';
-    uploadBtn.textContent = isBusy ? 'Uploading…' : 'Upload';
-  }
-
-  function showProgress(show) {
-    progBox.style.display = show ? 'block' : 'none';
-    if (!show) {
-      progBar.style.width = '0%';
-      progTxt.textContent = 'Uploading… 0%';
+    function showProgress(showing) {
+      show(progBox, showing);
+      if (!showing) {
+        progBar.style.width = '0%';
+        progTxt.textContent = 'Uploading… 0%';
+      }
     }
-  }
+    function updateProgress(pct) {
+      const p = Math.max(0, Math.min(100, Math.floor(pct)));
+      progBar.style.width = p + '%';
+      progTxt.textContent = 'Uploading… ' + p + '%';
+    }
 
-  function updateProgress(pct) {
-    const p = Math.max(0, Math.min(100, Math.floor(pct)));
-    progBar.style.width = p + '%';
-    progTxt.textContent = 'Uploading… ' + p + '%';
-  }
-
-  async function listHistory() {
-    msg.textContent = 'Loading history…';
-    hist.innerHTML = '';
-    try {
-      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode.value)}&email=${encodeURIComponent(email.value)}&type=${encodeURIComponent(typeSel.value)}`);
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
-      if (!data.count) {
-        hist.innerHTML = '<div style="opacity:0.8">No files yet for this type.</div>';
-      } else {
-        hist.innerHTML = data.rows.map(row => `
-          <div style="padding:8px;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:8px">
-            <div><strong>v${row.version}</strong> — ${row.filename}</div>
-            <div style="opacity:0.8">Uploaded: ${new Date(row.uploadedAt).toLocaleString()}</div>
-            <div style="margin-top:6px">
-              <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
+    async function listHistory() {
+      msg.textContent = 'Loading history…';
+      hist.innerHTML = '';
+      try {
+        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode.value)}&email=${encodeURIComponent(email.value)}&type=${encodeURIComponent(typeSel.value)}`);
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+        if (!data.count) {
+          hist.innerHTML = '<div style="opacity:0.8">No files yet for this type.</div>';
+        } else {
+          hist.innerHTML = data.rows.map(row => `
+            <div style="padding:8px;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:8px">
+              <div><strong>v${row.version}</strong> — ${row.filename}</div>
+              <div style="opacity:0.8">Uploaded: ${new Date(row.uploadedAt).toLocaleString()}</div>
+              <div style="margin-top:6px">
+                <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
+              </div>
             </div>
-          </div>
-        `).join('');
+          `).join('');
+        }
+        msg.textContent = '';
+      } catch (e) {
+        msg.innerHTML = `<span style="color:#ff6b6b">❌ History failed: ${e.message}</span>`;
       }
+    }
+
+    refreshBtn.addEventListener('click', listHistory);
+
+    uploadBtn.addEventListener('click', () => {
       msg.textContent = '';
-    } catch (e) {
-      msg.innerHTML = `<span style="color:#ff6b6b">❌ History failed: ${e.message}</span>`;
-    }
-  }
-
-  refreshBtn?.addEventListener('click', listHistory);
-
-  uploadBtn?.addEventListener('click', () => {
-    msg.textContent = '';
-    const file = fileInp.files?.[0];
-    if (!regCode.value || !email.value || !file) {
-      msg.textContent = '❌ regCode, email, and file are required';
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      msg.textContent = '❌ File too large (max 10 MB)';
-      return;
-    }
-
-    // Build form-data
-    const fd = new FormData();
-    fd.append('regCode', regCode.value.trim());
-    fd.append('email', email.value.trim());
-    fd.append('type', typeSel.value);
-    fd.append('file', file, file.name);
-
-    // Use XMLHttpRequest for progress events
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API}/api/uploads/gridfs`, true);
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const pct = (e.loaded / e.total) * 100;
-        updateProgress(pct);
-      } else {
-        // Unknown size (Safari sometimes) — show indeterminate growth
-        const current = parseInt(progBar.style.width) || 0;
-        updateProgress(Math.min(95, current + 5));
+      const file = fileInp.files?.[0];
+      if (!regCode.value || !email.value || !file) {
+        msg.textContent = '❌ regCode, email, and file are required';
+        return;
       }
-    };
-
-    xhr.onerror = () => {
-      setBusy(false);
-      showProgress(false);
-      msg.innerHTML = '<span style="color:#ff6b6b">❌ Upload failed (network)</span>';
-    };
-
-    xhr.onload = () => {
-      setBusy(false);
-      updateProgress(100);
-      setTimeout(() => showProgress(false), 600);
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        let data;
-        try { data = JSON.parse(xhr.responseText || '{}'); } catch { data = {}; }
-        msg.textContent = `✅ Uploaded v${data.version || '?'} .`;
-        fileInp.value = '';
-        listHistory();
-      } else {
-        let errMsg = `HTTP ${xhr.status}`;
-        try {
-          const err = JSON.parse(xhr.responseText || '{}');
-          if (err.error) errMsg = err.error;
-        } catch {}
-        msg.innerHTML = `<span style="color:#ff6b6b">❌ Upload failed: ${errMsg}</span>`;
+      if (file.size > 10 * 1024 * 1024) {
+        msg.textContent = '❌ File too large (max 10 MB)';
+        return;
       }
-    };
 
-    // Start
-    setBusy(true);
-    showProgress(true);
-    updateProgress(1);
-    xhr.send(fd);
+      const fdUp = new FormData();
+      fdUp.append('regCode', regCode.value.trim());
+      fdUp.append('email', email.value.trim());
+      fdUp.append('type', typeSel.value);
+      fdUp.append('file', file, file.name);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API}/api/uploads/gridfs`, true);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          updateProgress((e.loaded / e.total) * 100);
+        } else {
+          const current = parseInt(progBar.style.width) || 0;
+          updateProgress(Math.min(95, current + 5));
+        }
+      };
+
+      xhr.onerror = () => {
+        setBusy(false);
+        showProgress(false);
+        msg.innerHTML = '<span style="color:#ff6b6b">❌ Upload failed (network)</span>';
+      };
+
+      xhr.onload = () => {
+        setBusy(false);
+        updateProgress(100);
+        setTimeout(() => showProgress(false), 600);
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          let data = {};
+          try { data = JSON.parse(xhr.responseText || '{}'); } catch {}
+          msg.textContent = `✅ Uploaded v${data.version || '?'} .`;
+          fileInp.value = '';
+          listHistory();
+        } else {
+          let errMsg = `HTTP ${xhr.status}`;
+          try {
+            const err = JSON.parse(xhr.responseText || '{}');
+            if (err.error) errMsg = err.error;
+          } catch {}
+          msg.innerHTML = `<span style="color:#ff6b6b">❌ Upload failed: ${errMsg}</span>`;
+        }
+      };
+
+      setBusy(true);
+      showProgress(true);
+      updateProgress(1);
+      xhr.send(fdUp);
+    });
+
+    // Optional: prefill history if regCode/email already present (handy for testers)
+    if (regCode.value && email.value) listHistory();
   });
-});
-
-});
+})();
 </script>
+
 
 </body>
 </html>
