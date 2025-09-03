@@ -474,33 +474,76 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const openBtn = document.getElementById('openReg');
-    const modal = document.getElementById('regModal');
+    const openBtn  = document.getElementById('openReg');
+    const modal    = document.getElementById('regModal');
     const closeBtn = document.getElementById('regClose');
     const backdrop = document.getElementById('regBackdrop');
-    const frame = document.getElementById('regFrame');
+    const frame    = document.getElementById('regFrame');
+
+    // Use ABSOLUTE URL to avoid any base/path quirks
+    const REG_URL = 'https://zux12.github.io/Mterms2026/register.html';
+
+    // Simple loader
+    const loader = document.createElement('div');
+    loader.id = 'regLoader';
+    loader.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);font-weight:600;';
+    loader.textContent = 'Loading registration...';
 
     function openModal() {
-      // lazy-load the popup page when opened
-      if (!frame.src) frame.src = 'register.html';
+      if (!frame.src) frame.src = REG_URL;
+      if (!document.getElementById('regLoader')) modal.querySelector('.reg-modal__dialog').appendChild(loader);
       modal.classList.remove('hidden');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
     }
+
     function closeModal() {
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      // keep frame loaded so users can reopen quickly; remove src if you want to fully reset:
+      // keep frame loaded for quick reopen. To reset every time, uncomment:
       // frame.src = '';
     }
 
+    // Fallback: if iframe hasn't painted after 5s, show an "Open in new tab" link
+    function addFallbackLink() {
+      if (!document.getElementById('regFallback')) {
+        const wrap = document.createElement('div');
+        wrap.id = 'regFallback';
+        wrap.style.cssText = 'position:absolute;bottom:12px;left:12px;background:#1a1c22;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;font-size:0.95rem;';
+        wrap.innerHTML = `Having trouble loading? <a href="${REG_URL}" target="_blank" rel="noopener">Open in a new tab</a>`;
+        modal.querySelector('.reg-modal__dialog').appendChild(wrap);
+      }
+    }
+
+    // Events
     if (openBtn) openBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (backdrop) backdrop.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
+
+    // Iframe load handling
+    frame.addEventListener('load', () => {
+      // remove loader once the doc loads (even 404 pages 'load')
+      const ld = document.getElementById('regLoader');
+      if (ld) ld.remove();
+      // remove fallback link if present
+      const fb = document.getElementById('regFallback');
+      if (fb) fb.remove();
+    });
+
+    // Time-based fallback if network/CSP issues
+    let fallbackTimer;
+    const observer = new MutationObserver(() => {
+      if (!modal.classList.contains('hidden')) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = setTimeout(addFallbackLink, 5000);
+      }
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
   });
 </script>
+
 
 
 
