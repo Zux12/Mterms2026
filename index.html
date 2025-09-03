@@ -803,13 +803,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-<!-- MTERM2026 – Dynamic Pricing Preview -->
+<!-- MTERM2026 – Dynamic Pricing Preview (fixed for GitHub Pages) -->
 <script>
-(async () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const API_ORIGIN = 'https://mterm2026-559f9bf571b5.herokuapp.com';
   try {
-    const API_ORIGIN = 'https://mterm2026-559f9bf571b5.herokuapp.com';
     const res = await fetch(`${API_ORIGIN}/api/pricing/table`, { cache: 'no-store' });
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
     const host = document.querySelector('#registration') || document.body;
@@ -848,8 +848,9 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {
     console.error('Pricing preview failed', e);
   }
-})();
+});
 </script>
+
 
 
 
