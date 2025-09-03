@@ -11,30 +11,12 @@ const uploadsRouter = require('./routes/uploads');
 
 const app = express();
 
-/* ---- CORS (whitelist, robust) ----
-   Set on Heroku:
-   heroku config:set CORS_ORIGIN="https://zux12.github.io" -a mterm2026-559f9bf571b5
-   (comma-separate to allow more origins)
+/* ---- CORS: allow all while stabilizing (simple & reliable) ----
+   Once confirmed working, we can switch to a whitelist again.
 */
-const ALLOWED = (process.env.CORS_ORIGIN || '*')
-  .split(',')
-  .map(s => s.trim().replace(/\/$/, '').toLowerCase());
-
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
-
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // curl/Postman/same-origin
-    const o = origin.replace(/\/$/, '').toLowerCase();
-    if (ALLOWED.includes('*') || ALLOWED.includes(o)) return cb(null, true);
-    return cb(new Error('CORS: origin not allowed'));
-  },
-  methods: ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  credentials: false,
-  maxAge: 86400
-}));
-app.options('*', cors());
+app.use(cors());            // <-- allow every origin for now
+app.options('*', cors());   // <-- answer preflight for all routes
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
