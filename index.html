@@ -273,30 +273,227 @@
         </div>
       </div>
 
-<!-- MTERM2026 — Quick Registration Test (temporary) -->
-<div id="quick-reg" style="margin-top:24px;border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#0f1115">
-  <div style="font-weight:700;margin-bottom:8px">Quick Registration (test)</div>
-  <form id="regForm">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <select name="category" required>
-        <option value="">Select category…</option>
-        <option value="student">Student</option>
-        <option value="academia">Academia</option>
-        <option value="industry">Industry</option>
-      </select>
-      <label style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" name="dinner" /> Add Gala Dinner (RM150)
+<!-- MTERM2026 — Full Registration (beta) -->
+<div id="full-reg" style="margin-top:24px;border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#0f1115">
+  <div style="font-weight:700;margin-bottom:8px">Registration (beta)</div>
+
+  <form id="fullRegForm">
+    <!-- Category + Dinner -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <label>Category
+        <select name="category" id="f-category" required>
+          <option value="">Select…</option>
+          <option value="student">Student</option>
+          <option value="academia">Academia</option>
+          <option value="industry">Industry</option>
+        </select>
       </label>
-      <input name="firstName" placeholder="First name" required />
-      <input name="lastName" placeholder="Last name" required />
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="affiliation" placeholder="Affiliation/Organization" required />
-      <input name="phone" placeholder="Phone (optional)" />
+      <label style="display:flex;align-items:center;gap:8px;margin-top:auto">
+        <input type="checkbox" name="addons.dinner" /> Add Gala Dinner (RM150)
+      </label>
     </div>
-    <button class="btn" type="submit">Submit (test)</button>
+
+    <!-- Personal -->
+    <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+      <legend>Personal</legend>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <input name="personal.firstName" placeholder="First name" required />
+        <input name="personal.lastName"  placeholder="Last name" required />
+        <input name="personal.email" type="email" placeholder="Email" required />
+        <input name="personal.phone" placeholder="Phone (optional)" />
+        <input name="personal.country" placeholder="Country (optional)" />
+      </div>
+    </fieldset>
+
+    <!-- Professional -->
+    <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+      <legend>Affiliation</legend>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <input name="professional.affiliation" placeholder="University / Company" required />
+        <input name="professional.department"  placeholder="Department (optional)" />
+        <input name="professional.roleTitle"   placeholder="Role/Title (optional)" />
+      </div>
+    </fieldset>
+
+    <!-- Student-only -->
+    <fieldset id="studentOnly" style="display:none;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+      <legend>Student details</legend>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <input name="student.university" placeholder="University" />
+        <select name="student.level">
+          <option value="">Level</option>
+          <option value="UG">UG</option>
+          <option value="MSc">MSc</option>
+          <option value="PhD">PhD</option>
+          <option value="Other">Other</option>
+        </select>
+        <input name="student.expectedGradYear" type="number" placeholder="Expected grad year" />
+      </div>
+      <div style="margin-top:8px">
+        Student proof:
+        <label style="margin-left:8px"><input type="radio" name="studentProof" value="now"> I will upload now (coming soon)</label>
+        <label style="margin-left:16px"><input type="radio" name="studentProof" value="later" checked> I will upload later via email/portal</label>
+      </div>
+    </fieldset>
+
+    <!-- Program -->
+    <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+      <legend>Program</legend>
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="f-presenting" /> I am a presenter (talk/poster/workshop)
+      </label>
+      <div id="presentFields" style="display:none;margin-top:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <select id="f-type">
+            <option value="talk">Talk</option>
+            <option value="poster">Poster</option>
+            <option value="workshop">Workshop</option>
+          </select>
+          <input id="f-topicArea" placeholder="Topic area (optional)" />
+        </div>
+        <input id="f-title" placeholder="Presentation title" style="margin-top:8px" />
+      </div>
+    </fieldset>
+
+    <!-- Billing (optional) -->
+    <details style="margin-bottom:12px">
+      <summary>Billing & invoice (optional)</summary>
+      <div style="margin-top:8px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <input name="billing.billTo" placeholder="Bill-to name" />
+        <input name="billing.taxNo" placeholder="Company Tax/GST/VAT No." />
+        <input name="billing.poNumber" placeholder="Purchase order #" />
+      </div>
+    </details>
+
+    <!-- Address (optional) -->
+    <details style="margin-bottom:12px">
+      <summary>Postal address (optional)</summary>
+      <div style="margin-top:8px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <input name="address.line1" placeholder="Address line 1" />
+        <input name="address.line2" placeholder="Address line 2" />
+        <input name="address.city" placeholder="City" />
+        <input name="address.state" placeholder="State/Province" />
+        <input name="address.postcode" placeholder="Postcode" />
+        <input name="address.country" placeholder="Country" />
+      </div>
+    </details>
+
+    <!-- Consents -->
+    <div style="margin:8px 0">
+      <label><input type="checkbox" id="c-pdpa" required /> I consent to PDPA/privacy policy.</label><br>
+      <label><input type="checkbox" id="c-coc" required /> I agree to the Code of Conduct.</label><br>
+      <label><input type="checkbox" id="c-mkt" /> I’d like to receive event updates (optional).</label>
+    </div>
+
+    <button class="btn" type="submit">Submit registration (beta)</button>
   </form>
-  <div id="regResult" style="margin-top:10px;font-size:0.95rem"></div>
+
+  <div id="fullRegResult" style="margin-top:10px;font-size:0.95rem"></div>
 </div>
+
+<script>
+(() => {
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+  const form = document.getElementById('fullRegForm');
+  const out  = document.getElementById('fullRegResult');
+  const selCategory = document.getElementById('f-category');
+  const studentOnly = document.getElementById('studentOnly');
+  const chkPresenting = document.getElementById('f-presenting');
+  const presentFields = document.getElementById('presentFields');
+
+  // Show/hide student + presenter sections
+  selCategory.addEventListener('change', () => {
+    studentOnly.style.display = selCategory.value === 'student' ? 'block' : 'none';
+  });
+  chkPresenting.addEventListener('change', () => {
+    presentFields.style.display = chkPresenting.checked ? 'block' : 'none';
+  });
+
+  function get(obj, path, fallback) {
+    return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj) ?? fallback;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    out.textContent = 'Submitting…';
+
+    // Build nested payload from form fields (simple mapper)
+    const fd = new FormData(form);
+    const payload = {
+      category: fd.get('category'),
+      addons: { dinner: fd.get('addons.dinner') === 'on' },
+      personal: {
+        firstName: fd.get('personal.firstName'),
+        lastName:  fd.get('personal.lastName'),
+        email:     fd.get('personal.email'),
+        phone:     fd.get('personal.phone'),
+        country:   fd.get('personal.country')
+      },
+      professional: {
+        affiliation: fd.get('professional.affiliation'),
+        department:  fd.get('professional.department'),
+        roleTitle:   fd.get('professional.roleTitle')
+      },
+      address: {
+        line1: fd.get('address.line1'),
+        line2: fd.get('address.line2'),
+        city:  fd.get('address.city'),
+        state: fd.get('address.state'),
+        postcode: fd.get('address.postcode'),
+        country:  fd.get('address.country')
+      },
+      billing: {
+        billTo:   fd.get('billing.billTo'),
+        taxNo:    fd.get('billing.taxNo'),
+        poNumber: fd.get('billing.poNumber')
+      },
+      program: {
+        presenting: document.getElementById('f-presenting').checked,
+        type:       document.getElementById('f-type')?.value || 'none',
+        title:      document.getElementById('f-title')?.value || '',
+        topicArea:  document.getElementById('f-topicArea')?.value || ''
+      },
+      student: (fd.get('category') === 'student') ? {
+        university: fd.get('student.university'),
+        level:      fd.get('student.level') || 'Other',
+        expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
+      } : undefined,
+      studentProof: (fd.get('category') === 'student') ? {
+        deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
+      } : undefined,
+      consents: {
+        pdpa: document.getElementById('c-pdpa').checked,
+        codeOfConduct: document.getElementById('c-coc').checked,
+        marketingOptIn: document.getElementById('c-mkt').checked
+      }
+    };
+
+    try {
+      const r = await fetch(`${API}/api/registrations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Error');
+
+      out.innerHTML = `
+        ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+        Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+        Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+        <em>(Payment coming soon)</em>
+      `;
+      form.reset();
+      studentOnly.style.display = 'none';
+      presentFields.style.display = 'none';
+    } catch (err) {
+      out.textContent = '❌ ' + err.message;
+    }
+  });
+})();
+</script>
+
 
 <script>
 (() => {
