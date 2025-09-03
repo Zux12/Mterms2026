@@ -46,15 +46,7 @@ const uploadsRouter = require('./routes/uploads');
 
 const app = express();
 
-/** CORS — open while we stabilize. We’ll lock to zux12.github.io later. */
-app.use(cors({
-  origin: (origin, cb) => cb(null, true), // allow ALL origins for now
-  methods: ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  credentials: false,
-  maxAge: 86400
-}));
-app.options('*', cors());
+
 
 /** Parsers */
 app.use(express.json({ limit: '5mb' }));
