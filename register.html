@@ -148,32 +148,43 @@
       <div id="fullRegResult" style="margin-top:10px;font-size:0.95rem"></div>
     </div>
 
-    <!-- Upload Center (GridFS) -->
-    <div id="upload-center" class="card" style="margin-top:16px">
-      <div style="font-weight:700;margin-bottom:8px">Upload Center (beta)</div>
-      <p>Use your registration code and email to upload files. Accepted: PDF, JPG, PNG (≤10 MB).</p>
+   <!-- MTERM2026 — Upload Center (with progress) -->
+<div id="upload-center" class="card" style="margin-top:16px">
+  <div style="font-weight:700;margin-bottom:8px">Upload Center (beta)</div>
+  <p>Use your registration code and email to upload files. Accepted: PDF, JPG, PNG (≤10 MB).</p>
 
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
-        <input id="u-regCode" placeholder="Registration code e.g. MTERM2026-000002">
-        <input id="u-email" type="email" placeholder="Email used to register">
-      </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
+    <input id="u-regCode" placeholder="Registration code e.g. MTERM2026-000002">
+    <input id="u-email" type="email" placeholder="Email used to register">
+  </div>
 
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
-        <select id="u-type">
-          <option value="studentProof">Student proof</option>
-          <option value="bankReceipt">Bank transfer receipt</option>
-          <option value="abstract">Abstract</option>
-          <option value="slides">Slides</option>
-        </select>
-        <input id="u-file" type="file" accept=".pdf,.jpg,.jpeg,.png">
-      </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
+    <select id="u-type">
+      <option value="studentProof">Student proof</option>
+      <option value="bankReceipt">Bank transfer receipt</option>
+      <option value="abstract">Abstract</option>
+      <option value="slides">Slides</option>
+    </select>
+    <input id="u-file" type="file" accept=".pdf,.jpg,.jpeg,.png">
+  </div>
 
-      <button class="btn" id="u-upload">Upload</button>
-      <button class="btn ghost" id="u-refresh" style="margin-left:8px">Refresh history</button>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn" id="u-upload">Upload</button>
+    <button class="btn ghost" id="u-refresh">Refresh history</button>
+  </div>
 
-      <div id="u-msg" style="margin-top:10px;font-size:0.95rem"></div>
-      <div id="u-history" style="margin-top:10px"></div>
+  <!-- Progress UI -->
+  <div id="u-progress" style="display:none;margin-top:10px">
+    <div style="height:8px;background:#1a1c22;border-radius:9999px;overflow:hidden;border:1px solid #2a2a2a">
+      <div id="u-progress-bar" style="height:8px;width:0%;background:#3b82f6;transition:width .15s;"></div>
     </div>
+    <div id="u-progress-text" style="margin-top:6px;font-size:.9rem;opacity:.9">Uploading… 0%</div>
+  </div>
+
+  <div id="u-msg" style="margin-top:10px;font-size:0.95rem"></div>
+  <div id="u-history" style="margin-top:10px"></div>
+</div>
+
 
   </div>
 
@@ -313,12 +324,43 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ===== Upload Center (GridFS) =====
-  const regCode = $('u-regCode');
-  const email   = $('u-email');
-  const typeSel = $('u-type');
-  const fileInp = $('u-file');
-  const msg     = $('u-msg');
-  const hist    = $('u-history');
+document.addEventListener('DOMContentLoaded', () => {
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+  // Elements
+  const regCode = document.getElementById('u-regCode');
+  const email   = document.getElementById('u-email');
+  const typeSel = document.getElementById('u-type');
+  const fileInp = document.getElementById('u-file');
+  const uploadBtn = document.getElementById('u-upload');
+  const refreshBtn = document.getElementById('u-refresh');
+  const msg     = document.getElementById('u-msg');
+  const hist    = document.getElementById('u-history');
+  const progBox = document.getElementById('u-progress');
+  const progBar = document.getElementById('u-progress-bar');
+  const progTxt = document.getElementById('u-progress-text');
+
+  function setBusy(isBusy) {
+    uploadBtn.disabled = isBusy;
+    fileInp.disabled = isBusy;
+    uploadBtn.style.opacity = isBusy ? 0.6 : 1;
+    uploadBtn.style.pointerEvents = isBusy ? 'none' : 'auto';
+    uploadBtn.textContent = isBusy ? 'Uploading…' : 'Upload';
+  }
+
+  function showProgress(show) {
+    progBox.style.display = show ? 'block' : 'none';
+    if (!show) {
+      progBar.style.width = '0%';
+      progTxt.textContent = 'Uploading… 0%';
+    }
+  }
+
+  function updateProgress(pct) {
+    const p = Math.max(0, Math.min(100, Math.floor(pct)));
+    progBar.style.width = p + '%';
+    progTxt.textContent = 'Uploading… ' + p + '%';
+  }
 
   async function listHistory() {
     msg.textContent = 'Loading history…';
@@ -343,12 +385,12 @@ document.addEventListener('DOMContentLoaded', () => {
       msg.textContent = '';
     } catch (e) {
       msg.innerHTML = `<span style="color:#ff6b6b">❌ History failed: ${e.message}</span>`;
-      console.error('History failed', e);
     }
   }
 
-  $('u-refresh')?.addEventListener('click', listHistory);
-  $('u-upload')?.addEventListener('click', async () => {
+  refreshBtn?.addEventListener('click', listHistory);
+
+  uploadBtn?.addEventListener('click', () => {
     msg.textContent = '';
     const file = fileInp.files?.[0];
     if (!regCode.value || !email.value || !file) {
@@ -359,25 +401,64 @@ document.addEventListener('DOMContentLoaded', () => {
       msg.textContent = '❌ File too large (max 10 MB)';
       return;
     }
-    try {
-      const fd = new FormData();
-      fd.append('regCode', regCode.value.trim());
-      fd.append('email', email.value.trim());
-      fd.append('type', typeSel.value);
-      fd.append('file', file, file.name);
 
-      const r = await fetch(`${API}/api/uploads/gridfs`, { method: 'POST', body: fd });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    // Build form-data
+    const fd = new FormData();
+    fd.append('regCode', regCode.value.trim());
+    fd.append('email', email.value.trim());
+    fd.append('type', typeSel.value);
+    fd.append('file', file, file.name);
 
-      msg.textContent = `✅ Uploaded v${data.version}.`;
-      fileInp.value = '';
-      listHistory();
-    } catch (e) {
-      msg.innerHTML = `<span style="color:#ff6b6b">❌ Upload failed: ${e.message}</span>`;
-      console.error('Upload failed', e);
-    }
+    // Use XMLHttpRequest for progress events
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API}/api/uploads/gridfs`, true);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = (e.loaded / e.total) * 100;
+        updateProgress(pct);
+      } else {
+        // Unknown size (Safari sometimes) — show indeterminate growth
+        const current = parseInt(progBar.style.width) || 0;
+        updateProgress(Math.min(95, current + 5));
+      }
+    };
+
+    xhr.onerror = () => {
+      setBusy(false);
+      showProgress(false);
+      msg.innerHTML = '<span style="color:#ff6b6b">❌ Upload failed (network)</span>';
+    };
+
+    xhr.onload = () => {
+      setBusy(false);
+      updateProgress(100);
+      setTimeout(() => showProgress(false), 600);
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        let data;
+        try { data = JSON.parse(xhr.responseText || '{}'); } catch { data = {}; }
+        msg.textContent = `✅ Uploaded v${data.version || '?'} .`;
+        fileInp.value = '';
+        listHistory();
+      } else {
+        let errMsg = `HTTP ${xhr.status}`;
+        try {
+          const err = JSON.parse(xhr.responseText || '{}');
+          if (err.error) errMsg = err.error;
+        } catch {}
+        msg.innerHTML = `<span style="color:#ff6b6b">❌ Upload failed: ${errMsg}</span>`;
+      }
+    };
+
+    // Start
+    setBusy(true);
+    showProgress(true);
+    updateProgress(1);
+    xhr.send(fd);
   });
+});
+
 });
 </script>
 
