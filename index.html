@@ -273,6 +273,72 @@
         </div>
       </div>
 
+<!-- MTERM2026 — Quick Registration Test (temporary) -->
+<div id="quick-reg" style="margin-top:24px;border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#0f1115">
+  <div style="font-weight:700;margin-bottom:8px">Quick Registration (test)</div>
+  <form id="regForm">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <select name="category" required>
+        <option value="">Select category…</option>
+        <option value="student">Student</option>
+        <option value="academia">Academia</option>
+        <option value="industry">Industry</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" name="dinner" /> Add Gala Dinner (RM150)
+      </label>
+      <input name="firstName" placeholder="First name" required />
+      <input name="lastName" placeholder="Last name" required />
+      <input name="email" type="email" placeholder="Email" required />
+      <input name="affiliation" placeholder="Affiliation/Organization" required />
+      <input name="phone" placeholder="Phone (optional)" />
+    </div>
+    <button class="btn" type="submit">Submit (test)</button>
+  </form>
+  <div id="regResult" style="margin-top:10px;font-size:0.95rem"></div>
+</div>
+
+<script>
+(() => {
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+  const form = document.getElementById('regForm');
+  const out = document.getElementById('regResult');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    out.textContent = 'Submitting…';
+    const fd = new FormData(form);
+    const payload = {
+      category: fd.get('category'),
+      firstName: fd.get('firstName'),
+      lastName: fd.get('lastName'),
+      email: fd.get('email'),
+      affiliation: fd.get('affiliation'),
+      phone: fd.get('phone'),
+      dinner: fd.get('dinner') === 'on'
+    };
+    try {
+      const r = await fetch(`${API}/api/registrations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Error');
+      out.innerHTML = `
+        ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+        Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+        (Payment coming soon)
+      `;
+      form.reset();
+    } catch (err) {
+      out.textContent = '❌ ' + err.message;
+    }
+  });
+})();
+</script>
+
+      
       <div class="cta-row">
         <a class="btn" href="#">Payment Portal (placeholder)</a>
         <a class="btn ghost" href="#">Invoice/Receipt Help (placeholder)</a>
