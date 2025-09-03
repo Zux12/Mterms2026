@@ -2,26 +2,29 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 
-// ---- CORS (whitelist, robust) ----
-const cors = require('cors');
+const pricingRouter = require('./routes/pricing');
+const registrationsRouter = require('./routes/registrations');
+const uploadsRouter = require('./routes/uploads');
 
+const app = express();
 
-
-// Build a normalized allow-list from env (comma-separated). Example:
-// CORS_ORIGIN="https://zux12.github.io,https://mterm2026-559f9bf571b5.herokuapp.com"
+/* ---- CORS (whitelist, robust) ----
+   Set on Heroku:
+   heroku config:set CORS_ORIGIN="https://zux12.github.io" -a mterm2026-559f9bf571b5
+   (comma-separate to allow more origins)
+*/
 const ALLOWED = (process.env.CORS_ORIGIN || '*')
   .split(',')
   .map(s => s.trim().replace(/\/$/, '').toLowerCase());
 
-// Vary header helps caches behave correctly with different origins
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow non-browser clients (curl/Postman) and same-origin
-    if (!origin) return cb(null, true);
+    if (!origin) return cb(null, true); // curl/Postman/same-origin
     const o = origin.replace(/\/$/, '').toLowerCase();
     if (ALLOWED.includes('*') || ALLOWED.includes(o)) return cb(null, true);
     return cb(new Error('CORS: origin not allowed'));
@@ -31,44 +34,29 @@ app.use(cors({
   credentials: false,
   maxAge: 86400
 }));
-
-// Ensure preflight OPTIONS are answered
 app.options('*', cors());
 
-
-
-
-
-
-const pricingRouter = require('./routes/pricing');
-const registrationsRouter = require('./routes/registrations');
-const uploadsRouter = require('./routes/uploads');
-
-const app = express();
-
-
-
-/** Parsers */
+/* Parsers */
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-/** Static (optional, only if you put files in /public) */
+/* Static (optional) */
 app.use(express.static(path.join(__dirname, '../public')));
 
-/** Health */
+/* Health */
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-/** API routes */
+/* API routes */
 app.use('/api/pricing', pricingRouter);
 app.use('/api/registrations', registrationsRouter);
 app.use('/api/uploads', uploadsRouter);
 
-/** Friendly root */
+/* Friendly root */
 app.get('/', (req, res) => {
   res.type('text/plain').send('MTERM2026 API is running. Try /api/health or /api/pricing/table');
 });
 
-/** Start */
+/* Start */
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MTERM2026_DB_URI)
   .then(() => {
