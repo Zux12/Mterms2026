@@ -8,7 +8,21 @@ const pricingRouter = require('./routes/pricing');
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN || true }));
+const allowed = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map(s => s.trim());
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // curl, Postman
+    if (allowed.includes('*') || allowed.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  }
+}));
+
+
+
+
 const registrationsRouter = require('./routes/registrations');
 app.use('/api/registrations', registrationsRouter);
 const uploadsRouter = require('./routes/uploads');
