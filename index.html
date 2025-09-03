@@ -432,6 +432,60 @@
     </div>
   </footer>
 
+
+
+<!-- MTERM2026 – Dynamic Pricing Preview -->
+<script>
+(async () => {
+  try {
+    const res = await fetch('/api/pricing/table', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // Try to mount inside a #registration section; else append to body
+    const host = document.querySelector('#registration') || document.body;
+    const el = document.createElement('div');
+    el.id = 'pricing-preview';
+    el.style.marginTop = '24px';
+    el.innerHTML = `
+      <div style="border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#0f1115">
+        <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.rows.map(r => `
+              <tr>
+                <td style="padding:8px">${r.phase}</td>
+                <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
+                <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
+                <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top:8px;opacity:0.9">Dinner bundle: +RM ${data.dinnerAddon} (optional).</div>
+        <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>. Windows are relative to the event date.</div>
+        <div style="margin-top:6px;font-size:0.85rem;opacity:0.7">
+          Note: Malaysian corporate attendees may treat fees as a deductible business expense if incurred wholly & exclusively for business (consult your tax advisor).
+        </div>
+      </div>`;
+    host.appendChild(el);
+  } catch (e) {
+    console.error('Pricing preview failed', e);
+  }
+})();
+</script>
+
+
+
+
+  
   <link rel="stylesheet" href="assets/capabilities.css">
 <script src="assets/capabilities.js"></script>
   <link rel="stylesheet" href="assets/hero-video.css">
