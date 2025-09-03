@@ -392,149 +392,151 @@
 </div>
 
 <script>
-(() => {
+document.addEventListener('DOMContentLoaded', () => {
   const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
+  // ----- Full Registration form -----
   const form = document.getElementById('fullRegForm');
-  const out  = document.getElementById('fullRegResult');
-  const selCategory = document.getElementById('f-category');
-  const studentOnly = document.getElementById('studentOnly');
-  const chkPresenting = document.getElementById('f-presenting');
-  const presentFields = document.getElementById('presentFields');
+  if (form) {
+    const out  = document.getElementById('fullRegResult');
+    const selCategory = document.getElementById('f-category');
+    const studentOnly = document.getElementById('studentOnly');
+    const chkPresenting = document.getElementById('f-presenting');
+    const presentFields = document.getElementById('presentFields');
 
-  // Show/hide student + presenter sections
-  selCategory.addEventListener('change', () => {
-    studentOnly.style.display = selCategory.value === 'student' ? 'block' : 'none';
-  });
-  chkPresenting.addEventListener('change', () => {
-    presentFields.style.display = chkPresenting.checked ? 'block' : 'none';
-  });
+    if (selCategory && studentOnly) {
+      selCategory.addEventListener('change', () => {
+        studentOnly.style.display = selCategory.value === 'student' ? 'block' : 'none';
+      });
+    }
+    if (chkPresenting && presentFields) {
+      chkPresenting.addEventListener('change', () => {
+        presentFields.style.display = chkPresenting.checked ? 'block' : 'none';
+      });
+    }
 
-  function get(obj, path, fallback) {
-    return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj) ?? fallback;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (out) out.textContent = 'Submitting…';
+
+      const fd = new FormData(form);
+      const payload = {
+        category: fd.get('category'),
+        addons: { dinner: fd.get('addons.dinner') === 'on' },
+        personal: {
+          firstName: fd.get('personal.firstName'),
+          lastName:  fd.get('personal.lastName'),
+          email:     fd.get('personal.email'),
+          phone:     fd.get('personal.phone'),
+          country:   fd.get('personal.country')
+        },
+        professional: {
+          affiliation: fd.get('professional.affiliation'),
+          department:  fd.get('professional.department'),
+          roleTitle:   fd.get('professional.roleTitle')
+        },
+        address: {
+          line1: fd.get('address.line1'),
+          line2: fd.get('address.line2'),
+          city:  fd.get('address.city'),
+          state: fd.get('address.state'),
+          postcode: fd.get('address.postcode'),
+          country:  fd.get('address.country')
+        },
+        billing: {
+          billTo:   fd.get('billing.billTo'),
+          taxNo:    fd.get('billing.taxNo'),
+          poNumber: fd.get('billing.poNumber')
+        },
+        program: {
+          presenting: document.getElementById('f-presenting')?.checked || false,
+          type:       document.getElementById('f-type')?.value || 'none',
+          title:      document.getElementById('f-title')?.value || '',
+          topicArea:  document.getElementById('f-topicArea')?.value || ''
+        },
+        student: (fd.get('category') === 'student') ? {
+          university: fd.get('student.university'),
+          level:      fd.get('student.level') || 'Other',
+          expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
+        } : undefined,
+        studentProof: (fd.get('category') === 'student') ? {
+          deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
+        } : undefined,
+        consents: {
+          pdpa: document.getElementById('c-pdpa')?.checked || false,
+          codeOfConduct: document.getElementById('c-coc')?.checked || false,
+          marketingOptIn: document.getElementById('c-mkt')?.checked || false
+        }
+      };
+
+      try {
+        const r = await fetch(`${API}/api/registrations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error');
+
+        if (out) {
+          out.innerHTML = `
+            ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+            Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+            Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+            <em>(Payment coming soon)</em>
+          `;
+        }
+        form.reset();
+        if (studentOnly) studentOnly.style.display = 'none';
+        if (presentFields) presentFields.style.display = 'none';
+      } catch (err) {
+        if (out) out.textContent = '❌ ' + err.message;
+      }
+    });
   }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    out.textContent = 'Submitting…';
-
-    // Build nested payload from form fields (simple mapper)
-    const fd = new FormData(form);
-    const payload = {
-      category: fd.get('category'),
-      addons: { dinner: fd.get('addons.dinner') === 'on' },
-      personal: {
-        firstName: fd.get('personal.firstName'),
-        lastName:  fd.get('personal.lastName'),
-        email:     fd.get('personal.email'),
-        phone:     fd.get('personal.phone'),
-        country:   fd.get('personal.country')
-      },
-      professional: {
-        affiliation: fd.get('professional.affiliation'),
-        department:  fd.get('professional.department'),
-        roleTitle:   fd.get('professional.roleTitle')
-      },
-      address: {
-        line1: fd.get('address.line1'),
-        line2: fd.get('address.line2'),
-        city:  fd.get('address.city'),
-        state: fd.get('address.state'),
-        postcode: fd.get('address.postcode'),
-        country:  fd.get('address.country')
-      },
-      billing: {
-        billTo:   fd.get('billing.billTo'),
-        taxNo:    fd.get('billing.taxNo'),
-        poNumber: fd.get('billing.poNumber')
-      },
-      program: {
-        presenting: document.getElementById('f-presenting').checked,
-        type:       document.getElementById('f-type')?.value || 'none',
-        title:      document.getElementById('f-title')?.value || '',
-        topicArea:  document.getElementById('f-topicArea')?.value || ''
-      },
-      student: (fd.get('category') === 'student') ? {
-        university: fd.get('student.university'),
-        level:      fd.get('student.level') || 'Other',
-        expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
-      } : undefined,
-      studentProof: (fd.get('category') === 'student') ? {
-        deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
-      } : undefined,
-      consents: {
-        pdpa: document.getElementById('c-pdpa').checked,
-        codeOfConduct: document.getElementById('c-coc').checked,
-        marketingOptIn: document.getElementById('c-mkt').checked
+  // ----- (Optional) Quick Registration test form -----
+  // If you still have a small test form with id="regForm", this safely wires it.
+  const quickForm = document.getElementById('regForm');
+  if (quickForm) {
+    const quickOut = document.getElementById('regResult');
+    quickForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (quickOut) quickOut.textContent = 'Submitting…';
+      const fd = new FormData(quickForm);
+      const payload = {
+        category: fd.get('category'),
+        firstName: fd.get('firstName'),
+        lastName: fd.get('lastName'),
+        email: fd.get('email'),
+        affiliation: fd.get('affiliation'),
+        phone: fd.get('phone'),
+        dinner: fd.get('dinner') === 'on'
+      };
+      try {
+        const r = await fetch(`${API}/api/registrations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error');
+        if (quickOut) {
+          quickOut.innerHTML = `
+            ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+            Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+            (Payment coming soon)
+          `;
+        }
+        quickForm.reset();
+      } catch (err) {
+        if (quickOut) quickOut.textContent = '❌ ' + err.message;
       }
-    };
-
-    try {
-      const r = await fetch(`${API}/api/registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Error');
-
-      out.innerHTML = `
-        ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
-        Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
-        Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
-        <em>(Payment coming soon)</em>
-      `;
-      form.reset();
-      studentOnly.style.display = 'none';
-      presentFields.style.display = 'none';
-    } catch (err) {
-      out.textContent = '❌ ' + err.message;
-    }
-  });
-})();
+    });
+  }
+});
 </script>
 
-
-
-<script>
-(() => {
-  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
-  const form = document.getElementById('regForm');
-  const out = document.getElementById('regResult');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    out.textContent = 'Submitting…';
-    const fd = new FormData(form);
-    const payload = {
-      category: fd.get('category'),
-      firstName: fd.get('firstName'),
-      lastName: fd.get('lastName'),
-      email: fd.get('email'),
-      affiliation: fd.get('affiliation'),
-      phone: fd.get('phone'),
-      dinner: fd.get('dinner') === 'on'
-    };
-    try {
-      const r = await fetch(`${API}/api/registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Error');
-      out.innerHTML = `
-        ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
-        Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
-        (Payment coming soon)
-      `;
-      form.reset();
-    } catch (err) {
-      out.textContent = '❌ ' + err.message;
-    }
-  });
-})();
-</script>
 
       <!-- MTERM2026 — Upload Center (MongoDB GridFS) -->
 <div id="upload-center" style="margin-top:24px;border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#0f1115">
