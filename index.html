@@ -65,7 +65,7 @@
       </div>
 
       <div class="cta-row">
-        <a class="btn primary" href="#registration">Register (opens soon)</a>
+        <a class="btn primary" id="openReg">Register</a>
         <a class="btn" href="#abstracts">Submit Abstract (opens soon)</a>
         <a class="btn ghost" href="#program">View Program (draft)</a>
       </div>
@@ -447,6 +447,60 @@
 
 
 
+<!-- Registration Modal -->
+<div id="regModal" class="reg-modal hidden" aria-hidden="true">
+  <div class="reg-modal__backdrop" id="regBackdrop"></div>
+  <div class="reg-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="regTitle">
+    <button class="reg-modal__close" id="regClose" aria-label="Close">✕</button>
+    <iframe id="regFrame" title="MTERMS 2026 Registration" src="" loading="lazy"></iframe>
+  </div>
+</div>
+
+<style>
+  .reg-modal.hidden { display: none; }
+  .reg-modal { position: fixed; inset: 0; z-index: 9999; display: block; }
+  .reg-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+  .reg-modal__dialog {
+    position: relative; margin: 4vh auto 0; width: min(1000px, 92vw); height: 92vh;
+    background: #0f1115; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    overflow: hidden; border: 1px solid #2a2a2a;
+  }
+  .reg-modal__close {
+    position: absolute; top: 8px; right: 8px; background: #1e1f24; color: #fff;
+    border: 1px solid #333; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  }
+  #regFrame { width: 100%; height: 100%; border: 0; background: #0f1115; }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const openBtn = document.getElementById('openReg');
+    const modal = document.getElementById('regModal');
+    const closeBtn = document.getElementById('regClose');
+    const backdrop = document.getElementById('regBackdrop');
+    const frame = document.getElementById('regFrame');
+
+    function openModal() {
+      // lazy-load the popup page when opened
+      if (!frame.src) frame.src = 'register.html';
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      // keep frame loaded so users can reopen quickly; remove src if you want to fully reset:
+      // frame.src = '';
+    }
+
+    if (openBtn) openBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
+  });
+</script>
 
 
 
