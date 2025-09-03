@@ -9,6 +9,9 @@ const pricingRouter = require('./routes/pricing');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN || true }));
+const registrationsRouter = require('./routes/registrations');
+app.use('/api/registrations', registrationsRouter);
+
 
 // OPTIONAL: serve your static site if it’s in /public
 app.use(express.static('public'));
