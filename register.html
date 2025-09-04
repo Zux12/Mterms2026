@@ -142,7 +142,7 @@
           <label><input type="checkbox" id="c-mkt" /> I’d like to receive event updates (optional).</label>
         </div>
 
-        <button class="btn" type="submit">Submit registration (beta)</button>
+        <button class="btn" id="reg-submit" type="submit">Submit registration (beta)</button>
       </form>
 
       <div id="fullRegResult" style="margin-top:10px;font-size:0.95rem"></div>
@@ -247,94 +247,107 @@
       }
     })();
 
-    /* ================== Registration form ================== */
-    const form = $('fullRegForm');
-    const out  = $('fullRegResult');
-    const selCategory = $('f-category');
-    const studentOnly = $('studentOnly');
-    const chkPresenting = $('f-presenting');
-    const presentFields = $('presentFields');
+   /* ================== Registration form ================== */
+const form = $('fullRegForm');
+const out  = $('fullRegResult');
+const selCategory = $('f-category');
+const studentOnly = $('studentOnly');
+const chkPresenting = $('f-presenting');
+const presentFields = $('presentFields');
+const submitBtn = $('reg-submit');
 
-    selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
-    chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
+selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
+chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      out.textContent = 'Submitting…';
+function setSubmitBusy(busy) {
+  if (!submitBtn) return;
+  submitBtn.disabled = busy;
+  submitBtn.style.opacity = busy ? 0.6 : 1;
+  submitBtn.style.pointerEvents = busy ? 'none' : 'auto';
+  submitBtn.textContent = busy ? 'Submitting…' : 'Submit registration (beta)';
+}
 
-      const fd = new FormData(form);
-      const payload = {
-        category: fd.get('category'),
-        addons: { dinner: fd.get('addons.dinner') === 'on' },
-        personal: {
-          firstName: fd.get('personal.firstName'),
-          lastName:  fd.get('personal.lastName'),
-          email:     fd.get('personal.email'),
-          phone:     fd.get('personal.phone'),
-          country:   fd.get('personal.country')
-        },
-        professional: {
-          affiliation: fd.get('professional.affiliation'),
-          department:  fd.get('professional.department'),
-          roleTitle:   fd.get('professional.roleTitle')
-        },
-        address: {
-          line1: fd.get('address.line1'),
-          line2: fd.get('address.line2'),
-          city:  fd.get('address.city'),
-          state: fd.get('address.state'),
-          postcode: fd.get('address.postcode'),
-          country:  fd.get('address.country')
-        },
-        billing: {
-          billTo:   fd.get('billing.billTo'),
-          taxNo:    fd.get('billing.taxNo'),
-          poNumber: fd.get('billing.poNumber')
-        },
-        program: {
-          presenting: $('f-presenting').checked,
-          type:       $('f-type')?.value || 'none',
-          title:      $('f-title')?.value || '',
-          topicArea:  $('f-topicArea')?.value || ''
-        },
-        student: (fd.get('category') === 'student') ? {
-          university: fd.get('student.university'),
-          level:      fd.get('student.level') || 'Other',
-          expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
-        } : undefined,
-        studentProof: (fd.get('category') === 'student') ? {
-          deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
-        } : undefined,
-        consents: {
-          pdpa: $('c-pdpa').checked,
-          codeOfConduct: $('c-coc').checked,
-          marketingOptIn: $('c-mkt').checked
-        }
-      };
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  out.textContent = 'Submitting…';
+  setSubmitBusy(true);
 
-      try {
-        const r = await fetch(`${API}/api/registrations`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+  const fd = new FormData(form);
+  const payload = {
+    category: fd.get('category'),
+    addons: { dinner: fd.get('addons.dinner') === 'on' },
+    personal: {
+      firstName: fd.get('personal.firstName'),
+      lastName:  fd.get('personal.lastName'),
+      email:     fd.get('personal.email'),
+      phone:     fd.get('personal.phone'),
+      country:   fd.get('personal.country')
+    },
+    professional: {
+      affiliation: fd.get('professional.affiliation'),
+      department:  fd.get('professional.department'),
+      roleTitle:   fd.get('professional.roleTitle')
+    },
+    address: {
+      line1: fd.get('address.line1'),
+      line2: fd.get('address.line2'),
+      city:  fd.get('address.city'),
+      state: fd.get('address.state'),
+      postcode: fd.get('address.postcode'),
+      country:  fd.get('address.country')
+    },
+    billing: {
+      billTo:   fd.get('billing.billTo'),
+      taxNo:    fd.get('billing.taxNo'),
+      poNumber: fd.get('billing.poNumber')
+    },
+    program: {
+      presenting: $('f-presenting').checked,
+      type:       $('f-type')?.value || 'none',
+      title:      $('f-title')?.value || '',
+      topicArea:  $('f-topicArea')?.value || ''
+    },
+    student: (fd.get('category') === 'student') ? {
+      university: fd.get('student.university'),
+      level:      fd.get('student.level') || 'Other',
+      expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
+    } : undefined,
+    studentProof: (fd.get('category') === 'student') ? {
+      deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
+    } : undefined,
+    consents: {
+      pdpa: $('c-pdpa').checked,
+      codeOfConduct: $('c-coc').checked,
+      marketingOptIn: $('c-mkt').checked
+    }
+  };
 
-        out.innerHTML = `
-          ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
-          Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
-          Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
-          <em>(Payment coming soon)</em>
-        `;
-        form.reset();
-        show(studentOnly, false);
-        show(presentFields, false);
-      } catch (err) {
-        out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
-        console.error('Submit failed', err);
-      }
+  try {
+    const r = await fetch(`${API}/api/registrations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    out.innerHTML = `
+      ✅ Saved. Your code: <strong>${data.regCode}</strong><br>
+      Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+      Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+      <em>(Payment coming soon)</em>
+    `;
+    form.reset();
+    show(studentOnly, false);
+    show(presentFields, false);
+  } catch (err) {
+    out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
+    console.error('Submit failed', err);
+  } finally {
+    setSubmitBusy(false);
+  }
+});
+
 
     /* =================== Upload Center (XHR + progress) =================== */
     const regCode = $('u-regCode');
