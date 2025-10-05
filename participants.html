@@ -1,1 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MTERMS 2026 — Participant Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    body {
+      background: #0f1115;
+      color: #e8e8e8;
+      font-family: Inter, system-ui, sans-serif;
+      padding: 20px;
+    }
+    .card {
+      background: #111317;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      background: linear-gradient(90deg, #19c37d, #0ea5a6);
+      border: none;
+      color: #0b1115;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      background: #0f1115;
+      color: #e8e8e8;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>MTERMS 2026 — Participant Portal</h1>
+  <p style="opacity:.8">Log in using your registration code and email to view or update your details.</p>
+
+  <!-- Login form -->
+  <div id="loginBox" class="card">
+    <h2>Login</h2>
+    <input id="loginCode" placeholder="Registration Code (e.g., MTERM2026-000123)">
+    <input id="loginEmail" type="email" placeholder="Email used during registration">
+    <button id="loginBtn" class="btn">Login</button>
+    <div id="loginMsg" style="margin-top:10px;font-size:.9rem;"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashBox" class="hidden">
+    <div class="card">
+      <h2>Welcome, <span id="userName"></span></h2>
+      <p><strong>Registration Code:</strong> <span id="userCode"></span></p>
+      <p><strong>Category:</strong> <span id="userCategory"></span></p>
+      <p><strong>Status:</strong> <span id="userPayment"></span></p>
+      <button id="logoutBtn" class="btn" style="background:#222;color:#fff;">Logout</button>
+    </div>
+
+    <div class="card">
+      <h3>My Uploads</h3>
+      <p>You can upload or view your submitted documents below.</p>
+      <select id="uType">
+        <option value="studentProof">Student proof</option>
+        <option value="bankReceipt">Bank receipt</option>
+        <option value="abstract">Abstract</option>
+        <option value="slides">Slides</option>
+      </select>
+      <input type="file" id="uFile" accept=".pdf,.jpg,.jpeg,.png">
+      <button id="uBtn" class="btn">Upload</button>
+      <div id="uMsg" style="margin-top:8px;font-size:.9rem;"></div>
+      <div id="uHistory" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+    const loginBox = document.getElementById('loginBox');
+    const dashBox = document.getElementById('dashBox');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginMsg = document.getElementById('loginMsg');
+    const uMsg = document.getElementById('uMsg');
+
+    function saveSession(data) {
+      localStorage.setItem('mtermsUser', JSON.stringify(data));
+    }
+    function getSession() {
+      try { return JSON.parse(localStorage.getItem('mtermsUser') || '{}'); } catch { return {}; }
+    }
+    function clearSession() {
+      localStorage.removeItem('mtermsUser');
+    }
+
+    function showDashboard(user) {
+      document.getElementById('userName').textContent = user.personal.firstName + ' ' + (user.personal.lastName || '');
+      document.getElementById('userCode').textContent = user.regCode;
+      document.getElementById('userCategory').textContent = user.category;
+      document.getElementById('userPayment').textContent = user.payment?.status || 'pending';
+      loginBox.classList.add('hidden');
+      dashBox.classList.remove('hidden');
+    }
+
+    async function login() {
+      const regCode = document.getElementById('loginCode').value.trim();
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!regCode || !email) {
+        loginMsg.textContent = '❌ Please enter both registration code and email.';
+        return;
+      }
+      loginBtn.disabled = true;
+      loginMsg.textContent = 'Checking...';
+
+      try {
+        const r = await fetch(`${API}/api/registrations/check?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`);
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Not found');
+        saveSession(data);
+        showDashboard(data);
+      } catch (err) {
+        loginMsg.textContent = '❌ Login failed: ' + err.message;
+      } finally {
+        loginBtn.disabled = false;
+      }
+    }
+
+    async function uploadFile() {
+      const user = getSession();
+      const file = document.getElementById('uFile').files[0];
+      const type = document.getElementById('uType').value;
+      if (!file) { uMsg.textContent = '❌ Please select a file.'; return; }
+
+      const fd = new FormData();
+      fd.append('regCode', user.regCode);
+      fd.append('email', user.personal.email);
+      fd.append('type', type);
+      fd.append('file', file, file.name);
+
+      uMsg.textContent = 'Uploading...';
+      try {
+        const r = await fetch(`${API}/api/uploads/gridfs`, { method: 'POST', body: fd });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Upload failed');
+        uMsg.textContent = `✅ Uploaded version ${data.version}`;
+        loadHistory();
+      } catch (err) {
+        uMsg.textContent = '❌ ' + err.message;
+      }
+    }
+
+    async function loadHistory() {
+      const user = getSession();
+      const type = document.getElementById('uType').value;
+      const box = document.getElementById('uHistory');
+      box.innerHTML = 'Loading...';
+      try {
+        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Error');
+        box.innerHTML = data.count
+          ? data.rows.map(row => `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:8px;margin-top:6px">
+            <strong>v${row.version}</strong> — ${row.filename}<br>
+            <small>${new Date(row.uploadedAt).toLocaleString()}</small><br>
+            <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
+          </div>`).join('')
+          : '<em>No uploads yet.</em>';
+      } catch (err) {
+        box.innerHTML = `<span style="color:#ff6b6b">❌ ${err.message}</span>`;
+      }
+    }
+
+    loginBtn.addEventListener('click', login);
+    logoutBtn.addEventListener('click', () => { clearSession(); location.reload(); });
+    document.getElementById('uBtn').addEventListener('click', uploadFile);
+    document.getElementById('uType').addEventListener('change', loadHistory);
+
+    // Auto login if session exists
+    const sess = getSession();
+    if (sess.regCode && sess.personal?.email) {
+      showDashboard(sess);
+      loadHistory();
+    }
+  </script>
+</body>
+</html>
 
