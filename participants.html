@@ -7,45 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
   <style>
-    body {
-      background: #0f1115;
-      color: #e8e8e8;
-      font-family: Inter, system-ui, sans-serif;
-      padding: 20px;
-    }
-    .card {
-      background: #111317;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-    .btn {
-      background: linear-gradient(90deg, #19c37d, #0ea5a6);
-      border: none;
-      color: #0b1115;
-      font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 6px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid #2a2a2a;
-      background: #0f1115;
-      color: #e8e8e8;
-    }
-    .hidden { display: none; }
+    body{ background:#0f1115; color:#e8e8e8; font-family:Inter,system-ui,sans-serif; padding:20px; }
+    .card{ background:#111317; border:1px solid #2a2a2a; border-radius:12px; padding:16px; margin-bottom:20px; }
+    .btn{ background:linear-gradient(90deg,#19c37d,#0ea5a6); border:none; color:#0b1115; font-weight:700; padding:8px 16px; border-radius:8px; cursor:pointer; }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .btn.ghost{ background:#1b1f24; color:#fff; }
+    input,select,textarea{ width:100%; padding:8px; margin-top:6px; margin-bottom:12px; border-radius:8px; border:1px solid #2a2a2a; background:#0f1115; color:#e8e8e8; }
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+    .hidden{ display:none; }
+    .help{ opacity:.85; font-size:.92rem }
+    .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+    @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
+    .tag{ display:inline-block; border:1px solid #2a2a2a; padding:4px 10px; border-radius:999px; background:#13161b; margin-right:8px; font-size:.85rem; }
   </style>
 </head>
 <body>
   <h1>MTERMS 2026 — Participant Portal</h1>
-  <p style="opacity:.8">Log in using your registration code and email to view or update your details.</p>
+  <p class="help">Log in using your registration code and email to view or update your details, and manage uploads.</p>
 
   <!-- Login form -->
   <div id="loginBox" class="card">
@@ -59,132 +39,394 @@
   <!-- Dashboard -->
   <div id="dashBox" class="hidden">
     <div class="card">
-      <h2>Welcome, <span id="userName"></span></h2>
-      <p><strong>Registration Code:</strong> <span id="userCode"></span></p>
-      <p><strong>Category:</strong> <span id="userCategory"></span></p>
-      <p><strong>Status:</strong> <span id="userPayment"></span></p>
-      <button id="logoutBtn" class="btn" style="background:#222;color:#fff;">Logout</button>
+      <div class="row" style="align-items:center">
+        <div>
+          <h2>Welcome, <span id="userName"></span></h2>
+          <div class="help">
+            <span class="tag">Code: <span id="userCode"></span></span>
+            <span class="tag">Category: <span id="userCategory"></span></span>
+            <span class="tag">Payment: <span id="userPayment"></span></span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <button id="logoutBtn" class="btn ghost">Logout</button>
+        </div>
+      </div>
     </div>
 
     <div class="card">
       <h3>My Uploads</h3>
-      <p>You can upload or view your submitted documents below.</p>
-      <select id="uType">
-        <option value="studentProof">Student proof</option>
-        <option value="bankReceipt">Bank receipt</option>
-        <option value="abstract">Abstract</option>
-        <option value="slides">Slides</option>
-      </select>
-      <input type="file" id="uFile" accept=".pdf,.jpg,.jpeg,.png">
-      <button id="uBtn" class="btn">Upload</button>
+      <p class="help">Upload or view your submitted documents.</p>
+      <div class="grid-2">
+        <label>Type
+          <select id="uType">
+            <option value="studentProof">Student proof</option>
+            <option value="bankReceipt">Bank receipt</option>
+            <option value="abstract">Abstract</option>
+            <option value="slides">Slides</option>
+          </select>
+        </label>
+        <label>File
+          <input type="file" id="uFile" accept=".pdf,.jpg,.jpeg,.png">
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="uBtn" class="btn">Upload</button>
+        <button id="uRefresh" class="btn ghost">Refresh history</button>
+      </div>
       <div id="uMsg" style="margin-top:8px;font-size:.9rem;"></div>
       <div id="uHistory" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>My Details</h3>
+      <p class="help">Edit your information and save changes.</p>
+
+      <!-- Category + Addons -->
+      <div class="grid-2">
+        <label>Category
+          <select id="f-category">
+            <option value="student">Student</option>
+            <option value="academia">Academia</option>
+            <option value="industry">Industry</option>
+          </select>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:auto">
+          <input type="checkbox" id="f-dinner"> Add Gala Dinner
+        </label>
+      </div>
+
+      <!-- Personal -->
+      <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Personal</legend>
+        <div class="grid-2">
+          <input id="p-firstName" placeholder="First name">
+          <input id="p-lastName" placeholder="Last name">
+          <input id="p-email" type="email" placeholder="Email">
+          <input id="p-phone" placeholder="Phone">
+          <input id="p-country" placeholder="Country">
+        </div>
+      </fieldset>
+
+      <!-- Professional -->
+      <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Affiliation</legend>
+        <div class="grid-2">
+          <input id="pro-affiliation" placeholder="University / Company">
+          <input id="pro-dept" placeholder="Department (optional)">
+          <input id="pro-role" placeholder="Role/Title (optional)">
+        </div>
+      </fieldset>
+
+      <!-- Student only -->
+      <fieldset id="studentOnly" style="display:none;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Student details</legend>
+        <div class="grid-3">
+          <input id="s-university" placeholder="University">
+          <select id="s-level">
+            <option value="">Level</option>
+            <option value="UG">UG</option>
+            <option value="MSc">MSc</option>
+            <option value="PhD">PhD</option>
+            <option value="Other">Other</option>
+          </select>
+          <input id="s-grad" type="number" placeholder="Expected grad year">
+        </div>
+      </fieldset>
+
+      <!-- Program -->
+      <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Program</legend>
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="pr-presenting"> I am a presenter
+        </label>
+        <div id="presentFields" style="display:none;margin-top:8px">
+          <div class="grid-2">
+            <select id="pr-type">
+              <option value="talk">Talk</option>
+              <option value="poster">Poster</option>
+              <option value="workshop">Workshop</option>
+              <option value="none">None</option>
+            </select>
+            <input id="pr-topic" placeholder="Topic area (optional)">
+          </div>
+          <input id="pr-title" placeholder="Presentation title" style="margin-top:8px">
+        </div>
+      </fieldset>
+
+      <!-- Billing -->
+      <details style="margin-bottom:12px">
+        <summary>Billing & invoice (optional)</summary>
+        <div class="grid-2" style="margin-top:8px">
+          <input id="b-billTo" placeholder="Bill-to name">
+          <input id="b-taxNo" placeholder="Company Tax/GST/VAT No.">
+          <input id="b-po" placeholder="Purchase order #">
+        </div>
+      </details>
+
+      <!-- Address -->
+      <details style="margin-bottom:12px">
+        <summary>Postal address (optional)</summary>
+        <div class="grid-2" style="margin-top:8px">
+          <input id="a-line1" placeholder="Address line 1">
+          <input id="a-line2" placeholder="Address line 2">
+          <input id="a-city" placeholder="City">
+          <input id="a-state" placeholder="State/Province">
+          <input id="a-postcode" placeholder="Postcode">
+          <input id="a-country" placeholder="Country">
+        </div>
+      </details>
+
+      <!-- Consents -->
+      <div style="margin:8px 0">
+        <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br>
+        <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
+        <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label>
+      </div>
+
+      <button id="saveBtn" class="btn">Save Changes</button>
+      <span id="saveMsg" style="margin-left:10px;font-size:.95rem"></span>
     </div>
   </div>
 
   <script>
     const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
+    // Elements
     const loginBox = document.getElementById('loginBox');
-    const dashBox = document.getElementById('dashBox');
+    const dashBox  = document.getElementById('dashBox');
     const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutBtn= document.getElementById('logoutBtn');
     const loginMsg = document.getElementById('loginMsg');
-    const uMsg = document.getElementById('uMsg');
+    const saveBtn  = document.getElementById('saveBtn');
+    const saveMsg  = document.getElementById('saveMsg');
 
-    function saveSession(data) {
-      localStorage.setItem('mtermsUser', JSON.stringify(data));
-    }
-    function getSession() {
-      try { return JSON.parse(localStorage.getItem('mtermsUser') || '{}'); } catch { return {}; }
-    }
-    function clearSession() {
-      localStorage.removeItem('mtermsUser');
+    const $ = (id) => document.getElementById(id);
+    const studentOnly = $('studentOnly');
+    const presentFields = $('presentFields');
+
+    function saveSession(data){ localStorage.setItem('mtermsUser', JSON.stringify(data)); }
+    function getSession(){ try{ return JSON.parse(localStorage.getItem('mtermsUser')||'{}'); }catch{return{}} }
+    function clearSession(){ localStorage.removeItem('mtermsUser'); }
+
+    function showStudent(on){ studentOnly.style.display = on ? 'block' : 'none'; }
+    function showPresent(on){ presentFields.style.display = on ? 'block' : 'none'; }
+
+    function prefill(user){
+      // Header badges
+      $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
+      $('userCode').textContent = user.regCode || '';
+      $('userCategory').textContent = user.category || '';
+      $('userPayment').textContent = user?.payment?.status || 'pending';
+
+      // Category/addons
+      $('f-category').value = user.category || 'academia';
+      $('f-dinner').checked = !!user?.addons?.dinner;
+
+      // Personal
+      $('p-firstName').value = user?.personal?.firstName || '';
+      $('p-lastName').value  = user?.personal?.lastName  || '';
+      $('p-email').value     = user?.personal?.email     || '';
+      $('p-phone').value     = user?.personal?.phone     || '';
+      $('p-country').value   = user?.personal?.country   || '';
+
+      // Professional
+      $('pro-affiliation').value = user?.professional?.affiliation || '';
+      $('pro-dept').value        = user?.professional?.department  || '';
+      $('pro-role').value        = user?.professional?.roleTitle   || '';
+
+      // Student
+      const isStudent = (user?.category === 'student');
+      showStudent(isStudent);
+      $('s-university').value = user?.student?.university || '';
+      $('s-level').value      = user?.student?.level || '';
+      $('s-grad').value       = user?.student?.expectedGradYear || '';
+
+      // Program
+      $('pr-presenting').checked = !!user?.program?.presenting;
+      showPresent(!!user?.program?.presenting);
+      $('pr-type').value   = user?.program?.type || 'none';
+      $('pr-title').value  = user?.program?.title || '';
+      $('pr-topic').value  = user?.program?.topicArea || '';
+
+      // Billing
+      $('b-billTo').value = user?.billing?.billTo || '';
+      $('b-taxNo').value  = user?.billing?.taxNo  || '';
+      $('b-po').value     = user?.billing?.poNumber || '';
+
+      // Address
+      $('a-line1').value   = user?.address?.line1 || '';
+      $('a-line2').value   = user?.address?.line2 || '';
+      $('a-city').value    = user?.address?.city  || '';
+      $('a-state').value   = user?.address?.state || '';
+      $('a-postcode').value= user?.address?.postcode || '';
+      $('a-country').value = user?.address?.country || '';
+
+      // Consents
+      $('c-pdpa').checked = !!user?.consents?.pdpa;
+      $('c-coc').checked  = !!user?.consents?.codeOfConduct;
+      $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
     }
 
-    function showDashboard(user) {
-      document.getElementById('userName').textContent = user.personal.firstName + ' ' + (user.personal.lastName || '');
-      document.getElementById('userCode').textContent = user.regCode;
-      document.getElementById('userCategory').textContent = user.category;
-      document.getElementById('userPayment').textContent = user.payment?.status || 'pending';
+    function showDashboard(user){
+      prefill(user);
       loginBox.classList.add('hidden');
       dashBox.classList.remove('hidden');
     }
 
-    async function login() {
-      const regCode = document.getElementById('loginCode').value.trim();
-      const email = document.getElementById('loginEmail').value.trim();
-      if (!regCode || !email) {
-        loginMsg.textContent = '❌ Please enter both registration code and email.';
-        return;
-      }
+    async function login(){
+      const regCode = $('loginCode').value.trim();
+      const email   = $('loginEmail').value.trim();
+      if (!regCode || !email){ loginMsg.textContent='❌ Please enter both registration code and email.'; return; }
       loginBtn.disabled = true;
       loginMsg.textContent = 'Checking...';
-
       try {
         const r = await fetch(`${API}/api/registrations/check?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`);
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Not found');
         saveSession(data);
         showDashboard(data);
-      } catch (err) {
+        // load uploads list immediately
+        loadHistory();
+      } catch(err){
         loginMsg.textContent = '❌ Login failed: ' + err.message;
       } finally {
         loginBtn.disabled = false;
       }
     }
 
-    async function uploadFile() {
+    async function uploadFile(){
       const user = getSession();
-      const file = document.getElementById('uFile').files[0];
-      const type = document.getElementById('uType').value;
-      if (!file) { uMsg.textContent = '❌ Please select a file.'; return; }
-
+      const file = $('uFile').files[0];
+      const type = $('uType').value;
+      if (!file){ $('uMsg').textContent='❌ Please select a file.'; return; }
       const fd = new FormData();
       fd.append('regCode', user.regCode);
       fd.append('email', user.personal.email);
       fd.append('type', type);
       fd.append('file', file, file.name);
-
-      uMsg.textContent = 'Uploading...';
+      $('uMsg').textContent = 'Uploading...';
       try {
-        const r = await fetch(`${API}/api/uploads/gridfs`, { method: 'POST', body: fd });
+        const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Upload failed');
-        uMsg.textContent = `✅ Uploaded version ${data.version}`;
+        $('uMsg').textContent = `✅ Uploaded version ${data.version}`;
+        $('uFile').value = '';
         loadHistory();
-      } catch (err) {
-        uMsg.textContent = '❌ ' + err.message;
+      } catch(err){
+        $('uMsg').textContent = '❌ ' + err.message;
       }
     }
 
-    async function loadHistory() {
+    async function loadHistory(){
       const user = getSession();
-      const type = document.getElementById('uType').value;
-      const box = document.getElementById('uHistory');
+      const type = $('uType').value;
+      const box  = $('uHistory');
       box.innerHTML = 'Loading...';
       try {
         const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Error');
         box.innerHTML = data.count
-          ? data.rows.map(row => `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:8px;margin-top:6px">
-            <strong>v${row.version}</strong> — ${row.filename}<br>
-            <small>${new Date(row.uploadedAt).toLocaleString()}</small><br>
-            <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
-          </div>`).join('')
-          : '<em>No uploads yet.</em>';
-      } catch (err) {
+         ? data.rows.map(row => `<div style="border:1px solid #2a2a2a;border-radius:8px;padding:8px;margin-top:6px">
+              <strong>v${row.version}</strong> — ${row.filename}<br>
+              <small>${new Date(row.uploadedAt).toLocaleString()}</small><br>
+              <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
+            </div>`).join('')
+         : '<em>No uploads yet.</em>';
+      } catch(err){
         box.innerHTML = `<span style="color:#ff6b6b">❌ ${err.message}</span>`;
       }
     }
 
+    async function saveChanges(){
+      const user = getSession();
+      saveBtn.disabled = true;
+      saveMsg.textContent = 'Saving...';
+
+      // derive updates
+      const updates = {
+        category: $('f-category').value,
+        addons: { dinner: $('f-dinner').checked },
+        personal: {
+          firstName: $('p-firstName').value.trim(),
+          lastName:  $('p-lastName').value.trim(),
+          email:     $('p-email').value.trim(),
+          phone:     $('p-phone').value.trim(),
+          country:   $('p-country').value.trim()
+        },
+        professional: {
+          affiliation: $('pro-affiliation').value.trim(),
+          department:  $('pro-dept').value.trim(),
+          roleTitle:   $('pro-role').value.trim()
+        },
+        student: ($('f-category').value === 'student') ? {
+          university: $('s-university').value.trim(),
+          level:      $('s-level').value,
+          expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
+        } : undefined,
+        program: {
+          presenting: $('pr-presenting').checked,
+          type:       $('pr-type').value,
+          title:      $('pr-title').value.trim(),
+          topicArea:  $('pr-topic').value.trim()
+        },
+        billing: {
+          billTo:   $('b-billTo').value.trim(),
+          taxNo:    $('b-taxNo').value.trim(),
+          poNumber: $('b-po').value.trim()
+        },
+        address: {
+          line1: $('a-line1').value.trim(),
+          line2: $('a-line2').value.trim(),
+          city:  $('a-city').value.trim(),
+          state: $('a-state').value.trim(),
+          postcode: $('a-postcode').value.trim(),
+          country:  $('a-country').value.trim()
+        },
+        consents: {
+          pdpa: $('c-pdpa').checked,
+          codeOfConduct: $('c-coc').checked,
+          marketingOptIn: $('c-mkt').checked
+        }
+      };
+
+      // clean undefined student if not student
+      if (updates.student === undefined) delete updates.student;
+
+      try {
+        const r = await fetch(`${API}/api/registrations/update`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ regCode: user.regCode, email: user.personal.email, updates })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Update failed');
+
+        // refresh session with returned document
+        if (data?.doc) {
+          saveSession(data.doc);
+          prefill(data.doc);
+        }
+        saveMsg.textContent = '✅ Saved.';
+      } catch(err){
+        saveMsg.textContent = '❌ ' + err.message;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    // Wire events
     loginBtn.addEventListener('click', login);
     logoutBtn.addEventListener('click', () => { clearSession(); location.reload(); });
-    document.getElementById('uBtn').addEventListener('click', uploadFile);
-    document.getElementById('uType').addEventListener('change', loadHistory);
+    $('uBtn').addEventListener('click', uploadFile);
+    $('uRefresh').addEventListener('click', loadHistory);
+    $('uType').addEventListener('change', loadHistory);
+    $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
+    $('pr-presenting').addEventListener('change', () => showPresent($('pr-presenting').checked));
+    saveBtn.addEventListener('click', saveChanges);
 
-    // Auto login if session exists
+    // Auto session
     const sess = getSession();
     if (sess.regCode && sess.personal?.email) {
       showDashboard(sess);
@@ -193,4 +435,3 @@
   </script>
 </body>
 </html>
-
