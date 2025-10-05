@@ -454,30 +454,49 @@
     return { sx, sy, sw:w, sh:h };
   }
 
-  async function resizeToIDPhoto(file){
-    // Standard portrait preview: 360×480 (3:4). Good balance for web; printable source can be larger later.
-    const targetW = 360, targetH = 480;
-    const img = await new Promise((res, rej) => {
-      const i = new Image();
-      i.onload = () => res(i);
-      i.onerror = rej;
-      i.src = URL.createObjectURL(file);
-    });
+async function resizeToIDPhoto(file){
+  // Standard portrait 3:4 (no crop): 360x480 for web
+  const targetW = 360, targetH = 480;
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = URL.createObjectURL(file);
+  });
 
-    const canvas = document.createElement('canvas');
-    canvas.width = targetW; canvas.height = targetH;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,targetW,targetH);
+  const canvas = document.createElement('canvas');
+  canvas.width = targetW; canvas.height = targetH;
+  const ctx = canvas.getContext('2d');
 
-    const { sx, sy, sw, sh } = fitCoverToCanvas(img.naturalWidth, img.naturalHeight, targetW, targetH);
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+  // white background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, targetW, targetH);
 
-    // JPEG ~0.9 quality keeps it crisp
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
-    const previewUrl = URL.createObjectURL(blob);
-    return { blob, previewUrl };
+  // CONTAIN fit (no cropping), centered
+  const imgR = img.naturalWidth / img.naturalHeight;
+  const boxR = targetW / targetH;
+  let drawW, drawH;
+
+  if (imgR > boxR) {
+    // image is wider than the 3:4 box -> scale by width
+    drawW = targetW;
+    drawH = Math.round(drawW / imgR);
+  } else {
+    // image is taller -> scale by height
+    drawH = targetH;
+    drawW = Math.round(drawH * imgR);
   }
 
+  const dx = Math.round((targetW - drawW) / 2);
+  const dy = Math.round((targetH - drawH) / 2);
+
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, drawW, drawH);
+
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+  const previewUrl = URL.createObjectURL(blob);
+  return { blob, previewUrl };
+}
   async function uploadIDPhoto(){
     const user = getSession();
     const file = document.getElementById('idPhoto').files?.[0];
@@ -499,9 +518,12 @@
       fd.append('file', new File([blob], 'idphoto.jpg', { type:'image/jpeg' }));
 
       msg.textContent = 'Uploading…';
-      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Upload failed');
+// Replace inside uploadIDPhoto() after the fetch:
+const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+let data = {};
+try { data = await r.json(); } catch {}
+if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
 
       msg.textContent = '✅ Photo saved (v' + (data.version || '?') + ').';
     }catch(err){
