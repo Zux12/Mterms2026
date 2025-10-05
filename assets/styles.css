@@ -149,3 +149,42 @@ img{max-width:100%;display:block}
   .org-logos{ gap:18px; }
   .org-section{ padding:44px 0; }
 }
+
+
+/* --- Fix: white strip at bottom on desktop (Capabilities widget) --- */
+#capabilities-root,
+#capabilities-root * {
+  box-sizing: border-box;
+}
+
+/* Ensure the widget doesn't reserve page space when closed */
+#capabilities-root,
+#capabilities-root .cap-shell,
+#capabilities-root .cap-drawer,
+#capabilities-root .cap-panel,
+#capabilities-root .cap-spacer {
+  background: transparent !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: visible !important;
+}
+
+/* Only take up space when explicitly opened via its JS (class toggled) */
+#capabilities-root.is-open .cap-drawer,
+#capabilities-root.is-open .cap-panel {
+  height: auto !important;
+}
+
+/* Keep the floating pill visible and clickable */
+#capabilities-root .cap-fab {
+  position: fixed !important;
+  bottom: 18px; right: 18px;
+  height: auto !important;
+  background: initial;
+}
+
+/* Belt & suspenders: no accidental white backgrounds at page bottom */
+html, body { background: var(--bg, #0f1115); }
