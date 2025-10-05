@@ -179,4 +179,21 @@ router.get('/lookup', async (req, res) => {
   res.json({ count: rows.length, rows });
 });
 
+router.get('/check', async (req, res) => {
+  try {
+    const { regCode, email } = req.query;
+    if (!regCode || !email) return res.status(400).json({ error: 'Missing regCode or email' });
+    const doc = await Registration.findOne({
+      regCode: regCode.trim(),
+      'personal.email': email.trim()
+    });
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    res.json(doc);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 module.exports = router;
