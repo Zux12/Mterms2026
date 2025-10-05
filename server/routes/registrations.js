@@ -195,5 +195,48 @@ router.get('/check', async (req, res) => {
 });
 
 
+// ===== Participant update (by regCode + email) =====
+router.put('/update', async (req, res) => {
+  try {
+    const { regCode, email, updates } = req.body || {};
+    if (!regCode || !email || !updates) {
+      return res.status(400).json({ error: 'Missing regCode, email or updates' });
+    }
+
+    // Only allow fields we expect
+    const allow = (obj, keys) =>
+      Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keys.includes(k)));
+
+    const safe = {
+      category: updates.category, // optional if you want to allow category change; remove if not
+      addons: allow(updates.addons, ['dinner']),
+      personal: allow(updates.personal, ['firstName','lastName','email','phone','country']),
+      professional: allow(updates.professional, ['affiliation','department','roleTitle']),
+      address: allow(updates.address, ['line1','line2','city','state','postcode','country']),
+      billing: allow(updates.billing, ['billTo','taxNo','poNumber']),
+      program: allow(updates.program, ['presenting','type','title','topicArea']),
+      student: allow(updates.student, ['university','level','expectedGradYear']),
+      consents: allow(updates.consents, ['pdpa','codeOfConduct','marketingOptIn'])
+    };
+
+    // remove empty sub-objects to keep $set clean
+    Object.keys(safe).forEach(k => {
+      if (safe[k] && typeof safe[k] === 'object' && !Object.keys(safe[k]).length) delete safe[k];
+      if (typeof safe[k] === 'undefined') delete safe[k];
+    });
+
+    const doc = await Registration.findOneAndUpdate(
+      { regCode: regCode.trim(), 'personal.email': email.trim() },
+      { $set: safe },
+      { new: true }
+    );
+
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true, regCode: doc.regCode, updatedAt: doc.updatedAt, doc });
+  } catch (err) {
+    console.error('Update failed:', err);
+    res.status(500).json({ error: 'Server error: ' + err.message });
+  }
+});
 
 module.exports = router;
