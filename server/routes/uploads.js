@@ -10,7 +10,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10 MB
 });
 
-const ALLOWED_TYPES = ['studentProof','bankReceipt','abstract','slides'];
+const ALLOWED_TYPES = ['studentProof','bankReceipt','abstract','slides','profilePhoto'];
 const ALLOWED_MIME  = ['application/pdf','image/png','image/jpeg'];
 
 function safeName(name='file') {
