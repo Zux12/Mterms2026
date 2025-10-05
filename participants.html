@@ -21,6 +21,44 @@
     .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
     @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
     .tag{ display:inline-block; border:1px solid #2a2a2a; padding:4px 10px; border-radius:999px; background:#13161b; margin-right:8px; font-size:.85rem; }
+  
+  /* Badge card — balanced for desktop & mobile; ~260×400 preview */
+.badge{
+  width: 260px; height: 400px;
+  background:#fff; color:#0b1115;
+  border-radius:16px; border:1px solid #e8e8e8;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  display:flex; flex-direction:column; overflow:hidden;
+  font-family: Inter, system-ui, sans-serif;
+}
+.badge-top{ padding:8px 10px 4px; }
+.badge-mterm{ display:block; width:96px; height:auto; margin:0 auto 4px; object-fit:contain; }
+.badge-logos{ display:flex; justify-content:center; align-items:center; gap:8px; }
+.badge-logos img{ height:20px; width:auto; object-fit:contain; }
+
+.badge-photo-wrap{
+  margin:8px auto 0; width:180px; height:240px; /* 3:4 area */
+  position:relative; border:1px solid #ddd; border-radius:10px; overflow:hidden;
+  background:#f2f4f7;
+}
+.badge-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+.badge-photo.ph{ display:flex; align-items:center; justify-content:center; color:#98a2b3; font-weight:700; letter-spacing:.06em; }
+
+.badge-info{ padding:10px 12px 0; text-align:center; }
+.badge-name{ font-weight:800; font-size:18px; line-height:1.2; }
+.badge-affil{ font-size:12px; color:#475467; margin-top:2px; }
+.badge-cat{ font-size:12px; color:#0b7a64; font-weight:700; margin-top:6px; }
+
+.badge-footer{
+  margin-top:auto; font-size:11px; text-align:center; padding:8px 10px 10px; color:#667085;
+  border-top:1px solid #eef2f6; background:#fafafa;
+}
+
+/* keep inline checkbox labels tidy (from earlier tweak) */
+.field-inline{display:flex;align-items:center;gap:8px;margin:0}
+
+  
+  
   </style>
 </head>
 <body>
@@ -78,6 +116,61 @@
       <div id="uHistory" style="margin-top:12px;"></div>
     </div>
 
+
+<!-- ID Photo & Badge -->
+<div class="card">
+  <h3>ID Photo & Badge Preview</h3>
+  <p class="help">
+    Upload a portrait photo (front-facing, plain background). We’ll auto-fit it to standard ID proportions (3:4).
+  </p>
+
+  <div class="grid-2">
+    <label>Choose photo
+      <input type="file" id="idPhoto" accept="image/*">
+    </label>
+    <div style="display:flex;align-items:flex-end;gap:8px">
+      <button id="idUploadBtn" class="btn">Upload & Save</button>
+      <button id="idRefreshBtn" class="btn ghost">Refresh</button>
+      <span id="idMsg" style="margin-left:6px;font-size:.9rem"></span>
+    </div>
+  </div>
+
+  <!-- Badge preview -->
+  <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
+    <div id="badge" class="badge">
+      <div class="badge-top">
+        <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS" />
+        <div class="badge-logos">
+          <img src="public/uitm.png" alt="UiTM">
+          <img src="public/mohe.png" alt="MOHE">
+          <img src="public/tesma.png" alt="TESMA">
+        </div>
+      </div>
+
+      <div class="badge-photo-wrap">
+        <img id="badgePhoto" class="badge-photo" alt="ID photo placeholder">
+        <div id="badgePlaceholder" class="badge-photo ph">PHOTO</div>
+      </div>
+
+      <div class="badge-info">
+        <div id="badgeName" class="badge-name">Participant Name</div>
+        <div id="badgeAffil" class="badge-affil">Institution / Company</div>
+        <div id="badgeCat" class="badge-cat">Category</div>
+      </div>
+
+      <div class="badge-footer">MTERMS 2026 • Shah Alam</div>
+    </div>
+
+    <div class="help" style="max-width:420px">
+      <strong>Printing note:</strong> This preview uses a white card background. The photo is constrained to a standard
+      3:4 portrait. On the admin page, the same badge block can be placed in a print-friendly layout for bulk printing.
+    </div>
+  </div>
+</div>
+
+
+    
+    
     <div class="card">
       <h3>My Details</h3>
       <p class="help">Edit your information and save changes.</p>
@@ -344,6 +437,118 @@
       }
     }
 
+
+ // --- ID photo helpers ---
+  function fitCoverToCanvas(imgW, imgH, canW, canH){
+    const imgR = imgW / imgH, canR = canW / canH;
+    let w, h, sx, sy;
+    if (imgR > canR){ // image too wide -> crop sides
+      h = imgH;
+      w = h * canR;
+      sx = (imgW - w) / 2; sy = 0;
+    } else {          // image too tall -> crop top/bottom
+      w = imgW;
+      h = w / canR;
+      sx = 0; sy = (imgH - h) / 2;
+    }
+    return { sx, sy, sw:w, sh:h };
+  }
+
+  async function resizeToIDPhoto(file){
+    // Standard portrait preview: 360×480 (3:4). Good balance for web; printable source can be larger later.
+    const targetW = 360, targetH = 480;
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(file);
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW; canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,targetW,targetH);
+
+    const { sx, sy, sw, sh } = fitCoverToCanvas(img.naturalWidth, img.naturalHeight, targetW, targetH);
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+
+    // JPEG ~0.9 quality keeps it crisp
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+    const previewUrl = URL.createObjectURL(blob);
+    return { blob, previewUrl };
+  }
+
+  async function uploadIDPhoto(){
+    const user = getSession();
+    const file = document.getElementById('idPhoto').files?.[0];
+    const msg = document.getElementById('idMsg');
+    if (!file){ msg.textContent = '❌ Please choose an image.'; return; }
+
+    try{
+      msg.textContent = 'Processing…';
+      const { blob, previewUrl } = await resizeToIDPhoto(file);
+
+      // Show preview immediately
+      setBadgePhoto(previewUrl);
+
+      // Upload to GridFS as 'profilePhoto'
+      const fd = new FormData();
+      fd.append('regCode', user.regCode);
+      fd.append('email', user.personal.email);
+      fd.append('type', 'profilePhoto');
+      fd.append('file', new File([blob], 'idphoto.jpg', { type:'image/jpeg' }));
+
+      msg.textContent = 'Uploading…';
+      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Upload failed');
+
+      msg.textContent = '✅ Photo saved (v' + (data.version || '?') + ').';
+    }catch(err){
+      msg.textContent = '❌ ' + err.message;
+    }
+  }
+
+  async function refreshIDPhoto(){
+    const user = getSession();
+    const msg = document.getElementById('idMsg');
+    msg.textContent = 'Loading…';
+    try{
+      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=profilePhoto`);
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Error');
+      if (data.count){
+        // use latest version
+        const last = data.rows[data.rows.length - 1];
+        setBadgePhoto(`${API}${last.downloadUrl}`);
+        msg.textContent = '';
+      } else {
+        clearBadgePhoto();
+        msg.textContent = 'No photo uploaded yet.';
+      }
+    }catch(err){
+      msg.textContent = '❌ ' + err.message;
+    }
+  }
+
+  function setBadgePhoto(url){
+    const img = document.getElementById('badgePhoto');
+    const ph  = document.getElementById('badgePlaceholder');
+    img.src = url; img.style.display = 'block'; ph.style.display = 'none';
+  }
+  function clearBadgePhoto(){
+    const img = document.getElementById('badgePhoto');
+    const ph  = document.getElementById('badgePlaceholder');
+    img.removeAttribute('src'); img.style.display = 'none'; ph.style.display = 'flex';
+  }
+
+  function fillBadgeText(user){
+    document.getElementById('badgeName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim() || 'Participant Name';
+    document.getElementById('badgeAffil').textContent = user?.professional?.affiliation || 'Institution / Company';
+    document.getElementById('badgeCat').textContent   = (user?.category || 'Participant').toUpperCase();
+  }
+
+    
     async function saveChanges(){
       const user = getSession();
       saveBtn.disabled = true;
@@ -437,6 +642,20 @@
       showDashboard(sess);
       loadHistory();
     }
+
+    // ID photo events
+document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
+document.getElementById('idRefreshBtn').addEventListener('click', refreshIDPhoto);
+
+// When showing dashboard, fill badge text and try to load existing photo
+function showDashboard(user){
+  prefill(user);
+  fillBadgeText(user);
+  loginBox.classList.add('hidden');
+  dashBox.classList.remove('hidden');
+  refreshIDPhoto(); // pull existing profile photo if any
+}
+
   </script>
 </body>
 </html>
