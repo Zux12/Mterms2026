@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const UploadSchema = new mongoose.Schema({
-  type: { type: String, enum: ['studentProof','bankReceipt','abstract','slides'], required: true },
+  type: { type: String, enum: ['studentProof','bankReceipt','abstract','slides','profilePhoto'], required: true },
   version: { type: Number, required: true },
   gridFsId: { type: mongoose.Schema.Types.ObjectId, required: true },
   filename: String,
