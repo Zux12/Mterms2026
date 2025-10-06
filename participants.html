@@ -57,7 +57,18 @@
 /* keep inline checkbox labels tidy (from earlier tweak) */
 .field-inline{display:flex;align-items:center;gap:8px;margin:0}
 
-  
+
+
+    /* keep checkbox labels inside their fieldsets */
+.card fieldset { position: relative; }
+.card fieldset .grid-2 { align-items: start; }
+.card fieldset label { display: flex; flex-direction: column; margin: 0; }
+.field-inline { display:flex; align-items:center; gap:8px; margin:0 !important; }
+
+/* specific to our two labels */
+#f-dinner:where(input){ margin:0; }
+#pr-presenting:where(input){ margin:0; }
+
   
   </style>
 </head>
