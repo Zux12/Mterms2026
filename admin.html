@@ -163,20 +163,21 @@ button[disabled] {
       <div class="card" id="editCard" style="display:none">
         <h3>Edit Participant</h3>
         <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
-        <div class="row">
-          <label>Category
-            <select id="f-category">
-              <option value="student">Student</option>
-              <option value="academia">Academia</option>
-              <option value="industry">Industry</option>
-            </select>
-          </label>
-        <label class="field-inline" style="display:flex;align-items:center;gap:8px;white-space:normal;word-break:break-word;max-width:160px;justify-self:end;">
-  <input type="checkbox" id="f-dinner">
-  <span style="display:inline-block;">Add Gala Dinner</span>
-</label>
+        <div class="row" style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px">
+  <label style="margin:0">Category
+    <select id="f-category">
+      <option value="student">Student</option>
+      <option value="academia">Academia</option>
+      <option value="industry">Industry</option>
+    </select>
+  </label>
 
-        </div>
+  <label class="field-inline" style="display:flex;align-items:center;gap:8px;margin:0;white-space:nowrap">
+    <input type="checkbox" id="f-dinner">
+    <span>Add Gala Dinner</span>
+  </label>
+</div>
+
 
         <h4>Personal</h4>
         <div class="row">
