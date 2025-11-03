@@ -547,6 +547,62 @@ button[disabled] {
       }
     })();
   </script>
+
+  <style>
+/* ---------- Admin readability hard-overrides ---------- */
+
+/* 1) Search/inputs: visible placeholder in Safari/Chrome/Firefox */
+.admin-wrap input,
+.admin-wrap select,
+.admin-wrap textarea { color: var(--text) !important; }
+
+/* Safari/Chromium */
+.admin-wrap input::-webkit-input-placeholder,
+.admin-wrap textarea::-webkit-input-placeholder { color: var(--muted) !important; opacity: 1 !important; }
+/* Firefox */
+.admin-wrap input::placeholder,
+.admin-wrap textarea::placeholder { color: var(--muted) !important; opacity: 1 !important; }
+
+/* 2) Table headers: stronger contrast */
+.admin-wrap table thead th {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+.theme-dark .admin-wrap table thead th { color: #e5e7eb !important; }
+.theme-light .admin-wrap table thead th { color: #0b1115 !important; }
+
+/* 3) Disabled buttons: stop Safari’s dimming and set readable colors */
+.admin-wrap .btn:disabled,
+.admin-wrap button[disabled] {
+  opacity: 1 !important;            /* cancel browser fade */
+  cursor: not-allowed !important;
+  border-color: var(--border) !important;
+}
+
+/* light */
+.theme-light .admin-wrap .btn:disabled,
+.theme-light .admin-wrap button[disabled] {
+  background: #eef2f7 !important;
+  color: #48566a !important;
+}
+/* dark */
+.theme-dark .admin-wrap .btn:disabled,
+.theme-dark .admin-wrap button[disabled] {
+  background: #2a2f36 !important;
+  color: #c9d3dd !important;
+  border-color: #3a424a !important;
+}
+
+/* 4) Ghost buttons (Logout) text contrast in light */
+.theme-light .admin-wrap .btn.ghost {
+  color: #0b1115 !important;
+  border-color: var(--border) !important;
+}
+
+/* 5) Make tiny “Edit” labels readable even when disabled */
+.admin-wrap .actions .btn:disabled { font-weight: 700 !important; }
+</style>
+
 </body>
 </html>
 
