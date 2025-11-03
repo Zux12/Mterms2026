@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-light">
+
 <head>
   <meta charset="utf-8" />
   <title>MTERMS 2026 — Registration</title>
@@ -11,6 +12,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <style id="theme-overrides">
+  :root.theme-light{
+    --bg:#ffffff;--surface:#ffffff;--text:#0b1115;--muted:#667085;
+    --brand:#19c37d;--brand-2:#0ea5a6;--border:#e5e7eb;--faint:#f7f7f9;
+  }
+  :root.theme-dark{
+    --bg:#0b1115;--surface:#0e151a;--text:#e9f1f6;--muted:#8899a6;
+    --brand:#19c37d;--brand-2:#0ea5a6;--border:#1f2a31;--faint:#0f1d1a;
+  }
+  body{background:var(--bg);color:var(--text);}
+  .card{background:var(--surface);border:1px solid var(--border);}
+  .btn{border:1px solid var(--border);}
+  .theme-toggle{
+    margin-left:8px;background:#fff;color:#0b1115;
+    border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;
+  }
+  .theme-dark .theme-toggle{background:#1e1f24;color:#fff;border:1px solid #333;}
+</style>
+
+  
   <style>
     body{ background:#0f1115; color:#e8e8e8; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     .container{ max-width: 1100px; margin: 24px auto; padding: 0 16px; }
@@ -25,6 +47,8 @@
 <body>
   <div class="container">
     <h1 id="regTitle">MTERMS 2026 Registration</h1>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
+
     <p style="opacity:.85">Complete your details below. Fees and add-ons are shown live based on the current phase.</p>
 
     <!-- Pricing preview -->
@@ -481,5 +505,22 @@ form.addEventListener('submit', async (e) => {
 </script>
 
 
+<script>
+(function(){
+  const root=document.documentElement,btn=document.getElementById('themeToggle'),KEY='mterms-theme';
+  const saved=localStorage.getItem(KEY);
+  if(saved==='dark'){root.classList.remove('theme-light');root.classList.add('theme-dark');}
+  else{root.classList.add('theme-light');root.classList.remove('theme-dark');}
+  if(btn) btn.textContent=root.classList.contains('theme-dark')?'🌙':'🌞';
+  if(btn) btn.addEventListener('click',()=>{
+    const dark=root.classList.toggle('theme-dark');
+    root.classList.toggle('theme-light',!dark);
+    localStorage.setItem(KEY,dark?'dark':'light');
+    btn.textContent=dark?'🌙':'🌞';
+  });
+})();
+</script>
+
+  
 </body>
 </html>
