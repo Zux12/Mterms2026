@@ -657,6 +657,22 @@ button,
 }
 </style>
 
+<style>
+/* Keep the "Category + Add Gala Dinner" row inside the card */
+#editCard .row:first-of-type{
+  /* Left column takes the rest, right column sizes to its content */
+  grid-template-columns: 1fr max-content !important;
+  align-items: center;
+}
+
+/* Make the checkbox label wrap if needed and stay inside */
+#editCard .row:first-of-type .field-inline{
+  justify-self: end;            /* pin it to the right edge of the grid */
+  white-space: normal !important; /* allow wrapping (we previously had nowrap) */
+  word-break: break-word;       /* safety for very narrow screens */
+  max-width: 240px;             /* prevent creeping past the card on small viewports */
+}
+</style>
 
   
 </body>
