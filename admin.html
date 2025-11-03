@@ -620,6 +620,45 @@ button,
 }
 </style>
 
+
+
+<style>
+/* --- Fix Add Gala Dinner alignment & Edit box background --- */
+
+/* 1️⃣ Align the Add Gala Dinner checkbox properly inside the grid */
+#editCard .row,
+#editCard .row-3 {
+  align-items: center;
+}
+
+/* specifically that first row with Category + checkbox */
+#editCard .row:first-of-type {
+  grid-template-columns: 1fr auto; /* category select + small checkbox/label column */
+}
+
+/* make the label itself sit inline */
+#editCard .field-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* 2️⃣ Give the whole edit box a light-blue background and subtle border */
+#editCard {
+  background-color: #e6f4ff !important;   /* light blue */
+  border: 1px solid #b3d7ff !important;
+  border-radius: 12px;
+}
+
+/* optional: tone text contrast slightly darker inside that box */
+#editCard h3, #editCard h4, #editCard label {
+  color: #0b1115;
+}
+</style>
+
+
+  
 </body>
 </html>
 
