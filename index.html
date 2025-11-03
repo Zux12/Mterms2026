@@ -5,12 +5,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com; base-uri 'self'; form-action 'self'; frame-ancestors 'self'">
-
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  img-src 'self' data: blob: https:;
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+  base-uri 'self';
+  form-action 'self';
+  /* allow the embedded Google Map */
+  frame-src 'self' https://www.google.com https://*.google.com;
+  child-src 'self' https://www.google.com https://*.google.com
+">
 
   <title>MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting</title>
   <meta name="description" content="MTERMS 2026 • Sustainability through collaboration: building resilient tissue engineering and regenerative medicine ecosystems • September 2026 • Concorde Hotel, Shah Alam" />
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="public/mterm.jpg" type="image/jpeg">
 
   <!-- Open Graph (nice previews when sharing links) -->
   <meta property="og:title" content="MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting" />
