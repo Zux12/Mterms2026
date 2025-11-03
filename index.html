@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-light">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,6 +22,95 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
+  <style id="theme-overrides">
+  /* 1) Theme variables (light default via html.theme-light) */
+  :root.theme-light{
+    --bg:#ffffff;
+    --surface:#ffffff;
+    --text:#0b1115;
+    --muted:#667085;
+    --brand:#19c37d;
+    --brand-2:#0ea5a6;
+    --ring: rgba(25,195,125,.3);
+    --border:#e5e7eb;
+    --faint:#f7f7f9;
+  }
+  :root.theme-dark{
+    /* these mirror your existing dark tokens in assets/styles.css */
+    --bg:#0b1115;
+    --surface:#0e151a;
+    --text:#e9f1f6;
+    --muted:#8899a6;
+    --brand:#19c37d;
+    --brand-2:#0ea5a6;
+    --ring: rgba(25,195,125,.4);
+    --border:#1f2a31;
+    --faint:#0f1d1a;
+  }
+
+  /* 2) Global swaps when light is active */
+  .theme-light html, .theme-light body{ background:var(--bg); color:var(--text); }
+  .theme-light .notice{ background:#f1faf6; color:#064e3b; } /* top ribbon */
+  .theme-light .site-header{ background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); }
+  .theme-light .brand-mark{ color:#0b1115; }
+  .theme-light .nav a{ opacity:1; }
+  @media (max-width:960px){
+    .theme-light .nav.open{ background:#ffffff; border:1px solid var(--border); }
+    .theme-light .nav-toggle{ color:#0b1115; }
+  }
+
+  /* Hero */
+  .theme-light .subtitle{ color:#334155; }
+  .theme-light .theme{ color:#0f172a; }
+  .theme-light .hero-meta{ color:#1f2937; }
+  .theme-light .meta-item{
+    background:#ffffff; border:1px solid var(--border);
+  }
+
+  /* Buttons & cards */
+  .theme-light .btn{ background:#ffffff; color:#0b1115; border:1px solid var(--border); }
+  .theme-light .btn.ghost{ background:transparent; color:#0b1115; }
+  .theme-light .card,
+  .theme-light .img-card,
+  .theme-light .person,
+  .theme-light .price-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+  }
+  .theme-light .img-card figcaption{ color:#475569; border-top:1px solid var(--border); }
+
+  /* Pills, notes, footer, map border */
+  .theme-light .pill{ background:#f8fafc; color:#0b1115; border:1px solid var(--border); }
+  .theme-light .note{ color:#64748b; }
+  .theme-light .map-embed iframe{ border-top:1px solid var(--border); }
+  .theme-light .site-footer{ background:#ffffff; border-top:1px solid var(--border); }
+  .theme-light .foot-copy{ color:#64748b; }
+
+  /* Organizers strip (white cards already good) */
+  .theme-light .org-section{
+    background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0));
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+
+  /* Theme toggle button */
+  .theme-toggle{
+    margin-left:8px;
+    background:#ffffff;
+    color:#0b1115;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+  }
+  .theme-dark .theme-toggle{
+    background:#1e1f24;
+    color:#ffffff;
+    border:1px solid #333;
+  }
+</style>
+
 </head>
 <body>
 
@@ -48,7 +138,7 @@
         <a href="#committee">Committee</a>
         <a href="#contact">Contact</a>
       </nav>
-
+<button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
       <button class="nav-toggle" aria-label="Open menu">☰</button>
     </div>
   </header>
@@ -570,6 +660,33 @@
   <link rel="stylesheet" href="assets/agenda-popup.css">
 <script src="assets/agenda-popup.js"></script>
 
+<script>
+  (function(){
+    const root = document.documentElement; // <html>
+    const btn  = document.getElementById('themeToggle');
+    const KEY  = 'mterms-theme';
+
+    // On load: apply saved preference (default to light)
+    const saved = localStorage.getItem(KEY);
+    if (saved === 'dark') {
+      root.classList.remove('theme-light');
+      root.classList.add('theme-dark');
+    } else {
+      root.classList.add('theme-light');
+      root.classList.remove('theme-dark');
+    }
+    // Set icon
+    if (btn) btn.textContent = root.classList.contains('theme-dark') ? '🌙' : '🌞';
+
+    // Toggle on click
+    if (btn) btn.addEventListener('click', () => {
+      const dark = root.classList.toggle('theme-dark');
+      root.classList.toggle('theme-light', !dark);
+      localStorage.setItem(KEY, dark ? 'dark' : 'light');
+      btn.textContent = dark ? '🌙' : '🌞';
+    });
+  })();
+</script>
 
 
   <script src="assets/main.js"></script>
