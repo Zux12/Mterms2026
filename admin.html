@@ -627,26 +627,7 @@ button,
 
 
 <style>
-/* --- Fix Add Gala Dinner alignment & Edit box background --- */
 
-/* 1️⃣ Align the Add Gala Dinner checkbox properly inside the grid */
-#editCard .row,
-#editCard .row-3 {
-  align-items: center;
-}
-
-/* specifically that first row with Category + checkbox */
-#editCard .row:first-of-type {
-  grid-template-columns: 1fr auto; /* category select + small checkbox/label column */
-}
-
-/* make the label itself sit inline */
-#editCard .field-inline {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
 
 /* 2️⃣ Give the whole edit box a light-blue background and subtle border */
 #editCard {
@@ -661,22 +642,7 @@ button,
 }
 </style>
 
-<style>
-/* Keep the "Category + Add Gala Dinner" row inside the card */
-#editCard .row:first-of-type{
-  /* Left column takes the rest, right column sizes to its content */
-  grid-template-columns: 1fr max-content !important;
-  align-items: center;
-}
 
-/* Make the checkbox label wrap if needed and stay inside */
-#editCard .row:first-of-type .field-inline{
-  justify-self: end;            /* pin it to the right edge of the grid */
-  white-space: normal !important; /* allow wrapping (we previously had nowrap) */
-  word-break: break-word;       /* safety for very narrow screens */
-  max-width: 240px;             /* prevent creeping past the card on small viewports */
-}
-</style>
 
   
 </body>
