@@ -1,11 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-light">
+
 <head>
   <meta charset="utf-8" />
   <title>MTERMS 2026 — Participant Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
+<style id="theme-overrides">
+  :root.theme-light{
+    --bg:#ffffff;--surface:#ffffff;--text:#0b1115;--border:#e5e7eb;
+  }
+  :root.theme-dark{
+    --bg:#0b1115;--surface:#0e151a;--text:#e9f1f6;--border:#1f2a31;
+  }
+  body{background:var(--bg);color:var(--text);}
+  .card{background:var(--surface);border:1px solid var(--border);}
+  .btn{border:1px solid var(--border);}
+  .theme-toggle{
+    margin-left:8px;background:#fff;color:#0b1115;
+    border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;
+  }
+  .theme-dark .theme-toggle{background:#1e1f24;color:#fff;border:1px solid #333;}
+</style>
+
+
+  
   <style>
     body{ background:#0f1115; color:#e8e8e8; font-family:Inter,system-ui,sans-serif; padding:20px; }
     .card{ background:#111317; border:1px solid #2a2a2a; border-radius:12px; padding:16px; margin-bottom:20px; }
@@ -74,6 +94,8 @@
 </head>
 <body>
   <h1>MTERMS 2026 — Participant Portal</h1>
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
+
   <p class="help">Log in using your registration code and email to view or update your details, and manage uploads.</p>
 
   <!-- Login form -->
@@ -690,5 +712,23 @@ function showDashboard(user){
 }
 
   </script>
+
+
+  <script>
+(function(){
+  const root=document.documentElement,btn=document.getElementById('themeToggle'),KEY='mterms-theme';
+  const saved=localStorage.getItem(KEY);
+  if(saved==='dark'){root.classList.remove('theme-light');root.classList.add('theme-dark');}
+  else{root.classList.add('theme-light');root.classList.remove('theme-dark');}
+  if(btn) btn.textContent=root.classList.contains('theme-dark')?'🌙':'🌞';
+  if(btn) btn.addEventListener('click',()=>{
+    const dark=root.classList.toggle('theme-dark');
+    root.classList.toggle('theme-light',!dark);
+    localStorage.setItem(KEY,dark?'dark':'light');
+    btn.textContent=dark?'🌙':'🌞';
+  });
+})();
+</script>
+
 </body>
 </html>
