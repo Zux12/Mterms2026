@@ -46,6 +46,54 @@
       .print-grid{display:grid;grid-template-columns:repeat(2, 280px);gap:20px}
       .badge{break-inside:avoid}
     }
+
+    /* ---------- Readability fixes (target only the faint areas) ---------- */
+
+/* 1) Inputs: ensure good text + placeholder contrast */
+input, select, textarea { color: var(--text); }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+
+/* 2) Table headers: stronger contrast in light & dark */
+table thead th {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* 3) Buttons: make disabled states readable (remove default washed-out opacity) */
+.btn:disabled,
+button[disabled] {
+  opacity: 1;                     /* cancel browser fade */
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+
+/* Light theme disabled buttons */
+.theme-light .btn:disabled,
+.theme-light button[disabled] {
+  background: #eef2f7;            /* soft grey on white */
+  color: #6b7280;                  /* slate-500 for legibility */
+}
+
+/* Dark theme disabled buttons */
+.theme-dark .btn:disabled,
+.theme-dark button[disabled] {
+  background: #2a2f36;            /* raised charcoal */
+  color: #b6c2ce;                  /* light slate text */
+  border-color: #3a424a;
+}
+
+/* 4) Ghost buttons (e.g., Logout) need clearer text outlines in light mode */
+.theme-light .btn.ghost {
+  color: #0b1115;                  /* solid dark text */
+  background: transparent;
+  border-color: var(--border);
+}
+
+/* 5) Make the small “Edit” buttons readable even when disabled */
+.actions .btn:disabled {
+  font-weight: 600;
+}
+
   </style>
 </head>
 <body>
