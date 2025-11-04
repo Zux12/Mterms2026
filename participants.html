@@ -95,6 +95,7 @@
 <body>
   <h1>MTERMS 2026 — Participant Portal</h1>
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
+  
 
   <p class="help">Log in using your registration code and email to view or update your details, and manage uploads.</p>
 
@@ -104,6 +105,26 @@
     <input id="loginCode" placeholder="Registration Code (e.g., MTERM2026-000123)">
     <input id="loginEmail" type="email" placeholder="Email used during registration">
     <button id="loginBtn" class="btn">Login</button>
+     <button 
+  onclick="window.location.href='index.html'" 
+  style="
+    display:inline-block;
+    margin-top:12px;
+    padding:6px 12px;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(90deg,#19c37d,#0ea5a6);
+    color:#fff;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  "
+  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
+  onmouseout="this.style.transform='';this.style.boxShadow='';"
+>
+  ← Back to Main Page
+</button>
     <div id="loginMsg" style="margin-top:10px;font-size:.9rem;"></div>
   </div>
 
