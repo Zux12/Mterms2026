@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MTERMS 2026 – Committee Appointment Letter</title>
+  <!-- Simple internal styling, only for this page -->
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fb;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 24px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      flex: 1 1 260px;
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccd2e3;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #3652d3;
+      box-shadow: 0 0 0 2px rgba(54,82,211,0.15);
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: #3652d3;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #e3e7f5;
+      color: #333;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #777;
+      margin-top: 12px;
+    }
+
+    /* Printable letter style (hidden in normal view) */
+    .letter-wrapper {
+      width: 210mm;         /* A4 width */
+      min-height: 297mm;    /* A4 height */
+      padding: 20mm 20mm 25mm 20mm;
+      box-sizing: border-box;
+      background: #ffffff;
+      color: #000000;
+      font-family: "Times New Roman", serif;
+      font-size: 12pt;
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .letter-header img {
+      max-height: 40px;
+      object-fit: contain;
+    }
+
+    .letter-title {
+      text-align: center;
+      font-weight: bold;
+      text-decoration: underline;
+      margin-bottom: 20px;
+      font-size: 14pt;
+    }
+
+    .letter-body p {
+      margin: 0 0 10px 0;
+      line-height: 1.5;
+    }
+
+    .signature-block {
+      margin-top: 40px;
+    }
+
+    .signature-image {
+      max-height: 50px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .letter-meta {
+      font-size: 11pt;
+      margin-bottom: 16px;
+    }
+
+    /* Hidden by default (only used for PDF generation) */
+    #letterPreview {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Committee Appointment Letter Generator</h1>
+    <div class="subtitle">
+      MTERMS 2026 – Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="committeeName">Committee Member Name</label>
+        <input type="text" id="committeeName" placeholder="Enter full name" />
+      </div>
+      <div class="field">
+        <label for="committeeEmail">Email Address</label>
+        <input type="email" id="committeeEmail" placeholder="name@example.com" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="committeeRole">Role / Position</label>
+        <select id="committeeRole">
+          <option value="">-- Please select --</option>
+          <option value="President">President</option>
+          <option value="Vice President">Vice President</option>
+          <option value="Treasurer">Treasurer</option>
+          <option value="Secretariat">Secretariat</option>
+          <option value="Logistics Committee">Logistics Committee</option>
+          <option value="Programme Committee">Programme Committee</option>
+          <option value="Sponsorship Committee">Sponsorship Committee</option>
+          <option value="Technical Committee">Technical Committee</option>
+          <option value="Publicity & Media Committee">Publicity & Media Committee</option>
+          <option value="Committee Member">Committee Member</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="appointmentDate">Appointment Date</label>
+        <input type="date" id="appointmentDate" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="generateBtn" class="btn btn-primary">Generate Appointment Letter (PDF)</button>
+      <button type="button" class="btn btn-secondary" onclick="window.location.href='admin.html'">
+        Back to Admin Page
+      </button>
+    </div>
+
+    <div class="note">
+      Note: This page is intended for admin use only. Do not link it from public menus.
+    </div>
+  </div>
+
+  <!-- Hidden letter template for PDF generation -->
+  <div id="letterPreview">
+    <div class="letter-wrapper">
+      <div class="letter-header">
+        <!-- TODO: replace src paths with your actual logo locations -->
+        <img id="mtermsLogo" src="img/mterms-logo.png" alt="MTERMS 2026 Logo" />
+        <img id="organizerLogo" src="img/organizer-logo.png" alt="Organiser Logo" />
+      </div>
+
+      <div class="letter-title">
+        APPOINTMENT LETTER – MTERMS 2026 ORGANIZING COMMITTEE
+      </div>
+
+      <div class="letter-meta">
+        Ref: MTERMS2026/COMMITTEE/<span id="metaRefCode">001</span><br />
+        Date: <span id="metaDate"></span>
+      </div>
+
+      <div class="letter-body">
+        <p>
+          <strong>To:</strong><br />
+          <span id="previewName"></span><br />
+          Email: <span id="previewEmail"></span>
+        </p>
+
+        <p>
+          Dear <span id="previewName2"></span>,
+        </p>
+
+        <p>
+          We are pleased to formally appoint you as
+          <strong><span id="previewRole"></span></strong> for the
+          <strong>Malaysian Tissue Engineering &amp; Regenerative Medicine Scientific Meeting 2026 (MTERMS 2026)</strong>.
+          This appointment is in recognition of your expertise, experience, and commitment to advancing tissue
+          engineering and regenerative medicine in Malaysia.
+        </p>
+
+        <p>
+          In this role, you will be part of the Organizing Committee responsible for supporting the planning,
+          coordination and successful delivery of MTERMS 2026. Your key responsibilities will include, but are not
+          limited to:
+        </p>
+
+        <ul>
+          <li>Providing input and advice within your area of responsibility;</li>
+          <li>Attending and contributing to relevant committee meetings and discussions;</li>
+          <li>Supporting the execution of activities leading up to and during the event; and</li>
+          <li>Upholding the professional image and objectives of MTERMS 2026.</li>
+        </ul>
+
+        <p>
+          This appointment is effective from
+          <strong><span id="previewStartDate"></span></strong> and shall remain valid until the completion of MTERMS 2026
+          and all related post-event activities, unless otherwise notified in writing by the Organizing Committee.
+        </p>
+
+        <p>
+          We would like to record our sincere appreciation for your willingness to serve and contribute your time and
+          expertise. We look forward to working closely with you towards a successful and impactful scientific meeting.
+        </p>
+
+        <p>
+          Should you have any questions or require further clarification regarding this appointment, please do not
+          hesitate to contact the Organizing Committee Secretariat.
+        </p>
+
+        <p>
+          Thank you, and congratulations on your appointment.
+        </p>
+
+        <div class="signature-block">
+          <p>Yours sincerely,</p>
+          <img src="signaturesample.png" alt="Signature" class="signature-image" />
+          <p>
+            <strong>Assoc. Prof. Ts. Dr. Nur Aliana Hidayah Bt Mohamed</strong><br />
+            Vice President<br />
+            MTERMS 2026 Organizing Committee
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- html2pdf.js CDN (bundled with html2canvas + jsPDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // Helper to format date as e.g. "23 November 2025"
+    function formatDateLong(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      return d.toLocaleDateString("en-MY", options);
+    }
+
+    function formatTodayLong() {
+      const d = new Date();
+      const options = { day: "numeric", month: "long", year: "numeric" };
+      return d.toLocaleDateString("en-MY", options);
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", function () {
+      const name = document.getElementById("committeeName").value.trim();
+      const email = document.getElementById("committeeEmail").value.trim();
+      const role = document.getElementById("committeeRole").value;
+      const startDate = document.getElementById("appointmentDate").value;
+
+      if (!name) {
+        alert("Please enter the committee member's name.");
+        return;
+      }
+      if (!role) {
+        alert("Please select a role.");
+        return;
+      }
+      if (!startDate) {
+        alert("Please select an appointment date.");
+        return;
+      }
+
+      // Populate preview fields
+      document.getElementById("previewName").textContent = name;
+      document.getElementById("previewName2").textContent = name;
+      document.getElementById("previewEmail").textContent = email || "-";
+      document.getElementById("previewRole").textContent = role;
+      document.getElementById("previewStartDate").textContent = formatDateLong(startDate);
+
+      // Meta info: date on letter and a simple ref code (you can adjust pattern later)
+      document.getElementById("metaDate").textContent = formatTodayLong();
+      const simpleRef = new Date().getFullYear().toString().slice(-2) + "-" + Date.now().toString().slice(-4);
+      document.getElementById("metaRefCode").textContent = simpleRef;
+
+      const element = document.getElementById("letterPreview");
+      element.style.display = "block"; // show for rendering
+
+      const fileNameSafeName = name.replace(/[^a-z0-9]/gi, "_");
+      const opt = {
+        margin: 10,
+        filename: "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+
+      html2pdf().from(element).set(opt).save().then(function () {
+        element.style.display = "none"; // hide again after export
+      });
+    });
+  </script>
+</body>
+</html>
