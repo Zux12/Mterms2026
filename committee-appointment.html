@@ -152,154 +152,134 @@
       margin-bottom: 16px;
     }
 
-    /* Hidden by default (only used for PDF generation) */
-    #letterPreview {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <h1>Committee Appointment Letter Generator</h1>
-    <div class="subtitle">
-      MTERMS 2026 – Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting
-    </div>
-
-    <div class="form-row">
-      <div class="field">
-        <label for="committeeName">Committee Member Name</label>
-        <input type="text" id="committeeName" placeholder="Enter full name" />
-      </div>
-      <div class="field">
-        <label for="committeeEmail">Email Address</label>
-        <input type="email" id="committeeEmail" placeholder="name@example.com" />
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="field">
-        <label for="committeeRole">Role / Position</label>
-        <select id="committeeRole">
-          <option value="">-- Please select --</option>
-          <option value="President">President</option>
-          <option value="Vice President">Vice President</option>
-          <option value="Treasurer">Treasurer</option>
-          <option value="Secretariat">Secretariat</option>
-          <option value="Logistics Committee">Logistics Committee</option>
-          <option value="Programme Committee">Programme Committee</option>
-          <option value="Sponsorship Committee">Sponsorship Committee</option>
-          <option value="Technical Committee">Technical Committee</option>
-          <option value="Publicity & Media Committee">Publicity & Media Committee</option>
-          <option value="Committee Member">Committee Member</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="appointmentDate">Appointment Date</label>
-        <input type="date" id="appointmentDate" />
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="generateBtn" class="btn btn-primary">Generate Appointment Letter (PDF)</button>
-      <button type="button" class="btn btn-secondary" onclick="window.location.href='admin.html'">
-        Back to Admin Page
-      </button>
-    </div>
-
-    <div class="note">
-      Note: This page is intended for admin use only. Do not link it from public menus.
-    </div>
-  </div>
-
   <!-- Hidden letter template for PDF generation -->
-  <div id="letterPreview">
-    <div class="letter-wrapper">
-    <div class="letter-header">
-  <!-- MTERMS main logo -->
-  <img src="public/mterm.jpg" alt="MTERMS Logo" />
+<div id="letterPreview" style="display:none;">
+  <div class="letter-wrapper" style="
+      width:210mm;
+      min-height:297mm;
+      padding:25mm;
+      box-sizing:border-box;
+      font-family:'Times New Roman', serif;
+      font-size:11.5pt;
+      color:#000;
+    ">
 
-  <!-- Organiser logos (UITM, TESMA, MOHE) -->
-  <div style="display:flex; gap:15px; align-items:center;">
-    <img src="public/uitm.png" alt="UITM Logo" style="max-height:40px;" />
-    <img src="public/tesma.png" alt="TESMA Logo" style="max-height:40px;" />
-    <img src="public/mohe.png" alt="MOHE Logo" style="max-height:40px;" />
+    <!-- Logos Header -->
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
+      ">
+      
+      <!-- MTERMS main logo -->
+      <img src="public/mterm.jpg" alt="MTERMS Logo"
+           style="height:55px;object-fit:contain;">
+
+      <!-- Organiser Logos -->
+      <div style="display:flex;gap:18px;align-items:center;">
+        <img src="public/uitm.png" alt="UITM Logo" style="height:55px;object-fit:contain;">
+        <img src="public/tesma.png" alt="TESMA Logo" style="height:55px;object-fit:contain;">
+        <img src="public/mohe.png" alt="MOHE Logo" style="height:55px;object-fit:contain;">
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div style="
+        text-align:center;
+        font-weight:bold;
+        font-size:14pt;
+        margin-bottom:16px;
+        text-decoration:underline;
+      ">
+      APPOINTMENT LETTER – MTERMS 2026 ORGANIZING COMMITTEE
+    </div>
+
+    <!-- Ref & Date -->
+    <div style="margin-bottom:14px;line-height:1.4;">
+      Ref: MTERMS2026/COMMITTEE/<span id="metaRefCode"></span><br>
+      Date: <span id="metaDate"></span>
+    </div>
+
+    <!-- Body -->
+    <div style="text-align:justify;line-height:1.38;">
+
+      <p style="margin:0 0 10px 0;">
+        <strong>To:</strong><br>
+        <span id="previewName"></span><br>
+        Email: <span id="previewEmail"></span>
+      </p>
+
+      <p style="margin:0 0 10px 0;">
+        Dear <span id="previewName2"></span>,
+      </p>
+
+      <p style="margin:0 0 10px 0;">
+        We are pleased to formally appoint you as <strong><span id="previewRole"></span></strong> 
+        for the <strong>Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting 2026 (MTERMS 2026)</strong>. 
+        This appointment is in recognition of your expertise, experience, and commitment to advancing tissue engineering 
+        and regenerative medicine in Malaysia.
+      </p>
+
+      <p style="margin:0 0 10px 0;">
+        In this role, you will be part of the Organizing Committee responsible for supporting the planning, coordination 
+        and successful delivery of MTERMS 2026. Your key responsibilities will include, but are not limited to:
+      </p>
+
+      <ul style="margin:0 0 10px 20px; padding:0; line-height:1.35;">
+        <li>Providing input and advice within your area of responsibility;</li>
+        <li>Attending and contributing to relevant committee meetings and discussions;</li>
+        <li>Supporting the execution of activities leading up to and during the event; and</li>
+        <li>Upholding the professional image and objectives of MTERMS 2026.</li>
+      </ul>
+
+      <p style="margin:0 0 10px 0;">
+        This appointment is effective from <strong><span id="previewStartDate"></span></strong> and shall remain valid until 
+        the completion of MTERMS 2026 and all related post-event activities, unless otherwise notified in writing by the 
+        Organizing Committee.
+      </p>
+
+      <p style="margin:0 0 10px 0;">
+        We would like to record our sincere appreciation for your willingness to serve and contribute your time and expertise. 
+        We look forward to working closely with you towards a successful and impactful scientific meeting.
+      </p>
+
+      <p style="margin:0 0 10px 0;">
+        Should you have any questions or require further clarification regarding this appointment, please do not hesitate to 
+        contact the Organizing Committee Secretariat.
+      </p>
+
+      <p style="margin:0 0 16px 0;">
+        Thank you, and congratulations on your appointment.
+      </p>
+
+      <!-- Signature -->
+      <div style="margin-top:28px;">
+        <p style="margin:0 0 6px 0;">Yours sincerely,</p>
+
+        <img src="public/signaturesample.png" alt="Signature"
+             style="height:55px;margin-bottom:4px;">
+
+        <p style="margin:0;">
+          <strong>Assoc. Prof. Ts. Dr. Nur Aliana Hidayah Bt Mohamed</strong><br>
+          Vice President<br>
+          MTERMS 2026 Organizing Committee
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="
+        text-align:center;
+        margin-top:35px;
+        font-size:11pt;
+        opacity:0.8;
+      ">
+      MTERMS 2026 Organizing Committee
+    </div>
   </div>
 </div>
 
-
-      <div class="letter-title">
-        APPOINTMENT LETTER – MTERMS 2026 ORGANIZING COMMITTEE
-      </div>
-
-      <div class="letter-meta">
-        Ref: MTERMS2026/COMMITTEE/<span id="metaRefCode">001</span><br />
-        Date: <span id="metaDate"></span>
-      </div>
-
-      <div class="letter-body">
-        <p>
-          <strong>To:</strong><br />
-          <span id="previewName"></span><br />
-          Email: <span id="previewEmail"></span>
-        </p>
-
-        <p>
-          Dear <span id="previewName2"></span>,
-        </p>
-
-        <p>
-          We are pleased to formally appoint you as
-          <strong><span id="previewRole"></span></strong> for the
-          <strong>Malaysian Tissue Engineering &amp; Regenerative Medicine Scientific Meeting 2026 (MTERMS 2026)</strong>.
-          This appointment is in recognition of your expertise, experience, and commitment to advancing tissue
-          engineering and regenerative medicine in Malaysia.
-        </p>
-
-        <p>
-          In this role, you will be part of the Organizing Committee responsible for supporting the planning,
-          coordination and successful delivery of MTERMS 2026. Your key responsibilities will include, but are not
-          limited to:
-        </p>
-
-        <ul>
-          <li>Providing input and advice within your area of responsibility;</li>
-          <li>Attending and contributing to relevant committee meetings and discussions;</li>
-          <li>Supporting the execution of activities leading up to and during the event; and</li>
-          <li>Upholding the professional image and objectives of MTERMS 2026.</li>
-        </ul>
-
-        <p>
-          This appointment is effective from
-          <strong><span id="previewStartDate"></span></strong> and shall remain valid until the completion of MTERMS 2026
-          and all related post-event activities, unless otherwise notified in writing by the Organizing Committee.
-        </p>
-
-        <p>
-          We would like to record our sincere appreciation for your willingness to serve and contribute your time and
-          expertise. We look forward to working closely with you towards a successful and impactful scientific meeting.
-        </p>
-
-        <p>
-          Should you have any questions or require further clarification regarding this appointment, please do not
-          hesitate to contact the Organizing Committee Secretariat.
-        </p>
-
-        <p>
-          Thank you, and congratulations on your appointment.
-        </p>
-
-        <div class="signature-block">
-          <p>Yours sincerely,</p>
-<img src="public/signaturesample.png" class="signature-image" />
-          <p>
-            <strong>Assoc. Prof. Ts. Dr. Nur Aliana Hidayah Bt Mohamed</strong><br />
-            Vice President<br />
-            MTERMS 2026 Organizing Committee
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- html2pdf.js CDN (bundled with html2canvas + jsPDF) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
