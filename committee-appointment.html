@@ -214,11 +214,18 @@
   <!-- Hidden letter template for PDF generation -->
   <div id="letterPreview">
     <div class="letter-wrapper">
-      <div class="letter-header">
-        <!-- TODO: replace src paths with your actual logo locations -->
-        <img id="mtermsLogo" src="img/mterms-logo.png" alt="MTERMS 2026 Logo" />
-        <img id="organizerLogo" src="img/organizer-logo.png" alt="Organiser Logo" />
-      </div>
+    <div class="letter-header">
+  <!-- MTERMS main logo -->
+  <img src="public/mterm.jpg" alt="MTERMS Logo" />
+
+  <!-- Organiser logos (UITM, TESMA, MOHE) -->
+  <div style="display:flex; gap:15px; align-items:center;">
+    <img src="public/uitm.png" alt="UITM Logo" style="max-height:40px;" />
+    <img src="public/tesma.png" alt="TESMA Logo" style="max-height:40px;" />
+    <img src="public/mohe.png" alt="MOHE Logo" style="max-height:40px;" />
+  </div>
+</div>
+
 
       <div class="letter-title">
         APPOINTMENT LETTER – MTERMS 2026 ORGANIZING COMMITTEE
@@ -283,7 +290,7 @@
 
         <div class="signature-block">
           <p>Yours sincerely,</p>
-          <img src="signaturesample.png" alt="Signature" class="signature-image" />
+<img src="public/signaturesample.png" class="signature-image" />
           <p>
             <strong>Assoc. Prof. Ts. Dr. Nur Aliana Hidayah Bt Mohamed</strong><br />
             Vice President<br />
