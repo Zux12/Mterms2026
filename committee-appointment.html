@@ -107,7 +107,7 @@
     /* Printable letter wrapper (A4) */
     .letter-wrapper {
       width: 210mm;          /* A4 width */
-
+      min-height: 297mm;
       box-sizing: border-box;
       background: #ffffff;
       color: #000000;
@@ -247,9 +247,8 @@
 
         <ul style="margin:0 0 10px 20px;padding:0;line-height:1.35;">
           <li>Providing input and advice within your area of responsibility;</li>
-          <li>Attending and contributing to relevant committee meetings and discussions;</li>
-          <li>Supporting the execution of activities leading up to and during the event; and</li>
-          <li>Upholding the professional image and objectives of MTERMS 2026.</li>
+          <li>Attending and contributing to relevant committee meetings and discussions; and</li>
+          <li>Supporting the execution of activities leading up to and during MTERMS 2026 event.</li>
         </ul>
 
         <p style="margin:0 0 10px 0;">
@@ -352,7 +351,7 @@
 
       const fileNameSafeName = name.replace(/[^a-z0-9]/gi, "_");
       const opt = {
-        margin: 10,
+        margin: 5,
         filename: "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
