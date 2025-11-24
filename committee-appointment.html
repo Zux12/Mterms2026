@@ -358,9 +358,28 @@
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       };
 
-      html2pdf().from(element).set(opt).save().then(function () {
-        element.style.display = "none"; // hide again after export
-      });
+ html2pdf()
+  .from(element)
+  .set({
+    margin: 0, // force no extra margin
+    filename: "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ['avoid-all'] } // ⬅ FORCE no page breaks
+  })
+  .outputPdf()
+  .then(pdf => {
+    const trimmed = pdf.split('\nendobj')[0] + '\nendobj\n%%EOF';
+    const blob = new Blob([trimmed], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf";
+    link.click();
+
+    element.style.display = "none";
+  });
+
     });
   </script>
 </body>
