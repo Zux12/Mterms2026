@@ -134,8 +134,8 @@
         <input type="text" id="committeeName" placeholder="Enter full name" />
       </div>
       <div class="field">
-        <label for="committeeEmail">Email Address</label>
-        <input type="email" id="committeeEmail" placeholder="name@example.com" />
+        <label for="committeeEmail">Address</label>
+        <input type="email" id="committeeEmail" placeholder="UITM, Jalan Ilmu 1/1, 40450 Shah Alam, Selangor" />
       </div>
     </div>
 
@@ -148,11 +148,17 @@
           <option value="Vice President">Vice President</option>
           <option value="Treasurer">Treasurer</option>
           <option value="Secretariat">Secretariat</option>
+          <option value="Head of Secretariat">Head of Secretariat</option>
           <option value="Logistics Committee">Logistics Committee</option>
+          <option value="Head of Logistics Committee">Head of Logistics Committee</option>
           <option value="Programme Committee">Programme Committee</option>
+          <option value="Hea of Programme Committee">Head of Programme Committee</option>
           <option value="Sponsorship Committee">Sponsorship Committee</option>
+          <option value="Head of Sponsorship Committee">Head of Sponsorship Committee</option>
           <option value="Technical Committee">Technical Committee</option>
+          <option value="Head of Technical Committee">Head of Technical Committee</option>
           <option value="Publicity & Media Committee">Publicity & Media Committee</option>
+          <option value="Head of Publicity & Media Committee">Head of Publicity & Media Committee</option>
           <option value="Committee Member">Committee Member</option>
         </select>
       </div>
@@ -178,7 +184,7 @@
 
   <!-- Hidden letter template for PDF generation -->
   <div id="letterPreview">
-    <div class="letter-wrapper" style="padding:8mm 33mm 25mm 20mm;">
+    <div class="letter-wrapper" style="padding:8mm 33mm 20mm 20mm;">
       <!-- Logos Header -->
       <div style="
           display:flex;
@@ -220,7 +226,7 @@
         <p style="margin:0 0 10px 0;">
           <strong>To:</strong><br />
           <span id="previewName"></span><br />
-          Email: <span id="previewEmail"></span>
+          <span id="previewEmail"></span>
         </p>
 
         <p style="margin:0 0 10px 0;">
@@ -274,8 +280,8 @@
                style="height:55px;margin-bottom:4px;" />
 
           <p style="margin:0;">
-            <strong>Assoc. Prof. Ts. Dr. Nur Aliana Hidayah Bt Mohamed</strong><br />
-            Vice President<br />
+            <strong>Associate Professor. Ts. Dr. Nur Aliana Hidayah Mohamed</strong><br />
+            Chair<br />
             MTERMS 2026 Organizing Committee
           </p>
         </div>
