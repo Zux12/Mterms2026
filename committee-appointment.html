@@ -107,7 +107,7 @@
     /* Printable letter wrapper (A4) */
     .letter-wrapper {
       width: 210mm;          /* A4 width */
-      min-height: 180mm;
+      min-height: 150mm;
       box-sizing: border-box;
       background: #ffffff;
       color: #000000;
@@ -146,18 +146,22 @@
   <input type="text" id="addr3" placeholder="(optional)" />
 </label>
 
-
 <label>Address Line 4
-  <input type="text" id="addrPostcode" placeholder="(optional)" />
+  <input type="text" id="addr4" placeholder="(optional)" />
 </label>
 
 <label>Postcode 
-  <input type="text" id="addrCity" placeholder="e.g. 40450" />
+  <input type="text" id="addrPostcode" placeholder="e.g. 40450" />
 </label>
 
-<label>City & State
-  <input type="text" id="addrState" placeholder="e.g. Shah Alam, Selangor" />
+<label>City
+  <input type="text" id="addrCity" placeholder="e.g. Shah Alam" />
 </label>
+
+<label>State
+  <input type="text" id="addrState" placeholder="e.g. Selangor" />
+</label>
+
 
       </div>
     </div>
@@ -207,7 +211,7 @@
 
   <!-- Hidden letter template for PDF generation -->
   <div id="letterPreview">
-    <div class="letter-wrapper" style="padding:6mm 33mm 20mm 20mm;">
+    <div class="letter-wrapper" style="padding:4mm 33mm 20mm 20mm;">
       <!-- Logos Header -->
       <div style="
           display:flex;
@@ -352,17 +356,22 @@
   document.getElementById("previewName").textContent = name;
 
   // Build formatted address
-  const a1 = document.getElementById("addr1").value.trim();
-  const a2 = document.getElementById("addr2").value.trim();
-  const pc = document.getElementById("addrPostcode").value.trim();
-  const city = document.getElementById("addrCity").value.trim();
-  const st = document.getElementById("addrState").value.trim();
+const a1 = document.getElementById("addr1").value.trim();
+const a2 = document.getElementById("addr2").value.trim();
+const a3 = document.getElementById("addr3").value.trim();
+const a4 = document.getElementById("addr4").value.trim();
+const pc = document.getElementById("addrPostcode").value.trim();
+const city = document.getElementById("addrCity").value.trim();
+const st = document.getElementById("addrState").value.trim();
 
-  let fullAddress = a1;
-  if (a2) fullAddress += "<br>" + a2;
-  fullAddress += "<br>" + pc + " " + city + "<br>" + st;
+let fullAddress = a1;
+if (a2) fullAddress += "<br>" + a2;
+if (a3) fullAddress += "<br>" + a3;
+if (a4) fullAddress += "<br>" + a4;
+fullAddress += "<br>" + pc + " " + city + "<br>" + st;
 
-  document.getElementById("previewAddress").innerHTML = fullAddress;
+document.getElementById("previewAddress").innerHTML = fullAddress;
+
 
   document.getElementById("previewRole").textContent = role;
   document.getElementById("previewStartDate").textContent = formatDateLong(startDate);
