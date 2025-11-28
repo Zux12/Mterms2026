@@ -211,7 +211,7 @@
 
   <!-- Hidden letter template for PDF generation -->
   <div id="letterPreview">
-    <div class="letter-wrapper" style="padding:8mm 33mm 20mm 20mm;">
+    <div class="letter-wrapper" style="padding:4mm 33mm 20mm 20mm;">
       <!-- Logos Header -->
       <div style="
           display:flex;
@@ -385,7 +385,7 @@ document.getElementById("previewAddress").innerHTML = fullAddress;
 
       const fileNameSafeName = name.replace(/[^a-z0-9]/gi, "_");
       const opt = {
-        margin: 5,
+        margin: 0,
         filename: "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
