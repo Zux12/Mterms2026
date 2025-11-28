@@ -325,45 +325,43 @@
       return d.toLocaleDateString("en-MY", options);
     }
 
-    document.getElementById("generateBtn").addEventListener("click", function () {
-      const name = document.getElementById("committeeName").value.trim();
-      const email = document.getElementById("committeeEmail").value.trim();
-      const role = document.getElementById("committeeRole").value;
-      const startDate = document.getElementById("appointmentDate").value;
+   document.getElementById("generateBtn").addEventListener("click", function () {
+  const name = document.getElementById("committeeName").value.trim();
+  const role = document.getElementById("committeeRole").value;
+  const startDate = document.getElementById("appointmentDate").value;
 
-      if (!name) {
-        alert("Please enter the committee member's name.");
-        return;
-      }
-      if (!role) {
-        alert("Please select a role.");
-        return;
-      }
-      if (!startDate) {
-        alert("Please select an appointment date.");
-        return;
-      }
+  if (!name) {
+    alert("Please enter the committee member's name.");
+    return;
+  }
+  if (!role) {
+    alert("Please select a role.");
+    return;
+  }
+  if (!startDate) {
+    alert("Please select an appointment date.");
+    return;
+  }
 
-      // Populate preview fields
-      document.getElementById("previewName").textContent = name;
+  // Populate preview fields
+  document.getElementById("previewName").textContent = name;
 
+  // Build formatted address
+  const a1 = document.getElementById("addr1").value.trim();
+  const a2 = document.getElementById("addr2").value.trim();
+  const pc = document.getElementById("addrPostcode").value.trim();
+  const city = document.getElementById("addrCity").value.trim();
+  const st = document.getElementById("addrState").value.trim();
 
-const a1 = document.getElementById("addr1").value.trim();
-const a2 = document.getElementById("addr2").value.trim();
-const pc = document.getElementById("addrPostcode").value.trim();
-const city = document.getElementById("addrCity").value.trim();
-const st = document.getElementById("addrState").value.trim();
+  let fullAddress = a1;
+  if (a2) fullAddress += "<br>" + a2;
+  fullAddress += "<br>" + pc + " " + city + "<br>" + st;
 
-let fullAddress = a1;
-if (a2) fullAddress += "<br>" + a2;
-fullAddress += "<br>" + pc + " " + city + "<br>" + st;
+  document.getElementById("previewAddress").innerHTML = fullAddress;
 
-document.getElementById("previewAddress").innerHTML = fullAddress;
+  document.getElementById("previewRole").textContent = role;
+  document.getElementById("previewStartDate").textContent = formatDateLong(startDate);
 
-
-      
-      document.getElementById("previewRole").textContent = role;
-      document.getElementById("previewStartDate").textContent = formatDateLong(startDate);
 
       // Meta info: date on letter and a simple ref code
       document.getElementById("metaDate").textContent = formatTodayLong();
