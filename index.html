@@ -35,17 +35,21 @@
   <link rel="stylesheet" href="assets/styles.css" />
   <style id="theme-overrides">
   /* 1) Theme variables (light default via html.theme-light) */
-  :root.theme-light{
-    --bg:#ffffff;
-    --surface:#ffffff;
-    --text:#0b1115;
-    --muted:#667085;
-    --brand:#19c37d;
-    --brand-2:#0ea5a6;
-    --ring: rgba(25,195,125,.3);
-    --border:#e5e7eb;
-    --faint:#f7f7f9;
-  }
+:root.theme-light{
+  --bg:#f6fbff;          /* very light blue base */
+  --surface:#ffffff;
+  --text:#0b1115;
+  --muted:#556b86;
+
+  /* UiTM-ish blues (soft, not harsh) */
+  --brand:#1e5aa8;       /* primary blue */
+  --brand-2:#2f7bdc;     /* accent blue */
+  --ring: rgba(30,90,168,.18);
+
+  --border:#d7e6f7;
+  --faint:#eef6ff;
+}
+
   :root.theme-dark{
     /* these mirror your existing dark tokens in assets/styles.css */
     --bg:#0b1115;
@@ -60,7 +64,13 @@
   }
 
   /* 2) Global swaps when light is active */
-  .theme-light html, .theme-light body{ background:var(--bg); color:var(--text); }
+.theme-light html, .theme-light body{
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.10), transparent 60%),
+    radial-gradient(700px 420px at 85% 18%, rgba(30,90,168,.08), transparent 55%),
+    linear-gradient(180deg, #f6fbff 0%, #ffffff 55%, #f6fbff 100%);
+}
   .theme-light .notice{ background:#f1faf6; color:#064e3b; } /* top ribbon */
   .theme-light .site-header{ background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); }
   .theme-light .brand-mark{ color:#0b1115; }
@@ -79,7 +89,22 @@
   }
 
   /* Buttons & cards */
-  .theme-light .btn{ background:#ffffff; color:#0b1115; border:1px solid var(--border); }
+.theme-light .btn{
+  background:#ffffff;
+  color:#0b1115;
+  border:1px solid var(--border);
+}
+
+.theme-light .btn.primary{
+  background: var(--brand);
+  color: #ffffff;
+  border: 1px solid rgba(0,0,0,0);
+  box-shadow: 0 8px 22px rgba(30,90,168,.14);
+}
+
+.theme-light .btn.primary:hover{
+  filter: brightness(0.97);
+}
   .theme-light .btn.ghost{ background:transparent; color:#0b1115; }
   .theme-light .card,
   .theme-light .img-card,
@@ -99,11 +124,17 @@
   .theme-light .foot-copy{ color:#64748b; }
 
   /* Organizers strip (white cards already good) */
-  .theme-light .org-section{
-    background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0));
-    border-top:1px solid var(--border);
-    border-bottom:1px solid var(--border);
-  }
+.theme-light .org-section{
+  background: linear-gradient(180deg, rgba(47,123,220,.07), rgba(255,255,255,0));
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+/* subtle tint for section-alt blocks */
+.theme-light .section-alt{
+  background: linear-gradient(180deg, rgba(30,90,168,.06), rgba(255,255,255,0));
+}
+
 
   /* Theme toggle button */
   .theme-toggle{
@@ -211,7 +242,7 @@
       </div>
 
       <div class="cta-row">
-        <a class="btn primary" id="openReg">Register</a>       
+       <a class="btn primary" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register</a>  
         <a class="btn" href="#abstracts">Submit Abstract (Now Open)</a>
         <a class="btn ghost" href="#program">View Program (Tentative)</a>
       </div>
@@ -596,107 +627,7 @@
 
 
 
-<!-- Registration Modal -->
-<div id="regModal" class="reg-modal hidden" aria-hidden="true">
-  <div class="reg-modal__backdrop" id="regBackdrop"></div>
-  <div class="reg-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="regTitle">
-    <button class="reg-modal__close" id="regClose" aria-label="Close">✕</button>
 
-    <!-- IMPORTANT: inline onload clears the loader/fallback even if JS listeners miss the event -->
-    <iframe
-      id="regFrame"
-      title="MTERMS 2026 Registration"
-      src="about:blank"
-      loading="lazy"
-      onload="document.getElementById('regLoader')?.remove();document.getElementById('regFallback')?.remove();">
-    </iframe>
-  </div>
-</div>
-
-<style>
-  .reg-modal.hidden { display: none; }
-  .reg-modal { position: fixed; inset: 0; z-index: 9999; display: block; }
-  .reg-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-  .reg-modal__dialog {
-    position: relative; margin: 4vh auto 0; width: min(1000px, 92vw); height: 92vh;
-    background: #0f1115; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    overflow: hidden; border: 1px solid #2a2a2a;
-  }
-  .reg-modal__close {
-    position: absolute; top: 8px; right: 8px; background: #1e1f24; color: #fff;
-    border: 1px solid #333; border-radius: 8px; padding: 6px 10px; cursor: pointer;
-  }
-  #regFrame { width: 100%; height: 100%; border: 0; background: #0f1115; min-height: 400px; }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const openBtn  = document.getElementById('openReg');
-    const modal    = document.getElementById('regModal');
-    const closeBtn = document.getElementById('regClose');
-    const backdrop = document.getElementById('regBackdrop');
-    const frame    = document.getElementById('regFrame');
-
-    // ABSOLUTE URL avoids any path quirks
-    const REG_URL = 'https://www.mterms2026.com/register.html';
-
-    // Simple loader overlay
-    function addLoader() {
-      if (document.getElementById('regLoader')) return;
-      const loader = document.createElement('div');
-      loader.id = 'regLoader';
-      loader.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);font-weight:600;';
-      loader.textContent = 'Loading registration...';
-      modal.querySelector('.reg-modal__dialog').appendChild(loader);
-    }
-
-    function addFallbackLink() {
-      if (document.getElementById('regFallback')) return;
-      const wrap = document.createElement('div');
-      wrap.id = 'regFallback';
-      wrap.style.cssText = 'position:absolute;bottom:12px;left:12px;background:#1a1c22;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;font-size:0.95rem;';
-      wrap.innerHTML = `Having trouble loading? <a href="${REG_URL}" target="_blank" rel="noopener">Open in a new tab</a>`;
-      modal.querySelector('.reg-modal__dialog').appendChild(wrap);
-    }
-
-    let fallbackTimer;
-
-    function openModal() {
-      // set src only the first time
-      if (!frame.src || frame.src === 'about:blank') frame.src = REG_URL;
-
-      addLoader();
-      modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-
-      clearTimeout(fallbackTimer);
-      fallbackTimer = setTimeout(addFallbackLink, 4000); // show fallback if not ready by 4s
-    }
-
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      // keep frame loaded for fast reopen; to fully reset, uncomment:
-      // frame.src = 'about:blank';
-      // document.getElementById('regLoader')?.remove();
-      // document.getElementById('regFallback')?.remove();
-    }
-
-    // Also clear loader/fallback when iframe finishes (in addition to inline onload)
-    frame.addEventListener('load', () => {
-      document.getElementById('regLoader')?.remove();
-      document.getElementById('regFallback')?.remove();
-      clearTimeout(fallbackTimer);
-    });
-
-    openBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-    closeBtn?.addEventListener('click', closeModal);
-    backdrop?.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
-  });
-</script>
 
 
 
@@ -708,8 +639,7 @@
 
 
   
-  <link rel="stylesheet" href="assets/capabilities.css">
-<script src="assets/capabilities.js"></script>
+
   <link rel="stylesheet" href="assets/hero-video.css">
 <script src="assets/hero-video.js"></script>
   <link rel="stylesheet" href="assets/agenda-popup.css">
