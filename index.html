@@ -198,6 +198,68 @@
   border-radius: 10px;
 }
 
+
+/* Important Dates – clean UiTM-light card grid */
+.dates-card{
+  margin-top: 14px;
+  background: rgba(255,255,255,.85);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+  backdrop-filter: blur(6px);
+}
+
+.dates-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.date-item{
+  position: relative;
+  background: linear-gradient(180deg, rgba(47,123,220,.08), rgba(255,255,255,1));
+  border: 1px solid rgba(30,90,168,.12);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+
+.date-title{
+  font-weight: 800;
+  letter-spacing: .1px;
+  margin-bottom: 6px;
+}
+
+.date-range{
+  color: var(--muted);
+  font-size: .98rem;
+  line-height: 1.35;
+  padding-right: 84px;
+}
+
+.date-tag{
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--brand);
+  background: rgba(30,90,168,.10);
+  border: 1px solid rgba(30,90,168,.16);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .dates-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px){
+  .dates-grid{ grid-template-columns: 1fr; }
+  .date-range{ padding-right: 0; }
+  .date-tag{ position: static; display: inline-block; margin-top: 10px; }
+}
+    
 </style>
 
 </head>
@@ -417,14 +479,46 @@
 <section class="section-alt" id="important-dates">
   <div class="container">
     <h2>Important Dates</h2>
-    <ul class="dates-list">
-      <li><strong>Abstract Submission Deadline:</strong> 31 March 2026</li>
-      <li><strong>Abstract Acceptance Notification:</strong> 15 March 2026 – 15 April 2026</li>
-      <li><strong>Early Bird Registration Deadline:</strong> 15 May 2026</li>
-      <li><strong>Late Abstract Submission:</strong> 1 April 2026 – 15 August 2026</li>
-      <li><strong>Late Registration / Payment:</strong> until 1 September 2026</li>
-      <li><strong>Walk-in Registration:</strong> after 1 September 2026</li>
-    </ul>
+<div class="dates-card">
+  <div class="dates-grid">
+    <div class="date-item">
+      <div class="date-title">Abstract Submission Deadline</div>
+      <div class="date-range">31 March 2026</div>
+      <div class="date-tag">Abstract</div>
+    </div>
+
+    <div class="date-item">
+      <div class="date-title">Abstract Acceptance Notification</div>
+      <div class="date-range">15 March 2026 – 15 April 2026</div>
+      <div class="date-tag">Abstract</div>
+    </div>
+
+    <div class="date-item">
+      <div class="date-title">Early Bird Registration Deadline</div>
+      <div class="date-range">15 May 2026</div>
+      <div class="date-tag">Registration</div>
+    </div>
+
+    <div class="date-item">
+      <div class="date-title">Late Abstract Submission</div>
+      <div class="date-range">1 April 2026 – 15 August 2026</div>
+      <div class="date-tag">Abstract</div>
+    </div>
+
+    <div class="date-item">
+      <div class="date-title">Late Registration / Payment</div>
+      <div class="date-range">Until 1 September 2026</div>
+      <div class="date-tag">Payment</div>
+    </div>
+
+    <div class="date-item">
+      <div class="date-title">Walk-in Registration</div>
+      <div class="date-range">After 1 September 2026</div>
+      <div class="date-tag">On-site</div>
+    </div>
+  </div>
+</div>
+
   </div>
 </section>
   
