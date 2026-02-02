@@ -338,7 +338,7 @@ form.addEventListener('submit', async (e) => {
       ✅ Registration Successful. Please save your code: <strong>${data.regCode}</strong><br>
       Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
       Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
-      <em>(Payment coming soon)</em>
+
     `;
     form.reset();
     show(studentOnly, false);
