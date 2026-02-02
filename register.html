@@ -13,24 +13,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
 
-  <style id="theme-overrides">
+<style id="theme-overrides">
   :root.theme-light{
-    --bg:#ffffff;--surface:#ffffff;--text:#0b1115;--muted:#667085;
-    --brand:#19c37d;--brand-2:#0ea5a6;--border:#e5e7eb;--faint:#f7f7f9;
+    --bg:#f6fbff;
+    --surface:#ffffff;
+    --text:#0b1115;
+    --muted:#556b86;
+    --brand:#1e5aa8;
+    --brand-2:#2f7bdc;
+    --border:#d7e6f7;
+    --faint:#eef6ff;
   }
-  :root.theme-dark{
-    --bg:#0b1115;--surface:#0e151a;--text:#e9f1f6;--muted:#8899a6;
-    --brand:#19c37d;--brand-2:#0ea5a6;--border:#1f2a31;--faint:#0f1d1a;
-  }
-  body{background:var(--bg);color:var(--text);}
-  .card{background:var(--surface);border:1px solid var(--border);}
-  .btn{border:1px solid var(--border);}
-  .theme-toggle{
-    margin-left:8px;background:#fff;color:#0b1115;
-    border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;
-  }
-  .theme-dark .theme-toggle{background:#1e1f24;color:#fff;border:1px solid #333;}
+  html, body{ background:var(--bg); color:var(--text); }
+  .card{ background:var(--surface); border:1px solid var(--border); }
+  .btn{ border:1px solid var(--border); }
 </style>
+
 
   
   <style>
@@ -61,7 +59,6 @@ body{
 <body>
   <div class="container">
     <h1 id="regTitle">MTERMS 2026 Registration</h1>
-    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
 
     <p style="opacity:.85">Complete your details below. Fees and add-ons are shown live based on the current phase.</p>
 
@@ -186,51 +183,7 @@ body{
       <div id="fullRegResult" style="margin-top:10px;font-size:0.95rem"></div>
     </div>
 
-   <!-- MTERM2026 — Upload Center (with progress) -->
-<div id="upload-center" class="card" style="margin-top:16px">
-  <div style="font-weight:700;margin-bottom:8px">Express Upload Center</div>
-  <p>Use your registration code and email to upload files. Accepted: PDF, JPG, PNG (≤10 MB).</p>
- <p>You can also upload or review your files in Participants Portal that can be accessed from the main webpage.</p>
-  
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
-    <input id="u-regCode" placeholder="Registration code e.g. MTERM2026-000002">
-    <input id="u-email" type="email" placeholder="Email used to register">
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">
-    <select id="u-type">
-      <option value="studentProof">Student proof</option>
-      <option value="bankReceipt">Bank transfer receipt</option>
-      <option value="abstract">Abstract</option>
-      <option value="slides">Slides</option>
-    </select>
-    <input id="u-file" type="file" accept=".pdf,.jpg,.jpeg,.png">
-  </div>
-
-  <div style="display:flex;gap:8px;align-items:center">
-    <button class="btn" id="u-upload">Upload</button>
-<button
-  id="u-refresh"
-  type="button"
-  style="
-    appearance:none;
-    -webkit-appearance:none;
-    background:#ffffff;
-    color:#000000 !important;
-    border:1px solid #dbe5f1;
-    border-radius:10px;
-    padding:10px 14px;
-    font:600 14px/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    cursor:pointer;
-    box-shadow:0 6px 18px rgba(15, 23, 42, 0.10);
-  "
-  onmouseover="this.style.background='#f4f9ff'"
-  onmouseout="this.style.background='#ffffff'"
->
-  Refresh history
-</button>
-
-  </div>
+ 
 
   <!-- Progress UI -->
   <div id="u-progress" style="display:none;margin-top:10px">
@@ -540,21 +493,7 @@ form.addEventListener('submit', async (e) => {
 </script>
 
 
-<script>
-(function(){
-  const root=document.documentElement,btn=document.getElementById('themeToggle'),KEY='mterms-theme';
-  const saved=localStorage.getItem(KEY);
-  if(saved==='dark'){root.classList.remove('theme-light');root.classList.add('theme-dark');}
-  else{root.classList.add('theme-light');root.classList.remove('theme-dark');}
-  if(btn) btn.textContent=root.classList.contains('theme-dark')?'🌙':'🌞';
-  if(btn) btn.addEventListener('click',()=>{
-    const dark=root.classList.toggle('theme-dark');
-    root.classList.toggle('theme-light',!dark);
-    localStorage.setItem(KEY,dark?'dark':'light');
-    btn.textContent=dark?'🌙':'🌞';
-  });
-})();
-</script>
+
 
   
 </body>
