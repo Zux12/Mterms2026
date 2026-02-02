@@ -185,16 +185,7 @@ body{
 
  
 
-  <!-- Progress UI -->
-  <div id="u-progress" style="display:none;margin-top:10px">
-    <div style="height:8px;background:#1a1c22;border-radius:9999px;overflow:hidden;border:1px solid #2a2a2a">
-      <div id="u-progress-bar" style="height:8px;width:0%;background:#3b82f6;transition:width .15s;"></div>
-    </div>
-    <div id="u-progress-text" style="margin-top:6px;font-size:.9rem;opacity:.9">Uploading… 0%</div>
-  </div>
-
-  <div id="u-msg" style="margin-top:10px;font-size:0.95rem"></div>
-  <div id="u-history" style="margin-top:10px"></div>
+  
 </div>
 
 
@@ -211,10 +202,10 @@ body{
 
   // Wait until the elements exist (robust in iframes even if scripts move)
   function ready(fn, tries = 0) {
-    const need = [
-      'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields',
-      'u-regCode','u-email','u-type','u-file','u-upload','u-refresh','u-msg','u-history','u-progress','u-progress-bar','u-progress-text'
-    ];
+ const need = [
+  'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields'
+];
+
     const allOk = need.every(id => $(id));
     if (allOk) return fn();
     if (tries > 100) return console.warn('register.js: elements not found after retries');
@@ -361,133 +352,9 @@ form.addEventListener('submit', async (e) => {
 });
 
 
-    /* =================== Upload Center (XHR + progress) =================== */
-    const regCode = $('u-regCode');
-    const email   = $('u-email');
-    const typeSel = $('u-type');
-    const fileInp = $('u-file');
-    const uploadBtn = $('u-upload');
-    const refreshBtn = $('u-refresh');
-    const msg     = $('u-msg');
-    const hist    = $('u-history');
-    const progBox = $('u-progress');
-    const progBar = $('u-progress-bar');
-    const progTxt = $('u-progress-text');
-
-    function setBusy(isBusy) {
-      uploadBtn.disabled = isBusy;
-      refreshBtn.disabled = isBusy;
-      fileInp.disabled = isBusy;
-      uploadBtn.style.opacity = isBusy ? 0.6 : 1;
-      uploadBtn.style.pointerEvents = isBusy ? 'none' : 'auto';
-      uploadBtn.textContent = isBusy ? 'Uploading…' : 'Upload';
-    }
-    function showProgress(showing) {
-      show(progBox, showing);
-      if (!showing) {
-        progBar.style.width = '0%';
-        progTxt.textContent = 'Uploading… 0%';
-      }
-    }
-    function updateProgress(pct) {
-      const p = Math.max(0, Math.min(100, Math.floor(pct)));
-      progBar.style.width = p + '%';
-      progTxt.textContent = 'Uploading… ' + p + '%';
-    }
-
-    async function listHistory() {
-      msg.textContent = 'Loading history…';
-      hist.innerHTML = '';
-      try {
-        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode.value)}&email=${encodeURIComponent(email.value)}&type=${encodeURIComponent(typeSel.value)}`);
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
-        if (!data.count) {
-          hist.innerHTML = '<div style="opacity:0.8">No files yet for this type.</div>';
-        } else {
-          hist.innerHTML = data.rows.map(row => `
-            <div style="padding:8px;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:8px">
-              <div><strong>v${row.version}</strong> — ${row.filename}</div>
-              <div style="opacity:0.8">Uploaded: ${new Date(row.uploadedAt).toLocaleString()}</div>
-              <div style="margin-top:6px">
-                <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
-              </div>
-            </div>
-          `).join('');
-        }
-        msg.textContent = '';
-      } catch (e) {
-        msg.innerHTML = `<span style="color:#ff6b6b">❌ History failed: ${e.message}</span>`;
-      }
-    }
-
-    refreshBtn.addEventListener('click', listHistory);
-
-    uploadBtn.addEventListener('click', () => {
-      msg.textContent = '';
-      const file = fileInp.files?.[0];
-      if (!regCode.value || !email.value || !file) {
-        msg.textContent = '❌ regCode, email, and file are required';
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        msg.textContent = '❌ File too large (max 10 MB)';
-        return;
-      }
-
-      const fdUp = new FormData();
-      fdUp.append('regCode', regCode.value.trim());
-      fdUp.append('email', email.value.trim());
-      fdUp.append('type', typeSel.value);
-      fdUp.append('file', file, file.name);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${API}/api/uploads/gridfs`, true);
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          updateProgress((e.loaded / e.total) * 100);
-        } else {
-          const current = parseInt(progBar.style.width) || 0;
-          updateProgress(Math.min(95, current + 5));
-        }
-      };
-
-      xhr.onerror = () => {
-        setBusy(false);
-        showProgress(false);
-        msg.innerHTML = '<span style="color:#ff6b6b">❌ Upload failed (network)</span>';
-      };
-
-      xhr.onload = () => {
-        setBusy(false);
-        updateProgress(100);
-        setTimeout(() => showProgress(false), 600);
-
-        if (xhr.status >= 200 && xhr.status < 300) {
-          let data = {};
-          try { data = JSON.parse(xhr.responseText || '{}'); } catch {}
-          msg.textContent = `✅ Uploaded v${data.version || '?'} .`;
-          fileInp.value = '';
-          listHistory();
-        } else {
-          let errMsg = `HTTP ${xhr.status}`;
-          try {
-            const err = JSON.parse(xhr.responseText || '{}');
-            if (err.error) errMsg = err.error;
-          } catch {}
-          msg.innerHTML = `<span style="color:#ff6b6b">❌ Upload failed: ${errMsg}</span>`;
-        }
-      };
-
-      setBusy(true);
-      showProgress(true);
-      updateProgress(1);
-      xhr.send(fdUp);
-    });
+   
 
     // Optional: prefill history if regCode/email already present (handy for testers)
-    if (regCode.value && email.value) listHistory();
   });
 })();
 </script>
