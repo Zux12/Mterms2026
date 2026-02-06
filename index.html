@@ -424,6 +424,43 @@
     white-space: nowrap;
   }
 }
+
+
+/* ===== Desktop: keep centered menu, but reserve space for logos ===== */
+@media (min-width: 981px){
+  .header-inner{
+    position: relative;
+  }
+
+  /* pin left & right to the edges */
+  .header-left{
+    margin-right: auto;
+  }
+  .header-right{
+    margin-left: auto;
+  }
+
+  /* Center group, but never overlap logos */
+  .header-mid{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    white-space: nowrap;
+
+    /* IMPORTANT: reserve space for left+right logo areas */
+    max-width: calc(100% - 260px); /* adjust if needed */
+    overflow: hidden;
+  }
+
+  /* let nav shrink a bit before overlapping */
+  .header-mid .nav{
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 </style>
 
 </head>
