@@ -259,7 +259,36 @@
   .date-range{ padding-right: 0; }
   .date-tag{ position: static; display: inline-block; margin-top: 10px; }
 }
-    
+
+
+
+/* === Header partner logos (TESMA left, UiTM right) === */
+.header-inner{
+  position: relative;
+}
+
+.header-logo{
+  height: 42px;          /* SAME size for both logos */
+  width: auto;
+  object-fit: contain;
+}
+
+.header-logo.left{
+  position: absolute;
+  left: 0;
+}
+
+.header-logo.right{
+  position: absolute;
+  right: 0;
+}
+
+/* Mobile adjustment */
+@media (max-width: 768px){
+  .header-logo{
+    height: 34px;
+  }
+}    
 </style>
 
 </head>
@@ -270,9 +299,15 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#home" class="brand">
-        <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
-      </a>
+<!-- TESMA logo (top-left) -->
+<img src="tesma.png" alt="TESMA logo" class="header-logo left">
+
+<a href="#home" class="brand">
+  <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+</a>
+
+<!-- UiTM logo (top-right) -->
+<img src="uitm.png" alt="UiTM logo" class="header-logo right">
 
       <nav class="nav">
         <a href="#about">About</a>
