@@ -364,6 +364,41 @@
     display: inline-flex !important;
   }
 }
+
+
+
+/* ===== Desktop nav fitting (prevents last items being cut) ===== */
+@media (min-width: 981px){
+  /* tighten spacing + font slightly */
+  .header-mid .nav{
+    gap: 10px !important;
+  }
+  .header-mid .nav a{
+    font-size: 0.95rem !important;
+    padding: 8px 6px !important; /* keeps click area */
+  }
+
+  /* allow nav area to use more width */
+  .header-mid{
+    flex: 1;
+  }
+
+  /* keep logos + right controls fixed */
+  .header-left, .header-right{
+    flex: 0 0 auto;
+  }
+}
+
+/* Extra-tight for “medium desktop” widths */
+@media (min-width: 981px) and (max-width: 1200px){
+  .header-mid .nav{
+    gap: 8px !important;
+  }
+  .header-mid .nav a{
+    font-size: 0.92rem !important;
+    padding: 7px 5px !important;
+  }
+}
 </style>
 
 </head>
