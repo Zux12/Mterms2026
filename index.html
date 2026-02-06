@@ -261,32 +261,39 @@
 }
 
 
-
 /* === Header partner logos (TESMA left, UiTM right) === */
 .header-inner{
   position: relative;
+  padding-left: 68px;   /* reserve space for left logo */
+  padding-right: 68px;  /* reserve space for right logo */
 }
 
 .header-logo{
   height: 42px;          /* SAME size for both logos */
   width: auto;
   object-fit: contain;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .header-logo.left{
   position: absolute;
-  left: 0;
+  left: 12px;            /* small inset */
 }
 
 .header-logo.right{
   position: absolute;
-  right: 0;
+  right: 12px;           /* small inset */
 }
 
 /* Mobile adjustment */
 @media (max-width: 768px){
+  .header-inner{
+    padding-left: 52px;
+    padding-right: 52px;
+  }
   .header-logo{
-    height: 34px;
+    height: 32px;
   }
 }    
 </style>
@@ -331,7 +338,7 @@
     <div class="container hero-inner">
       <h1>MTERMS 2026</h1>
       <p class="subtitle">10th MALAYSIAN TISSUE ENGINEERING & REGENERATIVE MEDICINE SCIENTIFIC MEETING (MTERMS)2026</p>
-      <p class="theme">“FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE.”</p>
+      <p class="theme">“FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE”</p>
 
       <div class="hero-meta">
         <div class="meta-item">📍 Concorde Hotel, Shah Alam</div>
