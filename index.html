@@ -269,6 +269,103 @@
   }
   ...
 }
+
+/* ===== FINAL HEADER OVERRIDE (forces correct layout & logo size) ===== */
+.site-header .header-inner{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+  min-height: 64px !important;
+}
+
+.site-header .header-left{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+}
+
+.site-header .header-mid{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.site-header .header-right{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Force logos to a fixed size (prevents giant TESMA) */
+.site-header img.header-logo{
+  height: 38px !important;
+  max-height: 38px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Desktop nav: single line, no clipping weirdness */
+@media (min-width: 981px){
+  .site-header .header-mid .nav{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+}
+
+/* Mobile: keep your hamburger/dropdown behavior */
+@media (max-width: 980px){
+  .site-header img.header-logo{
+    height: 30px !important;
+    max-height: 30px !important;
+  }
+
+  .site-header .header-mid{
+    justify-content: flex-end !important;
+  }
+
+  .site-header .header-mid .nav{
+    display: none !important;
+  }
+
+  .site-header .header-mid .nav.open{
+    display: flex !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 12px !important;
+    right: 12px !important;
+    margin-top: 10px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    z-index: 9999 !important;
+  }
+
+  .site-header .header-mid .nav-toggle{
+    display: inline-flex !important;
+  }
+}
 </style>
 
 </head>
