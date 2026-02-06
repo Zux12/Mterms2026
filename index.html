@@ -261,40 +261,42 @@
 }
 
 
-/* === Header partner logos (TESMA left, UiTM right) === */
+/* === Header layout: left logo | center content | right logo === */
 .header-inner{
-  position: relative;
-  padding-left: 68px;   /* reserve space for left logo */
-  padding-right: 68px;  /* reserve space for right logo */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
 }
 
 .header-logo{
-  height: 42px;          /* SAME size for both logos */
+  height: 40px;
   width: auto;
   object-fit: contain;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
-.header-logo.left{
-  position: absolute;
-  left: 12px;            /* small inset */
+.header-center{
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0; /* prevents overflow issues */
 }
 
-.header-logo.right{
-  position: absolute;
-  right: 12px;           /* small inset */
+.header-center .nav{
+  flex: 1;
+  min-width: 0;
 }
 
-/* Mobile adjustment */
+.header-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Smaller screens */
 @media (max-width: 768px){
-  .header-inner{
-    padding-left: 52px;
-    padding-right: 52px;
-  }
-  .header-logo{
-    height: 32px;
-  }
+  .header-logo{ height: 30px; }
+  .header-inner{ gap: 10px; }
 }    
 </style>
 
@@ -309,27 +311,36 @@
 <!-- TESMA logo (top-left) -->
 <img src="tesma.png" alt="TESMA logo" class="header-logo left">
 
-<a href="#home" class="brand">
-  <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
-</a>
+<!-- Left: TESMA -->
+<img src="tesma.png" alt="TESMA logo" class="header-logo">
 
-<!-- UiTM logo (top-right) -->
-<img src="uitm.png" alt="UiTM logo" class="header-logo right">
+<!-- Center: Brand + Nav + Actions -->
+<div class="header-center">
+  <a href="#home" class="brand">
+    <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+  </a>
 
-      <nav class="nav">
-        <a href="#about">About</a>
-        <a href="#theme">Theme</a>
-        <a href="#program">Program</a>
-        <a href="#speakers">Speakers</a>
-        <a href="#venue">Venue & Travel</a>
-        <a href="#registration">Registration</a>
-        <a href="#abstracts">Abstracts</a>
-        <a href="#sponsors">Sponsors</a>
-        <a href="#committee">Committee</a>
-        <a href="#contact">Contact</a>
-      </nav>
-<button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
-      <button class="nav-toggle" aria-label="Open menu">☰</button>
+  <nav class="nav">
+    <a href="#about">About</a>
+    <a href="#theme">Theme</a>
+    <a href="#program">Program</a>
+    <a href="#speakers">Speakers</a>
+    <a href="#venue">Venue & Travel</a>
+    <a href="#registration">Registration</a>
+    <a href="#abstracts">Abstracts</a>
+    <a href="#sponsors">Sponsors</a>
+    <a href="#committee">Committee</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <div class="header-actions">
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
+    <button class="nav-toggle" aria-label="Open menu">☰</button>
+  </div>
+</div>
+
+<!-- Right: UiTM -->
+<img src="uitm.png" alt="UiTM logo" class="header-logo">
     </div>
   </header>
 
