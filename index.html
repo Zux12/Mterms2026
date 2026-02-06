@@ -323,7 +323,13 @@
 /* mobile logo size */
 @media (max-width: 768px){
   .header-logo{ height: 30px; }
-} 
+}
+
+
+/* keep hamburger aligned in the middle group */
+.header-mid .nav-toggle{
+  flex: 0 0 auto;
+}    
 </style>
 
 </head>
@@ -342,24 +348,25 @@
       <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
     </a>
 
-    <nav class="nav">
-      <a href="#about">About</a>
-      <a href="#theme">Theme</a>
-      <a href="#program">Program</a>
-      <a href="#speakers">Speakers</a>
-      <a href="#venue">Venue & Travel</a>
-      <a href="#registration">Registration</a>
-      <a href="#abstracts">Abstracts</a>
-      <a href="#sponsors">Sponsors</a>
-      <a href="#committee">Committee</a>
-      <a href="#contact">Contact</a>
-    </nav>
+<nav class="nav">
+  <a href="#about">About</a>
+  <a href="#theme">Theme</a>
+  <a href="#program">Program</a>
+  <a href="#speakers">Speakers</a>
+  <a href="#venue">Venue & Travel</a>
+  <a href="#registration">Registration</a>
+  <a href="#abstracts">Abstracts</a>
+  <a href="#sponsors">Sponsors</a>
+  <a href="#committee">Committee</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<button class="nav-toggle" aria-label="Open menu">☰</button>
   </div>
 </div>
 
 <div class="header-right">
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
-  <button class="nav-toggle" aria-label="Open menu">☰</button>
   <img src="uitm.png" alt="UiTM logo" class="header-logo">
 </div>
     </div>
