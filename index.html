@@ -427,38 +427,48 @@
 
 
 /* ===== Desktop: keep centered menu, but reserve space for logos ===== */
+/* ===== Desktop: centered header without hiding any menu items ===== */
 @media (min-width: 981px){
   .header-inner{
     position: relative;
+    padding-left: 90px;   /* reserve for TESMA */
+    padding-right: 120px; /* reserve for UiTM + toggle */
   }
 
-  /* pin left & right to the edges */
+  /* keep logos pinned to edges */
   .header-left{
-    margin-right: auto;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
   }
   .header-right{
-    margin-left: auto;
-  }
-
-  /* Center group, but never overlap logos */
-  .header-mid{
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    white-space: nowrap;
-
-    /* IMPORTANT: reserve space for left+right logo areas */
-    max-width: calc(100% - 260px); /* adjust if needed */
-    overflow: hidden;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
   }
 
-  /* let nav shrink a bit before overlapping */
+  /* center brand + nav */
+  .header-mid{
+    display: flex;
+    flex-direction: column;     /* allows 2-line nav if needed */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  /* nav: center, allow wrap instead of clipping */
   .header-mid .nav{
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;            /* KEY: no missing items */
+    gap: 10px 14px;             /* row-gap col-gap */
+    white-space: normal;
+    overflow: visible;
   }
 }
 </style>
