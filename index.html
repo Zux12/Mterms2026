@@ -399,6 +399,31 @@
     padding: 7px 5px !important;
   }
 }
+
+
+/* ===== Desktop: truly center the menu + brand ===== */
+@media (min-width: 981px){
+  .header-inner{
+    position: relative;
+  }
+
+  /* Left and right stay fixed */
+  .header-left,
+  .header-right{
+    z-index: 2;
+  }
+
+  /* Center brand + nav as one unit */
+  .header-mid{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    white-space: nowrap;
+  }
+}
 </style>
 
 </head>
