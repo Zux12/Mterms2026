@@ -2,7 +2,6 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -16,14 +15,47 @@ const app = express();
 
 // ✅ CORS (simple + reliable)
 app.set('trust proxy', 1);
-app.use(cors({ origin: true, credentials: true }));
-app.options('*', cors({ origin: true, credentials: true }));
 
 
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+
+// ✅ CORS + Preflight (manual, stable across Safari/Heroku)
+app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Allow your website origins
+  const allowed = new Set([
+    'https://www.mterms2026.com',
+    'https://mterms2026.com'
+  ]);
+
+  // If request has Origin and it’s allowed, reflect it back
+  if (origin && allowed.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  // Always allow these headers/methods (preflight needs this)
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+
+
 
 app.use(session({
   name: 'mterms.sid',
