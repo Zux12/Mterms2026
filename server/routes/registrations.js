@@ -4,6 +4,7 @@ const router = express.Router();
 const Pricing = require('../models/Pricing');
 const Registration = require('../models/Registration');
 const Counter = require('../models/Counter');
+const bcrypt = require('bcryptjs');
 
 function addDays(date, days) { const d = new Date(date); d.setDate(d.getDate()+days); return d; }
 function pad(n, size=6) { return String(n).padStart(size, '0'); }
@@ -56,6 +57,19 @@ router.post('/', async (req, res) => {
   if (!personal.firstName || !personal.lastName || !personal.email) {
     return res.status(400).json({ error: 'firstName, lastName, email are required' });
   }
+
+  // ---- 1b) Password required (new login flow)
+const password = String(body.password || '');
+if (password.length < 8) {
+  return res.status(400).json({ error: 'Password must be at least 8 characters' });
+}
+
+// Normalize email to match schema (lowercase + trim)
+personal.email = String(personal.email).trim().toLowerCase();
+
+// Hash password (store hash only)
+const passwordHash = await bcrypt.hash(password, 12);
+  
   if (!professional.affiliation) {
     return res.status(400).json({ error: 'affiliation is required' });
   }
@@ -108,9 +122,17 @@ router.post('/', async (req, res) => {
   // ---- 4) Persist
   const regCode = await nextRegCode();
 
-  const doc = await Registration.create({
+  let doc;
+try {
+  doc = await Registration.create({
     regCode,
     category,
+
+    auth: {
+      passwordHash,
+      passwordSetAt: new Date()
+    },
+
     personal: {
       firstName: personal.firstName,
       lastName: personal.lastName,
@@ -156,16 +178,23 @@ router.post('/', async (req, res) => {
     },
     payment: { method: 'manual', status: 'pending' }
   });
+} catch (err) {
+  // Duplicate email (unique index)
+  if (err && err.code === 11000) {
+    return res.status(409).json({ error: 'This email is already registered. Please log in instead.' });
+  }
+  console.error('Registration create failed:', err);
+  return res.status(500).json({ error: 'Server error: ' + (err.message || 'Unknown error') });
+}
 
-  res.json({
-    ok: true,
-    regCode: doc.regCode,
-    amount: doc.pricingSnapshot.total,
-    currency: doc.pricingSnapshot.currency,
-    phase: doc.pricingSnapshot.phase,
-    studentProof: doc.studentProof, // shows required/deferred flags
-    message: 'Registration saved (payment pending).'
-  });
+return res.json({
+  ok: true,
+  regCode: doc.regCode,
+  amount: doc.pricingSnapshot.total,
+  currency: doc.pricingSnapshot.currency,
+  phase: doc.pricingSnapshot.phase,
+  studentProof: doc.studentProof,
+  message: 'Registration saved (payment pending).'
 });
 
 // Lookup by email (unchanged)
