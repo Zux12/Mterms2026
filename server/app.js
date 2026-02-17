@@ -15,11 +15,27 @@ const app = express();
 
 
 // Allow cross-origin cookies (GitHub Pages / custom domain calling Heroku)
+const allowedOrigins = [
+  'https://www.mterms2026.com',
+  'https://mterms2026.com',
+  'https://mterm2026-559f9bf571b5.herokuapp.com'
+];
+
 app.use(cors({
-  origin: true,            // reflects request origin (NOT *)
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // allow non-browser tools
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
-app.options('*', cors({ origin: true, credentials: true }));
+
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
 /* ---- CORS: allow all while stabilizing (simple & reliable) ----
    Once confirmed working, we can switch to a whitelist again.
