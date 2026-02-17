@@ -95,6 +95,27 @@ body{
           </div>
         </fieldset>
 
+
+<!-- Account password -->
+<fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+  <legend>Account</legend>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+    <div style="position:relative">
+      <input id="pw" name="password" type="password" placeholder="Create password (min 8 chars)" minlength="8" required style="padding-right:44px" />
+      <button type="button" id="pwToggle"
+        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+               border:1px solid #dbe5f1;background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600;">
+        Show
+      </button>
+    </div>
+
+    <input id="pw2" name="password2" type="password" placeholder="Confirm password" minlength="8" required />
+  </div>
+
+  <div id="pwMsg" style="margin-top:8px;font-size:.9rem;color:#b42318;display:none"></div>
+</fieldset>
+        
         <!-- Professional -->
         <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
           <legend>Affiliation</legend>
@@ -256,6 +277,16 @@ const chkPresenting = $('f-presenting');
 const presentFields = $('presentFields');
 const submitBtn = $('reg-submit');
 
+  const pwEl = document.getElementById('pw');
+  const pwToggle = document.getElementById('pwToggle');
+  if (pwEl && pwToggle){
+    pwToggle.addEventListener('click', () => {
+      const isPw = pwEl.type === 'password';
+      pwEl.type = isPw ? 'text' : 'password';
+      pwToggle.textContent = isPw ? 'Hide' : 'Show';
+    });
+  }
+
 selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
 chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
 
@@ -273,8 +304,27 @@ form.addEventListener('submit', async (e) => {
   setSubmitBusy(true);
 
   const fd = new FormData(form);
+  const pw = String(fd.get('password') || '');
+const pw2 = String(fd.get('password2') || '');
+const pwMsg = document.getElementById('pwMsg');
+
+if (pwMsg) { pwMsg.style.display = 'none'; pwMsg.textContent = ''; }
+
+if (pw.length < 8) {
+  if (pwMsg){ pwMsg.textContent = 'Password must be at least 8 characters.'; pwMsg.style.display='block'; }
+  out.innerHTML = `<span style="color:#ff6b6b">❌ Password must be at least 8 characters.</span>`;
+  setSubmitBusy(false);
+  return;
+}
+if (pw !== pw2) {
+  if (pwMsg){ pwMsg.textContent = 'Passwords do not match.'; pwMsg.style.display='block'; }
+  out.innerHTML = `<span style="color:#ff6b6b">❌ Passwords do not match.</span>`;
+  setSubmitBusy(false);
+  return;
+}
   const payload = {
     category: fd.get('category'),
+    password: pw,
 addons: { dinner: false },
     personal: {
       firstName: fd.get('personal.firstName'),
@@ -332,8 +382,9 @@ addons: { dinner: false },
     if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
     out.innerHTML = `
-      ✅ Registration Successful. Please save your code: <strong>${data.regCode}</strong><br>
-      Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+✅ Registration Successful. Your code: <strong>${data.regCode}</strong><br>
+You can now log in using your <strong>email + password</strong>.<br>
+Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
       Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
 
     `;
