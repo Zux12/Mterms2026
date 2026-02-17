@@ -144,13 +144,28 @@
   <h1>MTERMS 2026 — Participant Portal</h1>
   
 
-  <p class="help">Log in using your registration code and email to view or update your details, and manage uploads.</p>
-
+<p class="help">Log in using your email and password to view or update your details, and manage uploads.</p>
+  
   <!-- Login form -->
   <div id="loginBox" class="card">
     <h2>Login</h2>
-    <input id="loginCode" placeholder="Registration Code (e.g., MTERM2026-000123)">
-    <input id="loginEmail" type="email" placeholder="Email used during registration">
+<input id="loginEmail" type="email" placeholder="Email used during registration">
+
+<div style="position:relative">
+  <input id="loginPassword" type="password" placeholder="Password" style="padding-right:70px">
+  <button type="button" id="loginPwToggle"
+    style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+           border:1px solid var(--border);background:#fff;border-radius:8px;
+           padding:6px 10px;cursor:pointer;font-weight:700;">
+    Show
+  </button>
+</div>
+
+<div style="margin-top:4px;font-size:.9rem">
+  <a href="login.html" style="font-weight:700;color:#0b5bd3;text-decoration:none">Go to Login page</a>
+  <span style="opacity:.6"> · </span>
+  <a href="#" id="forgotPwLink" style="font-weight:700;color:#0b5bd3;text-decoration:none">Forgot password?</a>
+</div>
     <button id="loginBtn" class="btn">Login</button>
      <button 
   onclick="window.location.href='index.html'" 
@@ -469,27 +484,49 @@
       loginBox.classList.add('hidden');
       dashBox.classList.remove('hidden');
     }
+async function login(){
+  const email = String($('loginEmail')?.value || '').trim().toLowerCase();
+  const password = String($('loginPassword')?.value || '');
 
-    async function login(){
-      const regCode = $('loginCode').value.trim();
-      const email   = $('loginEmail').value.trim();
-      if (!regCode || !email){ loginMsg.textContent='❌ Please enter both registration code and email.'; return; }
-      loginBtn.disabled = true;
-      loginMsg.textContent = 'Checking...';
-      try {
-        const r = await fetch(`${API}/api/registrations/check?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`);
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || 'Not found');
-        saveSession(data);
-        showDashboard(data);
-        // load uploads list immediately
-        loadHistory();
-      } catch(err){
-        loginMsg.textContent = '❌ Login failed: ' + err.message;
-      } finally {
-        loginBtn.disabled = false;
-      }
-    }
+  if (!email || !password){
+    loginMsg.textContent = '❌ Please enter both email and password.';
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginMsg.textContent = 'Logging in...';
+
+  try {
+    // 1) Create session
+    const r = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    // 2) Fetch full profile using session
+    const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+    const meData = await me.json().catch(() => ({}));
+    if (!me.ok) throw new Error(meData.error || `HTTP ${me.status}`);
+
+    // Save to localStorage (keep your existing behavior)
+    saveSession(meData.user);
+    showDashboard(meData.user);
+
+    // load uploads list immediately
+    loadHistory();
+
+    loginMsg.textContent = '';
+  } catch(err){
+    loginMsg.textContent = '❌ Login failed: ' + err.message;
+  } finally {
+    loginBtn.disabled = false;
+  }
+}
 
     async function uploadFile(){
       const user = getSession();
@@ -747,7 +784,32 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
     // Wire events
     loginBtn.addEventListener('click', login);
-    logoutBtn.addEventListener('click', () => { clearSession(); location.reload(); });
+// Login password show/hide
+const pwEl = $('loginPassword');
+const pwTg = $('loginPwToggle');
+if (pwEl && pwTg){
+  pwTg.addEventListener('click', () => {
+    const isPw = pwEl.type === 'password';
+    pwEl.type = isPw ? 'text' : 'password';
+    pwTg.textContent = isPw ? 'Hide' : 'Show';
+  });
+}
+
+// Forgot password placeholder
+const fp = document.getElementById('forgotPwLink');
+if (fp){
+  fp.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('Forgot password will be enabled soon.');
+  });
+}
+
+    
+logoutBtn.addEventListener('click', async () => {
+  try { await fetch(`${API}/api/auth/logout`, { method:'POST', credentials:'include' }); } catch {}
+  clearSession();
+  location.reload();
+});
     $('uBtn').addEventListener('click', uploadFile);
     $('uRefresh').addEventListener('click', loadHistory);
     $('uType').addEventListener('change', loadHistory);
@@ -755,12 +817,26 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
     $('pr-presenting').addEventListener('change', () => showPresent($('pr-presenting').checked));
     saveBtn.addEventListener('click', saveChanges);
 
-    // Auto session
-    const sess = getSession();
-    if (sess.regCode && sess.personal?.email) {
-      showDashboard(sess);
+// Auto session (prefer server session, fallback to localStorage)
+(async () => {
+  try{
+    const r = await fetch(`${API}/api/auth/me`, { credentials:'include' });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data?.user){
+      saveSession(data.user);
+      showDashboard(data.user);
       loadHistory();
+      return;
     }
+  } catch {}
+
+  // fallback (older session)
+  const sess = getSession();
+  if (sess.regCode && sess.personal?.email) {
+    showDashboard(sess);
+    loadHistory();
+  }
+})();
 
     // ID photo events
 document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
