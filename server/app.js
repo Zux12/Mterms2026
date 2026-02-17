@@ -59,6 +59,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/pricing', pricingRouter);
 app.use('/api/registrations', registrationsRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 
 
