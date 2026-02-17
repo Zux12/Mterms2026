@@ -14,32 +14,10 @@ const uploadsRouter = require('./routes/uploads');
 const app = express();
 
 
-// --- CORS (single source of truth) ---
-const allowedOrigins = new Set([
-  'https://www.mterms2026.com',
-  'https://mterms2026.com'
-]);
-
+// ✅ CORS (simple + reliable)
 app.set('trust proxy', 1);
-
-const corsOptions = {
-  origin: (origin, cb) => {
-    // allow curl/postman/same-origin (no Origin header)
-    if (!origin) return cb(null, true);
-
-    // allow your website domains
-    if (allowedOrigins.has(origin)) return cb(null, true);
-
-    // block silently (do NOT throw error => avoids 503)
-    return cb(null, false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.use(cors({ origin: true, credentials: true }));
+app.options('*', cors({ origin: true, credentials: true }));
 
 
 
