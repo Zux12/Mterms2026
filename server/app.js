@@ -4,6 +4,8 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 const pricingRouter = require('./routes/pricing');
 const registrationsRouter = require('./routes/registrations');
@@ -14,13 +16,38 @@ const app = express();
 /* ---- CORS: allow all while stabilizing (simple & reliable) ----
    Once confirmed working, we can switch to a whitelist again.
 */
+app.set('trust proxy', 1); // important on Heroku for secure cookies behind proxy
+
 app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
-app.use(cors());            // <-- allow every origin for now
-app.options('*', cors());   // <-- answer preflight for all routes
+
+// Allow cross-origin cookies (GitHub Pages / custom domain calling Heroku)
+app.use(cors({
+  origin: true,            // reflects request origin (NOT *)
+  credentials: true
+}));
+app.options('*', cors({ origin: true, credentials: true }));
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  name: 'mterms.sid',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MTERM2026_DB_URI,
+    collectionName: 'sessions',
+    ttl: 60 * 60 * 24 * 14 // 14 days
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',        // true on Heroku
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
+  }
+}));
 
 /* Static (optional) */
 app.use(express.static(path.join(__dirname, '../public')));
