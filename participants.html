@@ -137,7 +137,6 @@
   .card fieldset .grid-2 { align-items: start; }
   .card fieldset label { display: flex; flex-direction: column; margin: 0; }
   .field-inline { display:flex; align-items:center; gap:8px; margin:0 !important; }
-  #f-dinner:where(input){ margin:0; }
   #pr-presenting:where(input){ margin:0; }
 </style>
 </head>
@@ -288,9 +287,7 @@
         <option value="industry">Industry</option>
       </select>
     </label>
-    <label class="field-inline">
-      <input type="checkbox" id="f-dinner"> Add Gala Dinner
-    </label>
+
   </div>
 </fieldset>
 
@@ -421,7 +418,6 @@
 
       // Category/addons
       $('f-category').value = user.category || 'academia';
-      $('f-dinner').checked = !!user?.addons?.dinner;
 
       // Personal
       $('p-firstName').value = user?.personal?.firstName || '';
@@ -681,7 +677,6 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
       // derive updates
       const updates = {
         category: $('f-category').value,
-        addons: { dinner: $('f-dinner').checked },
         personal: {
           firstName: $('p-firstName').value.trim(),
           lastName:  $('p-lastName').value.trim(),
