@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MTERMS 2026 — Login</title>
+  <style>
+    :root{
+      --bg:#f3f7ff;
+      --card:#ffffff;
+      --line:#cfd9e6;
+      --text:#0f172a;
+      --muted:#475569;
+      --btn:#0b5bd3;
+      --btn2:#0ea5e9;
+      --danger:#b42318;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:var(--bg); color:var(--text);
+    }
+    .wrap{max-width:980px;margin:40px auto;padding:0 16px}
+    .top{
+      display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .top img{height:46px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px}
+    h1{margin:10px 0 4px;text-align:center}
+    p{margin:0 0 20px;text-align:center;color:var(--muted)}
+    .card{
+      max-width:520px;margin:0 auto;background:var(--card);
+      border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(2,8,23,.08);
+      padding:18px;
+    }
+    .row{display:grid;grid-template-columns:1fr;gap:12px}
+    label{font-weight:700;font-size:.95rem}
+    input{
+      width:100%;padding:12px 12px;border:1px solid var(--line);border-radius:12px;
+      font-size:1rem;outline:none;
+    }
+    input:focus{border-color:#7aa7ff;box-shadow:0 0 0 3px rgba(122,167,255,.25)}
+    .pwwrap{position:relative}
+    .toggle{
+      position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      border:1px solid var(--line);background:#fff;border-radius:12px;padding:6px 10px;
+      cursor:pointer;font-weight:700;
+    }
+    .actions{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap}
+    .btn{
+      border:none;border-radius:12px;padding:12px 14px;
+      color:#fff;background:var(--btn);font-weight:800;cursor:pointer;
+    }
+    .btn.secondary{background:var(--btn2)}
+    .link{color:#0b5bd3;text-decoration:none;font-weight:700}
+    .msg{margin-top:12px;font-weight:700}
+    .msg.err{color:var(--danger)}
+    .msg.ok{color:#067647}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <img src="mohe.png" alt="MOHE">
+      <img src="mterm.png" alt="MTERMS">
+      <img src="tesma.png" alt="TESMA">
+      <img src="uitm.png" alt="UiTM">
+    </div>
+
+    <h1>MTERMS 2026 — Participant Login</h1>
+    <p>Log in using your email and password.</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="username" required>
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <div class="pwwrap">
+            <input id="password" type="password" placeholder="Your password" autocomplete="current-password" required style="padding-right:80px">
+            <button type="button" id="toggle" class="toggle">Show</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="loginBtn">Login</button>
+          <a class="link" href="#" id="forgot">Forgot password?</a>
+        </div>
+
+        <div class="actions">
+          <a class="link" href="register.html">Create new registration</a>
+          <a class="link" href="participants.html">Go to portal</a>
+        </div>
+
+        <div id="msg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+    const msg = document.getElementById('msg');
+    const emailEl = document.getElementById('email');
+    const pwEl = document.getElementById('password');
+    const toggle = document.getElementById('toggle');
+    const btn = document.getElementById('loginBtn');
+
+    toggle.addEventListener('click', () => {
+      const isPw = pwEl.type === 'password';
+      pwEl.type = isPw ? 'text' : 'password';
+      toggle.textContent = isPw ? 'Hide' : 'Show';
+    });
+
+    document.getElementById('forgot').addEventListener('click', (e) => {
+      e.preventDefault();
+      msg.className = 'msg err';
+      msg.textContent = 'Forgot password will be enabled soon.';
+    });
+
+    async function doLogin(){
+      msg.textContent = '';
+      msg.className = 'msg';
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      try{
+        const r = await fetch(`${API}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: String(emailEl.value || '').trim().toLowerCase(),
+            password: String(pwEl.value || '')
+          })
+        });
+
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        msg.className = 'msg ok';
+        msg.textContent = '✅ Logged in. Redirecting...';
+
+        // go to participant portal
+        setTimeout(() => { window.location.href = 'participants.html'; }, 600);
+
+      } catch(err){
+        msg.className = 'msg err';
+        msg.textContent = '❌ ' + (err.message || 'Login failed');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Login';
+      }
+    }
+
+    btn.addEventListener('click', doLogin);
+    pwEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    emailEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+</html>
