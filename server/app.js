@@ -13,12 +13,6 @@ const uploadsRouter = require('./routes/uploads');
 
 const app = express();
 
-/* ---- CORS: allow all while stabilizing (simple & reliable) ----
-   Once confirmed working, we can switch to a whitelist again.
-*/
-app.set('trust proxy', 1); // important on Heroku for secure cookies behind proxy
-
-app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
 
 // Allow cross-origin cookies (GitHub Pages / custom domain calling Heroku)
 app.use(cors({
@@ -26,6 +20,15 @@ app.use(cors({
   credentials: true
 }));
 app.options('*', cors({ origin: true, credentials: true }));
+
+/* ---- CORS: allow all while stabilizing (simple & reliable) ----
+   Once confirmed working, we can switch to a whitelist again.
+*/
+app.set('trust proxy', 1); // important on Heroku for secure cookies behind proxy
+
+app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
+
+
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
