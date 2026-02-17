@@ -80,9 +80,7 @@ body{
               <option value="industry">Industry</option>
             </select>
           </label>
-          <label style="display:flex;align-items:center;gap:8px;margin-top:auto">
-            <input type="checkbox" name="addons.dinner" /> Add Gala Dinner (RM150)
-          </label>
+
         </div>
 
         <!-- Personal -->
@@ -241,7 +239,6 @@ body{
                 </tr>`).join('')}
             </tbody>
           </table>
-          <div style="margin-top:8px;opacity:0.9">Dinner bundle: +RM ${data.dinnerAddon} (optional).</div>
           <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
         `;
       } catch (e) {
@@ -278,7 +275,7 @@ form.addEventListener('submit', async (e) => {
   const fd = new FormData(form);
   const payload = {
     category: fd.get('category'),
-    addons: { dinner: fd.get('addons.dinner') === 'on' },
+addons: { dinner: false },
     personal: {
       firstName: fd.get('personal.firstName'),
       lastName:  fd.get('personal.lastName'),
