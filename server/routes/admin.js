@@ -1,12 +1,17 @@
 // server/routes/admin.js
 const express = require('express');
 const router = express.Router();
+// ✅ Allow CORS preflight to pass through admin routes
+router.options('*', (req, res) => res.sendStatus(204));
 const Registration = require('../models/Registration');
 
 // super-basic Basic-Auth (dev only). Change later to real auth/JWT.
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin';
 function adminAuth(req, res, next){
+  // ✅ Allow preflight OPTIONS requests through without Basic Auth
+  if (req.method === 'OPTIONS') return next();
+
   const h = req.headers.authorization || '';
   if (!h.startsWith('Basic ')) return res.status(401).json({ error: 'Auth required' });
   const [user, pass] = Buffer.from(h.slice(6), 'base64').toString('utf8').split(':');
