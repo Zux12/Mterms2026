@@ -11,12 +11,10 @@
   <!-- Theme overrides + hero-independent palette -->
   <style id="theme-overrides">
     :root.theme-light{--bg:#fff;--surface:#fff;--text:#0b1115;--border:#e5e7eb;--muted:#667085;}
-    :root.theme-dark{--bg:#0b1115;--surface:#0e151a;--text:#e9f1f6;--border:#1f2a31;--muted:#9aa4af;}
     html,body{background:var(--bg);color:var(--text);}
     .admin-wrap{width:min(1200px,92vw);margin:24px auto;}
     .admin-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px;}
     .theme-toggle{margin-left:8px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff;color:#0b1115}
-    .theme-dark .theme-toggle{background:#1e1f24;color:#fff;border-color:#333}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:16px}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -74,13 +72,7 @@ button[disabled] {
   color: #6b7280;                  /* slate-500 for legibility */
 }
 
-/* Dark theme disabled buttons */
-.theme-dark .btn:disabled,
-.theme-dark button[disabled] {
-  background: #2a2f36;            /* raised charcoal */
-  color: #b6c2ce;                  /* light slate text */
-  border-color: #3a424a;
-}
+
 
 /* 4) Ghost buttons (e.g., Logout) need clearer text outlines in light mode */
 .theme-light .btn.ghost {
@@ -153,7 +145,6 @@ button[disabled] {
 
         
         
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
         <button id="logoutBtn" class="btn ghost">Logout</button>
       </div>
     </div>
@@ -221,7 +212,6 @@ button[disabled] {
     </select>
   </label>
 
-          <label><input type="checkbox" id="f-dinner"> Add Gala Dinner</label>
 
 </div>
 
@@ -342,14 +332,7 @@ button[disabled] {
   </div>
 
   <script>
-    // Theme toggle
-    (function(){
-      const root=document.documentElement,btn=document.getElementById('themeToggle'),KEY='mterms-theme';
-      const saved=localStorage.getItem(KEY);
-      if(saved==='dark'){root.classList.replace('theme-light','theme-dark');}
-      if(btn){btn.textContent=root.classList.contains('theme-dark')?'🌙':'🌞';
-        btn.addEventListener('click',()=>{const dark=root.classList.toggle('theme-dark');root.classList.toggle('theme-light',!dark);localStorage.setItem(KEY,dark?'dark':'light');btn.textContent=dark?'🌙':'🌞';});}
-    })();
+   
 
     // Simple client-side auth (dev only) — matches Basic auth we'll add on backend (admin/admin)
     const ADMIN_KEY='mterms-admin-basic';
@@ -432,7 +415,6 @@ button[disabled] {
         $('editCard').style.display='block';
         $('editCode').textContent = doc.regCode;
         $('f-category').value = doc.category || 'academia';
-        $('f-dinner').checked = !!doc.addons?.dinner;
 
         $('p-firstName').value = doc.personal?.firstName||'';
         $('p-lastName').value  = doc.personal?.lastName||'';
@@ -491,7 +473,6 @@ button[disabled] {
       $('save').disabled = true; $('saveMsg').textContent = 'Saving…';
       const updates = {
         category: $('f-category').value,
-        addons: { dinner: $('f-dinner').checked },
         personal: {
           firstName:$('p-firstName').value.trim(), lastName:$('p-lastName').value.trim(),
           email:$('p-email').value.trim(), phone:$('p-phone').value.trim(), country:$('p-country').value.trim()
@@ -618,7 +599,6 @@ button[disabled] {
   color: var(--text) !important;
   font-weight: 700 !important;
 }
-.theme-dark .admin-wrap table thead th { color: #e5e7eb !important; }
 .theme-light .admin-wrap table thead th { color: #0b1115 !important; }
 
 /* 3) Disabled buttons: stop Safari’s dimming and set readable colors */
@@ -635,13 +615,7 @@ button[disabled] {
   background: #eef2f7 !important;
   color: #48566a !important;
 }
-/* dark */
-.theme-dark .admin-wrap .btn:disabled,
-.theme-dark .admin-wrap button[disabled] {
-  background: #2a2f36 !important;
-  color: #c9d3dd !important;
-  border-color: #3a424a !important;
-}
+
 
 /* 4) Ghost buttons (Logout) text contrast in light */
 .theme-light .admin-wrap .btn.ghost {
