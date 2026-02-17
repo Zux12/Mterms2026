@@ -19,11 +19,20 @@ const RegistrationSchema = new mongoose.Schema({
   personal: {
     firstName: { type: String, required: true },
     lastName:  { type: String, required: true },
-    email:     { type: String, required: true, index: true },
+email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
     phone:     { type: String },
     country:   { type: String }
   },
 
+  auth: {
+    passwordHash: { type: String, select: false }, // bcrypt hash only (never plain password)
+    passwordSetAt: { type: Date },
+
+    // for "Forgot password" later
+    resetTokenHash: { type: String, select: false },
+    resetTokenExpiresAt: { type: Date }
+  },
+  
   professional: {
     affiliation: { type: String, required: true },
     department:  { type: String },
