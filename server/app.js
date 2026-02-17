@@ -14,37 +14,32 @@ const uploadsRouter = require('./routes/uploads');
 const app = express();
 
 
-// Allow cross-origin cookies (GitHub Pages / custom domain calling Heroku)
-const allowedOrigins = [
+// --- CORS (single source of truth) ---
+const allowedOrigins = new Set([
   'https://www.mterms2026.com',
-  'https://mterms2026.com',
-  'https://mterm2026-559f9bf571b5.herokuapp.com'
-];
+  'https://mterms2026.com'
+]);
 
 app.set('trust proxy', 1);
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow server-to-server / tools
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false); // <-- IMPORTANT: do NOT throw error
+const corsOptions = {
+  origin: (origin, cb) => {
+    // allow curl/postman/same-origin (no Origin header)
+    if (!origin) return cb(null, true);
+
+    // allow your website domains
+    if (allowedOrigins.has(origin)) return cb(null, true);
+
+    // block silently (do NOT throw error => avoids 503)
+    return cb(null, false);
   },
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
-app.options('*', cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-
-/* ---- CORS: allow all while stabilizing (simple & reliable) ----
-   Once confirmed working, we can switch to a whitelist again.
-*/
-app.set('trust proxy', 1); // important on Heroku for secure cookies behind proxy
-
-app.use((req, res, next) => { res.setHeader('Vary', 'Origin'); next(); });
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 
 
