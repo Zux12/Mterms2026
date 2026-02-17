@@ -197,6 +197,7 @@ return res.json({
   message: 'Registration saved (payment pending).'
 });
 
+  }); // ✅ closes router.post('/', async (req, res) => { ... })
 // Lookup by email (unchanged)
 router.get('/lookup', async (req, res) => {
   const { email } = req.query;
