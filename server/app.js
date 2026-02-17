@@ -21,13 +21,15 @@ const allowedOrigins = [
   'https://mterm2026-559f9bf571b5.herokuapp.com'
 ];
 
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser tools
+    if (!origin) return callback(null, true); // allow server-to-server / tools
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+    return callback(null, false); // <-- IMPORTANT: do NOT throw error
   },
   credentials: true
 }));
