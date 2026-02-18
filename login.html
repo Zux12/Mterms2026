@@ -129,32 +129,49 @@
       btn.textContent = 'Logging in...';
 
       try{
+        // Optional: clear old stored session before new login
+        // localStorage.removeItem('mtermsUser');
+
+        const email = String(emailEl.value || '').trim().toLowerCase();
+        const password = String(pwEl.value || '');
+
         const r = await fetch(`${API}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({
-            email: String(emailEl.value || '').trim().toLowerCase(),
-            password: String(pwEl.value || '')
-          })
+          body: JSON.stringify({ email, password })
         });
 
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
-msg.className = 'msg ok';
-msg.textContent = '✅ Logged in. Redirecting...';
+        // ✅ IMPORTANT FIX:
+        // Save session info from LOGIN response first (works even if /me fails due to cookie restrictions)
+        // We accept common shapes: {user:...} or {doc:...}. If neither exists, store minimal email.
+        if (data?.user) {
+          localStorage.setItem('mtermsUser', JSON.stringify(data.user));
+        } else if (data?.doc) {
+          localStorage.setItem('mtermsUser', JSON.stringify(data.doc));
+        } else {
+          localStorage.setItem('mtermsUser', JSON.stringify({
+            personal: { email }
+          }));
+        }
 
-// Try to pull full profile (may fail if Safari blocks cookie)
-try {
-  const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
-  const meData = await me.json().catch(() => ({}));
-  if (me.ok && meData?.user) {
-    localStorage.setItem('mtermsUser', JSON.stringify(meData.user));
-  }
-} catch {}
+        msg.className = 'msg ok';
+        msg.textContent = '✅ Logged in. Redirecting...';
 
-setTimeout(() => { window.location.href = 'participants.html'; }, 600);
+        // Try to pull full profile (may fail if Safari blocks cookie)
+        // If it works, overwrite localStorage with the complete profile.
+        try {
+          const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+          const meData = await me.json().catch(() => ({}));
+          if (me.ok && meData?.user) {
+            localStorage.setItem('mtermsUser', JSON.stringify(meData.user));
+          }
+        } catch {}
+
+        setTimeout(() => { window.location.href = 'participants.html'; }, 600);
 
       } catch(err){
         msg.className = 'msg err';
