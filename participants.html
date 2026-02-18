@@ -682,11 +682,19 @@
     }
   }
 
-  logoutBtn.addEventListener('click', async () => {
-    try { await fetch(`${API}/api/auth/logout`, { method:'POST', credentials:'include' }); } catch {}
-    clearSession();
-    location.reload();
-  });
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await fetch(`${API}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch {}
+
+  clearSession();
+
+  // ✅ always return to login page
+  window.location.replace = 'login.html';
+});
 
   $('uBtn').addEventListener('click', uploadFile);
   $('uRefresh').addEventListener('click', loadHistory);
