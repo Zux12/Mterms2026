@@ -288,10 +288,55 @@
       .card-body{ padding: 16px; }
       .logo-chip img{ height: 36px; }
     }
+
+
+    /* ===== Back Button ===== */
+.back-btn{
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: .9rem;
+  text-decoration:none;
+  color: #fff;
+  background: linear-gradient(135deg, var(--uitm), var(--uitm2));
+  box-shadow: 0 12px 26px rgba(122,0,38,.22);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+  z-index:10;
+}
+
+.back-btn:hover{
+  filter: brightness(1.03);
+  box-shadow: 0 16px 36px rgba(122,0,38,.28);
+}
+
+.back-btn:active{
+  transform: translateY(1px);
+}
+
+/* Small screens */
+@media (max-width:520px){
+  .back-btn{
+    top: 18px;
+    left: 16px;
+    padding: 8px 12px;
+    font-size: .85rem;
+  }
+}
   </style>
 </head>
 
 <body>
+
+  <a href="https://www.mterms2026.com" class="back-btn">
+  ← Back to Website
+</a>
+  
   <main class="page">
     <!-- HEADER -->
     <header class="hero">
