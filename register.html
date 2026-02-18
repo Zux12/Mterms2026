@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="theme-light">
-
 <head>
-  <a href="https://www.mterms2026.com" class="back-btn">
-  ← Back to Website
-</a>
   <meta charset="utf-8" />
   <title>MTERMS 2026 — Registration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,64 +12,199 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
 
-<style id="theme-overrides">
-  :root.theme-light{
-    --bg:#f6fbff;
-    --surface:#ffffff;
-    --text:#0b1115;
-    --muted:#556b86;
-    --brand:#1e5aa8;
-    --brand-2:#2f7bdc;
-    --border:#d7e6f7;
-    --faint:#eef6ff;
-  }
-  html, body{ background:var(--bg); color:var(--text); }
-  .card{ background:var(--surface); border:1px solid var(--border); }
-  .btn{ border:1px solid var(--border); }
-</style>
+  <style id="theme-overrides">
+    :root.theme-light{
+      --bg:#f6fbff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --muted:#556b86;
+      --brand:#1e5aa8;
+      --brand-2:#2f7bdc;
+      --border:#d7e6f7;
+      --faint:#eef6ff;
+    }
+    html, body{ background:var(--bg); color:var(--text); }
+    .card{ background:var(--surface); border:1px solid var(--border); }
 
+    /* NOTE: leaving your .btn alone (as requested) */
+    .btn{ border:1px solid var(--border); }
+  </style>
 
-  
   <style>
-body{
-  background: linear-gradient(
-    135deg,
-    #eaf4ff 0%,
-    #f4f9ff 45%,
-    #ffffff 100%
-  );
-  color:#0b1115;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-}
+    body{
+      background: linear-gradient(135deg,#eaf4ff 0%,#f4f9ff 45%,#ffffff 100%);
+      color:#0b1115;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
     .container{ max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-.card{
-  border:1px solid #dbe5f1;
-  border-radius:12px;
-  padding:16px;
-  background:#ffffff;
-}
+
+    .card{
+      border:1px solid #dbe5f1;
+      border-radius:12px;
+      padding:16px;
+      background:#ffffff;
+    }
+
     h1{ font-size:1.6rem; margin:0 0 12px; }
     h2{ font-size:1.2rem; margin:16px 0 8px; }
-    .btn{ cursor:pointer; }
+    .btn{ cursor:pointer; } /* keep */
     .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
     @media (max-width: 900px){ .grid-2{ grid-template-columns: 1fr; } }
+
+    /* ===== Branding header/footer (no button style changes) ===== */
+    .brand-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding: 8px 0 16px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width: 0;
+    }
+    .brand-logo{
+      width: 92px;
+      height: 92px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      flex: 0 0 auto;
+    }
+    .brand-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      display:block;
+    }
+    .brand-title{
+      margin:0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height:1.1;
+    }
+    .brand-subtitle{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+
+    /* Back button (independent) */
+    .back-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: .9rem;
+      text-decoration:none;
+      color: #0b1115;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      white-space: nowrap;
+    }
+    .back-btn:hover{ filter: brightness(1.01); }
+    .back-btn:active{ transform: translateY(1px); }
+
+    /* Organizer footer */
+    .org-footer{
+      max-width: 1100px;
+      margin: 18px auto 0;
+      padding: 14px 16px 0;
+      border-top: 1px solid var(--border);
+      text-align:center;
+      color:#374151;
+    }
+    .org-label{
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      opacity: .9;
+    }
+    .org-logos{
+      display:flex;
+      justify-content:center;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .logo-chip{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background:#fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+    }
+    .logo-chip img{
+      height: 36px;
+      width:auto;
+      object-fit:contain;
+      display:block;
+    }
+
+    /* Field name labels (Personal + Affiliation) */
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field-name{
+      font-size: .88rem;
+      font-weight: 700;
+      color:#111827;
+    }
+
+    @media (max-width:520px){
+      .brand-logo{ width:78px; height:78px; }
+      .brand-title{ font-size: 1.25rem; }
+      .back-btn{ padding: 9px 12px; font-size: .85rem; }
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <h1 id="regTitle">MTERMS 2026 Registration</h1>
 
-    <p style="opacity:.85">Complete your details below. Fees and add-ons are shown live based on the current phase.</p>
+    <!-- Header -->
+    <header class="brand-header">
+      <div class="brand-left">
+        <div class="brand-logo">
+          <img src="public/mterm.jpg" alt="MTERMS 2026">
+        </div>
+        <div>
+          <h1 class="brand-title" id="regTitle">MTERMS 2026 Registration</h1>
+          <p class="brand-subtitle">Complete your details below. Fees and add-ons are shown live based on the current phase.</p>
+        </div>
+      </div>
+
+      <a href="https://www.mterms2026.com" class="back-btn">← Back to Website</a>
+    </header>
 
     <!-- Pricing preview -->
     <div id="pricingMount" class="card" style="margin-top:12px"></div>
 
-    <!-- Full Registration (same as before, moved here) -->
+    <!-- Full Registration -->
     <div id="full-reg" class="card" style="margin-top:16px">
       <div style="font-weight:700;margin-bottom:8px">Registration</div>
 
       <form id="fullRegForm">
-        <!-- Category + Dinner -->
+        <!-- Category -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
           <label>Category
             <select name="category" id="f-category" required>
@@ -83,49 +214,79 @@ body{
               <option value="industry">Industry</option>
             </select>
           </label>
-
         </div>
 
         <!-- Personal -->
         <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
           <legend>Personal</legend>
+
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-            <input name="personal.firstName" placeholder="First name" required />
-            <input name="personal.lastName"  placeholder="Last name" required />
-            <input name="personal.email" type="email" placeholder="Email" required />
-            <input name="personal.phone" placeholder="Phone (optional)" />
-            <input name="personal.country" placeholder="Country (optional)" />
+            <div class="field">
+              <div class="field-name">First Name</div>
+              <input name="personal.firstName" placeholder="First name" required />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Last Name</div>
+              <input name="personal.lastName" placeholder="Last name" required />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Email</div>
+              <input name="personal.email" type="email" placeholder="Email" required />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Phone (Optional)</div>
+              <input name="personal.phone" placeholder="Phone (optional)" />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Country (Optional)</div>
+              <input name="personal.country" placeholder="Country (optional)" />
+            </div>
           </div>
         </fieldset>
 
+        <!-- Account password -->
+        <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
+          <legend>Account</legend>
 
-<!-- Account password -->
-<fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
-  <legend>Account</legend>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+            <div style="position:relative">
+              <input id="pw" name="password" type="password" placeholder="Create password (min 8 chars)" minlength="8" required style="padding-right:44px" />
+              <button type="button" id="pwToggle"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+                       border:1px solid #dbe5f1;background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600;">
+                Show
+              </button>
+            </div>
 
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-    <div style="position:relative">
-      <input id="pw" name="password" type="password" placeholder="Create password (min 8 chars)" minlength="8" required style="padding-right:44px" />
-      <button type="button" id="pwToggle"
-        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
-               border:1px solid #dbe5f1;background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600;">
-        Show
-      </button>
-    </div>
+            <input id="pw2" name="password2" type="password" placeholder="Confirm password" minlength="8" required />
+          </div>
 
-    <input id="pw2" name="password2" type="password" placeholder="Confirm password" minlength="8" required />
-  </div>
+          <div id="pwMsg" style="margin-top:8px;font-size:.9rem;color:#b42318;display:none"></div>
+        </fieldset>
 
-  <div id="pwMsg" style="margin-top:8px;font-size:.9rem;color:#b42318;display:none"></div>
-</fieldset>
-        
-        <!-- Professional -->
+        <!-- Affiliation -->
         <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
           <legend>Affiliation</legend>
+
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-            <input name="professional.affiliation" placeholder="University / Company" required />
-            <input name="professional.department"  placeholder="Department (optional)" />
-            <input name="professional.roleTitle"   placeholder="Role/Title (optional)" />
+            <div class="field">
+              <div class="field-name">University / Company</div>
+              <input name="professional.affiliation" placeholder="University / Company" required />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Department (Optional)</div>
+              <input name="professional.department" placeholder="Department (optional)" />
+            </div>
+
+            <div class="field">
+              <div class="field-name">Role / Title (Optional)</div>
+              <input name="professional.roleTitle" placeholder="Role/Title (optional)" />
+            </div>
           </div>
         </fieldset>
 
@@ -199,220 +360,214 @@ body{
           <label><input type="checkbox" id="c-mkt" /> I’d like to receive event updates (optional).</label>
         </div>
 
+        <!-- Keep your button styling exactly -->
         <button class="btn" id="reg-submit" type="submit">Submit registration</button>
       </form>
 
       <div id="fullRegResult" style="margin-top:10px;font-size:0.95rem"></div>
     </div>
 
- 
-
-  
-</div>
-
+    <!-- Footer organizers -->
+    <footer class="org-footer">
+      <div class="org-label">Organized by</div>
+      <div class="org-logos">
+        <div class="logo-chip"><img src="public/uitm.png" alt="UiTM"></div>
+        <div class="logo-chip"><img src="public/tesma.png" alt="TESMA"></div>
+      </div>
+    </footer>
 
   </div>
 
-<script>
-/* MTERMS 2026 — unified wiring for pricing, registration, and uploads */
-(() => {
-  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+  <script>
+  /* MTERMS 2026 — unified wiring for pricing, registration, and uploads */
+  (() => {
+    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
-  // Small helpers
-  const $ = (id) => document.getElementById(id);
-  const show = (el, on) => { if (el) el.style.display = on ? 'block' : 'none'; };
+    // Small helpers
+    const $ = (id) => document.getElementById(id);
+    const show = (el, on) => { if (el) el.style.display = on ? 'block' : 'none'; };
 
-  // Wait until the elements exist (robust in iframes even if scripts move)
-  function ready(fn, tries = 0) {
- const need = [
-  'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields'
-];
-
-    const allOk = need.every(id => $(id));
-    if (allOk) return fn();
-    if (tries > 100) return console.warn('register.js: elements not found after retries');
-    setTimeout(() => ready(fn, tries + 1), 50);
-  }
-
-  ready(() => {
-    /* ===================== Pricing ===================== */
-    (async () => {
-      const mount = $('pricingMount');
-      try {
-        const r = await fetch(`${API}/api/pricing/table`, { cache: 'no-store' });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const data = await r.json();
-        mount.innerHTML = `
-          <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
-          <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
-                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
-                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
-                <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.rows.map(r => `
-                <tr>
-                  <td style="padding:8px">${r.phase}</td>
-                  <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
-                  <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
-                  <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-          <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
-        `;
-      } catch (e) {
-        mount.innerHTML = `<div style="color:#ff6b6b">❌ Pricing load failed: ${e.message}</div>`;
-        console.error('Pricing preview failed', e);
-      }
-    })();
-
-   /* ================== Registration form ================== */
-const form = $('fullRegForm');
-const out  = $('fullRegResult');
-const selCategory = $('f-category');
-const studentOnly = $('studentOnly');
-const chkPresenting = $('f-presenting');
-const presentFields = $('presentFields');
-const submitBtn = $('reg-submit');
-
-  const pwEl = document.getElementById('pw');
-  const pwToggle = document.getElementById('pwToggle');
-  if (pwEl && pwToggle){
-    pwToggle.addEventListener('click', () => {
-      const isPw = pwEl.type === 'password';
-      pwEl.type = isPw ? 'text' : 'password';
-      pwToggle.textContent = isPw ? 'Hide' : 'Show';
-    });
-  }
-
-selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
-chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
-
-function setSubmitBusy(busy) {
-  if (!submitBtn) return;
-  submitBtn.disabled = busy;
-  submitBtn.style.opacity = busy ? 0.6 : 1;
-  submitBtn.style.pointerEvents = busy ? 'none' : 'auto';
-  submitBtn.textContent = busy ? 'Submitting…' : 'Submit registration (beta)';
-}
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  out.textContent = 'Submitting…';
-  setSubmitBusy(true);
-
-  const fd = new FormData(form);
-  const pw = String(fd.get('password') || '');
-const pw2 = String(fd.get('password2') || '');
-const pwMsg = document.getElementById('pwMsg');
-
-if (pwMsg) { pwMsg.style.display = 'none'; pwMsg.textContent = ''; }
-
-if (pw.length < 8) {
-  if (pwMsg){ pwMsg.textContent = 'Password must be at least 8 characters.'; pwMsg.style.display='block'; }
-  out.innerHTML = `<span style="color:#ff6b6b">❌ Password must be at least 8 characters.</span>`;
-  setSubmitBusy(false);
-  return;
-}
-if (pw !== pw2) {
-  if (pwMsg){ pwMsg.textContent = 'Passwords do not match.'; pwMsg.style.display='block'; }
-  out.innerHTML = `<span style="color:#ff6b6b">❌ Passwords do not match.</span>`;
-  setSubmitBusy(false);
-  return;
-}
-  const payload = {
-    category: fd.get('category'),
-    password: pw,
-addons: { dinner: false },
-    personal: {
-      firstName: fd.get('personal.firstName'),
-      lastName:  fd.get('personal.lastName'),
-      email:     fd.get('personal.email'),
-      phone:     fd.get('personal.phone'),
-      country:   fd.get('personal.country')
-    },
-    professional: {
-      affiliation: fd.get('professional.affiliation'),
-      department:  fd.get('professional.department'),
-      roleTitle:   fd.get('professional.roleTitle')
-    },
-    address: {
-      line1: fd.get('address.line1'),
-      line2: fd.get('address.line2'),
-      city:  fd.get('address.city'),
-      state: fd.get('address.state'),
-      postcode: fd.get('address.postcode'),
-      country:  fd.get('address.country')
-    },
-    billing: {
-      billTo:   fd.get('billing.billTo'),
-      taxNo:    fd.get('billing.taxNo'),
-      poNumber: fd.get('billing.poNumber')
-    },
-    program: {
-      presenting: $('f-presenting').checked,
-      type:       $('f-type')?.value || 'none',
-      title:      $('f-title')?.value || '',
-      topicArea:  $('f-topicArea')?.value || ''
-    },
-    student: (fd.get('category') === 'student') ? {
-      university: fd.get('student.university'),
-      level:      fd.get('student.level') || 'Other',
-      expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
-    } : undefined,
-    studentProof: (fd.get('category') === 'student') ? {
-      deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
-    } : undefined,
-    consents: {
-      pdpa: $('c-pdpa').checked,
-      codeOfConduct: $('c-coc').checked,
-      marketingOptIn: $('c-mkt').checked
+    // Wait until the elements exist
+    function ready(fn, tries = 0) {
+      const need = [
+        'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields'
+      ];
+      const allOk = need.every(id => $(id));
+      if (allOk) return fn();
+      if (tries > 100) return console.warn('register.js: elements not found after retries');
+      setTimeout(() => ready(fn, tries + 1), 50);
     }
-  };
 
-  try {
-    const r = await fetch(`${API}/api/registrations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    ready(() => {
+      /* ===================== Pricing ===================== */
+      (async () => {
+        const mount = $('pricingMount');
+        try {
+          const r = await fetch(`${API}/api/pricing/table`, { cache: 'no-store' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+          mount.innerHTML = `
+            <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
+            <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+              <thead>
+                <tr>
+                  <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
+                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
+                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
+                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.rows.map(r => `
+                  <tr>
+                    <td style="padding:8px">${r.phase}</td>
+                    <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
+                    <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
+                    <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+            <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
+          `;
+        } catch (e) {
+          mount.innerHTML = `<div style="color:#ff6b6b">❌ Pricing load failed: ${e.message}</div>`;
+          console.error('Pricing preview failed', e);
+        }
+      })();
 
-    out.innerHTML = `
+      /* ================== Registration form ================== */
+      const form = $('fullRegForm');
+      const out  = $('fullRegResult');
+      const selCategory = $('f-category');
+      const studentOnly = $('studentOnly');
+      const chkPresenting = $('f-presenting');
+      const presentFields = $('presentFields');
+      const submitBtn = $('reg-submit');
+
+      const pwEl = document.getElementById('pw');
+      const pwToggle = document.getElementById('pwToggle');
+      if (pwEl && pwToggle){
+        pwToggle.addEventListener('click', () => {
+          const isPw = pwEl.type === 'password';
+          pwEl.type = isPw ? 'text' : 'password';
+          pwToggle.textContent = isPw ? 'Hide' : 'Show';
+        });
+      }
+
+      selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
+      chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
+
+      function setSubmitBusy(busy) {
+        if (!submitBtn) return;
+        submitBtn.disabled = busy;
+        submitBtn.style.opacity = busy ? 0.6 : 1;
+        submitBtn.style.pointerEvents = busy ? 'none' : 'auto';
+        submitBtn.textContent = busy ? 'Submitting…' : 'Submit registration (beta)';
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        out.textContent = 'Submitting…';
+        setSubmitBusy(true);
+
+        const fd = new FormData(form);
+        const pw = String(fd.get('password') || '');
+        const pw2 = String(fd.get('password2') || '');
+        const pwMsg = document.getElementById('pwMsg');
+
+        if (pwMsg) { pwMsg.style.display = 'none'; pwMsg.textContent = ''; }
+
+        if (pw.length < 8) {
+          if (pwMsg){ pwMsg.textContent = 'Password must be at least 8 characters.'; pwMsg.style.display='block'; }
+          out.innerHTML = `<span style="color:#ff6b6b">❌ Password must be at least 8 characters.</span>`;
+          setSubmitBusy(false);
+          return;
+        }
+        if (pw !== pw2) {
+          if (pwMsg){ pwMsg.textContent = 'Passwords do not match.'; pwMsg.style.display='block'; }
+          out.innerHTML = `<span style="color:#ff6b6b">❌ Passwords do not match.</span>`;
+          setSubmitBusy(false);
+          return;
+        }
+
+        const payload = {
+          category: fd.get('category'),
+          password: pw,
+          addons: { dinner: false },
+          personal: {
+            firstName: fd.get('personal.firstName'),
+            lastName:  fd.get('personal.lastName'),
+            email:     fd.get('personal.email'),
+            phone:     fd.get('personal.phone'),
+            country:   fd.get('personal.country')
+          },
+          professional: {
+            affiliation: fd.get('professional.affiliation'),
+            department:  fd.get('professional.department'),
+            roleTitle:   fd.get('professional.roleTitle')
+          },
+          address: {
+            line1: fd.get('address.line1'),
+            line2: fd.get('address.line2'),
+            city:  fd.get('address.city'),
+            state: fd.get('address.state'),
+            postcode: fd.get('address.postcode'),
+            country:  fd.get('address.country')
+          },
+          billing: {
+            billTo:   fd.get('billing.billTo'),
+            taxNo:    fd.get('billing.taxNo'),
+            poNumber: fd.get('billing.poNumber')
+          },
+          program: {
+            presenting: $('f-presenting').checked,
+            type:       $('f-type')?.value || 'none',
+            title:      $('f-title')?.value || '',
+            topicArea:  $('f-topicArea')?.value || ''
+          },
+          student: (fd.get('category') === 'student') ? {
+            university: fd.get('student.university'),
+            level:      fd.get('student.level') || 'Other',
+            expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
+          } : undefined,
+          studentProof: (fd.get('category') === 'student') ? {
+            deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
+          } : undefined,
+          consents: {
+            pdpa: $('c-pdpa').checked,
+            codeOfConduct: $('c-coc').checked,
+            marketingOptIn: $('c-mkt').checked
+          }
+        };
+
+        try {
+          const r = await fetch(`${API}/api/registrations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await r.json();
+          if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+          out.innerHTML = `
 ✅ Registration Successful. Your code: <strong>${data.regCode}</strong><br>
 You can now log in using your <strong>email + password</strong>.<br>
 Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
-      Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
+          `;
 
-    `;
-    form.reset();
-    show(studentOnly, false);
-    show(presentFields, false);
-  } catch (err) {
-    out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
-    console.error('Submit failed', err);
-  } finally {
-    setSubmitBusy(false);
-  }
-});
-
-
-   
-
-    // Optional: prefill history if regCode/email already present (handy for testers)
-  });
-})();
-</script>
-
-
-
-
-  
+          form.reset();
+          show(studentOnly, false);
+          show(presentFields, false);
+        } catch (err) {
+          out.innerHTML = `<span style="color:#ff6b6b">❌ Submit failed: ${err.message}</span>`;
+          console.error('Submit failed', err);
+        } finally {
+          setSubmitBusy(false);
+        }
+      });
+    });
+  })();
+  </script>
 </body>
 </html>
