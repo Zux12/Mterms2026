@@ -22,6 +22,31 @@ app.set('trust proxy', 1);
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ===== CORS + Preflight (stable) =====
+app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // allow only your site origins
+  const allowed = new Set([
+    'https://www.mterms2026.com',
+    'https://mterms2026.com'
+  ]);
+
+  if (origin && allowed.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 
 // ✅ CORS + Preflight (manual, stable across Safari/Heroku)
 app.set('trust proxy', 1);
