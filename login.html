@@ -3,300 +3,356 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>MTERMS 2026 — Login</title>
- <style>
-  :root{
-    /* Brand-leaning palette (UiTM-dominant + TESMA accent) */
-    --uitm:#7a0026;         /* UiTM maroon-ish */
-    --uitm-2:#a10a39;
-    --tesma:#0a4fb3;        /* TESMA blue-ish accent */
-    --ink:#0b1220;
-    --muted:#526079;
+  <title>MTERMS 2026 — Participant Login</title>
 
-    /* Surfaces */
-    --bg0:#f6f7fb;
-    --bg1:#eef2ff;
-    --card:rgba(255,255,255,.88);
-    --line:rgba(15,23,42,.10);
+  <style>
+    :root{
+      /* UiTM-dominant + TESMA accent */
+      --uitm: #7a0026;
+      --uitm2:#a10a39;
+      --tesma:#0a4fb3;
 
-    /* Effects */
-    --shadow: 0 18px 55px rgba(2,8,23,.12);
-    --shadow2: 0 10px 26px rgba(2,8,23,.10);
-    --radius:18px;
-  }
+      --ink:#0b1220;
+      --muted:#526079;
 
-  *{ box-sizing:border-box; }
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --line:rgba(15,23,42,.10);
 
-  body{
-    margin:0;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    color:var(--ink);
-    background:
-      radial-gradient(1200px 600px at 18% 8%, rgba(122,0,38,.12), transparent 55%),
-      radial-gradient(900px 520px at 82% 20%, rgba(10,79,179,.14), transparent 55%),
-      radial-gradient(900px 520px at 55% 88%, rgba(14,165,233,.10), transparent 55%),
-      linear-gradient(180deg, var(--bg0), var(--bg1));
-    min-height:100vh;
-  }
+      --shadow: 0 22px 60px rgba(2,8,23,.14);
+      --shadow2: 0 10px 22px rgba(2,8,23,.10);
 
-  .wrap{
-    max-width:980px;
-    margin:46px auto;
-    padding:0 18px;
-  }
+      --r16:16px;
+      --r20:20px;
+    }
 
-  /* Header/logo row */
-  .top{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:18px;
-  }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 15% 12%, rgba(122,0,38,.16), transparent 60%),
+        radial-gradient(900px 520px at 85% 18%, rgba(10,79,179,.14), transparent 60%),
+        radial-gradient(900px 520px at 55% 90%, rgba(122,0,38,.10), transparent 62%),
+        linear-gradient(180deg, #fbfcff, #eef2ff 60%, #f7f8fc);
+      min-height:100vh;
+    }
 
-  /* Make each logo look nice even if it has a white box background */
-  .top img{
-    height:44px;
-    width:auto;
-    object-fit:contain;
-    padding:10px 12px;
-    border-radius:14px;
-    border:1px solid rgba(15,23,42,.10);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.78));
-    box-shadow: 0 8px 20px rgba(2,8,23,.08);
-    /* Helps non-transparent logos blend slightly without looking washed out */
-    mix-blend-mode:multiply;
-  }
+    .page{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 42px 18px 26px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      min-height:100vh;
+    }
 
-  /* Remove MOHE without touching HTML */
-  .top img:nth-child(1){
-    display:none;
-  }
+    /* ===== Header ===== */
+    .hero{
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
 
-  /* Order + sizing:
-     - MTERMS (main) bigger and first visually
-     - TESMA + UiTM as organizers (smaller)
-  */
-  .top img:nth-child(2){ /* mterm.jpg */
-    order:1;
-    height:58px;
-    padding:12px 14px;
-    border-radius:16px;
-    border-color: rgba(122,0,38,.18);
-    box-shadow: 0 12px 30px rgba(122,0,38,.14);
-  }
-  .top img:nth-child(3){ /* tesma.png */
-    order:2;
-    height:42px;
-    border-color: rgba(10,79,179,.18);
-  }
-  .top img:nth-child(4){ /* uitm.png */
-    order:3;
-    height:42px;
-    border-color: rgba(122,0,38,.20);
-  }
+    /* Big main logo (no “tiny chips” anymore) */
+    .main-logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 12px 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(10px);
+    }
 
-  h1{
-    margin:10px 0 6px;
-    text-align:center;
-    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
-    letter-spacing:-0.02em;
-  }
+    .main-logo img{
+      height: 92px; /* BIG */
+      width:auto;
+      object-fit:contain;
+      display:block;
+      /* If logo has white background, this still looks fine */
+      border-radius: 14px;
+    }
 
-  p{
-    margin:0 0 22px;
-    text-align:center;
-    color:var(--muted);
-    font-size:1.02rem;
-  }
+    h1{
+      margin: 0;
+      font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+      letter-spacing:-0.02em;
+      line-height:1.15;
+    }
 
-  /* Card */
-  .card{
-    max-width:540px;
-    margin:0 auto;
-    padding:20px;
-    border-radius:var(--radius);
-    background:var(--card);
-    border:1px solid var(--line);
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-  }
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
 
-  .row{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:14px;
-  }
+    /* ===== Card ===== */
+    .card-wrap{
+      display:flex;
+      justify-content:center;
+    }
 
-  label{
-    display:block;
-    font-weight:800;
-    font-size:.95rem;
-    margin-bottom:6px;
-    color: rgba(11,18,32,.92);
-  }
+    .card{
+      width: min(560px, 100%);
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--line);
+      border-radius: var(--r20);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
 
-  input{
-    width:100%;
-    padding:12px 12px;
-    border:1px solid rgba(15,23,42,.14);
-    border-radius:14px;
-    font-size:1rem;
-    outline:none;
-    background: rgba(255,255,255,.95);
-    box-shadow: 0 1px 0 rgba(2,8,23,.03);
-    transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
-  }
+    .card-topline{
+      height: 6px;
+      background: linear-gradient(90deg, var(--uitm), var(--uitm2), var(--tesma));
+    }
 
-  input::placeholder{ color: rgba(82,96,121,.75); }
+    .card-body{
+      padding: 20px;
+    }
 
-  input:focus{
-    border-color: rgba(122,0,38,.38);
-    box-shadow:
-      0 0 0 4px rgba(122,0,38,.14),
-      0 10px 22px rgba(2,8,23,.08);
-  }
+    .grid{
+      display:grid;
+      gap: 14px;
+    }
 
-  .pwwrap{ position:relative; }
+    label{
+      display:block;
+      font-weight: 850;
+      font-size: .95rem;
+      margin-bottom: 6px;
+      color: rgba(11,18,32,.92);
+    }
 
-  .toggle{
-    position:absolute;
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    border:1px solid rgba(15,23,42,.14);
-    background: rgba(255,255,255,.92);
-    border-radius:12px;
-    padding:7px 10px;
-    cursor:pointer;
-    font-weight:800;
-    color: rgba(11,18,32,.85);
-    transition: transform .05s ease, box-shadow .15s ease, border-color .15s ease;
-  }
-  .toggle:hover{
-    border-color: rgba(122,0,38,.22);
-    box-shadow: 0 10px 18px rgba(2,8,23,.10);
-  }
-  .toggle:active{ transform:translateY(-50%) scale(.98); }
+    .input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.96);
+      outline:none;
+      font-size: 1rem;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+      box-shadow: 0 1px 0 rgba(2,8,23,.04);
+    }
+    .input::placeholder{ color: rgba(82,96,121,.75); }
 
-  .actions{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    justify-content:space-between;
-    margin-top:10px;
-    flex-wrap:wrap;
-  }
+    .input:focus{
+      border-color: rgba(122,0,38,.36);
+      box-shadow:
+        0 0 0 4px rgba(122,0,38,.12),
+        0 12px 26px rgba(2,8,23,.10);
+    }
 
-  .btn{
-    border:none;
-    border-radius:14px;
-    padding:12px 16px;
-    color:#fff;
-    font-weight:900;
-    cursor:pointer;
-    letter-spacing:.01em;
-    background:
-      linear-gradient(135deg, var(--uitm), var(--uitm-2));
-    box-shadow: 0 12px 26px rgba(122,0,38,.22);
-    transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
-  }
-  .btn:hover{
-    filter: brightness(1.02);
-    box-shadow: 0 16px 34px rgba(122,0,38,.26);
-  }
-  .btn:active{ transform: translateY(1px); }
-  .btn:disabled{
-    opacity:.65;
-    cursor:not-allowed;
-    box-shadow:none;
-  }
+    .pwwrap{ position:relative; }
+    .pwwrap .input{ padding-right: 88px; }
 
-  .btn.secondary{
-    background: linear-gradient(135deg, var(--tesma), #0ea5e9);
-    box-shadow: 0 12px 26px rgba(10,79,179,.20);
-  }
+    .toggle{
+      position:absolute;
+      right: 10px;
+      top:50%;
+      transform: translateY(-50%);
+      border-radius: 12px;
+      padding: 7px 10px;
+      font-weight: 850;
+      font-size: .85rem;
+      cursor:pointer;
+      border:1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.92);
+      color: rgba(11,18,32,.86);
+      transition: box-shadow .15s ease, border-color .15s ease, transform .06s ease;
+    }
+    .toggle:hover{
+      border-color: rgba(122,0,38,.22);
+      box-shadow: 0 10px 18px rgba(2,8,23,.10);
+    }
+    .toggle:active{ transform: translateY(-50%) scale(.98); }
 
-  .link{
-    color: var(--tesma);
-    text-decoration:none;
-    font-weight:800;
-    padding:6px 2px;
-  }
-  .link:hover{ text-decoration:underline; }
+    .row-actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
 
-  .msg{
-    margin-top:12px;
-    font-weight:800;
-    padding:10px 12px;
-    border-radius:14px;
-    border:1px solid rgba(15,23,42,.10);
-    background: rgba(255,255,255,.70);
-  }
-  .msg.err{
-    color:#8a1f17;
-    border-color: rgba(180,35,24,.25);
-    background: rgba(180,35,24,.06);
-  }
-  .msg.ok{
-    color:#0b6b3a;
-    border-color: rgba(6,118,71,.22);
-    background: rgba(6,118,71,.06);
-  }
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 900;
+      letter-spacing: .01em;
+      cursor:pointer;
+      color:#fff;
+      background: linear-gradient(135deg, var(--uitm), var(--uitm2));
+      box-shadow: 0 14px 30px rgba(122,0,38,.22);
+      transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .btn:hover{
+      filter: brightness(1.02);
+      box-shadow: 0 18px 40px rgba(122,0,38,.26);
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; box-shadow:none; }
 
-  /* Small screens */
-  @media (max-width:520px){
-    .wrap{ margin:34px auto; }
-    .card{ padding:16px; }
-    .top{ gap:10px; }
-    .top img{ height:40px; padding:9px 10px; }
-    .top img:nth-child(2){ height:54px; }
-  }
-</style>
+    .link{
+      color: var(--tesma);
+      text-decoration:none;
+      font-weight: 850;
+    }
+    .link:hover{ text-decoration: underline; }
+
+    .register{
+      margin-top: 2px;
+      display:flex;
+      justify-content:flex-start;
+    }
+
+    .msg{
+      display:none;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      font-weight: 800;
+    }
+    .msg.show{ display:block; }
+    .msg.err{
+      color:#8a1f17;
+      border-color: rgba(180,35,24,.25);
+      background: rgba(180,35,24,.06);
+    }
+    .msg.ok{
+      color:#0b6b3a;
+      border-color: rgba(6,118,71,.22);
+      background: rgba(6,118,71,.06);
+    }
+
+    /* ===== Footer (Organized by) ===== */
+    .footer{
+      margin-top:auto;
+      padding-top: 12px;
+      text-align:center;
+      color: var(--muted);
+    }
+
+    .org-label{
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      margin-bottom: 10px;
+    }
+
+    .org-logos{
+      display:flex;
+      justify-content:center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* logo “chips” so white-background logos still look good */
+    .logo-chip{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.80);
+      box-shadow: 0 10px 22px rgba(2,8,23,.08);
+      backdrop-filter: blur(10px);
+    }
+    .logo-chip img{
+      height: 40px;
+      width:auto;
+      object-fit:contain;
+      display:block;
+      border-radius: 10px;
+    }
+
+    /* Small screens */
+    @media (max-width:520px){
+      .page{ padding-top: 30px; }
+      .main-logo img{ height: 78px; }
+      .card-body{ padding: 16px; }
+      .logo-chip img{ height: 36px; }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="top">
-      <img src="public/mohe.png" alt="MOHE">
-      <img src="public/mterm.jpg" alt="MTERMS">
-      <img src="public/tesma.png" alt="TESMA">
-      <img src="public/uitm.png" alt="UiTM">
-    </div>
+  <main class="page">
+    <!-- HEADER -->
+    <header class="hero">
+      <div class="main-logo" aria-label="MTERMS 2026">
+        <!-- Main event logo (big) -->
+        <img src="public/mterm.jpg" alt="MTERMS 2026 Logo">
+      </div>
 
-    <h1>MTERMS 2026 — Participant Login</h1>
-    <p>Log in using your email and password.</p>
+      <div>
+        <h1>MTERMS 2026 — Participant Login</h1>
+        <p class="subtitle">Log in using your email and password.</p>
+      </div>
+    </header>
 
-    <div class="card">
-      <div class="row">
-        <div>
-          <label for="email">Email</label>
-          <input id="email" type="email" placeholder="you@example.com" autocomplete="username" required>
-        </div>
+    <!-- LOGIN CARD -->
+    <section class="card-wrap">
+      <div class="card" role="region" aria-label="Login form">
+        <div class="card-topline"></div>
+        <div class="card-body">
+          <div class="grid">
+            <div>
+              <label for="email">Email</label>
+              <input id="email" class="input" type="email" placeholder="you@example.com" autocomplete="username" required>
+            </div>
 
-        <div>
-          <label for="password">Password</label>
-          <div class="pwwrap">
-            <input id="password" type="password" placeholder="Your password" autocomplete="current-password" required style="padding-right:80px">
-            <button type="button" id="toggle" class="toggle">Show</button>
+            <div>
+              <label for="password">Password</label>
+              <div class="pwwrap">
+                <input id="password" class="input" type="password" placeholder="Your password" autocomplete="current-password" required>
+                <button type="button" id="toggle" class="toggle">Show</button>
+              </div>
+            </div>
+
+            <div class="row-actions">
+              <button class="btn" id="loginBtn">Login</button>
+              <a class="link" href="#" id="forgot">Forgot password?</a>
+            </div>
+
+            <div class="register">
+              <a class="link" href="register.html">Create new registration</a>
+            </div>
+
+            <div id="msg" class="msg"></div>
           </div>
         </div>
-
-        <div class="actions">
-          <button class="btn" id="loginBtn">Login</button>
-          <a class="link" href="#" id="forgot">Forgot password?</a>
-        </div>
-
-        <div class="actions">
-          <a class="link" href="register.html">Create new registration</a>
-
-        </div>
-
-        <div id="msg" class="msg"></div>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <!-- ORGANIZERS FOOTER -->
+    <footer class="footer">
+      <div class="org-label">Organized by</div>
+      <div class="org-logos">
+        <div class="logo-chip">
+          <img src="public/uitm.png" alt="UiTM">
+        </div>
+        <div class="logo-chip">
+          <img src="public/tesma.png" alt="TESMA">
+        </div>
+      </div>
+    </footer>
+  </main>
 
   <script>
     const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
@@ -306,6 +362,11 @@
     const toggle = document.getElementById('toggle');
     const btn = document.getElementById('loginBtn');
 
+    function showMsg(type, text){
+      msg.className = 'msg show ' + (type || '');
+      msg.textContent = text || '';
+    }
+
     toggle.addEventListener('click', () => {
       const isPw = pwEl.type === 'password';
       pwEl.type = isPw ? 'text' : 'password';
@@ -314,20 +375,16 @@
 
     document.getElementById('forgot').addEventListener('click', (e) => {
       e.preventDefault();
-      msg.className = 'msg err';
-      msg.textContent = 'Forgot password will be enabled soon.';
+      showMsg('err', 'Forgot password will be enabled soon.');
     });
 
     async function doLogin(){
-      msg.textContent = '';
-      msg.className = 'msg';
+      showMsg('', '');
+      msg.className = 'msg'; // hide
       btn.disabled = true;
       btn.textContent = 'Logging in...';
 
       try{
-        // Optional: clear old stored session before new login
-        // localStorage.removeItem('mtermsUser');
-
         const email = String(emailEl.value || '').trim().toLowerCase();
         const password = String(pwEl.value || '');
 
@@ -341,9 +398,7 @@
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
-        // ✅ IMPORTANT FIX:
-        // Save session info from LOGIN response first (works even if /me fails due to cookie restrictions)
-        // We accept common shapes: {user:...} or {doc:...}. If neither exists, store minimal email.
+        // Save session info from LOGIN response first
         if (data?.user) {
           localStorage.setItem('mtermsUser', JSON.stringify(data.user));
         } else if (data?.doc) {
@@ -354,11 +409,9 @@
           }));
         }
 
-        msg.className = 'msg ok';
-        msg.textContent = '✅ Logged in. Redirecting...';
+        showMsg('ok', '✅ Logged in. Redirecting...');
 
         // Try to pull full profile (may fail if Safari blocks cookie)
-        // If it works, overwrite localStorage with the complete profile.
         try {
           const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
           const meData = await me.json().catch(() => ({}));
@@ -370,8 +423,7 @@
         setTimeout(() => { window.location.href = 'participants.html'; }, 600);
 
       } catch(err){
-        msg.className = 'msg err';
-        msg.textContent = '❌ ' + (err.message || 'Login failed');
+        showMsg('err', '❌ ' + (err.message || 'Login failed'));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Login';
