@@ -819,22 +819,21 @@ logoutBtn.addEventListener('click', async () => {
 
 // Auto session (prefer server session, fallback to localStorage)
 (async () => {
-  try{
-    const r = await fetch(`${API}/api/auth/me`, { credentials:'include' });
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
     const data = await r.json().catch(() => ({}));
-    if (r.ok && data?.user){
-      saveSession(data.user);
-      showDashboard(data.user);
-      loadHistory();
+
+    if (!r.ok || !data?.user) {
+      window.location.href = 'login.html';
       return;
     }
-  } catch {}
 
-  // fallback (older session)
-  const sess = getSession();
-  if (sess.regCode && sess.personal?.email) {
-    showDashboard(sess);
+    saveSession(data.user);
+    showDashboard(data.user);
     loadHistory();
+
+  } catch {
+    window.location.href = 'login.html';
   }
 })();
 
