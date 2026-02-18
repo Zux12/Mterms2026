@@ -1,152 +1,160 @@
 <!DOCTYPE html>
 <html lang="en" class="theme-light">
-
 <head>
   <meta charset="utf-8" />
   <title>MTERMS 2026 — Participant Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/styles.css" />
-<style id="theme-overrides">
-  :root.theme-light{
-    --bg:#ffffff;
-    --surface:#ffffff;
-    --text:#0b1115;
-    --border:#e5e7eb;
-  }
 
-  body{ background:var(--bg); color:var(--text); }
-  .card{ background:var(--surface); border:1px solid var(--border); }
-</style>
+  <style id="theme-overrides">
+    :root.theme-light{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --border:#e5e7eb;
+    }
+    body{ background:var(--bg); color:var(--text); }
+    .card{ background:var(--surface); border:1px solid var(--border); }
+  </style>
 
-
-  
   <style>
-  /* Global */
-  body{
-    background: var(--bg);
-    color: var(--text);
-    font-family: Inter, system-ui, sans-serif;
-    padding: 20px;
-  }
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      padding: 20px;
+    }
 
-  /* Cards */
-  .card{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 20px;
-  }
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
 
-  /* Buttons */
-  .btn{
-    background: linear-gradient(90deg,#19c37d,#0ea5a6);
-    border: none;
-    color: #ffffff;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .btn{
+      background: linear-gradient(90deg,#19c37d,#0ea5a6);
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-  /* Ghost button (light) */
-  .btn.ghost{
-    background: #ffffff;
-    color: #0b1115;
-    border: 1px solid var(--border);
-  }
+    .btn.ghost{
+      background: #ffffff;
+      color: #0b1115;
+      border: 1px solid var(--border);
+    }
 
-  /* Inputs */
-  input,select,textarea{
-    width: 100%;
-    padding: 8px;
-    margin-top: 6px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #ffffff;
-    color: #0b1115;
-    outline: none;
-  }
-  input::placeholder, textarea::placeholder{ color:#6b7280; }
-  input:focus,select:focus,textarea:focus{
-    border-color:#9ca3af;
-    box-shadow: 0 0 0 3px rgba(17,24,39,.08);
-  }
+    input,select,textarea{
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #0b1115;
+      outline: none;
+    }
+    input::placeholder, textarea::placeholder{ color:#6b7280; }
+    input:focus,select:focus,textarea:focus{
+      border-color:#9ca3af;
+      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
 
-  /* Layout helpers */
-  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  @media (max-width: 900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
-  .hidden{ display:none; }
-  .help{ opacity:.9; font-size:.92rem; color:#374151; }
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
 
-  .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
-  @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
+    .hidden{ display:none; }
+    .help{ opacity:.9; font-size:.92rem; color:#374151; }
 
-  .tag{
-    display:inline-block;
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: #f9fafb;
-    margin-right: 8px;
-    font-size: .85rem;
-    color:#111827;
-  }
+    .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+    @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
 
-  /* Badge card (already light, keep as-is) */
-  .badge{
-    width: 260px; height: 400px;
-    background:#fff; color:#0b1115;
-    border-radius:16px; border:1px solid #e8e8e8;
-    box-shadow:0 8px 24px rgba(0,0,0,.15);
-    display:flex; flex-direction:column; overflow:hidden;
-    font-family: Inter, system-ui, sans-serif;
-  }
-  .badge-top{ padding:8px 10px 4px; }
-  .badge-mterm{ display:block; width:96px; height:auto; margin:0 auto 4px; object-fit:contain; }
-  .badge-logos{ display:flex; justify-content:center; align-items:center; gap:8px; }
-  .badge-logos img{ height:20px; width:auto; object-fit:contain; }
+    .tag{
+      display:inline-block;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f9fafb;
+      margin-right: 8px;
+      font-size: .85rem;
+      color:#111827;
+    }
 
-  .badge-photo-wrap{
-    margin:8px auto 0; width:180px; height:240px;
-    position:relative; border:1px solid #ddd; border-radius:10px; overflow:hidden;
-    background:#f2f4f7;
-  }
-  .badge-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
-  .badge-photo.ph{ display:flex; align-items:center; justify-content:center; color:#98a2b3; font-weight:700; letter-spacing:.06em; }
+    /* Badge */
+    .badge{
+      width: 260px; height: 400px;
+      background:#fff; color:#0b1115;
+      border-radius:16px; border:1px solid #e8e8e8;
+      box-shadow:0 8px 24px rgba(0,0,0,.15);
+      display:flex; flex-direction:column; overflow:hidden;
+      font-family: Inter, system-ui, sans-serif;
+    }
+    .badge-top{ padding:8px 10px 4px; }
+    .badge-mterm{ display:block; width:96px; height:auto; margin:0 auto 4px; object-fit:contain; }
+    .badge-logos{ display:flex; justify-content:center; align-items:center; gap:8px; }
+    .badge-logos img{ height:20px; width:auto; object-fit:contain; }
 
-  .badge-info{ padding:10px 12px 0; text-align:center; }
-  .badge-name{ font-weight:800; font-size:18px; line-height:1.2; }
-  .badge-affil{ font-size:12px; color:#475467; margin-top:2px; }
-  .badge-cat{ font-size:12px; color:#0b7a64; font-weight:700; margin-top:6px; }
+    .badge-photo-wrap{
+      margin:8px auto 0; width:180px; height:240px;
+      position:relative; border:1px solid #ddd; border-radius:10px; overflow:hidden;
+      background:#f2f4f7;
+    }
+    .badge-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+    .badge-photo.ph{ display:flex; align-items:center; justify-content:center; color:#98a2b3; font-weight:700; letter-spacing:.06em; }
 
-  .badge-footer{
-    margin-top:auto; font-size:11px; text-align:center; padding:8px 10px 10px; color:#667085;
-    border-top:1px solid #eef2f6; background:#fafafa;
-  }
+    .badge-info{ padding:10px 12px 0; text-align:center; }
+    .badge-name{ font-weight:800; font-size:18px; line-height:1.2; }
+    .badge-affil{ font-size:12px; color:#475467; margin-top:2px; }
+    .badge-cat{ font-size:12px; color:#0b7a64; font-weight:700; margin-top:6px; }
 
-  /* keep inline checkbox labels tidy */
-  .field-inline{display:flex;align-items:center;gap:8px;margin:0}
+    .badge-footer{
+      margin-top:auto; font-size:11px; text-align:center; padding:8px 10px 10px; color:#667085;
+      border-top:1px solid #eef2f6; background:#fafafa;
+    }
 
-  /* fieldset/checkbox layout */
-  .card fieldset { position: relative; }
-  .card fieldset .grid-2 { align-items: start; }
-  .card fieldset label { display: flex; flex-direction: column; margin: 0; }
-  .field-inline { display:flex; align-items:center; gap:8px; margin:0 !important; }
-  #pr-presenting:where(input){ margin:0; }
-</style>
+    .field-inline{display:flex;align-items:center;gap:8px;margin:0 !important;}
+    #pr-presenting:where(input){ margin:0; }
+  </style>
 </head>
+
 <body>
   <h1>MTERMS 2026 — Participant Portal</h1>
-  
+  <p class="help">Log in using your email and password to view or update your details, and manage uploads.</p>
 
-<p class="help">Log in using your email and password to view or update your details, and manage uploads.</p>
-  
+  <!-- Inline login fallback (prevents redirect loop and shows real error) -->
+  <div id="loginBox" class="card hidden">
+    <h3>Session Required</h3>
+    <p class="help" style="margin-top:6px">
+      Your session was not detected. You can login here. If your browser blocks cross-site cookies (common on Safari),
+      the portal may not stay logged in unless the API returns a user profile.
+    </p>
 
+    <div class="grid-2">
+      <label>Email
+        <input id="l-email" type="email" placeholder="you@example.com" autocomplete="username">
+      </label>
+      <label>Password
+        <input id="l-pass" type="password" placeholder="Password" autocomplete="current-password">
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="l-btn" class="btn">Login</button>
+      <button id="l-goLogin" class="btn ghost">Open login.html</button>
+      <span id="l-msg" class="help"></span>
+    </div>
+
+    <div id="diagBox" class="help" style="margin-top:10px"></div>
+  </div>
 
   <!-- Dashboard -->
   <div id="dashBox" class="hidden">
@@ -190,82 +198,73 @@
       <div id="uHistory" style="margin-top:12px;"></div>
     </div>
 
+    <!-- ID Photo & Badge -->
+    <div class="card">
+      <h3>ID Photo and Badge Preview</h3>
+      <p class="help">
+        Upload a portrait photo (front-facing, plain background). We’ll auto-fit it to standard ID proportions (3:4).
+      </p>
 
-<!-- ID Photo & Badge -->
-<div class="card">
-  <h3>ID Photo and Badge Preview</h3>
-  <p class="help">
-    Upload a portrait photo (front-facing, plain background). We’ll auto-fit it to standard ID proportions (3:4).
-  </p>
-
-  <div class="grid-2">
-    <label>Choose photo
-      <input type="file" id="idPhoto" accept="image/*">
-    </label>
-    <div style="display:flex;align-items:flex-end;gap:8px">
-      <button id="idUploadBtn" class="btn">Upload & Save</button>
-      <button id="idRefreshBtn" class="btn ghost">Refresh</button>
-      <span id="idMsg" style="margin-left:6px;font-size:.9rem"></span>
-    </div>
-  </div>
-
-  <!-- Badge preview -->
-  <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
-    <div id="badge" class="badge">
-      <div class="badge-top">
-        <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS" />
-        <div class="badge-logos">
-          <img src="public/uitm.png" alt="UiTM">
-          <img src="public/mohe.png" alt="MOHE">
-          <img src="public/tesma.png" alt="TESMA">
+      <div class="grid-2">
+        <label>Choose photo
+          <input type="file" id="idPhoto" accept="image/*">
+        </label>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <button id="idUploadBtn" class="btn">Upload & Save</button>
+          <button id="idRefreshBtn" class="btn ghost">Refresh</button>
+          <span id="idMsg" style="margin-left:6px;font-size:.9rem"></span>
         </div>
       </div>
 
-      <div class="badge-photo-wrap">
-        <img id="badgePhoto" class="badge-photo" alt="ID photo placeholder">
-        <div id="badgePlaceholder" class="badge-photo ph">PHOTO</div>
-      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
+        <div id="badge" class="badge">
+          <div class="badge-top">
+            <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS" />
+            <div class="badge-logos">
+              <img src="public/uitm.png" alt="UiTM">
+              <img src="public/mohe.png" alt="MOHE">
+              <img src="public/tesma.png" alt="TESMA">
+            </div>
+          </div>
 
-      <div class="badge-info">
-        <div id="badgeName" class="badge-name">Participant Name</div>
-        <div id="badgeAffil" class="badge-affil">Institution / Company</div>
-        <div id="badgeCat" class="badge-cat">Category</div>
-      </div>
+          <div class="badge-photo-wrap">
+            <img id="badgePhoto" class="badge-photo" alt="ID photo">
+            <div id="badgePlaceholder" class="badge-photo ph">PHOTO</div>
+          </div>
 
-      <div class="badge-footer">MTERMS 2026 • Shah Alam</div>
+          <div class="badge-info">
+            <div id="badgeName" class="badge-name">Participant Name</div>
+            <div id="badgeAffil" class="badge-affil">Institution / Company</div>
+            <div id="badgeCat" class="badge-cat">Category</div>
+          </div>
+
+          <div class="badge-footer">MTERMS 2026 • Shah Alam</div>
+        </div>
+
+        <div class="help" style="max-width:420px">
+          <strong>Printing note:</strong> This preview uses a white card background. The photo is constrained to a standard
+          3:4 portrait. On the admin page, the same badge block can be placed in a print-friendly layout for bulk printing.
+        </div>
+      </div>
     </div>
 
-    <div class="help" style="max-width:420px">
-      <strong>Printing note:</strong> This preview uses a white card background. The photo is constrained to a standard
-      3:4 portrait. On the admin page, the same badge block can be placed in a print-friendly layout for bulk printing.
-    </div>
-  </div>
-</div>
-
-
-    
-    
     <div class="card">
       <h3>My Details</h3>
       <p class="help">Edit your information and save changes.</p>
 
-<!-- Category + Addons -->
-<fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-  <legend>Registration Options</legend>
-  <div class="grid-2">
-    <label>Category
-      <select id="f-category">
-        <option value="student">Student</option>
-        <option value="academia">Academia</option>
-        <option value="industry">Industry</option>
-      </select>
-    </label>
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Registration Options</legend>
+        <div class="grid-2">
+          <label>Category
+            <select id="f-category">
+              <option value="student">Student</option>
+              <option value="academia">Academia</option>
+              <option value="industry">Industry</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
 
-  </div>
-</fieldset>
-
-
-      <!-- Personal -->
       <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
         <legend>Personal</legend>
         <div class="grid-2">
@@ -277,7 +276,6 @@
         </div>
       </fieldset>
 
-      <!-- Professional -->
       <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
         <legend>Affiliation</legend>
         <div class="grid-2">
@@ -287,7 +285,6 @@
         </div>
       </fieldset>
 
-      <!-- Student only -->
       <fieldset id="studentOnly" style="display:none;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
         <legend>Student details</legend>
         <div class="grid-3">
@@ -303,12 +300,11 @@
         </div>
       </fieldset>
 
-      <!-- Program -->
       <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
         <legend>Program</legend>
-<label class="field-inline">
-  <input type="checkbox" id="pr-presenting"> I am a presenter
-</label>
+        <label class="field-inline">
+          <input type="checkbox" id="pr-presenting"> I am a presenter
+        </label>
 
         <div id="presentFields" style="display:none;margin-top:8px">
           <div class="grid-2">
@@ -324,7 +320,6 @@
         </div>
       </fieldset>
 
-      <!-- Billing -->
       <details style="margin-bottom:12px">
         <summary>Billing & invoice (optional)</summary>
         <div class="grid-2" style="margin-top:8px">
@@ -334,7 +329,6 @@
         </div>
       </details>
 
-      <!-- Address -->
       <details style="margin-bottom:12px">
         <summary>Postal address (optional)</summary>
         <div class="grid-2" style="margin-top:8px">
@@ -347,7 +341,6 @@
         </div>
       </details>
 
-      <!-- Consents -->
       <div style="margin:8px 0">
         <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br>
         <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
@@ -359,192 +352,186 @@
     </div>
   </div>
 
-  <script>
-    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+<script>
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
-    // Elements
+  // Elements
+  const dashBox   = document.getElementById('dashBox');
+  const loginBox  = document.getElementById('loginBox');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-    const dashBox  = document.getElementById('dashBox');
+  const saveBtn  = document.getElementById('saveBtn');
+  const saveMsg  = document.getElementById('saveMsg');
 
-    const logoutBtn= document.getElementById('logoutBtn');
+  const $ = (id) => document.getElementById(id);
+  const studentOnly = $('studentOnly');
+  const presentFields = $('presentFields');
 
-    const saveBtn  = document.getElementById('saveBtn');
-    const saveMsg  = document.getElementById('saveMsg');
+  function saveSession(data){ localStorage.setItem('mtermsUser', JSON.stringify(data)); }
+  function getSession(){ try{ return JSON.parse(localStorage.getItem('mtermsUser')||'{}'); }catch{return{}} }
+  function clearSession(){ localStorage.removeItem('mtermsUser'); }
 
-    const $ = (id) => document.getElementById(id);
-    const studentOnly = $('studentOnly');
-    const presentFields = $('presentFields');
+  function showStudent(on){ studentOnly.style.display = on ? 'block' : 'none'; }
+  function showPresent(on){ presentFields.style.display = on ? 'block' : 'none'; }
 
-    function saveSession(data){ localStorage.setItem('mtermsUser', JSON.stringify(data)); }
-    function getSession(){ try{ return JSON.parse(localStorage.getItem('mtermsUser')||'{}'); }catch{return{}} }
-    function clearSession(){ localStorage.removeItem('mtermsUser'); }
+  function prefill(user){
+    $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
+    $('userCode').textContent = user?.regCode || '';
+    $('userCategory').textContent = user?.category || '';
+    $('userPayment').textContent = user?.payment?.status || 'pending';
 
-    function showStudent(on){ studentOnly.style.display = on ? 'block' : 'none'; }
-    function showPresent(on){ presentFields.style.display = on ? 'block' : 'none'; }
+    $('f-category').value = user?.category || 'academia';
 
-    function prefill(user){
-      // Header badges
-      $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
-      $('userCode').textContent = user.regCode || '';
-      $('userCategory').textContent = user.category || '';
-      $('userPayment').textContent = user?.payment?.status || 'pending';
+    $('p-firstName').value = user?.personal?.firstName || '';
+    $('p-lastName').value  = user?.personal?.lastName  || '';
+    $('p-email').value     = user?.personal?.email     || '';
+    $('p-phone').value     = user?.personal?.phone     || '';
+    $('p-country').value   = user?.personal?.country   || '';
 
-      // Category/addons
-      $('f-category').value = user.category || 'academia';
+    $('pro-affiliation').value = user?.professional?.affiliation || '';
+    $('pro-dept').value        = user?.professional?.department  || '';
+    $('pro-role').value        = user?.professional?.roleTitle   || '';
 
-      // Personal
-      $('p-firstName').value = user?.personal?.firstName || '';
-      $('p-lastName').value  = user?.personal?.lastName  || '';
-      $('p-email').value     = user?.personal?.email     || '';
-      $('p-phone').value     = user?.personal?.phone     || '';
-      $('p-country').value   = user?.personal?.country   || '';
+    const isStudent = (user?.category === 'student');
+    showStudent(isStudent);
+    $('s-university').value = user?.student?.university || '';
+    $('s-level').value      = user?.student?.level || '';
+    $('s-grad').value       = user?.student?.expectedGradYear || '';
 
-      // Professional
-      $('pro-affiliation').value = user?.professional?.affiliation || '';
-      $('pro-dept').value        = user?.professional?.department  || '';
-      $('pro-role').value        = user?.professional?.roleTitle   || '';
+    $('pr-presenting').checked = !!user?.program?.presenting;
+    showPresent(!!user?.program?.presenting);
+    $('pr-type').value   = user?.program?.type || 'none';
+    $('pr-title').value  = user?.program?.title || '';
+    $('pr-topic').value  = user?.program?.topicArea || '';
 
-      // Student
-      const isStudent = (user?.category === 'student');
-      showStudent(isStudent);
-      $('s-university').value = user?.student?.university || '';
-      $('s-level').value      = user?.student?.level || '';
-      $('s-grad').value       = user?.student?.expectedGradYear || '';
+    $('b-billTo').value = user?.billing?.billTo || '';
+    $('b-taxNo').value  = user?.billing?.taxNo  || '';
+    $('b-po').value     = user?.billing?.poNumber || '';
 
-      // Program
-      $('pr-presenting').checked = !!user?.program?.presenting;
-      showPresent(!!user?.program?.presenting);
-      $('pr-type').value   = user?.program?.type || 'none';
-      $('pr-title').value  = user?.program?.title || '';
-      $('pr-topic').value  = user?.program?.topicArea || '';
+    $('a-line1').value    = user?.address?.line1 || '';
+    $('a-line2').value    = user?.address?.line2 || '';
+    $('a-city').value     = user?.address?.city  || '';
+    $('a-state').value    = user?.address?.state || '';
+    $('a-postcode').value = user?.address?.postcode || '';
+    $('a-country').value  = user?.address?.country || '';
 
-      // Billing
-      $('b-billTo').value = user?.billing?.billTo || '';
-      $('b-taxNo').value  = user?.billing?.taxNo  || '';
-      $('b-po').value     = user?.billing?.poNumber || '';
+    $('c-pdpa').checked = !!user?.consents?.pdpa;
+    $('c-coc').checked  = !!user?.consents?.codeOfConduct;
+    $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
+  }
 
-      // Address
-      $('a-line1').value   = user?.address?.line1 || '';
-      $('a-line2').value   = user?.address?.line2 || '';
-      $('a-city').value    = user?.address?.city  || '';
-      $('a-state').value   = user?.address?.state || '';
-      $('a-postcode').value= user?.address?.postcode || '';
-      $('a-country').value = user?.address?.country || '';
-
-      // Consents
-      $('c-pdpa').checked = !!user?.consents?.pdpa;
-      $('c-coc').checked  = !!user?.consents?.codeOfConduct;
-      $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
+  function requireSessionOrThrow(){
+    const user = getSession();
+    if (!user?.regCode || !user?.personal?.email) {
+      throw new Error('Session missing regCode/email. Please login again.');
     }
+    return user;
+  }
 
+  async function uploadFile(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('uMsg').textContent = '❌ ' + e.message; showInlineLogin('Please login to upload files.'); return; }
 
+    const file = $('uFile').files[0];
+    const type = $('uType').value;
+    if (!file){ $('uMsg').textContent='❌ Please select a file.'; return; }
 
-    async function uploadFile(){
-      const user = getSession();
-      const file = $('uFile').files[0];
-      const type = $('uType').value;
-      if (!file){ $('uMsg').textContent='❌ Please select a file.'; return; }
-      const fd = new FormData();
-      fd.append('regCode', user.regCode);
-      fd.append('email', user.personal.email);
-      fd.append('type', type);
-      fd.append('file', file, file.name);
-      $('uMsg').textContent = 'Uploading...';
-      try {
-        const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || 'Upload failed');
-        $('uMsg').textContent = `✅ Uploaded version ${data.version}`;
-        $('uFile').value = '';
-        loadHistory();
-      } catch(err){
-        $('uMsg').textContent = '❌ ' + err.message;
-      }
+    const fd = new FormData();
+    fd.append('regCode', user.regCode);
+    fd.append('email', user.personal.email);
+    fd.append('type', type);
+    fd.append('file', file, file.name);
+
+    $('uMsg').textContent = 'Uploading...';
+    try {
+      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Upload failed');
+      $('uMsg').textContent = `✅ Uploaded version ${data.version}`;
+      $('uFile').value = '';
+      loadHistory();
+    } catch(err){
+      $('uMsg').textContent = '❌ ' + err.message;
     }
+  }
 
-    async function loadHistory(){
-      const user = getSession();
-      const type = $('uType').value;
-      const box  = $('uHistory');
-      box.innerHTML = 'Loading...';
-      try {
-        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || 'Error');
-        box.innerHTML = data.count
-         ? data.rows.map(row => `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:6px">
-              <strong>v${row.version}</strong> — ${row.filename}<br>
-              <small>${new Date(row.uploadedAt).toLocaleString()}</small><br>
-              <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
-            </div>`).join('')
-         : '<em>No uploads yet.</em>';
-      } catch(err){
-        box.innerHTML = `<span style="color:#ff6b6b">❌ ${err.message}</span>`;
-      }
+  async function loadHistory(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('uHistory').innerHTML = `<span style="color:#b42318">❌ ${e.message}</span>`; return; }
+
+    const type = $('uType').value;
+    const box  = $('uHistory');
+    box.innerHTML = 'Loading...';
+
+    try {
+      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Error');
+      box.innerHTML = data.count
+        ? data.rows.map(row => `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:6px">
+            <strong>v${row.version}</strong> — ${row.filename}<br>
+            <small>${new Date(row.uploadedAt).toLocaleString()}</small><br>
+            <a href="${API}${row.downloadUrl}" target="_blank" rel="noopener">Open</a>
+          </div>`).join('')
+        : '<em>No uploads yet.</em>';
+    } catch(err){
+      box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
     }
+  }
 
-
- // --- ID photo helpers ---
+  // --- ID photo helpers ---
   function fitCoverToCanvas(imgW, imgH, canW, canH){
     const imgR = imgW / imgH, canR = canW / canH;
     let w, h, sx, sy;
-    if (imgR > canR){ // image too wide -> crop sides
-      h = imgH;
-      w = h * canR;
-      sx = (imgW - w) / 2; sy = 0;
-    } else {          // image too tall -> crop top/bottom
-      w = imgW;
-      h = w / canR;
-      sx = 0; sy = (imgH - h) / 2;
+    if (imgR > canR){
+      h = imgH; w = h * canR; sx = (imgW - w) / 2; sy = 0;
+    } else {
+      w = imgW; h = w / canR; sx = 0; sy = (imgH - h) / 2;
     }
     return { sx, sy, sw:w, sh:h };
   }
 
-async function resizeToIDPhoto(file){
-  // Standard portrait 3:4 (no crop): 360x480 for web
-  const targetW = 360, targetH = 480;
-  const img = await new Promise((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = URL.createObjectURL(file);
-  });
+  async function resizeToIDPhoto(file){
+    const targetW = 360, targetH = 480;
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(file);
+    });
 
-  const canvas = document.createElement('canvas');
-  canvas.width = targetW; canvas.height = targetH;
-  const ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW; canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
 
-  // white background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, targetW, targetH);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, targetW, targetH);
 
-  // CONTAIN fit (no cropping), centered
-  const imgR = img.naturalWidth / img.naturalHeight;
-  const boxR = targetW / targetH;
-  let drawW, drawH;
+    const imgR = img.naturalWidth / img.naturalHeight;
+    const boxR = targetW / targetH;
+    let drawW, drawH;
 
-  if (imgR > boxR) {
-    // image is wider than the 3:4 box -> scale by width
-    drawW = targetW;
-    drawH = Math.round(drawW / imgR);
-  } else {
-    // image is taller -> scale by height
-    drawH = targetH;
-    drawW = Math.round(drawH * imgR);
+    if (imgR > boxR) { drawW = targetW; drawH = Math.round(drawW / imgR); }
+    else { drawH = targetH; drawW = Math.round(drawH * imgR); }
+
+    const dx = Math.round((targetW - drawW) / 2);
+    const dy = Math.round((targetH - drawH) / 2);
+
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, drawW, drawH);
+
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+    const previewUrl = URL.createObjectURL(blob);
+    return { blob, previewUrl };
   }
 
-  const dx = Math.round((targetW - drawW) / 2);
-  const dy = Math.round((targetH - drawH) / 2);
-
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, drawW, drawH);
-
-  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
-  const previewUrl = URL.createObjectURL(blob);
-  return { blob, previewUrl };
-}
   async function uploadIDPhoto(){
-    const user = getSession();
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('idMsg').textContent = '❌ ' + e.message; showInlineLogin('Please login to upload photo.'); return; }
+
     const file = document.getElementById('idPhoto').files?.[0];
     const msg = document.getElementById('idMsg');
     if (!file){ msg.textContent = '❌ Please choose an image.'; return; }
@@ -553,10 +540,8 @@ async function resizeToIDPhoto(file){
       msg.textContent = 'Processing…';
       const { blob, previewUrl } = await resizeToIDPhoto(file);
 
-      // Show preview immediately
       setBadgePhoto(previewUrl);
 
-      // Upload to GridFS as 'profilePhoto'
       const fd = new FormData();
       fd.append('regCode', user.regCode);
       fd.append('email', user.personal.email);
@@ -564,12 +549,10 @@ async function resizeToIDPhoto(file){
       fd.append('file', new File([blob], 'idphoto.jpg', { type:'image/jpeg' }));
 
       msg.textContent = 'Uploading…';
-// Replace inside uploadIDPhoto() after the fetch:
-const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
-let data = {};
-try { data = await r.json(); } catch {}
-if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
-
+      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+      let data = {};
+      try { data = await r.json(); } catch {}
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
       msg.textContent = '✅ Photo saved (v' + (data.version || '?') + ').';
     }catch(err){
@@ -578,15 +561,18 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
   }
 
   async function refreshIDPhoto(){
-    const user = getSession();
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('idMsg').textContent = ''; clearBadgePhoto(); return; }
+
     const msg = document.getElementById('idMsg');
     msg.textContent = 'Loading…';
     try{
       const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=profilePhoto`);
-      const data = await r.json();
+      const data = await r.json().catch(()=> ({}));
       if (!r.ok) throw new Error(data.error || 'Error');
+
       if (data.count){
-        // use latest version
         const last = data.rows[data.rows.length - 1];
         setBadgePhoto(`${API}${last.downloadUrl}`);
         msg.textContent = '';
@@ -611,145 +597,195 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
   }
 
   function fillBadgeText(user){
-    document.getElementById('badgeName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim() || 'Participant Name';
+    document.getElementById('badgeName').textContent =
+      [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim() || 'Participant Name';
     document.getElementById('badgeAffil').textContent = user?.professional?.affiliation || 'Institution / Company';
     document.getElementById('badgeCat').textContent   = (user?.category || 'Participant').toUpperCase();
   }
 
-    
-    async function saveChanges(){
-      const user = getSession();
-      saveBtn.disabled = true;
-      saveMsg.textContent = 'Saving...';
+  async function saveChanges(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ saveMsg.textContent = '❌ ' + e.message; showInlineLogin('Please login to save changes.'); return; }
 
-      // derive updates
-      const updates = {
-        category: $('f-category').value,
-        personal: {
-          firstName: $('p-firstName').value.trim(),
-          lastName:  $('p-lastName').value.trim(),
-          email:     $('p-email').value.trim(),
-          phone:     $('p-phone').value.trim(),
-          country:   $('p-country').value.trim()
-        },
-        professional: {
-          affiliation: $('pro-affiliation').value.trim(),
-          department:  $('pro-dept').value.trim(),
-          roleTitle:   $('pro-role').value.trim()
-        },
-        student: ($('f-category').value === 'student') ? {
-          university: $('s-university').value.trim(),
-          level:      $('s-level').value,
-          expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
-        } : undefined,
-        program: {
-          presenting: $('pr-presenting').checked,
-          type:       $('pr-type').value,
-          title:      $('pr-title').value.trim(),
-          topicArea:  $('pr-topic').value.trim()
-        },
-        billing: {
-          billTo:   $('b-billTo').value.trim(),
-          taxNo:    $('b-taxNo').value.trim(),
-          poNumber: $('b-po').value.trim()
-        },
-        address: {
-          line1: $('a-line1').value.trim(),
-          line2: $('a-line2').value.trim(),
-          city:  $('a-city').value.trim(),
-          state: $('a-state').value.trim(),
-          postcode: $('a-postcode').value.trim(),
-          country:  $('a-country').value.trim()
-        },
-        consents: {
-          pdpa: $('c-pdpa').checked,
-          codeOfConduct: $('c-coc').checked,
-          marketingOptIn: $('c-mkt').checked
-        }
-      };
+    saveBtn.disabled = true;
+    saveMsg.textContent = 'Saving...';
 
-      // clean undefined student if not student
-      if (updates.student === undefined) delete updates.student;
-
-      try {
-        const r = await fetch(`${API}/api/registrations/update`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ regCode: user.regCode, email: user.personal.email, updates })
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data.error || 'Update failed');
-
-        // refresh session with returned document
-        if (data?.doc) {
-          saveSession(data.doc);
-          prefill(data.doc);
-        }
-        saveMsg.textContent = '✅ Saved.';
-      } catch(err){
-        saveMsg.textContent = '❌ ' + err.message;
-      } finally {
-        saveBtn.disabled = false;
+    const updates = {
+      category: $('f-category').value,
+      personal: {
+        firstName: $('p-firstName').value.trim(),
+        lastName:  $('p-lastName').value.trim(),
+        email:     $('p-email').value.trim(),
+        phone:     $('p-phone').value.trim(),
+        country:   $('p-country').value.trim()
+      },
+      professional: {
+        affiliation: $('pro-affiliation').value.trim(),
+        department:  $('pro-dept').value.trim(),
+        roleTitle:   $('pro-role').value.trim()
+      },
+      student: ($('f-category').value === 'student') ? {
+        university: $('s-university').value.trim(),
+        level:      $('s-level').value,
+        expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
+      } : undefined,
+      program: {
+        presenting: $('pr-presenting').checked,
+        type:       $('pr-type').value,
+        title:      $('pr-title').value.trim(),
+        topicArea:  $('pr-topic').value.trim()
+      },
+      billing: {
+        billTo:   $('b-billTo').value.trim(),
+        taxNo:    $('b-taxNo').value.trim(),
+        poNumber: $('b-po').value.trim()
+      },
+      address: {
+        line1: $('a-line1').value.trim(),
+        line2: $('a-line2').value.trim(),
+        city:  $('a-city').value.trim(),
+        state: $('a-state').value.trim(),
+        postcode: $('a-postcode').value.trim(),
+        country:  $('a-country').value.trim()
+      },
+      consents: {
+        pdpa: $('c-pdpa').checked,
+        codeOfConduct: $('c-coc').checked,
+        marketingOptIn: $('c-mkt').checked
       }
+    };
+    if (updates.student === undefined) delete updates.student;
+
+    try {
+      const r = await fetch(`${API}/api/registrations/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regCode: user.regCode, email: user.personal.email, updates })
+      });
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Update failed');
+
+      // accept {doc} or {user}
+      const returned = data?.doc || data?.user;
+      if (returned) {
+        saveSession(returned);
+        prefill(returned);
+        fillBadgeText(returned);
+      }
+
+      saveMsg.textContent = '✅ Saved.';
+    } catch(err){
+      saveMsg.textContent = '❌ ' + err.message;
+    } finally {
+      saveBtn.disabled = false;
     }
+  }
 
+  logoutBtn.addEventListener('click', async () => {
+    try { await fetch(`${API}/api/auth/logout`, { method:'POST', credentials:'include' }); } catch {}
+    clearSession();
+    location.reload();
+  });
 
+  $('uBtn').addEventListener('click', uploadFile);
+  $('uRefresh').addEventListener('click', loadHistory);
+  $('uType').addEventListener('change', loadHistory);
+  $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
+  $('pr-presenting').addEventListener('change', () => showPresent($('pr-presenting').checked));
+  saveBtn.addEventListener('click', saveChanges);
 
+  document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
+  document.getElementById('idRefreshBtn').addEventListener('click', refreshIDPhoto);
 
-    
-logoutBtn.addEventListener('click', async () => {
-  try { await fetch(`${API}/api/auth/logout`, { method:'POST', credentials:'include' }); } catch {}
-  clearSession();
-  location.reload();
-});
-    $('uBtn').addEventListener('click', uploadFile);
-    $('uRefresh').addEventListener('click', loadHistory);
-    $('uType').addEventListener('change', loadHistory);
-    $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
-    $('pr-presenting').addEventListener('change', () => showPresent($('pr-presenting').checked));
-    saveBtn.addEventListener('click', saveChanges);
+  function showDashboard(user){
+    prefill(user);
+    fillBadgeText(user);
+    dashBox.classList.remove('hidden');
+    loginBox.classList.add('hidden');
+    refreshIDPhoto();
+  }
 
-// Auto session (server session first; fallback to localStorage)
-(async () => {
-  try {
+  function showInlineLogin(reasonText){
+    loginBox.classList.remove('hidden');
+    dashBox.classList.add('hidden');
+    const diag = document.getElementById('diagBox');
+    diag.textContent = reasonText || '';
+  }
+
+  async function tryMe(){
     const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
-    const data = await r.json().catch(() => ({}));
+    const data = await r.json().catch(()=> ({}));
+    const user = data?.user || data?.doc; // ✅ accept both
+    return { ok: r.ok, status: r.status, data, user };
+  }
 
-    if (r.ok && data?.user) {
-      saveSession(data.user);
-      showDashboard(data.user);
+  // Inline login actions
+  document.getElementById('l-goLogin').addEventListener('click', () => {
+    window.location.href = 'login.html';
+  });
+
+  document.getElementById('l-btn').addEventListener('click', async () => {
+    const em = String(document.getElementById('l-email').value || '').trim().toLowerCase();
+    const pw = String(document.getElementById('l-pass').value || '');
+    const lmsg = document.getElementById('l-msg');
+    lmsg.textContent = 'Logging in...';
+
+    try{
+      const r = await fetch(`${API}/api/auth/login`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        credentials:'include',
+        body: JSON.stringify({ email: em, password: pw })
+      });
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+      // After login, fetch /me and accept {user|doc}
+      const me = await tryMe();
+      if (me.ok && me.user?.regCode && me.user?.personal?.email) {
+        saveSession(me.user);
+        showDashboard(me.user);
+        loadHistory();
+        lmsg.textContent = '✅ Logged in.';
+        return;
+      }
+
+      // If /me doesn’t return a user/doc, show diagnostics
+      lmsg.textContent = '❌ Login succeeded but session profile not available.';
+      document.getElementById('diagBox').innerHTML =
+        `Login OK, but <code>/api/auth/me</code> returned status <strong>${me.status}</strong>.<br>
+         Response keys: <code>${Object.keys(me.data||{}).join(', ') || '(none)'}</code><br>
+         <em>This usually means the backend <code>/api/auth/me</code> isn’t returning <code>{user}</code> or <code>{doc}</code>, or cookies are blocked.</em>`;
+    }catch(err){
+      lmsg.textContent = '❌ ' + (err.message || 'Login failed');
+    }
+  });
+
+  // ====== Auto session bootstrap (server first; then localStorage; else inline login) ======
+  (async () => {
+    // 1) Try server session
+    try{
+      const me = await tryMe();
+      if (me.ok && me.user?.regCode && me.user?.personal?.email) {
+        saveSession(me.user);
+        showDashboard(me.user);
+        loadHistory();
+        return;
+      }
+    } catch {}
+
+    // 2) localStorage fallback
+    const sess = getSession();
+    if (sess?.regCode && sess?.personal?.email) {
+      showDashboard(sess);
       loadHistory();
       return;
     }
-  } catch {}
 
-  // Safari cross-site cookie block fallback
-  const sess = getSession();
-  if (sess?.regCode && sess?.personal?.email) {
-    showDashboard(sess);
-    loadHistory();
-    return;
-  }
-
-  window.location.href = 'login.html';
-})();
-
-    // ID photo events
-document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
-document.getElementById('idRefreshBtn').addEventListener('click', refreshIDPhoto);
-
-// When showing dashboard, fill badge text and try to load existing photo
-function showDashboard(user){
-  prefill(user);
-  fillBadgeText(user);
-  dashBox.classList.remove('hidden');
-  refreshIDPhoto();
-}
-
-  </script>
-
-
-
-
+    // 3) show inline login (no redirect loop)
+    showInlineLogin('No active session detected. Please login.');
+  })();
+</script>
 </body>
 </html>
