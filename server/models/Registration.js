@@ -61,6 +61,23 @@ email: { type: String, required: true, unique: true, index: true, lowercase: tru
     topicArea:  { type: String }
   },
 
+  submission: {
+  theme: { type: String },
+  field: { type: String },
+  title: { type: String },
+  authors: [
+    {
+      firstName: { type: String },
+      lastName: { type: String },
+      email: { type: String },
+      affiliation: { type: String },
+      country: { type: String },
+      isCorresponding: { type: Boolean, default: false }
+    }
+  ],
+  updatedAt: { type: Date }
+},
+
   student: {
     university: { type: String },
     level:      { type: String, enum: ['UG','MSc','PhD','Other'], default: 'Other' },
