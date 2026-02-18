@@ -36,17 +36,21 @@ router.post('/login', async (req, res) => {
     req.session.email = user.personal.email;
     req.session.regCode = user.regCode;
 
-    return res.json({
-      ok: true,
-      user: {
-        regCode: user.regCode,
-        email: user.personal.email,
-        firstName: user.personal.firstName,
-        lastName: user.personal.lastName,
-        category: user.category,
-        paymentStatus: user.payment?.status || 'pending'
-      }
-    });
+ return res.json({
+  ok: true,
+  user: {
+    regCode: user.regCode,
+    category: user.category,
+    personal: {
+      email: user.personal.email,
+      firstName: user.personal.firstName,
+      lastName: user.personal.lastName
+    },
+    payment: {
+      status: user.payment?.status || 'pending'
+    }
+  }
+});
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
