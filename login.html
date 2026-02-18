@@ -142,11 +142,19 @@
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
-        msg.className = 'msg ok';
-        msg.textContent = '✅ Logged in. Redirecting...';
+msg.className = 'msg ok';
+msg.textContent = '✅ Logged in. Redirecting...';
 
-        // go to participant portal
-        setTimeout(() => { window.location.href = 'participants.html'; }, 600);
+// Try to pull full profile (may fail if Safari blocks cookie)
+try {
+  const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+  const meData = await me.json().catch(() => ({}));
+  if (me.ok && meData?.user) {
+    localStorage.setItem('mtermsUser', JSON.stringify(meData.user));
+  }
+} catch {}
+
+setTimeout(() => { window.location.href = 'participants.html'; }, 600);
 
       } catch(err){
         msg.className = 'msg err';
