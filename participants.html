@@ -725,67 +725,76 @@
     window.location.href = 'login.html';
   });
 
-  document.getElementById('l-btn').addEventListener('click', async () => {
-    const em = String(document.getElementById('l-email').value || '').trim().toLowerCase();
-    const pw = String(document.getElementById('l-pass').value || '');
-    const lmsg = document.getElementById('l-msg');
-    lmsg.textContent = 'Logging in...';
+document.getElementById('l-btn').addEventListener('click', async () => {
+  const em = String(document.getElementById('l-email').value || '').trim().toLowerCase();
+  const pw = String(document.getElementById('l-pass').value || '');
+  const lmsg = document.getElementById('l-msg');
+  const diag = document.getElementById('diagBox');
 
-    try{
-      const r = await fetch(`${API}/api/auth/login`, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        credentials:'include',
-        body: JSON.stringify({ email: em, password: pw })
-      });
-      const data = await r.json().catch(()=> ({}));
-      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+  lmsg.textContent = 'Logging in...';
+  diag.textContent = '';
 
-      // After login, fetch /me and accept {user|doc}
-      const me = await tryMe();
-      if (me.ok && me.user?.regCode && me.user?.personal?.email) {
-        saveSession(me.user);
-        showDashboard(me.user);
-        loadHistory();
-        lmsg.textContent = '✅ Logged in.';
-        return;
-      }
+  try {
+    const r = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: em, password: pw })
+    });
 
-      // If /me doesn’t return a user/doc, show diagnostics
-      lmsg.textContent = '❌ Login succeeded but session profile not available.';
-      document.getElementById('diagBox').innerHTML =
-        `Login OK, but <code>/api/auth/me</code> returned status <strong>${me.status}</strong>.<br>
-         Response keys: <code>${Object.keys(me.data||{}).join(', ') || '(none)'}</code><br>
-         <em>This usually means the backend <code>/api/auth/me</code> isn’t returning <code>{user}</code> or <code>{doc}</code>, or cookies are blocked.</em>`;
-    }catch(err){
-      lmsg.textContent = '❌ ' + (err.message || 'Login failed');
-    }
-  });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
-  // ====== Auto session bootstrap (server first; then localStorage; else inline login) ======
-  (async () => {
-    // 1) Try server session
-    try{
-      const me = await tryMe();
-      if (me.ok && me.user?.regCode && me.user?.personal?.email) {
-        saveSession(me.user);
-        showDashboard(me.user);
-        loadHistory();
-        return;
-      }
-    } catch {}
+    // ✅ KEY FIX: use login response FIRST (Safari may block cookie so /me will 401)
+    const userFromLogin = data?.user || data?.doc;
 
-    // 2) localStorage fallback
-    const sess = getSession();
-    if (sess?.regCode && sess?.personal?.email) {
-      showDashboard(sess);
+    if (userFromLogin?.regCode && userFromLogin?.personal?.email) {
+      saveSession(userFromLogin);
+      showDashboard(userFromLogin);
       loadHistory();
+      lmsg.textContent = '✅ Logged in.';
       return;
     }
 
-    // 3) show inline login (no redirect loop)
-    showInlineLogin('No active session detected. Please login.');
-  })();
+    // Fallback: store minimal info so you don't get stuck in a loop
+    // (portal features needing regCode will still require backend to return it)
+    saveSession({ personal: { email: em } });
+
+    lmsg.textContent = '⚠️ Logged in, but profile missing in login response.';
+    diag.innerHTML =
+      `Your backend <code>/api/auth/login</code> did not return <code>{user}</code> or <code>{doc}</code> with <code>regCode</code>.<br>
+       Safari blocks the session cookie, so <code>/api/auth/me</code> becomes <strong>401</strong>.<br>
+       ✅ Fix backend: make <code>/api/auth/login</code> return the user profile (incl. regCode).`;
+
+  } catch (err) {
+    lmsg.textContent = '❌ ' + (err.message || 'Login failed');
+  }
+});
+
+  // ====== Auto session bootstrap (server first; then localStorage; else inline login) ======
+(async () => {
+  // 1) localStorage first (so no second login required)
+  const sess = getSession();
+  if (sess?.regCode && sess?.personal?.email) {
+    showDashboard(sess);
+    loadHistory();
+    return;
+  }
+
+  // 2) optional: try server session (may 401 on Safari)
+  try {
+    const me = await tryMe();
+    if (me.ok && me.user?.regCode && me.user?.personal?.email) {
+      saveSession(me.user);
+      showDashboard(me.user);
+      loadHistory();
+      return;
+    }
+  } catch {}
+
+  // 3) show inline login (no redirect loop)
+  showInlineLogin('No active session detected. Please login.');
+})();
 </script>
 </body>
 </html>
