@@ -164,6 +164,16 @@ try {
       title: program.title,
       topicArea: program.topicArea
     },
+
+
+    submission: {
+      theme: '',
+      field: '',
+      title: '',
+      authors: [],
+      updatedAt: null
+    },
+    
     student: studentBlock,
     studentProof: studentProofBlock,
     addons: { dinner: !!addons.dinner },
@@ -245,6 +255,26 @@ router.put('/update', async (req, res) => {
       address: allow(updates.address, ['line1','line2','city','state','postcode','country']),
       billing: allow(updates.billing, ['billTo','taxNo','poNumber']),
       program: allow(updates.program, ['presenting','type','title','topicArea']),
+
+
+      submission: {
+        theme: updates.submission?.theme,
+        field: updates.submission?.field,
+        title: updates.submission?.title,
+        authors: Array.isArray(updates.submission?.authors)
+          ? updates.submission.authors.slice(0, 10).map(a => ({
+              firstName: a?.firstName,
+              lastName: a?.lastName,
+              email: a?.email,
+              affiliation: a?.affiliation,
+              country: a?.country,
+              isCorresponding: !!a?.isCorresponding
+            }))
+          : [],
+        updatedAt: new Date()
+      },
+
+      
       student: allow(updates.student, ['university','level','expectedGradYear']),
       consents: allow(updates.consents, ['pdpa','codeOfConduct','marketingOptIn'])
     };
