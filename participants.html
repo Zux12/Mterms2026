@@ -146,49 +146,7 @@
 
 <p class="help">Log in using your email and password to view or update your details, and manage uploads.</p>
   
-  <!-- Login form -->
-  <div id="loginBox" class="card">
-    <h2>Login</h2>
-<input id="loginEmail" type="email" placeholder="Email used during registration">
 
-<div style="position:relative">
-  <input id="loginPassword" type="password" placeholder="Password" style="padding-right:70px">
-  <button type="button" id="loginPwToggle"
-    style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
-           border:1px solid var(--border);background:#fff;border-radius:8px;
-           padding:6px 10px;cursor:pointer;font-weight:700;">
-    Show
-  </button>
-</div>
-
-<div style="margin-top:4px;font-size:.9rem">
-  <a href="login.html" style="font-weight:700;color:#0b5bd3;text-decoration:none">Go to Login page</a>
-  <span style="opacity:.6"> · </span>
-  <a href="#" id="forgotPwLink" style="font-weight:700;color:#0b5bd3;text-decoration:none">Forgot password?</a>
-</div>
-    <button id="loginBtn" class="btn">Login</button>
-     <button 
-  onclick="window.location.href='index.html'" 
-  style="
-    display:inline-block;
-    margin-top:12px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    background:linear-gradient(90deg,#19c37d,#0ea5a6);
-    color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"
->
-  ← Back to Main Page
-</button>
-    <div id="loginMsg" style="margin-top:10px;font-size:.9rem;"></div>
-  </div>
 
   <!-- Dashboard -->
   <div id="dashBox" class="hidden">
@@ -405,11 +363,11 @@
     const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 
     // Elements
-    const loginBox = document.getElementById('loginBox');
+
     const dashBox  = document.getElementById('dashBox');
-    const loginBtn = document.getElementById('loginBtn');
+
     const logoutBtn= document.getElementById('logoutBtn');
-    const loginMsg = document.getElementById('loginMsg');
+
     const saveBtn  = document.getElementById('saveBtn');
     const saveMsg  = document.getElementById('saveMsg');
 
@@ -479,54 +437,7 @@
       $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
     }
 
-    function showDashboard(user){
-      prefill(user);
-      loginBox.classList.add('hidden');
-      dashBox.classList.remove('hidden');
-    }
-async function login(){
-  const email = String($('loginEmail')?.value || '').trim().toLowerCase();
-  const password = String($('loginPassword')?.value || '');
 
-  if (!email || !password){
-    loginMsg.textContent = '❌ Please enter both email and password.';
-    return;
-  }
-
-  loginBtn.disabled = true;
-  loginMsg.textContent = 'Logging in...';
-
-  try {
-    // 1) Create session
-    const r = await fetch(`${API}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
-
-    // 2) Fetch full profile using session
-    const me = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
-    const meData = await me.json().catch(() => ({}));
-    if (!me.ok) throw new Error(meData.error || `HTTP ${me.status}`);
-
-    // Save to localStorage (keep your existing behavior)
-    saveSession(meData.user);
-    showDashboard(meData.user);
-
-    // load uploads list immediately
-    loadHistory();
-
-    loginMsg.textContent = '';
-  } catch(err){
-    loginMsg.textContent = '❌ Login failed: ' + err.message;
-  } finally {
-    loginBtn.disabled = false;
-  }
-}
 
     async function uploadFile(){
       const user = getSession();
@@ -782,27 +693,8 @@ if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
       }
     }
 
-    // Wire events
-    loginBtn.addEventListener('click', login);
-// Login password show/hide
-const pwEl = $('loginPassword');
-const pwTg = $('loginPwToggle');
-if (pwEl && pwTg){
-  pwTg.addEventListener('click', () => {
-    const isPw = pwEl.type === 'password';
-    pwEl.type = isPw ? 'text' : 'password';
-    pwTg.textContent = isPw ? 'Hide' : 'Show';
-  });
-}
 
-// Forgot password placeholder
-const fp = document.getElementById('forgotPwLink');
-if (fp){
-  fp.addEventListener('click', (e) => {
-    e.preventDefault();
-    alert('Forgot password will be enabled soon.');
-  });
-}
+
 
     
 logoutBtn.addEventListener('click', async () => {
@@ -845,9 +737,8 @@ document.getElementById('idRefreshBtn').addEventListener('click', refreshIDPhoto
 function showDashboard(user){
   prefill(user);
   fillBadgeText(user);
-  loginBox.classList.add('hidden');
   dashBox.classList.remove('hidden');
-  refreshIDPhoto(); // pull existing profile photo if any
+  refreshIDPhoto();
 }
 
   </script>
