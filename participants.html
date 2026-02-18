@@ -332,7 +332,26 @@
       <div id="uHistory" style="margin-top:12px;"></div>
     </div>
 
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Program</legend>
+        <label class="field-inline">
+          <input type="checkbox" id="pr-presenting"> I am a presenter
+        </label>
 
+        <div id="presentFields" style="display:none;margin-top:8px">
+          <div class="grid-2">
+            <select id="pr-type">
+              <option value="talk">Oral</option>
+              <option value="poster">Poster</option>
+
+            </select>
+            <input id="pr-topic" placeholder="Topic area (optional)">
+          </div>
+          <input id="pr-title" placeholder="Presentation title" style="margin-top:8px">
+        </div>
+      </fieldset>
+
+    
         <!-- Submission (Theme + Field + Authors) -->
     <div class="card hidden" id="submissionCard">
       <h3>Abstract / Authors Details</h3>
@@ -769,25 +788,7 @@
         </div>
       </fieldset>
 
-      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-        <legend>Program</legend>
-        <label class="field-inline">
-          <input type="checkbox" id="pr-presenting"> I am a presenter
-        </label>
 
-        <div id="presentFields" style="display:none;margin-top:8px">
-          <div class="grid-2">
-            <select id="pr-type">
-              <option value="talk">Oral</option>
-              <option value="poster">Poster</option>
-              <option value="workshop">Workshop</option>
-              <option value="none">None</option>
-            </select>
-            <input id="pr-topic" placeholder="Topic area (optional)">
-          </div>
-          <input id="pr-title" placeholder="Presentation title" style="margin-top:8px">
-        </div>
-      </fieldset>
 
       <details style="margin-bottom:12px">
         <summary>Billing & invoice (optional)</summary>
