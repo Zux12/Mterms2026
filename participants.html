@@ -121,7 +121,29 @@
       border-top:1px solid #eef2f6; background:#fafafa;
     }
 
-    .field-inline{display:flex;align-items:center;gap:8px;margin:0 !important;}
+/* Keep inline checkbox/radio labels INSIDE the card (Safari-safe) */
+.field-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 !important;
+  width:100%;
+  max-width:100%;
+  justify-content:flex-start;
+  flex-wrap:wrap;              /* allow wrapping instead of pushing outside */
+  white-space:normal;          /* allow text to wrap */
+  overflow-wrap:anywhere;      /* prevent long words from overflowing */
+}
+
+.field-inline input{
+  width:auto !important;       /* stop input inheriting 100% width */
+  margin:0 !important;
+  flex:0 0 auto;
+}
+
+
+.card, fieldset { overflow:hidden; }
+    
     #pr-presenting:where(input){ margin:0; }
 
 
