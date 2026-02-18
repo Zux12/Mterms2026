@@ -67,7 +67,23 @@ app.use(session({
     collectionName: 'sessions',
     ttl: 60 * 60 * 24 * 14 // 14 days
   }),
+  app.use(session({
+  name: 'mterms.sid',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MTERM2026_DB_URI,
+    collectionName: 'sessions',
+    ttl: 60 * 60 * 24 * 14
+  }),
   cookie: {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 14
+  }
+}));: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',        // true on Heroku
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
