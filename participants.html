@@ -709,24 +709,29 @@ logoutBtn.addEventListener('click', async () => {
     $('pr-presenting').addEventListener('change', () => showPresent($('pr-presenting').checked));
     saveBtn.addEventListener('click', saveChanges);
 
-// Auto session (prefer server session, fallback to localStorage)
+// Auto session (server session first; fallback to localStorage)
 (async () => {
   try {
     const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
     const data = await r.json().catch(() => ({}));
 
-    if (!r.ok || !data?.user) {
-      window.location.href = 'login.html';
+    if (r.ok && data?.user) {
+      saveSession(data.user);
+      showDashboard(data.user);
+      loadHistory();
       return;
     }
+  } catch {}
 
-    saveSession(data.user);
-    showDashboard(data.user);
+  // Safari cross-site cookie block fallback
+  const sess = getSession();
+  if (sess?.regCode && sess?.personal?.email) {
+    showDashboard(sess);
     loadHistory();
-
-  } catch {
-    window.location.href = 'login.html';
+    return;
   }
+
+  window.location.href = 'login.html';
 })();
 
     // ID photo events
