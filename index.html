@@ -1204,7 +1204,7 @@
   <div id="ai-widget">
   <div id="ai-chat-window" class="ai-window hidden">
     <div class="ai-header">
-      <span>🤖 MTERMS2026 AI Assistant</span>
+      <span>MTERMS2026 AI Assistant</span>
       <button id="ai-close-btn" aria-label="Close chat">×</button>
     </div>
     <div id="ai-messages" class="ai-messages">
@@ -1218,9 +1218,9 @@
     </div>
   </div>
 
-  <button id="ai-toggle-btn" class="ai-toggle">
-    🤖
-  </button>
+<button id="ai-toggle-btn" class="ai-toggle">
+  <img src="public/aichatbot.png" alt="AI Chatbot" class="ai-toggle-icon">
+</button>
 </div>
 
 <style>
@@ -1249,6 +1249,13 @@
     background: var(--brand-2, #2f7bdc);
   }
 
+.ai-toggle-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none; /* ensures button click works smoothly */
+}
+  
   /* Chat Window */
   .ai-window {
     position: fixed;
