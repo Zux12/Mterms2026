@@ -902,7 +902,141 @@
   })();
 </script>
 
+  
 
   <script src="assets/main.js"></script>
+
+  <script>
+/* ========================================== */
+/* MTERMS AI ASSISTANT - UPDATED SCRIPT      */
+/* ========================================== */
+(function() {
+  const toggleBtn = document.getElementById('ai-toggle-btn');
+  const closeBtn = document.getElementById('ai-close-btn');
+  const windowEl = document.getElementById('ai-chat-window');
+  const inputEl = document.getElementById('ai-input');
+  const sendBtn = document.getElementById('ai-send-btn');
+  const msgsEl = document.getElementById('ai-messages');
+
+  // EXPANDED KNOWLEDGE BASE
+  // Sources: Event Guide, Prospectus, Abstract Guidelines, Oral Guidelines
+  const knowledge = [
+    // --- BASIC EVENT INFO ---
+    {
+      triggers: ["gala", "dinner", "social", "party"],
+      answer: "The Gala Dinner is on Day 1 (Monday, 7 Sept) at 20:00. It's a great chance to network!"
+    },
+    {
+      triggers: ["venue", "location", "hotel", "where"],
+      answer: "MTERMS 2026 will be held at the Concorde Hotel, Kuala Lumpur, Malaysia."
+    },
+    {
+      triggers: ["date", "when"],
+      answer: "The conference is on 7th & 8th September 2026 (Monday & Tuesday)."
+    },
+
+    // --- SCHEDULE & SPEAKERS ---
+    {
+      triggers: ["plenary", "keynote", "speaker"],
+      answer: "Key sessions: 'Stem Cell Biology' (Day 1, 10:00), 'Biomaterials' (Day 1, 17:00), and 'Gene Editing' (Day 2, 09:00)."
+    },
+    {
+      triggers: ["symposium", "symposia", "track"],
+      answer: "Symposia cover Stem Cell Innovations, Biomaterials, and the Student/Young Investigator Symposium (SYIS)."
+    },
+
+    // --- ABSTRACTS & PAPERS ---
+    {
+      triggers: ["abstract", "submit", "format", "font", "word count"],
+      answer: "Abstracts must be British English, max 250 words, Arial 12pt. You MUST include at least one figure or table. [Source: Abstract Guidelines]"
+    },
+    {
+      triggers: ["keyword", "key word"],
+      answer: "Please provide 3-5 keywords to assist in cross-indexing."
+    },
+    {
+      triggers: ["template", "appendix"],
+      answer: "Please refer to 'Appendix 1' in the guidelines for the exact abstract template."
+    },
+
+    // --- ORAL PRESENTATIONS ---
+    {
+      triggers: ["oral", "presentation", "slide", "powerpoint", "time limit"],
+      answer: "Oral presenters get 10 mins total: 8 mins to present + 2 mins Q&A. Slides are due by 30 August 2026. [Source: Oral Guidelines]"
+    },
+
+    // --- SPONSORSHIP ---
+    {
+      triggers: ["sponsor", "booth", "exhibit", "price", "cost", "package"],
+      answer: "Sponsorships: Platinum (RM30k), Gold (RM20k), Silver (RM10k). Booths are RM7,500. Contact lyoges@hctm.ukm.edu.my."
+    },
+    {
+      triggers: ["platinum", "gold", "silver"],
+      answer: "Platinum: RM30,000 (Exclusive). Gold: RM20,000. Silver: RM10,000. All include booth space & recognition."
+    },
+    {
+      triggers: ["bag", "lanyard", "dinner sponsor"],
+      answer: "Conference Bag: RM15,000. Lanyard: RM10,000. Dinner Sponsor: RM10,000. All correspond to exclusive branding."
+    },
+
+    // --- PAYMENT & CONTACT ---
+    {
+      triggers: ["pay", "bank", "account", "transfer"],
+      answer: "Bank: CIMB Bank. Acct: 8007092428 (Malaysian Tissue Engineering...). Send receipt to admin@mterms2026.com."
+    },
+    {
+      triggers: ["contact", "email", "help"],
+      answer: "For questions, email us at admin@mterms2026.com."
+    }
+  ];
+
+  // UI Toggles
+  toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
+  closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
+
+  // Message Logic
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    // 1. User Bubble
+    addBubble(text, 'user');
+    inputEl.value = '';
+
+    // 2. Bot Response
+    setTimeout(() => {
+      const response = getAIResponse(text);
+      addBubble(response, 'bot');
+    }, 600);
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  function addBubble(text, type) {
+    const div = document.createElement('div');
+    div.className = `ai-msg ${type}`;
+    div.innerText = text; // Safe injection
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function getAIResponse(query) {
+    const lowerQ = query.toLowerCase();
+    
+    // Find matching answer
+    for (let item of knowledge) {
+      if (item.triggers.some(t => lowerQ.includes(t))) {
+        return item.answer;
+      }
+    }
+    
+    // Fallback
+    return "I'm not sure. Check the 'Program' page or email lyoges@hctm.ukm.edu.my for help.";
+  }
+})();
+</script>
 </body>
 </html>
