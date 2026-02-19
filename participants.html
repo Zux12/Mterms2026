@@ -1444,6 +1444,14 @@ logoutBtn.addEventListener('click', async () => {
     return { ok: r.ok, status: r.status, data, user };
   }
 
+    // Fetch full profile directly from registrations/check (cookie-free; Safari-safe)
+  async function fetchFullProfile(regCode, email){
+    const r = await fetch(`${API}/api/registrations/check?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`);
+    const doc = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(doc.error || `HTTP ${r.status}`);
+    return doc; // full Registration document
+  }
+
   // Inline login actions
   document.getElementById('l-goLogin').addEventListener('click', () => {
     window.location.href = 'login.html';
@@ -1472,13 +1480,24 @@ document.getElementById('l-btn').addEventListener('click', async () => {
     // ✅ KEY FIX: use login response FIRST (Safari may block cookie so /me will 401)
     const userFromLogin = data?.user || data?.doc;
 
-    if (userFromLogin?.regCode && userFromLogin?.personal?.email) {
-      saveSession(userFromLogin);
-      showDashboard(userFromLogin);
-      loadHistory();
-      lmsg.textContent = '✅ Logged in.';
-      return;
-    }
+if (userFromLogin?.regCode && userFromLogin?.personal?.email) {
+  // 1) Save what login returned (may be partial)
+  saveSession(userFromLogin);
+
+  // 2) Immediately fetch full profile from /registrations/check (Safari-safe)
+  try {
+    const full = await fetchFullProfile(userFromLogin.regCode, userFromLogin.personal.email);
+    saveSession(full);
+    showDashboard(full);
+  } catch (e) {
+    // fallback: show what we have
+    showDashboard(userFromLogin);
+  }
+
+  loadHistory();
+  lmsg.textContent = '✅ Logged in.';
+  return;
+}
 
     // Fallback: store minimal info so you don't get stuck in a loop
     // (portal features needing regCode will still require backend to return it)
@@ -1498,12 +1517,18 @@ document.getElementById('l-btn').addEventListener('click', async () => {
   // ====== Auto session bootstrap (server first; then localStorage; else inline login) ======
 (async () => {
   // 1) localStorage first (so no second login required)
-  const sess = getSession();
-  if (sess?.regCode && sess?.personal?.email) {
+const sess = getSession();
+if (sess?.regCode && sess?.personal?.email) {
+  try {
+    const full = await fetchFullProfile(sess.regCode, sess.personal.email);
+    saveSession(full);
+    showDashboard(full);
+  } catch {
     showDashboard(sess);
-    loadHistory();
-    return;
   }
+  loadHistory();
+  return;
+}
 
   // 2) optional: try server session (may 401 on Safari)
   try {
