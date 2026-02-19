@@ -664,6 +664,122 @@
   justify-content:flex-end;
   gap: 10px;
 }
+
+
+/* =========================
+   NEW: Centered headings + justified body copy
+   ========================= */
+.center-justify{
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: justify;
+  text-justify: inter-word;
+}
+.center-justify h2,
+.center-justify h3{
+  text-align: center;
+}
+
+/* =========================
+   NEW: People blocks (no cards)
+   ========================= */
+.people-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.person-plain{
+  text-align: center;
+}
+
+.person-plain img{
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.person-plain .name{
+  margin-top: 10px;
+  font-weight: 800;
+}
+
+.person-plain .role{
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: .98rem;
+}
+
+.person-plain .bio{
+  margin-top: 10px;
+  text-align: justify;
+  text-justify: inter-word;
+  color: var(--text);
+}
+
+/* Two photos at end of welcoming remarks */
+.remarks-photos{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.remarks-photos img{
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 0 auto;
+  display: block;
+}
+@media (max-width: 640px){
+  .remarks-photos{ grid-template-columns: 1fr; }
+  .remarks-photos img{ max-width: 320px; }
+}
+
+/* =========================
+   NEW: Logo cards (Strategic Partners + Host/Co-host)
+   ========================= */
+.logo-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.logo-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.logo-card img{
+  max-height: 58px;
+  max-width: 140px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.logo-card .logo-fallback{
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+  padding: 6px;
+}
 </style>
 <script src="lunr.min.js"></script>
 </head>
@@ -759,8 +875,8 @@
   <!-- About -->
 <section id="about" class="section">
   <div class="container">
-    <div class="text-center-limit">
-      <h2>About MTERMS</h2>
+<div class="center-justify">
+  <h2>About MTERMS</h2>
       <p>
         The Malaysian Tissue Engineering and Regenerative Medicine Scientific Meeting (MTERMS) is a biennial conference organised by the Tissue Engineering and Regenerative Medicine Society Malaysia (TESMA). First held in 2004, MTERMS has grown into an international platform that brings together researchers, clinicians, industry partners, and government agencies to strengthen tissue engineering and regenerative medicine.
       </p>
@@ -771,7 +887,228 @@
   </div>
 </section>
 
- 
+
+
+
+
+
+<!-- Welcoming Remarks -->
+<section id="welcoming-remarks" class="section section-alt">
+  <div class="container">
+    <div class="center-justify">
+      <h2>Welcoming Remarks</h2>
+
+      <p>Dear Colleagues,</p>
+
+      <p>
+        On behalf of the Organizing Committee, it is our great pleasure to welcome you to the Malaysian Tissue Engineering &amp; Regenerative Medicine Symposium (MTERMS) 2026.
+        This symposium brings together leading researchers, clinicians, industry partners, and innovators to advance the rapidly evolving field of tissue engineering and regenerative medicine.
+      </p>
+
+      <p>
+        The theme of MTERMS 2026 reflects our shared commitment to transforming healthcare through innovative biomaterials, regenerative technologies, and interdisciplinary collaboration.
+        As the field continues to evolve, tissue engineering and regenerative medicine offer powerful solutions to complex clinical challenges, driving new paradigms in personalized medicine,
+        translational research, and advanced therapeutic strategies.
+      </p>
+
+      <p>
+        Our scientific programme will cover a diverse spectrum of topics, including biomaterials design, biofabrication and bioprinting technologies, scaffold engineering,
+        drug delivery systems, regenerative therapies, clinical translation, and emerging AI-assisted approaches in biomedical innovation.
+        Through keynote lectures, scientific sessions, workshops, and collaborative discussions, we aim to foster meaningful exchange, inspire new ideas, and strengthen global partnerships.
+      </p>
+
+      <p>
+        Malaysia provides a vibrant and dynamic setting for this international gathering, reflecting the region’s growing contributions to biomedical research and innovation.
+        We hope that beyond the scientific discussions, you will experience the rich culture, hospitality, and collaborative spirit that define our community.
+      </p>
+
+      <p>
+        Your active participation is essential to the success of MTERMS 2026. We warmly invite you to share your expertise, engage in insightful dialogue,
+        and build lasting collaborations that will shape the future of tissue engineering and regenerative medicine
+      </p>
+
+      <div class="remarks-photos" aria-label="Welcoming remarks photos">
+        <img src="public/aliana.jpg" alt="Assoc. Prof. Dr Nur Aliana (photo placeholder)">
+        <img src="public/fauzi.jpg" alt="Assoc. Prof. Dr Fauzi (photo placeholder)">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Keynote Speakers -->
+<section id="keynote-speakers" class="section">
+  <div class="container">
+    <div class="center-justify">
+      <h2>Keynote Speakers</h2>
+      <p>
+        (Details will be updated.) Below are the confirmed keynote speakers for MTERMS 2026.
+      </p>
+
+      <div class="people-grid">
+        <div class="person-plain">
+          <img src="public/john.jpg" alt="John Mason (photo placeholder)">
+          <div class="name">JOHN MASON</div>
+          <div class="role">Keynote Speaker</div>
+          <div class="bio">
+            Bio placeholder. (Add short professional biography: affiliation, key expertise, notable achievements, and talk focus.)
+          </div>
+        </div>
+
+        <div class="person-plain">
+          <img src="public/chua.jpg" alt="Chua (photo placeholder)">
+          <div class="name">CHUA</div>
+          <div class="role">Keynote Speaker</div>
+          <div class="bio">
+            Bio placeholder. (Add short professional biography: affiliation, key expertise, notable achievements, and talk focus.)
+          </div>
+        </div>
+
+        <div class="person-plain">
+          <img src="public/ika.jpg" alt="Ika (photo placeholder)">
+          <div class="name">IKA</div>
+          <div class="role">Keynote Speaker</div>
+          <div class="bio">
+            Bio placeholder. (Add short professional biography: affiliation, key expertise, notable achievements, and talk focus.)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Plenary Speakers (Placeholder) -->
+<section id="plenary-speakers" class="section section-alt">
+  <div class="container">
+    <div class="center-justify">
+      <h2>Plenary Speakers</h2>
+      <p>
+        Placeholder: Plenary speaker details will be announced soon.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- Host / Co-host -->
+<section id="host-cohost" class="section">
+  <div class="container">
+    <div class="center-justify">
+      <h2>Host / Co-host</h2>
+      <div class="logo-grid" aria-label="Host and co-host logos">
+        <div class="logo-card">
+          <img src="tesma.png" alt="TESMA logo">
+        </div>
+        <div class="logo-card">
+          <img src="uitm.png" alt="UiTM logo">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Strategic Partners -->
+<section id="strategic-partners" class="section section-alt">
+  <div class="container">
+    <div class="center-justify">
+      <h2>Strategic Partners</h2>
+      <p>In collaboration with universities and institutions across Malaysia and beyond.</p>
+
+      <div class="logo-grid" aria-label="Strategic partners logos">
+
+        <!-- Public universities (mostly Wikimedia Commons / official sources) -->
+        <div class="logo-card">
+          <!-- UKM: official download pages exist; replace this placeholder with your preferred official logo file -->
+          <div class="logo-fallback">UKM</div>
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20of%20UPM%20and%20PUTRA.jpg" alt="UPM logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/University%20of%20Malaya%20logo.svg" alt="UM logo">
+        </div>
+
+        <div class="logo-card">
+          <!-- USM: use crest/logotype as you prefer; this is the crest reference via Wikipedia file name -->
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/USM%20Crest.svg" alt="USM logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/UTM-LOGO-FULL.png" alt="UTM logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/IIUM%20Logo%202019.svg" alt="IIUM logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Ump%20logo.jpg" alt="Universiti Malaysia Pahang (UMPSA/UMP) logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Universiti%20Malaysia%20Sarawak%20logo.svg" alt="UNIMAS logo">
+        </div>
+
+        <div class="logo-card">
+          <!-- UMS: Wikipedia points to Logo_Universiti_Malaysia_Sabah.png -->
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo_Universiti_Malaysia_Sabah.png" alt="UMS logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Kluni.png" alt="UniKL logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20UniSZA.png" alt="UniSZA logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo_Universiti_Malaysia_Kelantan.png" alt="Universiti Malaysia Kelantan (UMK) logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20Rasmi%20UMT.png" alt="Universiti Malaysia Terengganu (UMT) logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Poli%20Logo.png" alt="Polytechnic Malaysia (Politeknik) logo">
+        </div>
+
+        <!-- Private universities / others (logos may vary; replace if you prefer official brand kits) -->
+        <div class="logo-card">
+          <!-- MAHSA: replace with your chosen official logo asset when ready -->
+          <div class="logo-fallback">MAHSA</div>
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/SUC%20Logo.png" alt="SEGi logo">
+        </div>
+
+        <div class="logo-card">
+          <!-- Lincoln: no clean logo file found in Commons category; use placeholder -->
+          <div class="logo-fallback">LINCOLN</div>
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Monash%20University%20logo.svg" alt="Monash University logo">
+        </div>
+
+        <div class="logo-card">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Sunway%20logo.jpg" alt="Sunway University logo">
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
 
 
   
