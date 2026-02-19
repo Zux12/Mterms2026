@@ -4,403 +4,210 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    img-src 'self' data: blob: https:;
-    script-src 'self' 'unsafe-inline';
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
-    base-uri 'self';
-    form-action 'self';
-    frame-src 'self' https://www.google.com https://*.google.com;
-    child-src 'self' https://www.google.com https://*.google.com
-  ">
-
   <title>MTERMS 2026 — Conference Theme</title>
   <meta name="description" content="MTERMS 2026 Theme — From Discovery to Therapy: Advances in Tissue Engineering and Regenerative Medicine" />
-  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
 
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+
+  <!-- Keep your shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
 
+  <!-- Lunr (bot search) -->
+  <script src="lunr.min.js"></script>
+
   <style>
-    /* ===== Light-only tokens (no dark mode) ===== */
+    /* =========================================================
+       THEME PAGE: minimalist + light only (no dark mode here)
+       ========================================================= */
+
     :root{
-      --bg:#f6fbff;
-      --surface:#ffffff;
-      --text:#0b1115;
-      --muted:#556b86;
+      --bg: #f7fbff;
+      --surface: #ffffff;
+      --text: #0b1115;
+      --muted: #4b5e77;
 
-      /* UiTM-like blues */
-      --uitm:#1e5aa8;
-      --uitm2:#2f7bdc;
+      /* Subtle blend: TESMA (green) + UiTM (blue) */
+      --tesma: #166534;
+      --uitm:  #1e5aa8;
 
-      /* TESMA accent (green-ish) */
-      --tesma:#166534;
-      --tesma2:#22c55e;
-
-      --ring: rgba(30,90,168,.18);
-      --border:#d7e6f7;
-      --faint:#eef6ff;
+      --border: rgba(30,90,168,.14);
+      --shadow: 0 14px 40px rgba(15, 23, 42, .08);
+      --shadow2: 0 8px 22px rgba(15, 23, 42, .06);
+      --radius: 18px;
     }
 
     html, body{
-      color: var(--text);
       background:
-        radial-gradient(900px 500px at 10% 8%, rgba(47,123,220,.11), transparent 60%),
-        radial-gradient(760px 420px at 85% 12%, rgba(22,101,52,.08), transparent 58%),
-        linear-gradient(180deg, #f6fbff 0%, #ffffff 60%, #f6fbff 100%);
-    }
-
-    /* ===== Header (same structure as index, but with blended colors) ===== */
-    .site-header{
-      background: linear-gradient(90deg,
-        rgba(22, 101, 52, 0.10) 0%,
-        rgba(30, 90, 168, 0.10) 45%,
-        rgba(47, 123, 220, 0.08) 100%);
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(8px);
-      position: relative;
-      z-index: 1000;
-    }
-
-    .site-header .header-inner.header-2row{
-      display:flex !important;
-      flex-direction:column !important;
-      align-items:stretch !important;
-      justify-content:flex-start !important;
-      gap:10px;
-      padding-top:10px;
-      padding-bottom:10px;
-      position:relative;
-    }
-
-    .site-header .brand-row{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items:center;
-      gap:14px;
-    }
-
-    .site-header .brand-logo{
-      display:flex;
-      align-items:center;
-    }
-    .site-header .brand-row .brand-logo:first-child{ justify-content:flex-start; }
-    .site-header .brand-row .brand-logo:last-child{ justify-content:flex-end; }
-
-    .site-header img.header-logo.header-logo--org{
-      height:64px;
-      max-height:64px;
-      width:auto;
-      max-width:220px;
-      object-fit:contain;
-      display:block;
-    }
-
-    .site-header .brand.brand-center{
-      display:inline-flex;
-      align-items:baseline;
-      justify-content:center;
-      gap:2px;
-      text-decoration:none;
-      white-space:nowrap;
-    }
-
-    .site-header .brand-mark,
-    .site-header .brand-year{
-      font-size: 2.1rem;
-      font-weight: 900;
-      line-height: 1;
-      background: linear-gradient(90deg, var(--tesma), var(--uitm));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .site-header .nav-row{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:nowrap;
-      position: relative;
-    }
-
-    .site-header .nav-row .nav{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:wrap;
-      font-size:1.08rem;
-      font-weight:600;
-    }
-
-    .site-header .nav-row .nav a{
-      padding:8px 10px;
-      border-radius:10px;
-      text-decoration:none;
+        radial-gradient(900px 520px at 12% 12%, rgba(30,90,168,.10), transparent 60%),
+        radial-gradient(760px 460px at 88% 18%, rgba(22,101,52,.08), transparent 58%),
+        linear-gradient(180deg, #f7fbff 0%, #ffffff 65%, #f7fbff 100%);
       color: var(--text);
     }
 
-    .site-header .nav-row .nav a:hover{
-      background: rgba(30,90,168,.06);
-      border: 1px solid rgba(30,90,168,.10);
-    }
+    /* Keep header same as index.html.
+       But this page is light-only: hide the theme toggle UI if it exists. */
+    .theme-toggle{ display:none !important; }
 
-    /* Active page marker */
+    /* Make Theme nav look active (minimal) */
     .nav a.is-active{
-      background: rgba(30,90,168,.10);
-      border: 1px solid rgba(30,90,168,.16);
-    }
-
-    .header-actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex:0 0 auto;
-    }
-
-    .nav-toggle{
-      display:none;
-      background:#ffffff;
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:8px 10px;
-      cursor:pointer;
-      color:#0b1115;
-    }
-
-    /* Right-side UiTM + MTERMS logo */
-    .brand-logo-right{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:10px;
-    }
-
-    img.header-logo--mterm{
-      height:52px;
-      width:auto;
-      border-radius:10px;
-      border:1px solid rgba(30,90,168,.18);
-      box-shadow: 0 8px 18px rgba(0,0,0,.08);
-      background: rgba(255,255,255,.55);
-      padding:5px;
-    }
-
-    /* Mobile menu */
-    @media (max-width: 980px){
-      .site-header img.header-logo.header-logo--org{ height:34px; max-height:34px; max-width:140px; }
-      img.header-logo--mterm{ height:34px; padding:4px; }
-
-      .nav-toggle{ display:inline-flex; }
-
-      .site-header .nav-row{
-        justify-content: space-between;
-      }
-
-      .site-header .nav-row .nav{
-        display:none;
-      }
-
-      .site-header .nav-row .nav.open{
-        display:flex !important;
-        position:absolute !important;
-        top:100% !important;
-        left:12px !important;
-        right:12px !important;
-        margin-top:10px !important;
-        padding:12px !important;
-        border-radius:12px !important;
-        background:#ffffff !important;
-        border:1px solid var(--border) !important;
-        box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
-        flex-direction:column !important;
-        gap:10px !important;
-        z-index:9999 !important;
-      }
-    }
-
-    /* ===== Theme page hero ===== */
-    .theme-hero{
-      position: relative;
-      overflow: hidden;
-      padding: 62px 0 36px;
-    }
-
-    .theme-hero::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.16), transparent 60%),
-        radial-gradient(760px 420px at 88% 16%, rgba(34,197,94,.12), transparent 58%),
-        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.30));
-      z-index:0;
-    }
-
-    .theme-hero .container{ position:relative; z-index:1; }
-
-    .theme-hero-card{
-      max-width: 980px;
-      margin: 0 auto;
-      background: rgba(255,255,255,.88);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 26px 22px;
-      box-shadow: 0 18px 46px rgba(30,90,168,.10);
-      backdrop-filter: blur(8px);
-    }
-
-    .theme-hero-kicker{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 7px 12px;
-      border-radius: 999px;
       background: rgba(30,90,168,.08);
       border: 1px solid rgba(30,90,168,.14);
-      font-weight: 700;
+      border-radius: 10px;
+    }
+
+    /* =========================================================
+       Minimalist 1-column layout
+       ========================================================= */
+    .page{
+      padding: 42px 0 56px;
+    }
+
+    .theme-wrap{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero-card{
+      background: rgba(255,255,255,.90);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 26px 22px;
+      backdrop-filter: blur(8px);
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(22,101,52,.18);
+      background: rgba(22,101,52,.07);
       color: #0f172a;
+      font-weight: 800;
       letter-spacing: .2px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
-    .theme-hero h1{
+    .hero-title{
+      margin: 0 0 8px;
+      font-size: clamp(1.85rem, 2.6vw, 2.45rem);
+      line-height: 1.16;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-theme{
       margin: 0 0 10px;
-      font-size: clamp(1.9rem, 2.8vw, 2.6rem);
-      line-height: 1.15;
-    }
-
-    .theme-hero .tagline{
-      margin: 0;
-      font-size: clamp(1.05rem, 1.4vw, 1.2rem);
-      color: #334155;
-      line-height: 1.55;
-    }
-
-    .theme-big-theme{
-      margin-top: 14px;
       font-weight: 900;
-      letter-spacing: .2px;
-      font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+      font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+      line-height: 1.45;
       background: linear-gradient(90deg, var(--tesma), var(--uitm));
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
-    /* Professional content sections */
-    .theme-wrap{
-      max-width: 980px;
-      margin: 26px auto 0;
-      display: grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 18px;
-      align-items: start;
+    .hero-sub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.7;
+      max-width: 72ch;
     }
 
-    .theme-panel{
+    .section-card{
+      margin-top: 16px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 10px 25px rgba(30,90,168,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      padding: 18px 18px;
     }
 
-    .theme-panel h2{
-      margin-top: 0;
+    .section-card h2{
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+      letter-spacing: -0.2px;
     }
 
-    .theme-panel p{
+    .section-card p{
+      margin: 0 0 10px;
       color: #1f2937;
       line-height: 1.75;
-      font-size: 1.05rem;
+      font-size: 1.02rem;
     }
 
     .pill-row{
       display:flex;
       flex-wrap:wrap;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .pill{
-      background:#ffffff;
-      border:1px solid var(--border);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-weight: 600;
-      color: #0b1115;
-    }
-
-    .focus-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:10px;
       margin-top: 10px;
     }
-    .focus{
-      border:1px solid rgba(30,90,168,.12);
-      background: linear-gradient(180deg, rgba(47,123,220,.08), rgba(255,255,255,1));
-      border-radius: 16px;
-      padding: 14px;
-    }
-    .focus .t{
-      font-weight: 900;
-      margin-bottom: 6px;
-    }
-    .focus .d{
-      color: var(--muted);
-      line-height: 1.55;
+
+    .pill{
+      background:#fff;
+      border:1px solid rgba(30,90,168,.16);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+      color:#0b1115;
+      font-size: .95rem;
     }
 
-    .aside-card{
-      border: 1px solid rgba(22,101,52,.16);
-      background: linear-gradient(180deg, rgba(34,197,94,.10), rgba(255,255,255,1));
-    }
-    .aside-card .meta{
+    .focus-list{
       display:grid;
       gap:10px;
       margin-top: 10px;
-      color: #0f172a;
-    }
-    .aside-pill{
-      display:inline-flex;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(22,101,52,.18);
-      background: rgba(34,197,94,.08);
-      font-weight: 700;
-      width: fit-content;
     }
 
-    /* Responsive */
+    .focus-item{
+      border:1px solid rgba(30,90,168,.12);
+      border-radius: 14px;
+      padding: 12px 12px;
+      background: linear-gradient(180deg, rgba(30,90,168,.05), rgba(255,255,255,1));
+    }
+
+    .focus-item .t{
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .focus-item .d{
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .cta-row{
+      margin-top: 12px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* Ensure page remains clean on mobile */
     @media (max-width: 980px){
-      .theme-wrap{ grid-template-columns: 1fr; }
-      .focus-grid{ grid-template-columns: 1fr; }
+      .page{ padding: 28px 0 46px; }
+      .hero-card{ padding: 22px 16px; }
+      .section-card{ padding: 16px 14px; }
     }
-
-    /* Footer match */
-    .site-footer{
-      background:#ffffff;
-      border-top:1px solid var(--border);
-    }
-    .foot-copy{ color:#64748b; }
   </style>
-
-  <script src="lunr.min.js"></script>
 </head>
 
 <body>
 
-  <!-- Header -->
+  <!-- =========================================================
+       HEADER (same as index.html structure)
+       NOTE: links point back to index sections
+       ========================================================= -->
   <header class="site-header">
     <div class="container header-inner header-2row">
 
+      <!-- Top row: logos + wordmark -->
       <div class="brand-row">
         <a class="brand-logo" href="index.html#home" aria-label="TESMA">
           <img src="tesma.png" alt="TESMA logo" class="header-logo header-logo--org">
@@ -410,14 +217,12 @@
           <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
         </a>
 
-        <div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
-          <a href="index.html#home" aria-label="UiTM">
-            <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
-          </a>
-          <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo--mterm">
-        </div>
+        <a class="brand-logo" href="index.html#home" aria-label="UiTM">
+          <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
+        </a>
       </div>
 
+      <!-- Second row: enlarged nav + author dropdown -->
       <div class="nav-row">
         <nav class="nav" id="siteNav" aria-label="Primary navigation">
           <a href="index.html#about">About</a>
@@ -426,6 +231,19 @@
           <a href="index.html#speakers">Speakers</a>
           <a href="index.html#venue">Venue & Travel</a>
           <a href="index.html#registration">Registration</a>
+
+          <!-- Author dropdown kept as-is (same structure). If your index has real items, replace below accordingly. -->
+          <div class="nav-dropdown">
+            <button class="nav-dropbtn" aria-haspopup="true" aria-expanded="false">
+              Authors ▾
+            </button>
+            <div class="nav-dropdown-content" role="menu">
+              <a href="index.html#abstracts">Abstract Submission</a>
+              <a href="index.html#guidelines">Guidelines</a>
+              <a href="index.html#templates">Templates (placeholder)</a>
+            </div>
+          </div>
+
           <a href="index.html#sponsors">Sponsors</a>
           <a href="index.html#committee">Committee</a>
           <a href="index.html#contact">Contact</a>
@@ -433,101 +251,97 @@
 
         <div class="header-actions">
           <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
         </div>
       </div>
 
     </div>
   </header>
 
-  <!-- Theme Hero -->
-  <section class="theme-hero" id="top">
-    <div class="container">
-      <div class="theme-hero-card">
-        <div class="theme-hero-kicker">Conference Theme</div>
-        <h1>From discovery to therapy</h1>
-        <p class="tagline">
-          Tissue engineering and regenerative medicine advances fastest when discovery science, manufacturing readiness,
-          clinical translation, and collaboration move in one connected pipeline.
+  <!-- =========================================================
+       CONTENT (simple minimalist one column)
+       ========================================================= -->
+  <main class="page">
+    <div class="container theme-wrap">
+
+      <section class="hero-card" aria-label="Conference Theme">
+        <div class="kicker">Conference Theme</div>
+
+        <h1 class="hero-title">From discovery to therapy</h1>
+
+        <p class="hero-theme">
+          FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE
         </p>
-        <div class="theme-big-theme">
-          “FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE”
+
+        <p class="hero-sub">
+          MTERMS 2026 focuses on the full translation pipeline—how scientific discoveries in biomaterials, cells,
+          biofabrication, and regenerative strategies can be validated, scaled, and delivered as real therapies.
+        </p>
+      </section>
+
+      <section class="section-card" aria-label="Theme meaning">
+        <h2>What this theme means</h2>
+        <p>
+          Progress in tissue engineering and regenerative medicine is strongest when discovery science connects directly to
+          manufacturing readiness, regulatory expectations, and clinical evidence. This theme emphasizes practical pathways
+          that turn promising research into reliable, safe, and scalable therapeutic solutions.
+        </p>
+
+        <div class="pill-row" aria-label="Key areas">
+          <span class="pill">Biomaterials & scaffolds</span>
+          <span class="pill">Stem cells & organoids</span>
+          <span class="pill">Bioprinting & biofabrication</span>
+          <span class="pill">Clinical translation</span>
+          <span class="pill">Manufacturing & QA/QC</span>
+          <span class="pill">Standards & compliance</span>
         </div>
-      </div>
+      </section>
 
-      <div class="theme-wrap">
-        <!-- Main narrative -->
-        <div class="theme-panel">
-          <h2>What this theme means for MTERMS 2026</h2>
-          <p>
-            MTERMS 2026 spotlights how breakthroughs in <strong>biomaterials</strong>, <strong>cells and organoids</strong>,
-            <strong>bioprinting</strong>, and <strong>translational science</strong> become practical therapies.
-            We emphasize the end-to-end journey: rigorous discovery, reproducible processes, scalable manufacturing,
-            regulatory readiness, and clinically meaningful outcomes.
-          </p>
+      <section class="section-card" aria-label="Focus areas">
+        <h2>Focus areas</h2>
 
-          <div class="pill-row">
-            <span class="pill">Biomaterials & smart scaffolds</span>
-            <span class="pill">Stem cells & organoids</span>
-            <span class="pill">Bioprinting & biofabrication</span>
-            <span class="pill">Translation & clinical evidence</span>
-            <span class="pill">Manufacturing, QA/QC & standards</span>
-            <span class="pill">Industry–academia collaboration</span>
+        <div class="focus-list">
+          <div class="focus-item">
+            <div class="t">Bench-to-bedside translation</div>
+            <p class="d">Clear validation, meaningful outcomes, and pathways that support real clinical adoption.</p>
           </div>
 
-          <h2 style="margin-top:18px;">Focus areas</h2>
-          <div class="focus-grid">
-            <div class="focus">
-              <div class="t">Bench-to-bedside translation</div>
-              <div class="d">Accelerating pathways from laboratory proof-of-concept to safe, effective clinical adoption.</div>
-            </div>
-            <div class="focus">
-              <div class="t">Scalability & reproducibility</div>
-              <div class="d">Designing processes that are robust, manufacturable, and consistent across batches and sites.</div>
-            </div>
-            <div class="focus">
-              <div class="t">Regulatory readiness</div>
-              <div class="d">Evidence, documentation, and controls aligned to real regulatory expectations and clinical use.</div>
-            </div>
-            <div class="focus">
-              <div class="t">Partnership-driven impact</div>
-              <div class="d">Connecting researchers, clinicians, industry, and agencies to move innovations faster and further.</div>
-            </div>
+          <div class="focus-item">
+            <div class="t">Reproducibility & scalability</div>
+            <p class="d">Processes that remain consistent across batches, sites, and larger-scale production.</p>
           </div>
 
-          <h2 style="margin-top:18px;">Why it matters</h2>
-          <p>
-            Sustainable progress in TERM is not just about new ideas—it’s about building systems that deliver therapies
-            reliably and responsibly. MTERMS 2026 brings together multidisciplinary expertise to strengthen Malaysia’s
-            innovation ecosystem and support therapies that can be deployed at real-world scale.
-          </p>
+          <div class="focus-item">
+            <div class="t">Regulatory readiness</div>
+            <p class="d">Evidence and documentation aligned to practical expectations for safe therapeutic use.</p>
+          </div>
+
+          <div class="focus-item">
+            <div class="t">Collaboration that accelerates impact</div>
+            <p class="d">Connecting academia, clinicians, industry, and agencies to strengthen the ecosystem.</p>
+          </div>
         </div>
+      </section>
 
-        <!-- Sidebar -->
-        <div class="theme-panel aside-card">
-          <h2>Quick details</h2>
-          <div class="meta">
-            <span class="aside-pill">7 & 8 September 2026</span>
-            <div><strong>Venue:</strong> Concorde Hotel, Shah Alam</div>
-            <div><strong>Audience:</strong> Researchers, clinicians, industry, agencies</div>
-            <div><strong>Outcomes:</strong> Collaboration, translation, standards, impact</div>
-          </div>
+      <section class="section-card" aria-label="Why it matters">
+        <h2>Why it matters</h2>
+        <p>
+          Sustainable progress in TERM requires more than breakthroughs—it requires systems that deliver therapies reliably.
+          MTERMS 2026 brings multidisciplinary communities together to advance translation, strengthen partnerships, and
+          support innovations that can be deployed at real-world scale.
+        </p>
 
-          <div style="margin-top:14px;">
-            <a class="btn primary" href="https://www.mterms2026.com/register.html" rel="noopener">Register</a>
-            <a class="btn" href="index.html#program">View Program (Tentative)</a>
-            <a class="btn ghost" href="login.html">Participant Login</a>
-          </div>
-
-          <p style="margin-top:14px; color:#475569;">
-            If you are submitting an abstract, this theme prioritizes clarity on novelty, translation potential, and
-            evidence quality (methods, validation, reproducibility).
-          </p>
+        <div class="cta-row">
+          <a class="btn primary" href="register.html">Register</a>
+          <a class="btn" href="index.html#program">View Program</a>
+          <a class="btn ghost" href="login.html">Participant Login</a>
         </div>
-      </div>
+      </section>
+
     </div>
-  </section>
+  </main>
 
-  <!-- Footer (same as index links) -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="foot-brand">MTERMS 2026</div>
@@ -544,7 +358,9 @@
     </div>
   </footer>
 
-  <!-- ===== AI BOT (same as index) ===== -->
+  <!-- =========================================================
+       AI BOT (same widget)
+       ========================================================= -->
   <div id="ai-widget">
     <div id="ai-chat-window" class="ai-window hidden">
       <div class="ai-header">
@@ -601,8 +417,8 @@
       right: 30px;
       width: 350px;
       height: 450px;
-      background: var(--surface, #ffffff);
-      border: 1px solid var(--border, #ddd);
+      background: #ffffff;
+      border: 1px solid rgba(30,90,168,.14);
       border-radius: 16px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.15);
       z-index: 10000;
@@ -618,7 +434,7 @@
       transform: translateY(20px);
     }
     .ai-header{
-      background: var(--uitm, #1e5aa8);
+      background: #1e5aa8;
       color: white;
       padding: 15px;
       font-weight: 600;
@@ -637,7 +453,7 @@
       flex: 1;
       padding: 15px;
       overflow-y: auto;
-      background: var(--bg, #f6fbff);
+      background: #f7fbff;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -656,37 +472,27 @@
       border-bottom-left-radius: 2px;
     }
     .ai-msg.user{
-      background: var(--uitm, #1e5aa8);
+      background: #1e5aa8;
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 2px;
     }
-    .ai-quick{ margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .ai-quick-btn{
-      border: 1px solid rgba(0,0,0,.12);
-      background: #fff;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .ai-quick-btn:hover{ filter: brightness(0.98); }
     .ai-input-area{
       padding: 10px;
-      border-top: 1px solid var(--border, #ddd);
+      border-top: 1px solid rgba(30,90,168,.14);
       display: flex;
       gap: 10px;
-      background: var(--surface, #fff);
+      background: #fff;
     }
     #ai-input{
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid var(--border, #ccc);
+      border: 1px solid rgba(30,90,168,.20);
       border-radius: 20px;
       outline: none;
     }
     #ai-send-btn{
-      background: var(--uitm, #1e5aa8);
+      background: #1e5aa8;
       color: white;
       border: none;
       width: 36px;
@@ -697,13 +503,29 @@
       align-items: center;
       justify-content: center;
     }
-    #ai-send-btn:hover{ background: var(--uitm2, #2f7bdc); }
+    #ai-send-btn:hover{ filter: brightness(1.05); }
   </style>
 
   <script>
-    /* ========================================== */
-    /* MTERMS AI ASSISTANT - SAFE SMART FAQ BOT    */
-    /* ========================================== */
+    /* =========================
+       Mobile menu toggle (same behavior)
+       ========================= */
+    (function(){
+      const nav = document.getElementById('siteNav');
+      const toggle = document.querySelector('.nav-toggle');
+      if (toggle && nav){
+        toggle.addEventListener('click', () => {
+          const open = nav.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', String(open));
+        });
+      }
+    })();
+  </script>
+
+  <script>
+    /* ==========================================
+       MTERMS AI ASSISTANT - SAFE SMART FAQ BOT
+       ========================================== */
     (function () {
       function init() {
         const toggleBtn = document.getElementById('ai-toggle-btn');
@@ -724,22 +546,6 @@
           { id:"contact", title:"Contact", text:"For help, email admin@mterms2026.com.", tags:"contact email help admin" }
         ];
 
-        const synonyms = [
-          ["where", "venue", "location", "hotel"],
-          ["when", "date", "dates", "schedule"],
-          ["abstract", "poster", "submission", "submit"],
-          ["register", "registration", "sign up", "signup"],
-          ["fee", "fees", "payment", "pay", "cost", "price"]
-        ];
-
-        function normalizeQuery(q) {
-          let s = (q || "").toLowerCase().trim();
-          for (const group of synonyms) {
-            if (group.some(w => s.includes(w))) s += " " + group.join(" ");
-          }
-          return s.replace(/\s+/g, " ");
-        }
-
         let idx = null;
         function buildIndex() {
           if (typeof window.lunr !== "function") { idx = null; return false; }
@@ -755,60 +561,24 @@
         buildIndex();
 
         function getSmartAnswer(userQuery) {
-          const q = normalizeQuery(userQuery);
-          if (!idx) {
-            return { text:"Bot search engine isn’t loaded yet. Please fix lunr.min.js path. For now, ask about: venue, dates, abstract deadline, registration, or contact.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
-          }
-          if (q.length < 3) {
-            return { text:"Tell me what you need: venue, dates, abstract deadline, registration, or contact?", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
-          }
+          const q = (userQuery || "").toLowerCase().trim().replace(/\s+/g," ");
+          if (!idx) return { text:"Bot search isn’t loaded yet. Please confirm lunr.min.js exists in root.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
+          if (q.length < 3) return { text:"Ask about: venue, dates, abstract deadline, registration, or contact.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
 
           const results = idx.search(q);
-          if (!results.length) {
-            return { text:"I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
-          }
+          if (!results.length) return { text:"I couldn’t find that. Try: venue, dates, abstract deadline, registration, or contact.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
 
-          const top = results.slice(0,2).map(r => faq.find(d => d.id === r.ref)).filter(Boolean);
-          if (results[0].score < 0.6) {
-            return { text:"I’m not sure which one you meant. Choose one:", quick: top.map(t => t.title) };
-          }
-
-          const best = top[0];
-          const followUps = {
-            venue: ["Dates","Registration","Contact"],
-            dates: ["Venue","Abstract deadline","Registration"],
-            abstract_deadline: ["Acceptance notification","Registration","Contact"],
-            acceptance: ["Abstract deadline","Registration","Contact"],
-            registration: ["Dates","Venue","Contact"],
-            contact: ["Registration","Abstract deadline","Venue"]
-          };
-
-          return { text: best.text, quick: (followUps[best.id] || ["Venue","Dates","Registration"]) };
+          const best = faq.find(d => d.id === results[0].ref);
+          return { text: (best ? best.text : "Try venue, dates, abstract deadline, registration, or contact."), quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
         }
 
         toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
         closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
 
-        function addBubble(text, type, quickReplies=null){
+        function addBubble(text, type){
           const div = document.createElement('div');
           div.className = `ai-msg ${type}`;
           div.innerText = text;
-
-          if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
-            const wrap = document.createElement("div");
-            wrap.className = "ai-quick";
-            quickReplies.slice(0,5).forEach(label => {
-              const b = document.createElement("button");
-              b.type = "button";
-              b.className = "ai-quick-btn";
-              b.textContent = label;
-              b.addEventListener("click", () => { inputEl.value = label; sendMessage(); });
-              wrap.appendChild(b);
-            });
-            div.appendChild(document.createElement("br"));
-            div.appendChild(wrap);
-          }
-
           msgsEl.appendChild(div);
           msgsEl.scrollTop = msgsEl.scrollHeight;
         }
@@ -820,35 +590,16 @@
           inputEl.value = '';
           setTimeout(() => {
             const out = getSmartAnswer(text);
-            addBubble(out.text, 'bot', out.quick);
-          }, 200);
+            addBubble(out.text, 'bot');
+          }, 160);
         }
 
         sendBtn.addEventListener('click', sendMessage);
         inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
       }
 
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init);
-      } else {
-        init();
-      }
-    })();
-  </script>
-
-  <script>
-    /* =========================
-       Mobile menu toggle
-       ========================= */
-    (function(){
-      const nav = document.getElementById('siteNav');
-      const toggle = document.querySelector('.nav-toggle');
-      if (toggle && nav){
-        toggle.addEventListener('click', () => {
-          const open = nav.classList.toggle('open');
-          toggle.setAttribute('aria-expanded', String(open));
-        });
-      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+      else init();
     })();
   </script>
 
