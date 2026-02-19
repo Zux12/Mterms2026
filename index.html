@@ -50,18 +50,7 @@
   --faint:#eef6ff;
 }
 
-  :root.theme-dark{
-    /* these mirror your existing dark tokens in assets/styles.css */
-    --bg:#0b1115;
-    --surface:#0e151a;
-    --text:#e9f1f6;
-    --muted:#8899a6;
-    --brand:#19c37d;
-    --brand-2:#0ea5a6;
-    --ring: rgba(25,195,125,.4);
-    --border:#1f2a31;
-    --faint:#0f1d1a;
-  }
+
 
   /* 2) Global swaps when light is active */
 .theme-light html, .theme-light body{
@@ -638,7 +627,41 @@
 /* Keep header always above hero */
 .site-header{ position: relative; z-index: 1000; }
 
+/* ===== Header gradient (TESMA x UiTM blend) ===== */
+.site-header{
+  background: linear-gradient(90deg,
+    rgba(22, 101, 52, 0.10) 0%,
+    rgba(30, 90, 168, 0.10) 45%,
+    rgba(47, 123, 220, 0.08) 100%);
+  backdrop-filter: blur(8px);
+}
 
+.site-header .brand-mark,
+.site-header .brand-year{
+  background: linear-gradient(90deg, #166534, #1e5aa8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+/* New MTERMS logo in header (right side) */
+.site-header img.header-logo.header-logo--mterm{
+  height: 52px;
+  width: auto;
+  border-radius: 10px;
+  margin-left: 10px;
+  border: 1px solid rgba(30,90,168,.18);
+  box-shadow: 0 8px 18px rgba(0,0,0,.08);
+  background: rgba(255,255,255,.55);
+  padding: 5px;
+}
+
+.site-header .brand-logo-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 10px;
+}
 </style>
 <script src="lunr.min.js"></script>
 </head>
@@ -660,16 +683,19 @@
           <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
         </a>
 
-        <a class="brand-logo" href="#home" aria-label="UiTM">
-          <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
-        </a>
+<div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
+  <a href="#home" aria-label="UiTM">
+    <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
+  </a>
+  <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo header-logo--mterm">
+</div>
       </div>
 
       <!-- Second row: enlarged nav + author dropdown -->
       <div class="nav-row">
         <nav class="nav" id="siteNav" aria-label="Primary navigation">
           <a href="#about">About</a>
-          <a href="#theme">Theme</a>
+          <a href="theme.html">Theme</a>
           <a href="#program">Program</a>
           <a href="#speakers">Speakers</a>
           <a href="#venue">Venue & Travel</a>
@@ -696,7 +722,6 @@
 
         <div class="header-actions">
           <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
-          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌞</button>
         </div>
       </div>
 
@@ -706,7 +731,6 @@
 
   <!-- Hero -->
   <section id="home" class="hero" style="--hero-img: url('https://images.unsplash.com/photo-1532634876-26909d0d4b6a?q=80&w=2400&auto=format&fit=crop');">
-    <img class="hero-corner-logo" src="public/mterm.jpg" alt="MTERMS logo">
     <div class="hero-slideshow" id="heroSlideshow" aria-hidden="true">
       <img id="heroSlideImg" src="public/herobanner1.png" alt="">
     </div>
@@ -745,33 +769,7 @@
   </div>
 </section>
 
-  <!-- Theme -->
-<section id="theme" class="section section-alt">
-  <div class="container">
-    
-    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-      
-      <h2>Conference Theme</h2>
-      
-      <h3 class="tagline" style="margin-top: 15px; margin-bottom: 25px; color: #555; line-height: 1.4;">
-        FROM DISCOVERY TO THERAPY: <br>ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE
-      </h3>
-      
-      <p style="font-size: 1.1em; line-height: 1.6;">
-        Advancing tissue engineering and regenerative medicine requires a seamless pathway from <strong>fundamental discovery</strong> to <strong>safe, effective clinical application</strong>. 
-        <br><br>
-        This theme highlights how breakthroughs in <strong>biomaterials</strong>, <strong>stem cells</strong>, <strong>bioprinting</strong>, and <strong>translational science</strong> are being transformed into real-world therapies. We emphasize <strong>interdisciplinary collaboration</strong>, <strong>scalable manufacturing</strong>, <strong>regulatory readiness</strong>, and <strong>industry–academia partnerships</strong> that accelerate innovation from bench to bedside.
-      </p>
-
-      <div class="pill-row" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 35px;">
-        <span class="pill">Stem Cell Innovations and Clinical Applications</span>
-        <span class="pill">Biomaterials and Tissue Scaffolds</span>
-      </div>
-
-    </div>
-
-  </div>
-</section>
+ 
 
   <!-- Program (draft placeholders) -->
   <section id="program" class="section">
@@ -1167,33 +1165,7 @@
   <link rel="stylesheet" href="assets/agenda-popup.css">
 <script src="assets/agenda-popup.js"></script>
 
-<script>
-  (function(){
-    const root = document.documentElement; // <html>
-    const btn  = document.getElementById('themeToggle');
-    const KEY  = 'mterms-theme';
 
-    // On load: apply saved preference (default to light)
-    const saved = localStorage.getItem(KEY);
-    if (saved === 'dark') {
-      root.classList.remove('theme-light');
-      root.classList.add('theme-dark');
-    } else {
-      root.classList.add('theme-light');
-      root.classList.remove('theme-dark');
-    }
-    // Set icon
-    if (btn) btn.textContent = root.classList.contains('theme-dark') ? '🌙' : '🌞';
-
-    // Toggle on click
-    if (btn) btn.addEventListener('click', () => {
-      const dark = root.classList.toggle('theme-dark');
-      root.classList.toggle('theme-light', !dark);
-      localStorage.setItem(KEY, dark ? 'dark' : 'light');
-      btn.textContent = dark ? '🌙' : '🌞';
-    });
-  })();
-</script>
 
   
 
