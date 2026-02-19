@@ -1,1 +1,1291 @@
 
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  img-src 'self' data: blob: https:;
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+  base-uri 'self';
+  form-action 'self';
+  /* allow the embedded Google Map */
+  frame-src 'self' https://www.google.com https://*.google.com;
+  child-src 'self' https://www.google.com https://*.google.com
+">
+
+  <title>MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting</title>
+  <meta name="description" content="MTERMS 2026 • Sustainability through collaboration: building resilient tissue engineering and regenerative medicine ecosystems • September 2026 • Concorde Hotel, Shah Alam" />
+<link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+
+  <!-- Open Graph (nice previews when sharing links) -->
+  <meta property="og:title" content="MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting" />
+  <meta property="og:description" content="Sustainability through collaboration: building resilient tissue engineering and regenerative medicine ecosystems • Nov 2026 • Concorde Hotel, Shah Alam" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1532634876-26909d0d4b6a?q=80&w=1600&auto=format&fit=crop" />
+  <meta property="og:url" content="https://<your-username>.github.io/mterms2026/" />
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style id="theme-overrides">
+  /* 1) Theme variables (light default via html.theme-light) */
+:root.theme-light{
+  --bg:#f6fbff;          /* very light blue base */
+  --surface:#ffffff;
+  --text:#0b1115;
+  --muted:#556b86;
+
+  /* UiTM-ish blues (soft, not harsh) */
+  --brand:#1e5aa8;       /* primary blue */
+  --brand-2:#2f7bdc;     /* accent blue */
+  --ring: rgba(30,90,168,.18);
+
+  --border:#d7e6f7;
+  --faint:#eef6ff;
+}
+
+
+
+  /* 2) Global swaps when light is active */
+.theme-light html, .theme-light body{
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.10), transparent 60%),
+    radial-gradient(700px 420px at 85% 18%, rgba(30,90,168,.08), transparent 55%),
+    linear-gradient(180deg, #f6fbff 0%, #ffffff 55%, #f6fbff 100%);
+}
+  .theme-light .notice{ background:#f1faf6; color:#064e3b; } /* top ribbon */
+  .theme-light .site-header{ background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); }
+  .theme-light .brand-mark{ color:#0b1115; }
+  .theme-light .nav a{ opacity:1; }
+  @media (max-width:960px){
+    .theme-light .nav.open{ background:#ffffff; border:1px solid var(--border); }
+    .theme-light .nav-toggle{ color:#0b1115; }
+  }
+
+  /* Hero */
+  .theme-light .subtitle{ color:#334155; }
+  .theme-light .theme{ color:#0f172a; }
+  .theme-light .hero-meta{ color:#1f2937; }
+  .theme-light .meta-item{
+    background:#ffffff; border:1px solid var(--border);
+  }
+
+  /* Buttons & cards */
+.theme-light .btn{
+  background:#ffffff;
+  color:#0b1115;
+  border:1px solid var(--border);
+}
+
+.theme-light .btn.primary{
+  background: var(--brand);
+  color: #ffffff;
+  border: 1px solid rgba(0,0,0,0);
+  box-shadow: 0 8px 22px rgba(30,90,168,.14);
+}
+
+.theme-light .btn.primary:hover{
+  filter: brightness(0.97);
+}
+  .theme-light .btn.ghost{ background:transparent; color:#0b1115; }
+  .theme-light .card,
+  .theme-light .img-card,
+  .theme-light .person,
+  .theme-light .price-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+  }
+  .theme-light .img-card figcaption{ color:#475569; border-top:1px solid var(--border); }
+
+  /* Pills, notes, footer, map border */
+  .theme-light .pill{ background:#f8fafc; color:#0b1115; border:1px solid var(--border); }
+  .theme-light .note{ color:#64748b; }
+  .theme-light .map-embed iframe{ border-top:1px solid var(--border); }
+  .theme-light .site-footer{ background:#ffffff; border-top:1px solid var(--border); }
+  .theme-light .foot-copy{ color:#64748b; }
+
+  /* Organizers strip (white cards already good) */
+.theme-light .org-section{
+  background: linear-gradient(180deg, rgba(47,123,220,.07), rgba(255,255,255,0));
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+/* subtle tint for section-alt blocks */
+.theme-light .section-alt{
+  background: linear-gradient(180deg, rgba(30,90,168,.06), rgba(255,255,255,0));
+}
+
+
+  /* Theme toggle button */
+  .theme-toggle{
+    margin-left:8px;
+    background:#ffffff;
+    color:#0b1115;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+  }
+  .theme-dark .theme-toggle{
+    background:#1e1f24;
+    color:#ffffff;
+    border:1px solid #333;
+  }
+
+
+    /* ---- Hero readability: fixed contrast (works in both themes) ---- */
+.hero{ position:relative; }
+.hero::before{
+  content:"";
+  position:absolute; inset:0;
+  /* soft dark veil to guarantee legibility on any image */
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.35) 40%, rgba(0,0,0,.25));
+  z-index:0;
+}
+.hero .hero-inner{ position:relative; z-index:1; }
+
+/* lock hero text colors on top of image */
+.hero h1,
+.hero .subtitle,
+.hero .theme,
+.hero .hero-meta,
+.hero .meta-item { color:#ffffff !important; text-shadow:0 2px 10px rgba(0,0,0,.45); }
+
+.hero .meta-item{
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(2px);
+}
+
+/* Make the ghost button visible on the image */
+.hero .btn.ghost{
+  background: transparent !important;
+  color: #f8fbff !important;
+  border: 2px solid rgba(255,255,255,.85) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.hero .btn.ghost:hover{
+  background: rgba(255,255,255,.10) !important;
+}
+
+/* Keep the solid buttons crisp on the image too */
+.hero .btn.primary{
+  background: #ffffff !important;
+  color: #0b1115 !important;
+  border: 1px solid rgba(255,255,255,.0);
+}
+.hero .btn{
+  border-radius: 10px;
+}
+
+
+/* Important Dates – clean UiTM-light card grid */
+.dates-card{
+  margin-top: 14px;
+  background: rgba(255,255,255,.85);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+  backdrop-filter: blur(6px);
+}
+
+.dates-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.date-item{
+  position: relative;
+  background: linear-gradient(180deg, rgba(47,123,220,.08), rgba(255,255,255,1));
+  border: 1px solid rgba(30,90,168,.12);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+
+.date-title{
+  font-weight: 800;
+  letter-spacing: .1px;
+  margin-bottom: 6px;
+}
+
+.date-range{
+  color: var(--muted);
+  font-size: .98rem;
+  line-height: 1.35;
+  padding-right: 84px;
+}
+
+.date-tag{
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--brand);
+  background: rgba(30,90,168,.10);
+  border: 1px solid rgba(30,90,168,.16);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .dates-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px){
+  .dates-grid{ grid-template-columns: 1fr; }
+  .date-range{ padding-right: 0; }
+  .date-tag{ position: static; display: inline-block; margin-top: 10px; }
+}
+
+
+@media (min-width: 981px){
+  .header-inner{
+    position: relative;
+    padding-left: 90px;
+    padding-right: 120px;
+  }
+  ...
+}
+
+/* ===== FINAL HEADER OVERRIDE (forces correct layout & logo size) ===== */
+.site-header .header-inner{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+  min-height: 64px !important;
+}
+
+.site-header .header-left{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+}
+
+.site-header .header-mid{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.site-header .header-right{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Force logos to a fixed size (prevents giant TESMA) */
+.site-header img.header-logo{
+  height: 38px !important;
+  max-height: 38px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Desktop nav: single line, no clipping weirdness */
+@media (min-width: 981px){
+  .site-header .header-mid .nav{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+}
+
+/* Mobile: keep your hamburger/dropdown behavior */
+@media (max-width: 980px){
+  .site-header img.header-logo{
+    height: 30px !important;
+    max-height: 30px !important;
+  }
+
+  .site-header .header-mid{
+    justify-content: flex-end !important;
+  }
+
+  .site-header .header-mid .nav{
+    display: none !important;
+  }
+
+  .site-header .header-mid .nav.open{
+    display: flex !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 12px !important;
+    right: 12px !important;
+    margin-top: 10px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    z-index: 9999 !important;
+  }
+
+  .site-header .header-mid .nav-toggle{
+    display: inline-flex !important;
+  }
+}
+
+/* Add this to your stylesheet */
+.text-center-limit {
+  max-width: 800px; /* Optimal reading width */
+  margin: 0 auto;   /* Centers the block */
+  text-align: center; /* Optional: centers the text alignment */
+}
+    
+
+/* =========================
+   Header (2-row professional)
+   ========================= */
+.site-header .header-inner.header-2row{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-top:10px;
+  padding-bottom:10px;
+  position:relative;
+}
+
+.site-header .brand-row{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+  gap:14px;
+}
+
+.site-header .brand-logo{
+  display:flex;
+  align-items:center;
+}
+.site-header .brand-row .brand-logo:first-child{ justify-content:flex-start; }
+.site-header .brand-row .brand-logo:last-child{ justify-content:flex-end; }
+
+.site-header img.header-logo.header-logo--org{
+  height:64px !important;      /* increased */
+  max-height:64px !important;
+  width:auto !important;
+  max-width:200px !important;
+  object-fit:contain !important;
+}
+
+.site-header .brand.brand-center{
+  display:inline-flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:2px;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+/* Slightly bigger professional size */
+.site-header .brand-mark,
+.site-header .brand-year{
+  font-size: 2.1rem !important;
+  font-weight: 900 !important;
+  line-height: 1;
+}
+
+.site-header .nav-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:nowrap;
+}
+
+.site-header .nav-row .nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:1.05rem;            /* enlarge menu */
+  font-weight:600;
+}
+
+.site-header .nav-row .nav a,
+.site-header .nav-dd-btn{
+  padding:8px 10px;
+  border-radius:10px;
+}
+
+.site-header .header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+
+/* Authors dropdown */
+.nav-dd{ position:relative; }
+.nav-dd-btn{
+  background:transparent;
+  border:1px solid transparent;
+  cursor:pointer;
+  color:inherit;
+  font: inherit;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.nav-dd-btn:hover{ background: rgba(30,90,168,.06); border-color: rgba(30,90,168,.10); }
+.nav-dd-caret{ font-size:.9em; opacity:.8; }
+
+.nav-dd-menu{
+  position:absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 260px;
+  background: var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.10);
+  display:none;
+  z-index: 9999;
+}
+.nav-dd-menu a{
+  display:block;
+  padding:10px 10px;
+  border-radius:12px;
+  text-decoration:none;
+}
+.nav-dd-menu a:hover{
+  background: rgba(30,90,168,.08);
+}
+.nav-dd.open .nav-dd-menu{ display:block; }
+.nav-dd.open .nav-dd-btn{ background: rgba(30,90,168,.06); border-color: rgba(30,90,168,.10); }
+
+/* Mobile behavior: keep nav collapsible */
+@media (max-width: 980px){
+  .site-header .brand-row{
+    grid-template-columns: auto 1fr auto;
+  }
+  .site-header img.header-logo.header-logo--org{
+    height:34px !important;
+    max-height:34px !important;
+    max-width:140px !important;
+  }
+
+  .site-header .nav-row{
+    justify-content:space-between;
+  }
+
+  .site-header .nav-row .nav{
+    display:none;
+  }
+
+  .site-header .nav-row .nav.open{
+    display:flex !important;
+    position:absolute !important;
+    top:100% !important;
+    left:12px !important;
+    right:12px !important;
+    margin-top:10px !important;
+    padding:12px !important;
+    border-radius:12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+    flex-direction:column !important;
+    gap:10px !important;
+    z-index:9999 !important;
+  }
+
+  .nav-dd-menu{
+    position: static;
+    transform:none;
+    min-width: unset;
+    box-shadow:none;
+    border-radius:12px;
+    margin-top:6px;
+  }
+}
+
+/* =========================
+   Hero corner logo + post-video slideshow
+   ========================= */
+.hero{ position:relative; overflow:hidden; }
+.hero-corner-logo{
+  position:absolute;
+  top: 18px;
+  right: 18px;
+  height: 95px;
+  width: auto;
+  z-index: 2;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.35));
+  border-radius: 12px;
+  background: rgba(255,255,255,.14);
+  padding: 6px;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 560px){
+  .hero-corner-logo{ height: 52px; top: 12px; right: 12px; }
+}
+
+.hero-slideshow{
+  position:absolute;
+  inset:0;
+  z-index:1;        /* IMPORTANT FIX */
+  opacity:0;
+  pointer-events:none;
+}
+
+    .hero video{
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+.hero-inner{
+  position:relative;
+  z-index:3;
+}
+
+.hero-corner-logo{
+  z-index:4;
+}
+.hero-slideshow.active{ opacity:1; }
+
+.hero-slideshow img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: translateX(0);
+  transition: opacity 700ms ease, transform 900ms ease;
+  opacity:0;
+}
+.hero-slideshow img.show{
+  opacity:1;
+  transform: translateX(0);
+}
+.hero-slideshow img.slide-in{
+  transform: translateX(20px);
+}
+
+
+
+/* ===== FIX: Force 2-row header to stay on top (override earlier !important rules) ===== */
+.site-header .header-inner.header-2row{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+}
+
+/* Prevent any earlier header-left/mid/right rules from affecting layout */
+.site-header .header-inner.header-2row .header-left,
+.site-header .header-inner.header-2row .header-mid,
+.site-header .header-inner.header-2row .header-right{
+  all: unset !important;
+}
+
+/* Make sure brand row is FIRST and nav row is SECOND visually */
+.site-header .brand-row{ order: 0 !important; }
+.site-header .nav-row{ order: 1 !important; }
+
+/* Slightly bigger nav on desktop, but wraps nicely */
+@media (min-width: 981px){
+  .site-header .nav-row .nav{
+    font-size: 1.12rem !important;
+    gap: 16px !important;
+  }
+}
+
+/* Keep header always above hero */
+.site-header{ position: relative; z-index: 1000; }
+
+/* ===== Header gradient (TESMA x UiTM blend) ===== */
+.site-header{
+  background: linear-gradient(90deg,
+    rgba(22, 101, 52, 0.10) 0%,
+    rgba(30, 90, 168, 0.10) 45%,
+    rgba(47, 123, 220, 0.08) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.site-header .brand-mark,
+.site-header .brand-year{
+  background: linear-gradient(90deg, #166534, #1e5aa8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+/* New MTERMS logo in header (right side) */
+.site-header img.header-logo.header-logo--mterm{
+  height: 80px !important;
+  max-height: none !important;   /* THIS is the key */
+  max-width: none !important;    /* prevents width restriction */
+  width: auto !important;
+  margin-left: 10px;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+    
+.site-header .brand-logo-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 10px;
+}
+</style>
+<script src="lunr.min.js"></script>
+</head>
+<body>
+
+
+
+    <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner header-2row">
+
+      <!-- Top row: logos + wordmark -->
+      <div class="brand-row">
+        <a class="brand-logo" href="#home" aria-label="TESMA">
+          <img src="tesma.png" alt="TESMA logo" class="header-logo header-logo--org">
+        </a>
+
+        <a href="#home" class="brand brand-center" aria-label="MTERMS 2026 Home">
+          <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+        </a>
+
+<div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
+  <a href="#home" aria-label="UiTM">
+    <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
+  </a>
+  <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo header-logo--mterm">
+</div>
+      </div>
+
+      <!-- Second row: enlarged nav + author dropdown -->
+      <div class="nav-row">
+        <nav class="nav" id="siteNav" aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="theme.html">Theme</a>
+          <a href="program.html">Program</a>
+          <a href="speaker.html">Speakers</a>
+          <a href="venue.html">Venue & Travel</a>
+          <a href="#registration">Registration</a>
+
+          <!-- Authors dropdown (placeholders for now) -->
+          <div class="nav-dd" data-dd>
+            <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+              Authors <span class="nav-dd-caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dd-menu" role="menu">
+              <a role="menuitem" href="#authors-guidelines">Author Guidelines (placeholder)</a>
+              <a role="menuitem" href="#abstracts">Abstract Submission (placeholder)</a>
+              <a role="menuitem" href="#presenter-info">Presenter / Oral Instructions (placeholder)</a>
+              <a role="menuitem" href="#poster-info">Poster Instructions (placeholder)</a>
+              <a role="menuitem" href="#faq-authors">Author FAQs (placeholder)</a>
+            </div>
+          </div>
+
+          <a href="#sponsors">Sponsors</a>
+          <a href="#committee">Committee</a>
+          <a href="#contact">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="foot-brand">MTERMS 2026</div>
+      <div class="foot-links">
+        <a href="#registration">Register</a>
+        <a href="#abstracts">Submit Abstract</a>
+        <a href="#">Payment</a>
+        <a href="#">Code of Conduct</a>
+        <a href="#">Privacy</a>
+          <a href="login.html">Participant Portal</a>
+  <a href="admin.html">Admin Login</a>
+
+      </div>
+      <div class="foot-copy">© 2026 MTERMS.</div>
+    </div>
+  </footer>
+
+
+
+
+<!-- Sponsors -->
+  <section id="sponsors" class="section section-alt">
+    <div class="container">
+      <h2>Sponsorship & Exhibition</h2>
+      <p>We welcome partnerships that strengthen Malaysia’s TERM ecosystem.</p>
+      <div class="cards">
+        <div class="card">
+          <h3>Exhibitor</h3>
+          <ul>
+            <li>Booth space (sizes TBA)</li>
+            <li>Logo on site & program</li>
+            <li>Complimentary passes</li>
+          </ul>
+          <a class="btn" href="#">Request Prospectus</a>
+        </div>
+        <div class="card">
+          <h3>Industry Session</h3>
+          <ul>
+            <li>Product/technology showcase</li>
+            <li>Lead retrieval</li>
+            <li>Co-marketing</li>
+          </ul>
+          <a class="btn" href="#">Enquire</a>
+        </div>
+        <div class="card">
+          <h3>Academic Partner</h3>
+          <ul>
+            <li>Track co-branding</li>
+            <li>Student awards</li>
+            <li>Workshop hosting</li>
+          </ul>
+          <a class="btn" href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+
+
+
+
+
+
+  
+
+  <link rel="stylesheet" href="assets/agenda-popup.css">
+<script src="assets/agenda-popup.js"></script>
+
+
+
+  
+
+  <script src="assets/main.js"></script>
+
+
+
+  <div id="ai-widget">
+  <div id="ai-chat-window" class="ai-window hidden">
+    <div class="ai-header">
+      <span>MTERMS2026 AI Assistant</span>
+      <button id="ai-close-btn" aria-label="Close chat">×</button>
+    </div>
+    <div id="ai-messages" class="ai-messages">
+      <div class="ai-msg bot">
+        Hello! I'm the MTERMS2026 AI agent. Ask me about the schedule, venue, or deadlines!
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <input type="text" id="ai-input" placeholder="Ask a question..." />
+      <button id="ai-send-btn">➤</button>
+    </div>
+  </div>
+
+<button id="ai-toggle-btn" class="ai-toggle">
+  <img src="public/aichatbot.png" alt="AI Chatbot" class="ai-toggle-icon">
+</button>
+</div>
+
+<style>
+  /* Floating Button */
+  .ai-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: #ffffff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  z-index: 10000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+}
+
+.ai-toggle-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  pointer-events: none; /* ensures button click works smoothly */
+}
+  
+  /* Chat Window */
+  .ai-window {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 450px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  
+  .ai-window.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+  }
+
+  /* Header */
+  .ai-header {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    padding: 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #ai-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* Messages Area */
+  .ai-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: var(--bg, #f6fbff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 80%;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .ai-msg.bot {
+    background: #eef2f6;
+    color: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+  .ai-msg.user {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+
+
+.ai-quick { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-quick-btn {
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ai-quick-btn:hover { filter: brightness(0.98); }
+  
+  /* Input Area */
+  .ai-input-area {
+    padding: 10px;
+    border-top: 1px solid var(--border, #ddd);
+    display: flex;
+    gap: 10px;
+    background: var(--surface, #fff);
+  }
+  #ai-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border, #ccc);
+    border-radius: 20px;
+    outline: none;
+  }
+  #ai-send-btn {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #ai-send-btn:hover { background: var(--brand-2, #2f7bdc); }
+
+
+
+@media (max-width: 560px){
+  .hero-corner-logo{ height: 52px; top: 12px; right: 12px; }
+}
+
+
+
+</style>
+
+<script>
+/* ========================================== */
+/* MTERMS AI ASSISTANT - SAFE SMART FAQ BOT    */
+/* ========================================== */
+(function () {
+  // Run after DOM is ready (prevents null element errors)
+  function init() {
+    const toggleBtn = document.getElementById('ai-toggle-btn');
+    const closeBtn  = document.getElementById('ai-close-btn');
+    const windowEl  = document.getElementById('ai-chat-window');
+    const inputEl   = document.getElementById('ai-input');
+    const sendBtn   = document.getElementById('ai-send-btn');
+    const msgsEl    = document.getElementById('ai-messages');
+
+    // If your HTML IDs are wrong/missing, do NOT crash the whole page
+    if (!toggleBtn || !closeBtn || !windowEl || !inputEl || !sendBtn || !msgsEl) {
+      console.error("[AI BOT] Missing one or more required elements. Check your IDs:", {
+        toggleBtn, closeBtn, windowEl, inputEl, sendBtn, msgsEl
+      });
+      return;
+    }
+
+    // ----------------------------
+    // Smart FAQ dataset
+    // ----------------------------
+    const faq = [
+      {
+        id: "venue",
+        title: "Venue & location",
+        text: "Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.",
+        tags: "venue location hotel where shah alam concorde selangor"
+      },
+      {
+        id: "dates",
+        title: "Conference dates",
+        text: "Conference dates: 7 & 8 September 2026 (Monday & Tuesday).",
+        tags: "date when september 2026 7 8"
+      },
+      {
+        id: "abstract_deadline",
+        title: "Abstract deadline",
+        text: "Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.",
+        tags: "abstract deadline submit submission late april august"
+      },
+      {
+        id: "acceptance",
+        title: "Acceptance notification",
+        text: "Abstract acceptance notifications: 15 March 2026 – 15 April 2026.",
+        tags: "acceptance notification result decision"
+      },
+      {
+        id: "registration",
+        title: "Registration deadlines",
+        text: "Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).",
+        tags: "register registration early bird late payment walk in onsite"
+      },
+      {
+        id: "contact",
+        title: "Contact",
+        text: "For help, email admin@mterms2026.com.",
+        tags: "contact email help admin"
+      }
+    ];
+
+    const synonyms = [
+      ["where", "venue", "location", "hotel"],
+      ["when", "date", "dates", "schedule"],
+      ["abstract", "poster", "submission", "submit"],
+      ["register", "registration", "sign up", "signup"],
+      ["fee", "fees", "payment", "pay", "cost", "price"]
+    ];
+
+    function normalizeQuery(q) {
+      let s = (q || "").toLowerCase().trim();
+      for (const group of synonyms) {
+        if (group.some(w => s.includes(w))) s += " " + group.join(" ");
+      }
+      return s.replace(/\s+/g, " ");
+    }
+
+    // ----------------------------
+    // Lunr index (SAFE)
+    // ----------------------------
+    let idx = null;
+
+    function buildIndex() {
+      if (typeof window.lunr !== "function") {
+        console.warn("[AI BOT] lunr is not loaded. Bot will run in fallback mode. Check lunr.min.js path.");
+        idx = null;
+        return false;
+      }
+
+      idx = window.lunr(function () {
+        this.ref("id");
+        this.field("title");
+        this.field("text");
+        this.field("tags");
+        faq.forEach(d => this.add(d));
+      });
+
+      return true;
+    }
+
+    buildIndex();
+
+    function getSmartAnswer(userQuery) {
+      const q = normalizeQuery(userQuery);
+
+      // If Lunr didn't load, still respond (so bot works)
+      if (!idx) {
+        return {
+          text: "Bot search engine isn’t loaded yet. Please fix lunr.min.js path. For now, ask about: venue, dates, abstract deadline, registration, or contact.",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      if (q.length < 3) {
+        return {
+          text: "Tell me what you need: venue, dates, abstract deadline, registration, or contact?",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      const results = idx.search(q);
+
+      if (!results.length) {
+        return {
+          text: "I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      const top = results
+        .slice(0, 2)
+        .map(r => faq.find(d => d.id === r.ref))
+        .filter(Boolean);
+
+      if (results[0].score < 0.6) {
+        return {
+          text: "I’m not sure which one you meant. Choose one:",
+          quick: top.map(t => t.title)
+        };
+      }
+
+      const best = top[0];
+
+      const followUps = {
+        venue: ["Dates", "Registration", "Contact"],
+        dates: ["Venue", "Abstract deadline", "Registration"],
+        abstract_deadline: ["Acceptance notification", "Registration", "Contact"],
+        acceptance: ["Abstract deadline", "Registration", "Contact"],
+        registration: ["Dates", "Venue", "Contact"],
+        contact: ["Registration", "Abstract deadline", "Venue"]
+      };
+
+      return {
+        text: best.text,
+        quick: (followUps[best.id] || ["Venue", "Dates", "Registration"])
+      };
+    }
+
+    // ----------------------------
+    // UI
+    // ----------------------------
+    toggleBtn.addEventListener('click', () => {
+      windowEl.classList.toggle('hidden');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      windowEl.classList.add('hidden');
+    });
+
+    function addBubble(text, type, quickReplies = null) {
+      const div = document.createElement('div');
+      div.className = `ai-msg ${type}`;
+      div.innerText = text;
+
+      if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
+        const wrap = document.createElement("div");
+        wrap.className = "ai-quick";
+
+        quickReplies.slice(0, 5).forEach(label => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "ai-quick-btn";
+          b.textContent = label;
+          b.addEventListener("click", () => {
+            inputEl.value = label;
+            sendMessage();
+          });
+          wrap.appendChild(b);
+        });
+
+        div.appendChild(document.createElement("br"));
+        div.appendChild(wrap);
+      }
+
+      msgsEl.appendChild(div);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      addBubble(text, 'user');
+      inputEl.value = '';
+
+      setTimeout(() => {
+        const out = getSmartAnswer(text);
+        addBubble(out.text, 'bot', out.quick);
+      }, 200);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    console.log("[AI BOT] initialized OK");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+  
+
+<script>
+/* =========================
+   Header dropdown + mobile menu
+   ========================= */
+(function(){
+  const nav = document.getElementById('siteNav');
+  const toggle = document.querySelector('.nav-toggle');
+  const dd = document.querySelector('[data-dd]');
+  const ddBtn = dd ? dd.querySelector('.nav-dd-btn') : null;
+
+  // Mobile menu toggle (keeps compatibility with existing styling)
+  if (toggle && nav){
+    toggle.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  }
+
+  // Dropdown open/close
+  function closeDD(){
+    if (!dd) return;
+    dd.classList.remove('open');
+    if (ddBtn) ddBtn.setAttribute('aria-expanded', 'false');
+  }
+  function toggleDD(){
+    if (!dd) return;
+    const open = dd.classList.toggle('open');
+    if (ddBtn) ddBtn.setAttribute('aria-expanded', String(open));
+  }
+
+  if (ddBtn){
+    ddBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleDD();
+    });
+  }
+
+  document.addEventListener('click', closeDD);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDD();
+  });
+})();
+</script>
+
+
+
+</body>
+</html>
+
