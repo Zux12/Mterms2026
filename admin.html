@@ -255,6 +255,213 @@ button[disabled] {
           <input id="pr-topic" placeholder="Topic area">
         </div>
 
+
+
+        <!-- Submission (Theme + Field + Authors) -->
+        <div class="card" id="ad-submissionCard" style="display:none;margin-top:12px">
+          <h4>Abstract / Authors Details</h4>
+          <div style="opacity:.85;margin-top:-6px;margin-bottom:10px">
+            Theme, respective field, and author list (up to 10). Tick <strong>one</strong> corresponding author only.
+          </div>
+
+          <div class="row">
+            <label>Theme
+              <select id="ad-sub-theme">
+                <option value="">Select theme</option>
+              </select>
+            </label>
+
+            <label>Respective Field
+              <select id="ad-sub-field" disabled>
+                <option value="">Select field</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Submission / Abstract Title
+            <input id="ad-sub-title" placeholder="e.g., Scaffold-assisted stem cell regeneration...">
+          </label>
+
+          <div id="ad-subMsg" style="margin:6px 0 12px;opacity:.9"></div>
+
+          <!-- Authors 1..10 -->
+          <div id="ad-authorsWrap">
+
+            <!-- Author 1 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 1</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a1-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a1-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a1-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a1-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a1-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 2 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 2</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a2-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a2-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a2-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a2-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a2-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a2-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 3 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 3</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a3-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a3-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a3-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a3-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a3-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a3-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 4 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 4</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a4-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a4-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a4-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a4-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a4-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a4-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 5 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 5</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a5-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a5-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a5-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a5-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a5-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a5-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 6 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 6</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a6-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a6-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a6-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a6-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a6-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a6-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 7 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 7</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a7-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a7-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a7-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a7-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a7-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a7-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 8 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 8</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a8-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a8-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a8-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a8-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a8-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a8-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 9 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 9</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a9-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a9-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a9-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a9-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a9-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a9-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+            <!-- Author 10 -->
+            <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+              <legend>Author 10</legend>
+              <div class="row-3">
+                <label>First name <input id="ad-a10-first" placeholder="First name"></label>
+                <label>Last name <input id="ad-a10-last" placeholder="Last name"></label>
+                <label>Email <input id="ad-a10-email" type="email" placeholder="email@example.com"></label>
+              </div>
+              <div class="row">
+                <label>Affiliation <input id="ad-a10-affil" placeholder="University / Company"></label>
+                <label>Country <input id="ad-a10-country" placeholder="Country"></label>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="radio" name="adCorrAuthor" id="ad-a10-corr"> Corresponding author
+              </label>
+            </fieldset>
+
+          </div>
+        </div>
+
+
+        
         <h4>Billing</h4>
         <div class="row">
           <input id="b-billTo" placeholder="Bill-to name">
@@ -344,6 +551,180 @@ button[disabled] {
     const API='https://mterm2026-559f9bf571b5.herokuapp.com';
     const $=id=>document.getElementById(id);
 
+
+
+
+
+        // ===== Submission (theme/field/authors) for Admin =====
+    const adSubCard  = $('ad-submissionCard');
+    const adSubTheme = $('ad-sub-theme');
+    const adSubField = $('ad-sub-field');
+    const adSubTitle = $('ad-sub-title');
+    const adSubMsg   = $('ad-subMsg');
+
+    const THEME_FIELDS = {
+      "Stem Cell Innovations and Clinical Applications": [
+        "Stem Cell Biology and Mechanisms of Differentiation",
+        "Tissue Engineering and Biomaterials",
+        "Organoids and 3D Bioprinting",
+        "Regenerative Medicine and Translational Therapies",
+        "Cellular Reprogramming and Induced Pluripotent Stem Cells (iPSCs)",
+        "Clinical Trials and Regulatory Science in Stem Cell Therapy",
+        "Gene Editing and Cell Engineering",
+        "Immunomodulation and Stem Cell Interactions",
+        "Neural Stem Cells and Neuroregeneration",
+        "Musculoskeletal Regeneration",
+        "Cardiac and Vascular Regeneration",
+        "Hepatic and Pancreatic Regeneration",
+        "Stem Cell-Derived Extracellular Vesicles and Secretome Therapy",
+        "Biomanufacturing and GMP Production of Stem Cells",
+        "Ethics, Policy, and Commercialization in Regenerative Medicine",
+        "Other relevant fields"
+      ],
+      "Biomaterials and Tissue Scaffolds": [
+        "Design and Development of Novel Biomaterials",
+        "Biocompatibility and Biofunctionality Assessment",
+        "3D Bioprinting and Additive Manufacturing",
+        "Smart and Responsive Biomaterials",
+        "Hydrogels and Injectable Scaffolds",
+        "Nanomaterials in Tissue Engineering",
+        "Bioactive Surface Modification",
+        "Degradable and Bioresorbable Scaffolds",
+        "Mechanical and Structural Characterization of Scaffolds",
+        "Vascularization Strategies in Engineered Tissues",
+        "Cell–Material Interactions and Mechanotransduction",
+        "Composite and Hybrid Scaffolds",
+        "Scaffold-Based Organoid and Tissue Models",
+        "Clinical Translation and Regulatory Challenges in Biomaterials",
+        "Sustainable and Green Biomaterials",
+        "Other relevant fields"
+      ],
+      "Student and Young Investigator Symposium (SYIS)": [
+        "All fields listed above (SYIS)"
+      ]
+    };
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function initAdminSubmissionUI(){
+      adSubTheme.innerHTML =
+        `<option value="">Select theme</option>` +
+        Object.keys(THEME_FIELDS).map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+
+      adSubField.innerHTML = `<option value="">Select field</option>`;
+      adSubField.disabled = true;
+
+      adSubTheme.addEventListener('change', () => {
+        const t = adSubTheme.value;
+        const fields = THEME_FIELDS[t] || [];
+        adSubField.innerHTML =
+          `<option value="">Select field</option>` +
+          fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+        adSubField.disabled = !fields.length;
+      });
+    }
+
+    function toggleAdminSubmission(on){
+      adSubCard.style.display = on ? 'block' : 'none';
+      adSubMsg.textContent = '';
+    }
+
+    function getAdAuthor(i){
+      const first = $(`ad-a${i}-first`)?.value?.trim() || '';
+      const last  = $(`ad-a${i}-last`)?.value?.trim()  || '';
+      const email = $(`ad-a${i}-email`)?.value?.trim() || '';
+      const affil = $(`ad-a${i}-affil`)?.value?.trim() || '';
+      const country = $(`ad-a${i}-country`)?.value?.trim() || '';
+      const isCorr = !!$(`ad-a${i}-corr`)?.checked;
+
+      const anyFilled = !!(first || last || email || affil || country);
+      if (!anyFilled) return null;
+
+      return { firstName:first, lastName:last, email, affiliation:affil, country, isCorresponding:isCorr };
+    }
+
+    function readAdminSubmissionFromForm(){
+      const theme = adSubTheme.value || '';
+      const field = adSubField.value || '';
+      const title = adSubTitle.value?.trim() || '';
+
+      const authors = [];
+      for (let i=1; i<=10; i++){
+        const a = getAdAuthor(i);
+        if (a) authors.push(a);
+      }
+      return { theme, field, title, authors };
+    }
+
+    function writeAdminSubmissionToForm(sub){
+      const theme = sub?.theme || '';
+      const field = sub?.field || '';
+      const title = sub?.title || '';
+      const authors = Array.isArray(sub?.authors) ? sub.authors : [];
+
+      adSubTheme.value = theme;
+
+      const fields = THEME_FIELDS[theme] || [];
+      adSubField.innerHTML =
+        `<option value="">Select field</option>` +
+        fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+      adSubField.disabled = !fields.length;
+
+      adSubField.value = field;
+      adSubTitle.value = title;
+
+      for (let i=1; i<=10; i++){
+        $(`ad-a${i}-first`).value = '';
+        $(`ad-a${i}-last`).value = '';
+        $(`ad-a${i}-email`).value = '';
+        $(`ad-a${i}-affil`).value = '';
+        $(`ad-a${i}-country`).value = '';
+        $(`ad-a${i}-corr`).checked = false;
+      }
+
+      authors.slice(0,10).forEach((a, idx) => {
+        const i = idx + 1;
+        $(`ad-a${i}-first`).value = a?.firstName || '';
+        $(`ad-a${i}-last`).value = a?.lastName || '';
+        $(`ad-a${i}-email`).value = a?.email || '';
+        $(`ad-a${i}-affil`).value = a?.affiliation || '';
+        $(`ad-a${i}-country`).value = a?.country || '';
+        $(`ad-a${i}-corr`).checked = !!a?.isCorresponding;
+      });
+    }
+
+    function validateAdminSubmissionIfPresenter(){
+      adSubMsg.textContent = '';
+      if (!$('pr-presenting').checked) return { ok:true };
+
+      const sub = readAdminSubmissionFromForm();
+      const anySubData = !!(sub.theme || sub.field || sub.title || sub.authors.length);
+      if (!anySubData) return { ok:true };
+
+      if (!sub.theme) return { ok:false, msg:'❌ Please select a Theme.' };
+      if (!sub.field) return { ok:false, msg:'❌ Please select a Respective Field.' };
+      if (!sub.authors.length) return { ok:false, msg:'❌ Please fill at least Author 1.' };
+
+      const corrCount = sub.authors.filter(a => a.isCorresponding).length;
+      if (corrCount !== 1) return { ok:false, msg:'❌ Please tick exactly ONE corresponding author.' };
+
+      return { ok:true };
+    }
+
+    // init once
+    initAdminSubmissionUI();
+
+    // show/hide on presenter toggle
+    $('pr-presenting').addEventListener('change', () => {
+      toggleAdminSubmission($('pr-presenting').checked);
+    });
     // Login flow
     $('aLogin').addEventListener('click',()=>{
       const u=$('aUser').value.trim(), p=$('aPass').value;
@@ -437,6 +818,12 @@ button[disabled] {
         $('pr-title').value  = doc.program?.title||'';
         $('pr-topic').value  = doc.program?.topicArea||'';
 
+
+
+                // Submission: show only if presenter
+        toggleAdminSubmission(!!doc.program?.presenting);
+        writeAdminSubmissionToForm(doc.submission || {});
+
         $('b-billTo').value = doc.billing?.billTo||'';
         $('b-taxNo').value  = doc.billing?.taxNo||'';
         $('b-po').value     = doc.billing?.poNumber||'';
@@ -486,12 +873,24 @@ button[disabled] {
         program: {
           presenting:$('pr-presenting').checked, type:$('pr-type').value, title:$('pr-title').value.trim(), topicArea:$('pr-topic').value.trim()
         },
+
+                submission: readAdminSubmissionFromForm(),
+
+        
         billing: { billTo:$('b-billTo').value.trim(), taxNo:$('b-taxNo').value.trim(), poNumber:$('b-po').value.trim() },
         address: { line1:$('a-line1').value.trim(), line2:$('a-line2').value.trim(), city:$('a-city').value.trim(), state:$('a-state').value.trim(), postcode:$('a-postcode').value.trim(), country:$('a-country').value.trim() },
         consents: { pdpa:$('c-pdpa').checked, codeOfConduct:$('c-coc').checked, marketingOptIn:$('c-mkt').checked },
         payment: { status:$('pay-status').value, amount:$('pay-amount').value?Number($('pay-amount').value):undefined }
       };
       if (updates.student===undefined) delete updates.student;
+
+            const v = validateAdminSubmissionIfPresenter();
+      if (!v.ok) {
+        $('saveMsg').textContent = v.msg;
+        $('save').disabled = false;
+        return;
+      }
+      
       try{
         const r = await fetch(`${API}/api/admin/registrations/${id}`, {
           method:'PUT',
