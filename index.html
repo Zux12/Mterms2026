@@ -646,14 +646,16 @@
 
 /* New MTERMS logo in header (right side) */
 .site-header img.header-logo.header-logo--mterm{
-  height: 52px;
-  width: auto;
-  border-radius: 10px;
+  height: 80px !important;
+  max-height: none !important;   /* THIS is the key */
+  max-width: none !important;    /* prevents width restriction */
+  width: auto !important;
   margin-left: 10px;
-  border: 1px solid rgba(30,90,168,.18);
-  box-shadow: 0 8px 18px rgba(0,0,0,.08);
-  background: rgba(255,255,255,.55);
-  padding: 5px;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
 
 .site-header .brand-logo-right{
