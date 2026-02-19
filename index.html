@@ -640,7 +640,7 @@
 
 
 </style>
-
+<script src="lunr.min.js"></script>
 </head>
 <body>
 
@@ -1323,6 +1323,18 @@
     border-bottom-right-radius: 2px;
   }
 
+
+.ai-quick { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-quick-btn {
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ai-quick-btn:hover { filter: brightness(0.98); }
+  
   /* Input Area */
   .ai-input-area {
     padding: 10px;
@@ -1377,101 +1389,123 @@
   // EXPANDED KNOWLEDGE BASE
   // Sources: Event Guide, Prospectus, Abstract Guidelines, Oral Guidelines
 // 3. Knowledge Base (Conflict-Free & Updated)
-  const knowledge = [
-    // --- DEADLINES & DATES (High Priority) ---
-    { 
-      triggers: ["deadline", "due date", "cutoff"], 
-      answer: "Key Deadlines: Abstract Submission (31 Mar 2026), Early Bird Reg (15 May 2026), Late Payment (1 Sept 2026)." 
-    },
-    { 
-      triggers: ["notification", "accept", "result"], 
-      answer: "Abstract acceptance notifications will be sent between 15 March 2026 and 15 April 2026." 
-    },
-    { 
-      triggers: ["early bird", "early registration"], 
-      answer: "Early Bird registration ends on 15 May 2026. Register before then for the best rates!" 
-    },
-    { 
-      triggers: ["late abstract", "late submission"], 
-      answer: "Late Abstract Submission is open from 1 April 2026 to 15 August 2026." 
-    },
-    { 
-      triggers: ["late registration", "late payment"], 
-      answer: "Late registration and payment is accepted until 1 September 2026." 
-    },
-    { 
-      triggers: ["walk-in", "on-site", "walk in"], 
-      answer: "Walk-in registration is available after 1 September 2026 (subject to availability)." 
-    },
+  // ----------------------------
+// Option A: Smart FAQ Search (Lunr) + Synonyms + Quick Replies
+// ----------------------------
+const faq = [
+  {
+    id: "venue",
+    title: "Venue & location",
+    text: "Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.",
+    tags: "venue location hotel where shah alam concorde selangor"
+  },
+  {
+    id: "dates",
+    title: "Conference dates",
+    text: "Conference dates: 7 & 8 September 2026 (Monday & Tuesday).",
+    tags: "date when september 2026 7 8"
+  },
+  {
+    id: "abstract_deadline",
+    title: "Abstract deadline",
+    text: "Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.",
+    tags: "abstract deadline submit submission late april august"
+  },
+  {
+    id: "acceptance",
+    title: "Acceptance notification",
+    text: "Abstract acceptance notifications: 15 March 2026 – 15 April 2026.",
+    tags: "acceptance notification result decision"
+  },
+  {
+    id: "registration",
+    title: "Registration deadlines",
+    text: "Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).",
+    tags: "register registration early bird late payment walk in onsite"
+  },
+  {
+    id: "contact",
+    title: "Contact",
+    text: "For help, email admin@mterms2026.com.",
+    tags: "contact email help admin"
+  }
+];
 
-    // --- ABSTRACTS & PAPERS ---
-    { 
-      triggers: ["submit abstract", "abstract submission"], 
-      answer: "Submission Deadline: 31 March 2026. Late submission open until 15 Aug. Submit via the portal." 
-    },
-    { 
-      triggers: ["abstract format", "font", "word count", "template", "abstract style"], 
-      answer: "Format: Max 250 words, Arial 12pt, British English. You MUST include at least one figure/table. See Appendix 1." 
-    },
-    { 
-      triggers: ["keyword"], 
-      answer: "Please provide 3-5 keywords to assist in cross-indexing." 
-    },
+const synonyms = [
+  ["where", "venue", "location", "hotel"],
+  ["when", "date", "dates", "schedule"],
+  ["abstract", "poster", "submission", "submit"],
+  ["register", "registration", "sign up", "signup"],
+  ["fee", "fees", "payment", "pay", "cost", "price"]
+];
 
-    // --- BASIC EVENT INFO ---
-    { 
-      triggers: ["gala", "dinner", "social", "party"], 
-      answer: "The Gala Dinner is on Day 1 (Monday, 7 Sept) at 20:00. It's a great chance to network!" 
-    },
-    { 
-      triggers: ["venue", "location", "hotel", "where"], 
-      answer: "MTERMS 2026 will be held at the Concorde Hotel, Kuala Lumpur, Malaysia." 
-    },
-    { 
-      triggers: ["date", "when"], 
-      answer: "The conference is on 7th & 8th September 2026 (Monday & Tuesday)." 
-    },
+function normalizeQuery(q) {
+  let s = (q || "").toLowerCase().trim();
+  for (const group of synonyms) {
+    if (group.some(w => s.includes(w))) s += " " + group.join(" ");
+  }
+  return s.replace(/\s+/g, " ");
+}
 
-    // --- SCHEDULE & SPEAKERS ---
-    { 
-      triggers: ["plenary", "keynote", "speaker"], 
-      answer: "Key sessions: 'Stem Cell Biology' (Day 1, 10:00), 'Biomaterials' (Day 1, 17:00), and 'Gene Editing' (Day 2, 09:00)." 
-    },
-    { 
-      triggers: ["symposium", "symposia", "track"], 
-      answer: "Symposia cover Stem Cell Innovations, Biomaterials, and the Student/Young Investigator Symposium (SYIS)." 
-    },
+let idx = null;
+function buildIndex() {
+  // lunr must be loaded by <script src="lunr.min.js"></script>
+  idx = lunr(function () {
+    this.ref("id");
+    this.field("title");
+    this.field("text");
+    this.field("tags");
+    faq.forEach(d => this.add(d));
+  });
+}
+buildIndex();
 
-    // --- ORAL PRESENTATIONS ---
-    { 
-      triggers: ["oral", "presentation", "slide", "powerpoint", "time limit"], 
-      answer: "Oral presenters get 10 mins total: 8 mins to present + 2 mins Q&A. Slides are due by 30 August 2026." 
-    },
+function getSmartAnswer(userQuery) {
+  const q = normalizeQuery(userQuery);
 
-    // --- SPONSORSHIP ---
-    { 
-      triggers: ["sponsor", "booth", "exhibit", "price", "cost", "package"], 
-      answer: "Sponsorships: Platinum (RM30k), Gold (RM20k), Silver (RM10k). Booths are RM7,500. Contact lyoges@hctm.ukm.edu.my." 
-    },
-    { 
-      triggers: ["platinum", "gold", "silver"], 
-      answer: "Platinum: RM30,000 (Exclusive). Gold: RM20,000. Silver: RM10,000. All include booth space & recognition." 
-    },
-    { 
-      triggers: ["bag", "lanyard", "dinner sponsor"], 
-      answer: "Conference Bag: RM15,000. Lanyard: RM10,000. Dinner Sponsor: RM10,000. All correspond to exclusive branding." 
-    },
+  // very short queries => offer quick buttons
+  if (q.length < 3) {
+    return {
+      text: "Tell me what you need: venue, dates, abstract deadline, registration, or contact?",
+      quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+    };
+  }
 
-    // --- PAYMENT & CONTACT ---
-    { 
-      triggers: ["pay", "bank", "account", "transfer"], 
-      answer: "Bank: CIMB Bank. Acct: 8007092428 (Malaysian Tissue Engineering...). Send receipt to admin@mterms2026.com." 
-    },
-    { 
-      triggers: ["contact", "help", "email"], 
-      answer: "For questions, email us at admin@mterms2026.com." 
-    }
-  ];
+  const results = idx.search(q);
+
+  if (!results.length) {
+    return {
+      text: "I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.",
+      quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+    };
+  }
+
+  const top = results.slice(0, 2).map(r => faq.find(d => d.id === r.ref)).filter(Boolean);
+
+  // weak match => ask user to choose
+  if (results[0].score < 0.6) {
+    return {
+      text: "I’m not sure which one you meant. Choose one:",
+      quick: top.map(t => t.title)
+    };
+  }
+
+  const best = top[0];
+
+  const followUps = {
+    venue: ["Dates", "Registration", "Contact"],
+    dates: ["Venue", "Abstract deadline", "Registration"],
+    abstract_deadline: ["Acceptance notification", "Registration", "Contact"],
+    acceptance: ["Abstract deadline", "Registration", "Contact"],
+    registration: ["Dates", "Venue", "Contact"],
+    contact: ["Registration", "Abstract deadline", "Venue"]
+  };
+
+  return {
+    text: best.text,
+    quick: (followUps[best.id] || ["Venue", "Dates", "Registration"])
+  };
+}
 
   // UI Toggles
   toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
@@ -1486,11 +1520,11 @@
     addBubble(text, 'user');
     inputEl.value = '';
 
-    // 2. Bot Response
-    setTimeout(() => {
-      const response = getAIResponse(text);
-      addBubble(response, 'bot');
-    }, 600);
+// 2. Bot Response (Smart Search)
+setTimeout(() => {
+  const out = getSmartAnswer(text);
+  addBubble(out.text, 'bot', out.quick);
+}, 300);
   }
 
   sendBtn.addEventListener('click', sendMessage);
@@ -1498,13 +1532,34 @@
     if (e.key === 'Enter') sendMessage();
   });
 
-  function addBubble(text, type) {
-    const div = document.createElement('div');
-    div.className = `ai-msg ${type}`;
-    div.innerText = text; // Safe injection
-    msgsEl.appendChild(div);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
+function addBubble(text, type, quickReplies = null) {
+  const div = document.createElement('div');
+  div.className = `ai-msg ${type}`;
+  div.innerText = text;
+
+  if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
+    const wrap = document.createElement("div");
+    wrap.className = "ai-quick";
+
+    quickReplies.slice(0, 5).forEach(label => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "ai-quick-btn";
+      b.textContent = label;
+      b.addEventListener("click", () => {
+        inputEl.value = label;
+        sendMessage();
+      });
+      wrap.appendChild(b);
+    });
+
+    div.appendChild(document.createElement("br"));
+    div.appendChild(wrap);
   }
+
+  msgsEl.appendChild(div);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
 
   function getAIResponse(query) {
     const lowerQ = query.toLowerCase();
