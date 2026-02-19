@@ -1,1 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: blob: https:;
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+    base-uri 'self';
+    form-action 'self';
+    frame-src 'self' https://www.google.com https://*.google.com;
+    child-src 'self' https://www.google.com https://*.google.com
+  ">
+
+  <title>MTERMS 2026 — Conference Theme</title>
+  <meta name="description" content="MTERMS 2026 Theme — From Discovery to Therapy: Advances in Tissue Engineering and Regenerative Medicine" />
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <style>
+    /* ===== Light-only tokens (no dark mode) ===== */
+    :root{
+      --bg:#f6fbff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --muted:#556b86;
+
+      /* UiTM-like blues */
+      --uitm:#1e5aa8;
+      --uitm2:#2f7bdc;
+
+      /* TESMA accent (green-ish) */
+      --tesma:#166534;
+      --tesma2:#22c55e;
+
+      --ring: rgba(30,90,168,.18);
+      --border:#d7e6f7;
+      --faint:#eef6ff;
+    }
+
+    html, body{
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 8%, rgba(47,123,220,.11), transparent 60%),
+        radial-gradient(760px 420px at 85% 12%, rgba(22,101,52,.08), transparent 58%),
+        linear-gradient(180deg, #f6fbff 0%, #ffffff 60%, #f6fbff 100%);
+    }
+
+    /* ===== Header (same structure as index, but with blended colors) ===== */
+    .site-header{
+      background: linear-gradient(90deg,
+        rgba(22, 101, 52, 0.10) 0%,
+        rgba(30, 90, 168, 0.10) 45%,
+        rgba(47, 123, 220, 0.08) 100%);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      position: relative;
+      z-index: 1000;
+    }
+
+    .site-header .header-inner.header-2row{
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:stretch !important;
+      justify-content:flex-start !important;
+      gap:10px;
+      padding-top:10px;
+      padding-bottom:10px;
+      position:relative;
+    }
+
+    .site-header .brand-row{
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items:center;
+      gap:14px;
+    }
+
+    .site-header .brand-logo{
+      display:flex;
+      align-items:center;
+    }
+    .site-header .brand-row .brand-logo:first-child{ justify-content:flex-start; }
+    .site-header .brand-row .brand-logo:last-child{ justify-content:flex-end; }
+
+    .site-header img.header-logo.header-logo--org{
+      height:64px;
+      max-height:64px;
+      width:auto;
+      max-width:220px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .site-header .brand.brand-center{
+      display:inline-flex;
+      align-items:baseline;
+      justify-content:center;
+      gap:2px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .site-header .brand-mark,
+    .site-header .brand-year{
+      font-size: 2.1rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(90deg, var(--tesma), var(--uitm));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .site-header .nav-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:nowrap;
+      position: relative;
+    }
+
+    .site-header .nav-row .nav{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+      font-size:1.08rem;
+      font-weight:600;
+    }
+
+    .site-header .nav-row .nav a{
+      padding:8px 10px;
+      border-radius:10px;
+      text-decoration:none;
+      color: var(--text);
+    }
+
+    .site-header .nav-row .nav a:hover{
+      background: rgba(30,90,168,.06);
+      border: 1px solid rgba(30,90,168,.10);
+    }
+
+    /* Active page marker */
+    .nav a.is-active{
+      background: rgba(30,90,168,.10);
+      border: 1px solid rgba(30,90,168,.16);
+    }
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:0 0 auto;
+    }
+
+    .nav-toggle{
+      display:none;
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      color:#0b1115;
+    }
+
+    /* Right-side UiTM + MTERMS logo */
+    .brand-logo-right{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+    }
+
+    img.header-logo--mterm{
+      height:52px;
+      width:auto;
+      border-radius:10px;
+      border:1px solid rgba(30,90,168,.18);
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+      background: rgba(255,255,255,.55);
+      padding:5px;
+    }
+
+    /* Mobile menu */
+    @media (max-width: 980px){
+      .site-header img.header-logo.header-logo--org{ height:34px; max-height:34px; max-width:140px; }
+      img.header-logo--mterm{ height:34px; padding:4px; }
+
+      .nav-toggle{ display:inline-flex; }
+
+      .site-header .nav-row{
+        justify-content: space-between;
+      }
+
+      .site-header .nav-row .nav{
+        display:none;
+      }
+
+      .site-header .nav-row .nav.open{
+        display:flex !important;
+        position:absolute !important;
+        top:100% !important;
+        left:12px !important;
+        right:12px !important;
+        margin-top:10px !important;
+        padding:12px !important;
+        border-radius:12px !important;
+        background:#ffffff !important;
+        border:1px solid var(--border) !important;
+        box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+        flex-direction:column !important;
+        gap:10px !important;
+        z-index:9999 !important;
+      }
+    }
+
+    /* ===== Theme page hero ===== */
+    .theme-hero{
+      position: relative;
+      overflow: hidden;
+      padding: 62px 0 36px;
+    }
+
+    .theme-hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.16), transparent 60%),
+        radial-gradient(760px 420px at 88% 16%, rgba(34,197,94,.12), transparent 58%),
+        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.30));
+      z-index:0;
+    }
+
+    .theme-hero .container{ position:relative; z-index:1; }
+
+    .theme-hero-card{
+      max-width: 980px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 22px;
+      box-shadow: 0 18px 46px rgba(30,90,168,.10);
+      backdrop-filter: blur(8px);
+    }
+
+    .theme-hero-kicker{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(30,90,168,.08);
+      border: 1px solid rgba(30,90,168,.14);
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: .2px;
+      margin-bottom: 14px;
+    }
+
+    .theme-hero h1{
+      margin: 0 0 10px;
+      font-size: clamp(1.9rem, 2.8vw, 2.6rem);
+      line-height: 1.15;
+    }
+
+    .theme-hero .tagline{
+      margin: 0;
+      font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+      color: #334155;
+      line-height: 1.55;
+    }
+
+    .theme-big-theme{
+      margin-top: 14px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+      background: linear-gradient(90deg, var(--tesma), var(--uitm));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Professional content sections */
+    .theme-wrap{
+      max-width: 980px;
+      margin: 26px auto 0;
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .theme-panel{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(30,90,168,.06);
+    }
+
+    .theme-panel h2{
+      margin-top: 0;
+    }
+
+    .theme-panel p{
+      color: #1f2937;
+      line-height: 1.75;
+      font-size: 1.05rem;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .pill{
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 600;
+      color: #0b1115;
+    }
+
+    .focus-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .focus{
+      border:1px solid rgba(30,90,168,.12);
+      background: linear-gradient(180deg, rgba(47,123,220,.08), rgba(255,255,255,1));
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .focus .t{
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .focus .d{
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .aside-card{
+      border: 1px solid rgba(22,101,52,.16);
+      background: linear-gradient(180deg, rgba(34,197,94,.10), rgba(255,255,255,1));
+    }
+    .aside-card .meta{
+      display:grid;
+      gap:10px;
+      margin-top: 10px;
+      color: #0f172a;
+    }
+    .aside-pill{
+      display:inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(22,101,52,.18);
+      background: rgba(34,197,94,.08);
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .theme-wrap{ grid-template-columns: 1fr; }
+      .focus-grid{ grid-template-columns: 1fr; }
+    }
+
+    /* Footer match */
+    .site-footer{
+      background:#ffffff;
+      border-top:1px solid var(--border);
+    }
+    .foot-copy{ color:#64748b; }
+  </style>
+
+  <script src="lunr.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner header-2row">
+
+      <div class="brand-row">
+        <a class="brand-logo" href="index.html#home" aria-label="TESMA">
+          <img src="tesma.png" alt="TESMA logo" class="header-logo header-logo--org">
+        </a>
+
+        <a href="index.html#home" class="brand brand-center" aria-label="MTERMS 2026 Home">
+          <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+        </a>
+
+        <div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
+          <a href="index.html#home" aria-label="UiTM">
+            <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
+          </a>
+          <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo--mterm">
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <nav class="nav" id="siteNav" aria-label="Primary navigation">
+          <a href="index.html#about">About</a>
+          <a href="theme.html" class="is-active">Theme</a>
+          <a href="index.html#program">Program</a>
+          <a href="index.html#speakers">Speakers</a>
+          <a href="index.html#venue">Venue & Travel</a>
+          <a href="index.html#registration">Registration</a>
+          <a href="index.html#sponsors">Sponsors</a>
+          <a href="index.html#committee">Committee</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Theme Hero -->
+  <section class="theme-hero" id="top">
+    <div class="container">
+      <div class="theme-hero-card">
+        <div class="theme-hero-kicker">Conference Theme</div>
+        <h1>From discovery to therapy</h1>
+        <p class="tagline">
+          Tissue engineering and regenerative medicine advances fastest when discovery science, manufacturing readiness,
+          clinical translation, and collaboration move in one connected pipeline.
+        </p>
+        <div class="theme-big-theme">
+          “FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE”
+        </div>
+      </div>
+
+      <div class="theme-wrap">
+        <!-- Main narrative -->
+        <div class="theme-panel">
+          <h2>What this theme means for MTERMS 2026</h2>
+          <p>
+            MTERMS 2026 spotlights how breakthroughs in <strong>biomaterials</strong>, <strong>cells and organoids</strong>,
+            <strong>bioprinting</strong>, and <strong>translational science</strong> become practical therapies.
+            We emphasize the end-to-end journey: rigorous discovery, reproducible processes, scalable manufacturing,
+            regulatory readiness, and clinically meaningful outcomes.
+          </p>
+
+          <div class="pill-row">
+            <span class="pill">Biomaterials & smart scaffolds</span>
+            <span class="pill">Stem cells & organoids</span>
+            <span class="pill">Bioprinting & biofabrication</span>
+            <span class="pill">Translation & clinical evidence</span>
+            <span class="pill">Manufacturing, QA/QC & standards</span>
+            <span class="pill">Industry–academia collaboration</span>
+          </div>
+
+          <h2 style="margin-top:18px;">Focus areas</h2>
+          <div class="focus-grid">
+            <div class="focus">
+              <div class="t">Bench-to-bedside translation</div>
+              <div class="d">Accelerating pathways from laboratory proof-of-concept to safe, effective clinical adoption.</div>
+            </div>
+            <div class="focus">
+              <div class="t">Scalability & reproducibility</div>
+              <div class="d">Designing processes that are robust, manufacturable, and consistent across batches and sites.</div>
+            </div>
+            <div class="focus">
+              <div class="t">Regulatory readiness</div>
+              <div class="d">Evidence, documentation, and controls aligned to real regulatory expectations and clinical use.</div>
+            </div>
+            <div class="focus">
+              <div class="t">Partnership-driven impact</div>
+              <div class="d">Connecting researchers, clinicians, industry, and agencies to move innovations faster and further.</div>
+            </div>
+          </div>
+
+          <h2 style="margin-top:18px;">Why it matters</h2>
+          <p>
+            Sustainable progress in TERM is not just about new ideas—it’s about building systems that deliver therapies
+            reliably and responsibly. MTERMS 2026 brings together multidisciplinary expertise to strengthen Malaysia’s
+            innovation ecosystem and support therapies that can be deployed at real-world scale.
+          </p>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="theme-panel aside-card">
+          <h2>Quick details</h2>
+          <div class="meta">
+            <span class="aside-pill">7 & 8 September 2026</span>
+            <div><strong>Venue:</strong> Concorde Hotel, Shah Alam</div>
+            <div><strong>Audience:</strong> Researchers, clinicians, industry, agencies</div>
+            <div><strong>Outcomes:</strong> Collaboration, translation, standards, impact</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <a class="btn primary" href="https://www.mterms2026.com/register.html" rel="noopener">Register</a>
+            <a class="btn" href="index.html#program">View Program (Tentative)</a>
+            <a class="btn ghost" href="login.html">Participant Login</a>
+          </div>
+
+          <p style="margin-top:14px; color:#475569;">
+            If you are submitting an abstract, this theme prioritizes clarity on novelty, translation potential, and
+            evidence quality (methods, validation, reproducibility).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (same as index links) -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="foot-brand">MTERMS 2026</div>
+      <div class="foot-links">
+        <a href="index.html#registration">Register</a>
+        <a href="index.html#abstracts">Submit Abstract</a>
+        <a href="#">Payment</a>
+        <a href="#">Code of Conduct</a>
+        <a href="#">Privacy</a>
+        <a href="login.html">Participant Portal</a>
+        <a href="admin.html">Admin Login</a>
+      </div>
+      <div class="foot-copy">© 2026 MTERMS.</div>
+    </div>
+  </footer>
+
+  <!-- ===== AI BOT (same as index) ===== -->
+  <div id="ai-widget">
+    <div id="ai-chat-window" class="ai-window hidden">
+      <div class="ai-header">
+        <span>MTERMS2026 AI Assistant</span>
+        <button id="ai-close-btn" aria-label="Close chat">×</button>
+      </div>
+      <div id="ai-messages" class="ai-messages">
+        <div class="ai-msg bot">
+          Hello! I'm the MTERMS2026 AI agent. Ask me about the schedule, venue, or deadlines!
+        </div>
+      </div>
+      <div class="ai-input-area">
+        <input type="text" id="ai-input" placeholder="Ask a question..." />
+        <button id="ai-send-btn">➤</button>
+      </div>
+    </div>
+
+    <button id="ai-toggle-btn" class="ai-toggle" aria-label="Open AI assistant">
+      <img src="public/aichatbot.png" alt="AI Chatbot" class="ai-toggle-icon">
+    </button>
+  </div>
+
+  <style>
+    .ai-toggle{
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: #ffffff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      z-index: 10000;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ai-toggle:hover{
+      transform: scale(1.08);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+    .ai-toggle-icon{
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .ai-window{
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 350px;
+      height: 450px;
+      background: var(--surface, #ffffff);
+      border: 1px solid var(--border, #ddd);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .ai-window.hidden{
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+    .ai-header{
+      background: var(--uitm, #1e5aa8);
+      color: white;
+      padding: 15px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #ai-close-btn{
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .ai-messages{
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: var(--bg, #f6fbff);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-msg{
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .ai-msg.bot{
+      background: #eef2f6;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .ai-msg.user{
+      background: var(--uitm, #1e5aa8);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .ai-quick{ margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-quick-btn{
+      border: 1px solid rgba(0,0,0,.12);
+      background: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .ai-quick-btn:hover{ filter: brightness(0.98); }
+    .ai-input-area{
+      padding: 10px;
+      border-top: 1px solid var(--border, #ddd);
+      display: flex;
+      gap: 10px;
+      background: var(--surface, #fff);
+    }
+    #ai-input{
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border, #ccc);
+      border-radius: 20px;
+      outline: none;
+    }
+    #ai-send-btn{
+      background: var(--uitm, #1e5aa8);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #ai-send-btn:hover{ background: var(--uitm2, #2f7bdc); }
+  </style>
+
+  <script>
+    /* ========================================== */
+    /* MTERMS AI ASSISTANT - SAFE SMART FAQ BOT    */
+    /* ========================================== */
+    (function () {
+      function init() {
+        const toggleBtn = document.getElementById('ai-toggle-btn');
+        const closeBtn  = document.getElementById('ai-close-btn');
+        const windowEl  = document.getElementById('ai-chat-window');
+        const inputEl   = document.getElementById('ai-input');
+        const sendBtn   = document.getElementById('ai-send-btn');
+        const msgsEl    = document.getElementById('ai-messages');
+
+        if (!toggleBtn || !closeBtn || !windowEl || !inputEl || !sendBtn || !msgsEl) return;
+
+        const faq = [
+          { id:"venue", title:"Venue & location", text:"Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.", tags:"venue location hotel where shah alam concorde selangor" },
+          { id:"dates", title:"Conference dates", text:"Conference dates: 7 & 8 September 2026 (Monday & Tuesday).", tags:"date when september 2026 7 8" },
+          { id:"abstract_deadline", title:"Abstract deadline", text:"Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.", tags:"abstract deadline submit submission late april august" },
+          { id:"acceptance", title:"Acceptance notification", text:"Abstract acceptance notifications: 15 March 2026 – 15 April 2026.", tags:"acceptance notification result decision" },
+          { id:"registration", title:"Registration deadlines", text:"Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).", tags:"register registration early bird late payment walk in onsite" },
+          { id:"contact", title:"Contact", text:"For help, email admin@mterms2026.com.", tags:"contact email help admin" }
+        ];
+
+        const synonyms = [
+          ["where", "venue", "location", "hotel"],
+          ["when", "date", "dates", "schedule"],
+          ["abstract", "poster", "submission", "submit"],
+          ["register", "registration", "sign up", "signup"],
+          ["fee", "fees", "payment", "pay", "cost", "price"]
+        ];
+
+        function normalizeQuery(q) {
+          let s = (q || "").toLowerCase().trim();
+          for (const group of synonyms) {
+            if (group.some(w => s.includes(w))) s += " " + group.join(" ");
+          }
+          return s.replace(/\s+/g, " ");
+        }
+
+        let idx = null;
+        function buildIndex() {
+          if (typeof window.lunr !== "function") { idx = null; return false; }
+          idx = window.lunr(function () {
+            this.ref("id");
+            this.field("title");
+            this.field("text");
+            this.field("tags");
+            faq.forEach(d => this.add(d));
+          });
+          return true;
+        }
+        buildIndex();
+
+        function getSmartAnswer(userQuery) {
+          const q = normalizeQuery(userQuery);
+          if (!idx) {
+            return { text:"Bot search engine isn’t loaded yet. Please fix lunr.min.js path. For now, ask about: venue, dates, abstract deadline, registration, or contact.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
+          }
+          if (q.length < 3) {
+            return { text:"Tell me what you need: venue, dates, abstract deadline, registration, or contact?", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
+          }
+
+          const results = idx.search(q);
+          if (!results.length) {
+            return { text:"I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.", quick:["Venue","Dates","Abstract deadline","Registration","Contact"] };
+          }
+
+          const top = results.slice(0,2).map(r => faq.find(d => d.id === r.ref)).filter(Boolean);
+          if (results[0].score < 0.6) {
+            return { text:"I’m not sure which one you meant. Choose one:", quick: top.map(t => t.title) };
+          }
+
+          const best = top[0];
+          const followUps = {
+            venue: ["Dates","Registration","Contact"],
+            dates: ["Venue","Abstract deadline","Registration"],
+            abstract_deadline: ["Acceptance notification","Registration","Contact"],
+            acceptance: ["Abstract deadline","Registration","Contact"],
+            registration: ["Dates","Venue","Contact"],
+            contact: ["Registration","Abstract deadline","Venue"]
+          };
+
+          return { text: best.text, quick: (followUps[best.id] || ["Venue","Dates","Registration"]) };
+        }
+
+        toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
+        closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
+
+        function addBubble(text, type, quickReplies=null){
+          const div = document.createElement('div');
+          div.className = `ai-msg ${type}`;
+          div.innerText = text;
+
+          if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
+            const wrap = document.createElement("div");
+            wrap.className = "ai-quick";
+            quickReplies.slice(0,5).forEach(label => {
+              const b = document.createElement("button");
+              b.type = "button";
+              b.className = "ai-quick-btn";
+              b.textContent = label;
+              b.addEventListener("click", () => { inputEl.value = label; sendMessage(); });
+              wrap.appendChild(b);
+            });
+            div.appendChild(document.createElement("br"));
+            div.appendChild(wrap);
+          }
+
+          msgsEl.appendChild(div);
+          msgsEl.scrollTop = msgsEl.scrollHeight;
+        }
+
+        function sendMessage(){
+          const text = inputEl.value.trim();
+          if (!text) return;
+          addBubble(text, 'user');
+          inputEl.value = '';
+          setTimeout(() => {
+            const out = getSmartAnswer(text);
+            addBubble(out.text, 'bot', out.quick);
+          }, 200);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+
+  <script>
+    /* =========================
+       Mobile menu toggle
+       ========================= */
+    (function(){
+      const nav = document.getElementById('siteNav');
+      const toggle = document.querySelector('.nav-toggle');
+      if (toggle && nav){
+        toggle.addEventListener('click', () => {
+          const open = nav.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', String(open));
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
