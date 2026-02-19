@@ -19,6 +19,15 @@
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
     input,select,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+
+    /* IMPORTANT: don't apply 100% width to checkbox/radio */
+input[type="checkbox"],
+input[type="radio"]{
+  width:auto !important;
+  padding:0 !important;
+  border:none !important;
+  box-shadow:none !important;
+}
     table{width:100%;border-collapse:collapse;font-size:.95rem}
     th,td{padding:8px;border-bottom:1px solid var(--border)}
     th{text-align:left}
@@ -246,7 +255,7 @@ button[disabled] {
         <h4>Program</h4>
         <div class="row">
           <label class="field-inline" style="display:flex;align-items:center;gap:8px">
-            <input type="checkbox" id="pr-presenting"> Presenter
+<input type="checkbox" id="pr-presenting"> I am a presenter
           </label>
           <select id="pr-type">
             <option value="none">None</option><option value="talk">Oral</option><option value="poster">Poster</option><option value="workshop">Workshop</option>
@@ -299,9 +308,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a1-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a1-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 2 -->
@@ -316,9 +325,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a2-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a2-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a2-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 3 -->
@@ -333,9 +342,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a3-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a3-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a3-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 4 -->
@@ -350,9 +359,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a4-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a4-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a4-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 5 -->
@@ -367,9 +376,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a5-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a5-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a5-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 6 -->
@@ -384,9 +393,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a6-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a6-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a6-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 7 -->
@@ -401,9 +410,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a7-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a7-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a7-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 8 -->
@@ -418,9 +427,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a8-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a8-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a8-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 9 -->
@@ -435,9 +444,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a9-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a9-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a9-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
             <!-- Author 10 -->
@@ -452,9 +461,9 @@ button[disabled] {
                 <label>Affiliation <input id="ad-a10-affil" placeholder="University / Company"></label>
                 <label>Country <input id="ad-a10-country" placeholder="Country"></label>
               </div>
-              <label style="display:flex;align-items:center;gap:8px">
-                <input type="radio" name="adCorrAuthor" id="ad-a10-corr"> Corresponding author
-              </label>
+<label class="field-inline">
+  <input type="radio" name="adCorrAuthor" id="ad-a1-corr"> Corresponding author
+</label>
             </fieldset>
 
           </div>
