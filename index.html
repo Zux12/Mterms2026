@@ -911,12 +911,12 @@
   <div id="ai-widget">
   <div id="ai-chat-window" class="ai-window hidden">
     <div class="ai-header">
-      <span>🤖 MTERMS Assistant</span>
+      <span>🤖 MTERMS2026 AI Assistant</span>
       <button id="ai-close-btn" aria-label="Close chat">×</button>
     </div>
     <div id="ai-messages" class="ai-messages">
       <div class="ai-msg bot">
-        Hello! I'm the MTERMS AI agent. Ask me about the schedule, venue, or deadlines!
+        Hello! I'm the MTERMS2026 AI agent. Ask me about the schedule, venue, or deadlines!
       </div>
     </div>
     <div class="ai-input-area">
@@ -1074,73 +1074,100 @@
 
   // EXPANDED KNOWLEDGE BASE
   // Sources: Event Guide, Prospectus, Abstract Guidelines, Oral Guidelines
+// 3. Knowledge Base (Conflict-Free & Updated)
   const knowledge = [
-    // --- BASIC EVENT INFO ---
-    {
-      triggers: ["gala", "dinner", "social", "party"],
-      answer: "The Gala Dinner is on Day 1 (Monday, 7 Sept) at 20:00. It's a great chance to network!"
+    // --- DEADLINES & DATES (High Priority) ---
+    { 
+      triggers: ["deadline", "due date", "cutoff"], 
+      answer: "Key Deadlines: Abstract Submission (31 Mar 2026), Early Bird Reg (15 May 2026), Late Payment (1 Sept 2026)." 
     },
-    {
-      triggers: ["venue", "location", "hotel", "where"],
-      answer: "MTERMS 2026 will be held at the Concorde Hotel, Kuala Lumpur, Malaysia."
+    { 
+      triggers: ["notification", "accept", "result"], 
+      answer: "Abstract acceptance notifications will be sent between 15 March 2026 and 15 April 2026." 
     },
-    {
-      triggers: ["date", "when"],
-      answer: "The conference is on 7th & 8th September 2026 (Monday & Tuesday)."
+    { 
+      triggers: ["early bird", "early registration"], 
+      answer: "Early Bird registration ends on 15 May 2026. Register before then for the best rates!" 
     },
-
-    // --- SCHEDULE & SPEAKERS ---
-    {
-      triggers: ["plenary", "keynote", "speaker"],
-      answer: "Key sessions: 'Stem Cell Biology' (Day 1, 10:00), 'Biomaterials' (Day 1, 17:00), and 'Gene Editing' (Day 2, 09:00)."
+    { 
+      triggers: ["late abstract", "late submission"], 
+      answer: "Late Abstract Submission is open from 1 April 2026 to 15 August 2026." 
     },
-    {
-      triggers: ["symposium", "symposia", "track"],
-      answer: "Symposia cover Stem Cell Innovations, Biomaterials, and the Student/Young Investigator Symposium (SYIS)."
+    { 
+      triggers: ["late registration", "late payment"], 
+      answer: "Late registration and payment is accepted until 1 September 2026." 
+    },
+    { 
+      triggers: ["walk-in", "on-site", "walk in"], 
+      answer: "Walk-in registration is available after 1 September 2026 (subject to availability)." 
     },
 
     // --- ABSTRACTS & PAPERS ---
-    {
-      triggers: ["abstract", "submit", "format", "font", "word count"],
-      answer: "Abstracts must be British English, max 250 words, Arial 12pt. You MUST include at least one figure or table. [Source: Abstract Guidelines]"
+    { 
+      triggers: ["submit abstract", "abstract submission"], 
+      answer: "Submission Deadline: 31 March 2026. Late submission open until 15 Aug. Submit via the portal." 
     },
-    {
-      triggers: ["keyword", "key word"],
-      answer: "Please provide 3-5 keywords to assist in cross-indexing."
+    { 
+      triggers: ["abstract format", "font", "word count", "template", "abstract style"], 
+      answer: "Format: Max 250 words, Arial 12pt, British English. You MUST include at least one figure/table. See Appendix 1." 
     },
-    {
-      triggers: ["template", "appendix"],
-      answer: "Please refer to 'Appendix 1' in the guidelines for the exact abstract template."
+    { 
+      triggers: ["keyword"], 
+      answer: "Please provide 3-5 keywords to assist in cross-indexing." 
+    },
+
+    // --- BASIC EVENT INFO ---
+    { 
+      triggers: ["gala", "dinner", "social", "party"], 
+      answer: "The Gala Dinner is on Day 1 (Monday, 7 Sept) at 20:00. It's a great chance to network!" 
+    },
+    { 
+      triggers: ["venue", "location", "hotel", "where"], 
+      answer: "MTERMS 2026 will be held at the Concorde Hotel, Kuala Lumpur, Malaysia." 
+    },
+    { 
+      triggers: ["date", "when"], 
+      answer: "The conference is on 7th & 8th September 2026 (Monday & Tuesday)." 
+    },
+
+    // --- SCHEDULE & SPEAKERS ---
+    { 
+      triggers: ["plenary", "keynote", "speaker"], 
+      answer: "Key sessions: 'Stem Cell Biology' (Day 1, 10:00), 'Biomaterials' (Day 1, 17:00), and 'Gene Editing' (Day 2, 09:00)." 
+    },
+    { 
+      triggers: ["symposium", "symposia", "track"], 
+      answer: "Symposia cover Stem Cell Innovations, Biomaterials, and the Student/Young Investigator Symposium (SYIS)." 
     },
 
     // --- ORAL PRESENTATIONS ---
-    {
-      triggers: ["oral", "presentation", "slide", "powerpoint", "time limit"],
-      answer: "Oral presenters get 10 mins total: 8 mins to present + 2 mins Q&A. Slides are due by 30 August 2026. [Source: Oral Guidelines]"
+    { 
+      triggers: ["oral", "presentation", "slide", "powerpoint", "time limit"], 
+      answer: "Oral presenters get 10 mins total: 8 mins to present + 2 mins Q&A. Slides are due by 30 August 2026." 
     },
 
     // --- SPONSORSHIP ---
-    {
-      triggers: ["sponsor", "booth", "exhibit", "price", "cost", "package"],
-      answer: "Sponsorships: Platinum (RM30k), Gold (RM20k), Silver (RM10k). Booths are RM7,500. Contact lyoges@hctm.ukm.edu.my."
+    { 
+      triggers: ["sponsor", "booth", "exhibit", "price", "cost", "package"], 
+      answer: "Sponsorships: Platinum (RM30k), Gold (RM20k), Silver (RM10k). Booths are RM7,500. Contact lyoges@hctm.ukm.edu.my." 
     },
-    {
-      triggers: ["platinum", "gold", "silver"],
-      answer: "Platinum: RM30,000 (Exclusive). Gold: RM20,000. Silver: RM10,000. All include booth space & recognition."
+    { 
+      triggers: ["platinum", "gold", "silver"], 
+      answer: "Platinum: RM30,000 (Exclusive). Gold: RM20,000. Silver: RM10,000. All include booth space & recognition." 
     },
-    {
-      triggers: ["bag", "lanyard", "dinner sponsor"],
-      answer: "Conference Bag: RM15,000. Lanyard: RM10,000. Dinner Sponsor: RM10,000. All correspond to exclusive branding."
+    { 
+      triggers: ["bag", "lanyard", "dinner sponsor"], 
+      answer: "Conference Bag: RM15,000. Lanyard: RM10,000. Dinner Sponsor: RM10,000. All correspond to exclusive branding." 
     },
 
     // --- PAYMENT & CONTACT ---
-    {
-      triggers: ["pay", "bank", "account", "transfer"],
-      answer: "Bank: CIMB Bank. Acct: 8007092428 (Malaysian Tissue Engineering...). Send receipt to admin@mterms2026.com."
+    { 
+      triggers: ["pay", "bank", "account", "transfer"], 
+      answer: "Bank: CIMB Bank. Acct: 8007092428 (Malaysian Tissue Engineering...). Send receipt to admin@mterms2026.com." 
     },
-    {
-      triggers: ["contact", "help"],
-      answer: "For questions, email us a admin@mterms2026.com."
+    { 
+      triggers: ["contact", "help", "email"], 
+      answer: "For questions, email us at admin@mterms2026.com." 
     }
   ];
 
