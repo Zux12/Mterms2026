@@ -479,5 +479,292 @@
     pwEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
     emailEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
   </script>
+
+
+
+  <div id="ai-widget">
+  <div id="ai-chat-window" class="ai-window hidden">
+    <div class="ai-header">
+      <span>🤖 MTERMS Assistant</span>
+      <button id="ai-close-btn" aria-label="Close chat">×</button>
+    </div>
+    <div id="ai-messages" class="ai-messages">
+      <div class="ai-msg bot">
+        Hello! I'm the MTERMS AI agent. Ask me about the schedule, venue, or deadlines!
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <input type="text" id="ai-input" placeholder="Ask a question..." />
+      <button id="ai-send-btn">➤</button>
+    </div>
+  </div>
+
+  <button id="ai-toggle-btn" class="ai-toggle">
+    🤖
+  </button>
+</div>
+
+<style>
+  /* Floating Button */
+  .ai-toggle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--brand, #1e5aa8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    z-index: 10000;
+    transition: transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-toggle:hover {
+    transform: scale(1.1);
+    background: var(--brand-2, #2f7bdc);
+  }
+
+  /* Chat Window */
+  .ai-window {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 450px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  
+  .ai-window.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+  }
+
+  /* Header */
+  .ai-header {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    padding: 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #ai-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* Messages Area */
+  .ai-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: var(--bg, #f6fbff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 80%;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .ai-msg.bot {
+    background: #eef2f6;
+    color: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+  .ai-msg.user {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+
+  /* Input Area */
+  .ai-input-area {
+    padding: 10px;
+    border-top: 1px solid var(--border, #ddd);
+    display: flex;
+    gap: 10px;
+    background: var(--surface, #fff);
+  }
+  #ai-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border, #ccc);
+    border-radius: 20px;
+    outline: none;
+  }
+  #ai-send-btn {
+    background: var(--brand, #1e5aa8);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #ai-send-btn:hover { background: var(--brand-2, #2f7bdc); }
+</style>
+
+<script>
+/* ========================================== */
+/* MTERMS AI ASSISTANT - UPDATED SCRIPT      */
+/* ========================================== */
+(function() {
+  const toggleBtn = document.getElementById('ai-toggle-btn');
+  const closeBtn = document.getElementById('ai-close-btn');
+  const windowEl = document.getElementById('ai-chat-window');
+  const inputEl = document.getElementById('ai-input');
+  const sendBtn = document.getElementById('ai-send-btn');
+  const msgsEl = document.getElementById('ai-messages');
+
+  // EXPANDED KNOWLEDGE BASE
+  // Sources: Event Guide, Prospectus, Abstract Guidelines, Oral Guidelines
+  const knowledge = [
+    // --- BASIC EVENT INFO ---
+    {
+      triggers: ["gala", "dinner", "social", "party"],
+      answer: "The Gala Dinner is on Day 1 (Monday, 7 Sept) at 20:00. It's a great chance to network!"
+    },
+    {
+      triggers: ["venue", "location", "hotel", "where"],
+      answer: "MTERMS 2026 will be held at the Concorde Hotel, Kuala Lumpur, Malaysia."
+    },
+    {
+      triggers: ["date", "when"],
+      answer: "The conference is on 7th & 8th September 2026 (Monday & Tuesday)."
+    },
+
+    // --- SCHEDULE & SPEAKERS ---
+    {
+      triggers: ["plenary", "keynote", "speaker"],
+      answer: "Key sessions: 'Stem Cell Biology' (Day 1, 10:00), 'Biomaterials' (Day 1, 17:00), and 'Gene Editing' (Day 2, 09:00)."
+    },
+    {
+      triggers: ["symposium", "symposia", "track"],
+      answer: "Symposia cover Stem Cell Innovations, Biomaterials, and the Student/Young Investigator Symposium (SYIS)."
+    },
+
+    // --- ABSTRACTS & PAPERS ---
+    {
+      triggers: ["abstract", "submit", "format", "font", "word count"],
+      answer: "Abstracts must be British English, max 250 words, Arial 12pt. You MUST include at least one figure or table. [Source: Abstract Guidelines]"
+    },
+    {
+      triggers: ["keyword", "key word"],
+      answer: "Please provide 3-5 keywords to assist in cross-indexing."
+    },
+    {
+      triggers: ["template", "appendix"],
+      answer: "Please refer to 'Appendix 1' in the guidelines for the exact abstract template."
+    },
+
+    // --- ORAL PRESENTATIONS ---
+    {
+      triggers: ["oral", "presentation", "slide", "powerpoint", "time limit"],
+      answer: "Oral presenters get 10 mins total: 8 mins to present + 2 mins Q&A. Slides are due by 30 August 2026. [Source: Oral Guidelines]"
+    },
+
+    // --- SPONSORSHIP ---
+    {
+      triggers: ["sponsor", "booth", "exhibit", "price", "cost", "package"],
+      answer: "Sponsorships: Platinum (RM30k), Gold (RM20k), Silver (RM10k). Booths are RM7,500. Contact lyoges@hctm.ukm.edu.my."
+    },
+    {
+      triggers: ["platinum", "gold", "silver"],
+      answer: "Platinum: RM30,000 (Exclusive). Gold: RM20,000. Silver: RM10,000. All include booth space & recognition."
+    },
+    {
+      triggers: ["bag", "lanyard", "dinner sponsor"],
+      answer: "Conference Bag: RM15,000. Lanyard: RM10,000. Dinner Sponsor: RM10,000. All correspond to exclusive branding."
+    },
+
+    // --- PAYMENT & CONTACT ---
+    {
+      triggers: ["pay", "bank", "account", "transfer"],
+      answer: "Bank: CIMB Bank. Acct: 8007092428 (Malaysian Tissue Engineering...). Send receipt to admin@mterms2026.com."
+    },
+    {
+      triggers: ["contact", "email", "help"],
+      answer: "For questions, email us at admin@mterms2026.com."
+    }
+  ];
+
+  // UI Toggles
+  toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
+  closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
+
+  // Message Logic
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    // 1. User Bubble
+    addBubble(text, 'user');
+    inputEl.value = '';
+
+    // 2. Bot Response
+    setTimeout(() => {
+      const response = getAIResponse(text);
+      addBubble(response, 'bot');
+    }, 600);
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  function addBubble(text, type) {
+    const div = document.createElement('div');
+    div.className = `ai-msg ${type}`;
+    div.innerText = text; // Safe injection
+    msgsEl.appendChild(div);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function getAIResponse(query) {
+    const lowerQ = query.toLowerCase();
+    
+    // Find matching answer
+    for (let item of knowledge) {
+      if (item.triggers.some(t => lowerQ.includes(t))) {
+        return item.answer;
+      }
+    }
+    
+    // Fallback
+    return "I'm not sure. Check the 'Program' page or email lyoges@hctm.ukm.edu.my for help.";
+  }
+})();
+</script>
 </body>
 </html>
