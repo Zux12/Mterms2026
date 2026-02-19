@@ -1375,204 +1375,231 @@
 </style>
 
 <script>
-  /* ========================================== */
-/* MTERMS AI ASSISTANT - UPDATED SCRIPT      */
 /* ========================================== */
-(function() {
-  const toggleBtn = document.getElementById('ai-toggle-btn');
-  const closeBtn = document.getElementById('ai-close-btn');
-  const windowEl = document.getElementById('ai-chat-window');
-  const inputEl = document.getElementById('ai-input');
-  const sendBtn = document.getElementById('ai-send-btn');
-  const msgsEl = document.getElementById('ai-messages');
+/* MTERMS AI ASSISTANT - SAFE SMART FAQ BOT    */
+/* ========================================== */
+(function () {
+  // Run after DOM is ready (prevents null element errors)
+  function init() {
+    const toggleBtn = document.getElementById('ai-toggle-btn');
+    const closeBtn  = document.getElementById('ai-close-btn');
+    const windowEl  = document.getElementById('ai-chat-window');
+    const inputEl   = document.getElementById('ai-input');
+    const sendBtn   = document.getElementById('ai-send-btn');
+    const msgsEl    = document.getElementById('ai-messages');
 
-  // EXPANDED KNOWLEDGE BASE
-  // Sources: Event Guide, Prospectus, Abstract Guidelines, Oral Guidelines
-// 3. Knowledge Base (Conflict-Free & Updated)
-  // ----------------------------
-// Option A: Smart FAQ Search (Lunr) + Synonyms + Quick Replies
-// ----------------------------
-const faq = [
-  {
-    id: "venue",
-    title: "Venue & location",
-    text: "Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.",
-    tags: "venue location hotel where shah alam concorde selangor"
-  },
-  {
-    id: "dates",
-    title: "Conference dates",
-    text: "Conference dates: 7 & 8 September 2026 (Monday & Tuesday).",
-    tags: "date when september 2026 7 8"
-  },
-  {
-    id: "abstract_deadline",
-    title: "Abstract deadline",
-    text: "Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.",
-    tags: "abstract deadline submit submission late april august"
-  },
-  {
-    id: "acceptance",
-    title: "Acceptance notification",
-    text: "Abstract acceptance notifications: 15 March 2026 – 15 April 2026.",
-    tags: "acceptance notification result decision"
-  },
-  {
-    id: "registration",
-    title: "Registration deadlines",
-    text: "Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).",
-    tags: "register registration early bird late payment walk in onsite"
-  },
-  {
-    id: "contact",
-    title: "Contact",
-    text: "For help, email admin@mterms2026.com.",
-    tags: "contact email help admin"
-  }
-];
-
-const synonyms = [
-  ["where", "venue", "location", "hotel"],
-  ["when", "date", "dates", "schedule"],
-  ["abstract", "poster", "submission", "submit"],
-  ["register", "registration", "sign up", "signup"],
-  ["fee", "fees", "payment", "pay", "cost", "price"]
-];
-
-function normalizeQuery(q) {
-  let s = (q || "").toLowerCase().trim();
-  for (const group of synonyms) {
-    if (group.some(w => s.includes(w))) s += " " + group.join(" ");
-  }
-  return s.replace(/\s+/g, " ");
-}
-
-let idx = null;
-function buildIndex() {
-  // lunr must be loaded by <script src="lunr.min.js"></script>
-  idx = lunr(function () {
-    this.ref("id");
-    this.field("title");
-    this.field("text");
-    this.field("tags");
-    faq.forEach(d => this.add(d));
-  });
-}
-buildIndex();
-
-function getSmartAnswer(userQuery) {
-  const q = normalizeQuery(userQuery);
-
-  // very short queries => offer quick buttons
-  if (q.length < 3) {
-    return {
-      text: "Tell me what you need: venue, dates, abstract deadline, registration, or contact?",
-      quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
-    };
-  }
-
-  const results = idx.search(q);
-
-  if (!results.length) {
-    return {
-      text: "I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.",
-      quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
-    };
-  }
-
-  const top = results.slice(0, 2).map(r => faq.find(d => d.id === r.ref)).filter(Boolean);
-
-  // weak match => ask user to choose
-  if (results[0].score < 0.6) {
-    return {
-      text: "I’m not sure which one you meant. Choose one:",
-      quick: top.map(t => t.title)
-    };
-  }
-
-  const best = top[0];
-
-  const followUps = {
-    venue: ["Dates", "Registration", "Contact"],
-    dates: ["Venue", "Abstract deadline", "Registration"],
-    abstract_deadline: ["Acceptance notification", "Registration", "Contact"],
-    acceptance: ["Abstract deadline", "Registration", "Contact"],
-    registration: ["Dates", "Venue", "Contact"],
-    contact: ["Registration", "Abstract deadline", "Venue"]
-  };
-
-  return {
-    text: best.text,
-    quick: (followUps[best.id] || ["Venue", "Dates", "Registration"])
-  };
-}
-
-  // UI Toggles
-  toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
-  closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
-
-  // Message Logic
-  function sendMessage() {
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    // 1. User Bubble
-    addBubble(text, 'user');
-    inputEl.value = '';
-
-// 2. Bot Response (Smart Search)
-setTimeout(() => {
-  const out = getSmartAnswer(text);
-  addBubble(out.text, 'bot', out.quick);
-}, 300);
-  }
-
-  sendBtn.addEventListener('click', sendMessage);
-  inputEl.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-  });
-
-function addBubble(text, type, quickReplies = null) {
-  const div = document.createElement('div');
-  div.className = `ai-msg ${type}`;
-  div.innerText = text;
-
-  if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
-    const wrap = document.createElement("div");
-    wrap.className = "ai-quick";
-
-    quickReplies.slice(0, 5).forEach(label => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "ai-quick-btn";
-      b.textContent = label;
-      b.addEventListener("click", () => {
-        inputEl.value = label;
-        sendMessage();
+    // If your HTML IDs are wrong/missing, do NOT crash the whole page
+    if (!toggleBtn || !closeBtn || !windowEl || !inputEl || !sendBtn || !msgsEl) {
+      console.error("[AI BOT] Missing one or more required elements. Check your IDs:", {
+        toggleBtn, closeBtn, windowEl, inputEl, sendBtn, msgsEl
       });
-      wrap.appendChild(b);
+      return;
+    }
+
+    // ----------------------------
+    // Smart FAQ dataset
+    // ----------------------------
+    const faq = [
+      {
+        id: "venue",
+        title: "Venue & location",
+        text: "Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.",
+        tags: "venue location hotel where shah alam concorde selangor"
+      },
+      {
+        id: "dates",
+        title: "Conference dates",
+        text: "Conference dates: 7 & 8 September 2026 (Monday & Tuesday).",
+        tags: "date when september 2026 7 8"
+      },
+      {
+        id: "abstract_deadline",
+        title: "Abstract deadline",
+        text: "Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.",
+        tags: "abstract deadline submit submission late april august"
+      },
+      {
+        id: "acceptance",
+        title: "Acceptance notification",
+        text: "Abstract acceptance notifications: 15 March 2026 – 15 April 2026.",
+        tags: "acceptance notification result decision"
+      },
+      {
+        id: "registration",
+        title: "Registration deadlines",
+        text: "Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).",
+        tags: "register registration early bird late payment walk in onsite"
+      },
+      {
+        id: "contact",
+        title: "Contact",
+        text: "For help, email admin@mterms2026.com.",
+        tags: "contact email help admin"
+      }
+    ];
+
+    const synonyms = [
+      ["where", "venue", "location", "hotel"],
+      ["when", "date", "dates", "schedule"],
+      ["abstract", "poster", "submission", "submit"],
+      ["register", "registration", "sign up", "signup"],
+      ["fee", "fees", "payment", "pay", "cost", "price"]
+    ];
+
+    function normalizeQuery(q) {
+      let s = (q || "").toLowerCase().trim();
+      for (const group of synonyms) {
+        if (group.some(w => s.includes(w))) s += " " + group.join(" ");
+      }
+      return s.replace(/\s+/g, " ");
+    }
+
+    // ----------------------------
+    // Lunr index (SAFE)
+    // ----------------------------
+    let idx = null;
+
+    function buildIndex() {
+      if (typeof window.lunr !== "function") {
+        console.warn("[AI BOT] lunr is not loaded. Bot will run in fallback mode. Check lunr.min.js path.");
+        idx = null;
+        return false;
+      }
+
+      idx = window.lunr(function () {
+        this.ref("id");
+        this.field("title");
+        this.field("text");
+        this.field("tags");
+        faq.forEach(d => this.add(d));
+      });
+
+      return true;
+    }
+
+    buildIndex();
+
+    function getSmartAnswer(userQuery) {
+      const q = normalizeQuery(userQuery);
+
+      // If Lunr didn't load, still respond (so bot works)
+      if (!idx) {
+        return {
+          text: "Bot search engine isn’t loaded yet. Please fix lunr.min.js path. For now, ask about: venue, dates, abstract deadline, registration, or contact.",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      if (q.length < 3) {
+        return {
+          text: "Tell me what you need: venue, dates, abstract deadline, registration, or contact?",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      const results = idx.search(q);
+
+      if (!results.length) {
+        return {
+          text: "I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.",
+          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
+        };
+      }
+
+      const top = results
+        .slice(0, 2)
+        .map(r => faq.find(d => d.id === r.ref))
+        .filter(Boolean);
+
+      if (results[0].score < 0.6) {
+        return {
+          text: "I’m not sure which one you meant. Choose one:",
+          quick: top.map(t => t.title)
+        };
+      }
+
+      const best = top[0];
+
+      const followUps = {
+        venue: ["Dates", "Registration", "Contact"],
+        dates: ["Venue", "Abstract deadline", "Registration"],
+        abstract_deadline: ["Acceptance notification", "Registration", "Contact"],
+        acceptance: ["Abstract deadline", "Registration", "Contact"],
+        registration: ["Dates", "Venue", "Contact"],
+        contact: ["Registration", "Abstract deadline", "Venue"]
+      };
+
+      return {
+        text: best.text,
+        quick: (followUps[best.id] || ["Venue", "Dates", "Registration"])
+      };
+    }
+
+    // ----------------------------
+    // UI
+    // ----------------------------
+    toggleBtn.addEventListener('click', () => {
+      windowEl.classList.toggle('hidden');
     });
 
-    div.appendChild(document.createElement("br"));
-    div.appendChild(wrap);
+    closeBtn.addEventListener('click', () => {
+      windowEl.classList.add('hidden');
+    });
+
+    function addBubble(text, type, quickReplies = null) {
+      const div = document.createElement('div');
+      div.className = `ai-msg ${type}`;
+      div.innerText = text;
+
+      if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
+        const wrap = document.createElement("div");
+        wrap.className = "ai-quick";
+
+        quickReplies.slice(0, 5).forEach(label => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "ai-quick-btn";
+          b.textContent = label;
+          b.addEventListener("click", () => {
+            inputEl.value = label;
+            sendMessage();
+          });
+          wrap.appendChild(b);
+        });
+
+        div.appendChild(document.createElement("br"));
+        div.appendChild(wrap);
+      }
+
+      msgsEl.appendChild(div);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      addBubble(text, 'user');
+      inputEl.value = '';
+
+      setTimeout(() => {
+        const out = getSmartAnswer(text);
+        addBubble(out.text, 'bot', out.quick);
+      }, 200);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    console.log("[AI BOT] initialized OK");
   }
 
-  msgsEl.appendChild(div);
-  msgsEl.scrollTop = msgsEl.scrollHeight;
-}
-
-  function getAIResponse(query) {
-    const lowerQ = query.toLowerCase();
-    
-    // Find matching answer
-    for (let item of knowledge) {
-      if (item.triggers.some(t => lowerQ.includes(t))) {
-        return item.answer;
-      }
-    }
-    
-    // Fallback
-    return "I'm not sure. Check the 'Program' page or email admin@mterms2026.com for help.";
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
 })();
 </script>
