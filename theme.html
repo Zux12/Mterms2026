@@ -791,139 +791,123 @@
 
   
 
-
 <!-- Key Focus Areas -->
 <section class="section section-alt">
   <div class="container">
 
     <h2 style="text-align:center;">Key Focus Areas</h2>
 
-    <div class="focus-layout">
+    <div class="focus-grid">
 
-      <!-- LEFT COLUMN (Two portrait cards stacked) -->
-      <div class="focus-left">
-
-        <div class="focus-card portrait">
-          <h3>Stem Cell Innovations and Clinical Applications</h3>
-          <ul class="bullets">
-            <li>Stem Cell Biology and Mechanisms of Differentiation</li>
-            <li>Tissue Engineering and Biomaterials</li>
-            <li>Organoids and 3D Bioprinting</li>
-            <li>Regenerative Medicine and Translational Therapies</li>
-            <li>Cellular Reprogramming and Induced Pluripotent Stem Cells (iPSCs)</li>
-            <li>Clinical Trials and Regulatory Science in Stem Cell Therapy</li>
-            <li>Gene Editing and Cell Engineering</li>
-            <li>Immunomodulation and Stem Cell Interactions</li>
-            <li>Neural Stem Cells and Neuroregeneration</li>
-            <li>Musculoskeletal Regeneration</li>
-            <li>Cardiac and Vascular Regeneration</li>
-            <li>Hepatic and Pancreatic Regeneration</li>
-            <li>Stem Cell-Derived Extracellular Vesicles and Secretome Therapy</li>
-            <li>Biomanufacturing and GMP Production of Stem Cells</li>
-            <li>Ethics, Policy, and Commercialization in Regenerative Medicine</li>
-            <li>Other relevant fields</li>
-          </ul>
-        </div>
-
-        <div class="focus-card portrait">
-          <h3>Biomaterials and Tissue Scaffolds</h3>
-          <ul class="bullets">
-            <li>Design and Development of Novel Biomaterials</li>
-            <li>Biocompatibility and Biofunctionality Assessment</li>
-            <li>3D Bioprinting and Additive Manufacturing</li>
-            <li>Smart and Responsive Biomaterials</li>
-            <li>Hydrogels and Injectable Scaffolds</li>
-            <li>Nanomaterials in Tissue Engineering</li>
-            <li>Bioactive Surface Modification</li>
-            <li>Degradable and Bioresorbable Scaffolds</li>
-            <li>Mechanical and Structural Characterization of Scaffolds</li>
-            <li>Vascularization Strategies in Engineered Tissues</li>
-            <li>Cell–Material Interactions and Mechanotransduction</li>
-            <li>Composite and Hybrid Scaffolds</li>
-            <li>Scaffold-Based Organoid and Tissue Models</li>
-            <li>Clinical Translation and Regulatory Challenges in Biomaterials</li>
-            <li>Sustainable and Green Biomaterials</li>
-            <li>Other relevant fields</li>
-          </ul>
-        </div>
-
+      <!-- Card 1 -->
+      <div class="focus-card portrait">
+        <h3>Stem Cell Innovations and Clinical Applications</h3>
+        <ul class="bullets">
+          <li>Stem Cell Biology and Mechanisms of Differentiation</li>
+          <li>Tissue Engineering and Biomaterials</li>
+          <li>Organoids and 3D Bioprinting</li>
+          <li>Regenerative Medicine and Translational Therapies</li>
+          <li>Cellular Reprogramming and Induced Pluripotent Stem Cells (iPSCs)</li>
+          <li>Clinical Trials and Regulatory Science in Stem Cell Therapy</li>
+          <li>Gene Editing and Cell Engineering</li>
+          <li>Immunomodulation and Stem Cell Interactions</li>
+          <li>Neural Stem Cells and Neuroregeneration</li>
+          <li>Musculoskeletal Regeneration</li>
+          <li>Cardiac and Vascular Regeneration</li>
+          <li>Hepatic and Pancreatic Regeneration</li>
+          <li>Stem Cell-Derived Extracellular Vesicles and Secretome Therapy</li>
+          <li>Biomanufacturing and GMP Production of Stem Cells</li>
+          <li>Ethics, Policy, and Commercialization in Regenerative Medicine</li>
+          <li>Other relevant fields</li>
+        </ul>
       </div>
 
-      <!-- RIGHT SIDE (Landscape card below the two portrait cards) -->
-      <div class="focus-right">
-        <div class="focus-card landscape">
-          <h3>Student and Young Investigator Symposium (SYIS)</h3>
-          <ul class="bullets">
-            <li>
-              All fields listed above presented by active MSc or PhD students,
-              or by MSc/PhD graduates who have completed their studies within the past three years.
-            </li>
-          </ul>
-        </div>
+      <!-- Card 2 -->
+      <div class="focus-card portrait">
+        <h3>Biomaterials and Tissue Scaffolds</h3>
+        <ul class="bullets">
+          <li>Design and Development of Novel Biomaterials</li>
+          <li>Biocompatibility and Biofunctionality Assessment</li>
+          <li>3D Bioprinting and Additive Manufacturing</li>
+          <li>Smart and Responsive Biomaterials</li>
+          <li>Hydrogels and Injectable Scaffolds</li>
+          <li>Nanomaterials in Tissue Engineering</li>
+          <li>Bioactive Surface Modification</li>
+          <li>Degradable and Bioresorbable Scaffolds</li>
+          <li>Mechanical and Structural Characterization of Scaffolds</li>
+          <li>Vascularization Strategies in Engineered Tissues</li>
+          <li>Cell–Material Interactions and Mechanotransduction</li>
+          <li>Composite and Hybrid Scaffolds</li>
+          <li>Scaffold-Based Organoid and Tissue Models</li>
+          <li>Clinical Translation and Regulatory Challenges in Biomaterials</li>
+          <li>Sustainable and Green Biomaterials</li>
+          <li>Other relevant fields</li>
+        </ul>
+      </div>
+
+      <!-- Card 3 (Full Width Landscape) -->
+      <div class="focus-card landscape full-width">
+        <h3>Student and Young Investigator Symposium (SYIS)</h3>
+        <ul class="bullets">
+          <li>
+            All fields listed above presented by active MSc or PhD students,
+            or by MSc/PhD graduates who have completed their studies within the past three years.
+          </li>
+        </ul>
       </div>
 
     </div>
 
   </div>
 
-  <!-- Layout Styling -->
   <style>
-    /* Layout grid */
-    .focus-layout{
+    /* Grid Layout */
+    .focus-grid{
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 28px;
       margin-top: 30px;
-      align-items: start;
     }
 
-    /* Left column stacked */
-    .focus-left{
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
+    /* Make Card 3 span full width */
+    .full-width{
+      grid-column: 1 / -1;
     }
 
-    /* Right column */
-    .focus-right{
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    /* Card styling */
+    /* Card Styling */
     .focus-card{
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 22px;
+      padding: 24px;
       box-shadow: 0 14px 30px rgba(0,0,0,0.06);
     }
 
     .focus-card h3{
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       font-weight: 800;
     }
 
+    /* Justified bullet text */
     .focus-card ul{
       text-align: justify;
       text-justify: inter-word;
     }
 
-    /* Portrait cards slightly taller */
+    /* Portrait feel */
     .portrait{
-      min-height: 540px;
+      min-height: 520px;
     }
 
-    /* Landscape card */
+    /* Landscape feel */
     .landscape{
       min-height: 240px;
     }
 
     /* Responsive */
     @media (max-width: 992px){
-      .focus-layout{
+      .focus-grid{
         grid-template-columns: 1fr;
       }
       .portrait,
