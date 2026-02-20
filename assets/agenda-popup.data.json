@@ -1,107 +1,146 @@
 {
   "days": [
     {
-      "title": "Day 1 — Plenaries & Keynotes",
+      "title": "7 September 2026, Monday (Day 1)",
       "items": [
         {
-          "time": "08:00–09:00",
-          "session": "Registration & Welcome Coffee"
+          "time": "07:30–08:30",
+          "session": "Registration"
         },
         {
-          "time": "09:00–09:20",
-          "session": "Opening Remarks",
-          "speaker": "TBA, Institution"
+          "time": "08:30–09:00",
+          "session": "OPENING CEREMONY"
         },
         {
-          "time": "09:20–09:25",
-          "session": "Photo Session",
-          "speaker": "TBA"
+          "time": "09:00–10:00",
+          "session": "OPENING KEYNOTE"
         },
         {
-          "time": "09:25–10:00",
-          "session": "Theme Keynote: Building Resilient TERM Ecosystems",
-          "speaker": "TBA, Institution",
-          "talkTitle": "Talk Title Placeholder"
+          "time": "10:00–10:30",
+          "session": "PLENARY 1: STEM CELL BIOLOGY & REGENERATION"
         },
         {
-          "time": "10:30–12:30",
-          "session": "Plenary Block I",
+          "time": "10:30–11:00",
+          "session": "Tea Break"
+        },
+        {
+          "time": "11:00–12:15",
+          "session": "PROPOSED SYMPOSIA",
           "subSessions": [
-            { "topic": "Biomaterials & Advanced Scaffolds", "speaker": "TBA, Institution", "talkTitle": "Placeholder" },
-            { "topic": "Bioprinting Frontiers", "speaker": "TBA, Institution", "talkTitle": "Placeholder" },
-            { "topic": "Standards & Reproducibility Panel", "speaker": "Panelists TBA" }
+            { "topic": "PS1: Theme (TBC)" },
+            { "topic": "PS2: Theme (TBC)" },
+            { "topic": "PS3: Theme (TBC)" }
           ]
         },
         {
-          "time": "16:00–17:30",
-          "session": "Panel: Funding & Partnerships for Resilient Ecosystems"
+          "time": "12:15–13:00",
+          "session": "INDUSTRIAL TALK"
         },
         {
-          "time": "18:00–19:30",
-          "session": "Welcome Reception & Poster Viewing I"
-        }
-      ]
-    },
-    {
-      "title": "Day 2 — Translation & Standards",
-      "items": [
-        {
-          "time": "09:00–09:40",
-          "session": "Industry Keynote: GMP-ready Manufacturing for TERM",
-          "speaker": "TBA"
-        },
-        {
-          "time": "11:00–12:30",
-          "session": "Parallel Sessions",
-          "subSessions": [
-            { "topic": "B1: GMP Manufacturing & Release Testing", "speaker": "TBA" },
-            { "topic": "B2: Preclinical Models & Biomarker Strategies", "speaker": "TBA" },
-            { "topic": "B3: Data, AI & Bioinformatics", "speaker": "TBA" }
-          ]
+          "time": "13:00–14:00",
+          "session": "Lunch, Exhibition & Poster"
         },
         {
           "time": "14:00–15:30",
-          "session": "Workshops",
+          "session": "ORAL PRESENTATION (OP)",
           "subSessions": [
-            { "topic": "W1: Bioprocess & Closed-System Fundamentals", "speaker": "TBA" },
-            { "topic": "W2: Biostatistics for Translational Studies", "speaker": "TBA" },
-            { "topic": "W3: Regulatory Dossier & Risk Management", "speaker": "TBA" }
+            { "topic": "OP1: Stem Cell Innovations and Clinical Applications" },
+            { "topic": "OP2: Biomaterials and Tissue Scaffolds" },
+            { "topic": "OP3: Student and Young Investigator Symposium (SYIS)" }
           ]
         },
         {
-          "time": "16:00–17:30",
-          "session": "Industry Showcase & Technology Demos"
+          "time": "15:30–16:00",
+          "session": "Tea Break"
         },
         {
-          "time": "19:00–21:00",
-          "session": "Awards Night & Networking Dinner"
+          "time": "16:00–17:00",
+          "session": "ORAL PRESENTATION (OP) (continued)",
+          "subSessions": [
+            { "topic": "OP1: Stem Cell Innovations and Clinical Applications" },
+            { "topic": "OP2: Biomaterials and Tissue Scaffolds" },
+            { "topic": "OP3: Student and Young Investigator Symposium (SYIS)" }
+          ]
+        },
+        {
+          "time": "17:00–17:30",
+          "session": "PLENARY 2: BIOMATERIALS AND SMART SCAFFOLDS IN REGENERATIVE ENGINEERING"
+        },
+        {
+          "time": "17:30",
+          "session": "Adjourn Day 1"
+        },
+        {
+          "time": "20:00",
+          "session": "Gala Dinner"
         }
       ]
     },
     {
-      "title": "Day 3 — Clinics & Community",
+      "title": "8 September 2026, Tuesday (Day 2)",
       "items": [
         {
-          "time": "09:00–10:00",
-          "session": "Clinical Plenary: Real-world Deployment & Outcomes in TERM",
-          "speaker": "TBA"
+          "time": "08:30–09:00",
+          "session": "Registration"
         },
         {
-          "time": "10:30–12:00",
-          "session": "Parallel Sessions",
+          "time": "09:00–09:30",
+          "session": "PLENARY 3: GENE EDITING AND PERSONALIZED MEDICINE IN TISSUE REGENERATION"
+        },
+        {
+          "time": "09:30–10:45",
+          "session": "Morning Sessions",
           "subSessions": [
-            { "topic": "C1: Clinical Case Sessions & Complications Management", "speaker": "TBA" },
-            { "topic": "C2: Sustainability & Supply-Chain Resilience", "speaker": "TBA" },
-            { "topic": "C3: Education, Training & Capability Building", "speaker": "TBA" }
+            { "topic": "Meet the experts (3 panels)" },
+            { "topic": "PS4: Theme (TBC)" },
+            { "topic": "PS5: Theme (TBC)" }
           ]
         },
         {
-          "time": "13:30–15:00",
-          "session": "Young Investigator Talks"
+          "time": "10:45–11:00",
+          "session": "Tea Break"
         },
         {
-          "time": "15:20–16:40",
-          "session": "Closing Plenary & 2027 Preview"
+          "time": "11:00–12:15",
+          "session": "PROPOSED SYMPOSIA (PS)",
+          "subSessions": [
+            { "topic": "PS6: Theme (TBC)" },
+            { "topic": "PS7: Theme (TBC)" },
+            { "topic": "PS8: Theme (TBC)" }
+          ]
+        },
+        {
+          "time": "12:15–13:00",
+          "session": "INDUSTRIAL TALK"
+        },
+        {
+          "time": "13:00–14:00",
+          "session": "Lunch and Exhibition"
+        },
+        {
+          "time": "14:00–15:15",
+          "session": "PROPOSED SYMPOSIA (PS)",
+          "subSessions": [
+            { "topic": "PS9: Theme (TBC)" },
+            { "topic": "PS10: Theme (TBC)" },
+            { "topic": "PS11: Theme (TBC)" }
+          ]
+        },
+        {
+          "time": "15:15–15:45",
+          "session": "Tea Break"
+        },
+        {
+          "time": "15:45–16:45",
+          "session": "CLOSING KEYNOTE"
+        },
+        {
+          "time": "16:45–17:15",
+          "session": "CLOSING AND AWARD GIVING CEREMONY"
+        },
+        {
+          "time": "17:15",
+          "session": "END"
         }
       ]
     }
