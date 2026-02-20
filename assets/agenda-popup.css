@@ -1,86 +1,249 @@
-/* Agenda Popup Modal */
+/* =========================
+   Agenda Popup Modal (Light, Professional)
+   ========================= */
 
-#agenda-fab {
-  display: inline-block;
-  margin-top: 24px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(90deg,#19c37d,#0ea5a6);
-  color: #04120b;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+/* Trigger button */
+#agenda-fab{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-top:24px;
+  padding:12px 18px;
+  border-radius:12px;
+  border:1px solid rgba(2,6,23,.08);
+  background:#ffffff;
+  color:#0f172a;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(2,6,23,.10);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-#agenda-fab:hover { transform: translateY(-2px); }
+#agenda-fab::before{
+  content:"🗓️";
+  font-size:16px;
+  line-height:1;
+}
+#agenda-fab:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 34px rgba(2,6,23,.14);
+  border-color:rgba(2,6,23,.14);
+}
+#agenda-fab:active{
+  transform:translateY(0);
+}
 
 /* Backdrop */
-.agenda-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.65);
+.agenda-backdrop{
+  position:fixed; inset:0;
+  background:rgba(2,6,23,.55);
   backdrop-filter: blur(6px);
-  display: none;
-  z-index: 9998;
+  display:none;
+  z-index:9998;
 }
 
-/* Modal */
-.agenda-modal {
-  position: fixed;
-  top: 5%; left: 50%;
-  transform: translateX(-50%);
-  width: min(960px, 95vw);
-  max-height: 90vh;
-  background: #0e151a url('assets/hero-poster.jpg') center/cover no-repeat;
-  color: #e9f1f6;
-  border-radius: 16px;
-  border: 1px solid #1f2a31;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
-  display: none;
-  z-index: 10000;
-  overflow: hidden;
+/* Modal shell */
+.agenda-modal{
+  position:fixed;
+  top:6%; left:50%;
+  transform:translateX(-50%);
+  width:min(980px, 94vw);
+  max-height:88vh;
+  background:#ffffff;
+  color:#0f172a;
+  border-radius:18px;
+  border:1px solid rgba(2,6,23,.10);
+  box-shadow:0 30px 80px rgba(2,6,23,.30);
+  display:none;
+  z-index:10000;
+  overflow:hidden;
 }
 
 /* Header */
-.agenda-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 20px;
-  background: rgba(10,16,20,.85);
-  border-bottom: 1px solid #1f2a31;
+.agenda-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 16px;
+  background:linear-gradient(180deg, rgba(248,250,252,1), rgba(241,245,249,1));
+  border-bottom:1px solid rgba(2,6,23,.08);
 }
-.agenda-title { font-weight: 800; font-size: 20px; }
-.agenda-close {
-  background: transparent; border: none; font-size: 22px;
-  color: #cfe7dd; cursor: pointer;
+
+.agenda-header-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+}
+
+.agenda-logos{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.agenda-logos img{
+  height:34px;
+  width:auto;
+  object-fit:contain;
+  display:block;
+  filter:none;
+}
+.agenda-logos img.agenda-logo--mterm{
+  height:38px; /* main logo slightly bigger */
+}
+
+.agenda-title-wrap{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.agenda-title{
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:.2px;
+  line-height:1.1;
+  margin:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.agenda-subtitle{
+  margin-top:2px;
+  font-size:12.5px;
+  color:rgba(15,23,42,.65);
+  font-weight:600;
+}
+
+/* Close button */
+.agenda-close{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid rgba(2,6,23,.10);
+  background:#ffffff;
+  color:#0f172a;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  line-height:1;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.agenda-close:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(2,6,23,.12);
+  border-color:rgba(2,6,23,.18);
 }
 
 /* Body */
-.agenda-body {
-  overflow-y: auto;
-  max-height: calc(90vh - 60px);
-  padding: 20px;
-  background: rgba(10,16,20,.75);
+.agenda-body{
+  overflow-y:auto;
+  max-height:calc(88vh - 64px);
+  padding:18px 18px 22px;
+  background:#ffffff;
 }
-.agenda-day {
-  margin-bottom: 28px;
+
+/* Day block */
+.agenda-day{
+  margin-bottom:18px;
+  padding:14px;
+  border:1px solid rgba(2,6,23,.08);
+  border-radius:16px;
+  background:linear-gradient(180deg, #ffffff, #fbfdff);
+  box-shadow:0 10px 26px rgba(2,6,23,.06);
 }
-.agenda-day h3 {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 700;
-  border-left: 4px solid #19c37d;
-  padding-left: 8px;
+
+.agenda-day h3{
+  margin:0 0 12px;
+  font-size:16px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(2,6,23,.04);
+  border:1px solid rgba(2,6,23,.06);
 }
-.agenda-item {
-  margin-bottom: 14px;
-  padding: 10px 12px;
-  border-left: 2px solid #2b3b45;
-  background: rgba(15,29,26,.6);
-  border-radius: 8px;
+.agenda-day h3::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:linear-gradient(90deg, #0ea5a6, #19c37d);
+  box-shadow:0 6px 16px rgba(14,165,166,.20);
 }
-.agenda-time {
-  font-weight: 600;
-  color: #19c37d;
-  margin-bottom: 4px;
+
+/* Agenda item */
+.agenda-item{
+  margin-bottom:10px;
+  padding:12px 12px;
+  border:1px solid rgba(2,6,23,.08);
+  background:#ffffff;
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(2,6,23,.05);
 }
-.agenda-session { font-weight: 500; }
-.agenda-speaker { font-size: 14px; color: #cfe7dd; margin-top: 2px; }
+
+.agenda-time{
+  font-weight:900;
+  font-size:13px;
+  color:#0ea5a6;
+  margin-bottom:4px;
+}
+
+.agenda-session{
+  font-weight:800;
+  color:#0f172a;
+}
+
+.agenda-speaker{
+  margin-top:4px;
+  font-size:13px;
+  color:rgba(15,23,42,.68);
+  font-weight:600;
+}
+
+/* Optional: subSessions list inside item (if you render them as nested bullets) */
+.agenda-item ul,
+.agenda-item ol{
+  margin:8px 0 0 18px;
+  color:rgba(15,23,42,.80);
+}
+.agenda-item li{
+  margin:4px 0;
+}
+
+/* Nice scrollbar (WebKit) */
+.agenda-body::-webkit-scrollbar{ width:10px; }
+.agenda-body::-webkit-scrollbar-track{ background:rgba(2,6,23,.04); border-radius:999px; }
+.agenda-body::-webkit-scrollbar-thumb{
+  background:rgba(2,6,23,.20);
+  border-radius:999px;
+  border:2px solid rgba(2,6,23,.04);
+}
+.agenda-body::-webkit-scrollbar-thumb:hover{ background:rgba(2,6,23,.28); }
+
+/* Responsive tweaks */
+@media (max-width: 560px){
+  .agenda-logos img{ height:28px; }
+  .agenda-logos img.agenda-logo--mterm{ height:32px; }
+  .agenda-title{ font-size:16px; }
+  .agenda-body{ padding:14px 14px 18px; }
+}
+
+/* =========================
+   Required HTML (paste into your modal header)
+   =========================
+   <div class="agenda-header-left">
+     <div class="agenda-logos">
+       <img class="agenda-logo--mterm" src="public/mterm.png" alt="MTERMS 2026">
+       <img src="public/uitm.png" alt="UiTM">
+       <img src="public/tesma.png" alt="TESMA">
+     </div>
+     <div class="agenda-title-wrap">
+       <div class="agenda-title">Programme Schedule</div>
+       <div class="agenda-subtitle">MTERMS 2026 • 7–8 September 2026</div>
+     </div>
+   </div>
+*/
