@@ -665,6 +665,32 @@
   justify-content:flex-end;
   gap: 10px;
 }
+
+
+/* Center Program Cards */
+.program-cards{
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+/* Keep cards nicely sized */
+.program-cards .card{
+  max-width: 420px;
+  width: 100%;
+}
+
+/* Center Buttons */
+.program-actions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
 </style>
 <script src="lunr.min.js"></script>
 </head>
@@ -735,39 +761,54 @@
 
 
 
-  <!-- Program (draft placeholders) -->
-  <section id="program" class="section">
-    <div class="container">
-      <h2>Program</h2>
+ <!-- Program (draft placeholders) -->
+<section id="program" class="section">
+  <div class="container">
+    <h2 style="text-align:center;">Program</h2>
 
-      <div class="cards">
-        <div class="card">
-          <h3>Day 1 — Plenaries & Keynotes</h3>
-          <ul>
-            <li>Opening Ceremony & Opening Keynote</li>
-            <li>Plenary 1: Stem Cell Biology & Regeneration</li>
-            <li>Symposia & Industrial Talk</li>
-            <li>Oral Presentations: Stem Cell Innovations, Biomaterials & SYIS</li>
-            <li>Plenary 2: Biomaterials and Smart Scaffolds</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>Day 2 — Translation & Standards</h3>
-          <ul>
-            <li>Plenary 3: Gene Editing and Personalized Medicine</li>
-            <li>Meet the Experts Panels & Symposia Sessions</li>
-            <li>Industrial Talks, Lunch & Exhibition</li>
-            <li>Closing Keynote</li>
-            <li>Closing & Award Giving Ceremony</li>
-          </ul>
-        </div>
-
+    <!-- Centered Cards -->
+    <div class="cards program-cards">
+      <div class="card">
+        <h3>Day 1 — Plenaries & Keynotes</h3>
+        <ul>
+          <li>Opening Ceremony & Opening Keynote</li>
+          <li>Plenary 1: Stem Cell Biology & Regeneration</li>
+          <li>Symposia & Industrial Talk</li>
+          <li>Oral Presentations: Stem Cell Innovations, Biomaterials & SYIS</li>
+          <li>Plenary 2: Biomaterials and Smart Scaffolds</li>
+        </ul>
       </div>
 
-      <div class="note">Detailed session blocks, speakers, and abstract tracks will be published closer to the meeting.</div>
+      <div class="card">
+        <h3>Day 2 — Translation & Standards</h3>
+        <ul>
+          <li>Plenary 3: Gene Editing and Personalized Medicine</li>
+          <li>Meet the Experts Panels & Symposia Sessions</li>
+          <li>Industrial Talks, Lunch & Exhibition</li>
+          <li>Closing Keynote</li>
+          <li>Closing & Award Giving Ceremony</li>
+        </ul>
+      </div>
     </div>
-  </section>
+
+    <!-- Centered Note -->
+    <div class="note" style="text-align:center; margin-top:18px;">
+      Detailed session blocks, speakers, and abstract tracks will be published closer to the meeting.
+    </div>
+
+    <!-- Centered Buttons -->
+    <div class="program-actions">
+
+      <a class="btn primary"
+         href="public/mterms%20final%20schedule.pdf"
+         target="_blank"
+         rel="noopener">
+         Download Detailed Agenda
+      </a>
+    </div>
+
+  </div>
+</section>
 
 
 
