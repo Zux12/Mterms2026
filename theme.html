@@ -736,12 +736,34 @@
 
 
 
-  <!-- Theme Page Content -->
+<style>
+  /* CSS for the indented and justified layout */
+  .left-indent-justified {
+    text-align: justify;     /* Justifies the text (flush left and right) */
+    margin-left: 50px;       /* Creates the left indent. Adjust this number as needed */
+    max-width: 900px;        /* Optional: Stops the text from stretching too wide on large screens */
+  }
+
+  /* Keeps the titles cleanly aligned to the left instead of stretching */
+  .left-indent-justified h1, 
+  .left-indent-justified .tagline {
+    text-align: left; 
+  }
+  
+  /* Adds a little breathing room between the tagline and the paragraphs */
+  .left-indent-justified .tagline {
+    margin-bottom: 20px;
+    color: #555; /* Optional: Makes the tagline a slightly softer color */
+  }
+</style>
+
 <section class="section">
   <div class="container">
 
-    <div class="centered-justified">
+    <div class="left-indent-justified">
+      
       <h1>Conference Theme</h1>
+      
       <h3 class="tagline">
         FROM DISCOVERY TO THERAPY: ADVANCES IN TISSUE ENGINEERING AND REGENERATIVE MEDICINE
       </h3>
@@ -759,10 +781,15 @@
         intelligence, and clinical translation. MTERMS 2026 highlights how these domains converge to
         move laboratory breakthroughs toward therapeutic impact.
       </p>
+      
     </div>
 
   </div>
 </section>
+
+
+
+  
 
 
 <section class="section section-alt">
