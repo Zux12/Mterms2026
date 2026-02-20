@@ -4,8 +4,8 @@
   if(!programSection) return;
 
   const btn = document.createElement('button');
-  btn.id = 'agenda-fab';
-  btn.textContent = '📅 View Detailed Agenda';
+//  btn.id = 'agenda-fab';
+//  btn.textContent = '📅 View Detailed Agenda';
   programSection.appendChild(btn);
 
   // Backdrop + Modal shell
