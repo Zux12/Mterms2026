@@ -647,22 +647,139 @@
 /* New MTERMS logo in header (right side) */
 .site-header img.header-logo.header-logo--mterm{
   height: 80px !important;
-  max-height: none !important;   /* THIS is the key */
-  max-width: none !important;    /* prevents width restriction */
+  max-height: none !important;
+  max-width: none !important;
   width: auto !important;
   margin-left: 10px;
+  transform: translateY(4px); /* NEW: nudge down slightly */
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
   padding: 0 !important;
   border-radius: 0 !important;
 }
-    
+
 .site-header .brand-logo-right{
   display:flex;
   align-items:center;
   justify-content:flex-end;
   gap: 10px;
+}
+
+
+/* =========================
+   NEW: Centered headings + justified body copy
+   ========================= */
+.center-justify{
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: justify;
+  text-justify: inter-word;
+}
+.center-justify h2,
+.center-justify h3{
+  text-align: center;
+}
+
+/* =========================
+   NEW: People blocks (no cards)
+   ========================= */
+.people-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.person-plain{
+  text-align: center;
+}
+
+.person-plain img{
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.person-plain .name{
+  margin-top: 10px;
+  font-weight: 800;
+}
+
+.person-plain .role{
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: .98rem;
+}
+
+.person-plain .bio{
+  margin-top: 10px;
+  text-align: justify;
+  text-justify: inter-word;
+  color: var(--text);
+}
+
+/* Two photos at end of welcoming remarks */
+.remarks-photos{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.remarks-photos img{
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 0 auto;
+  display: block;
+}
+@media (max-width: 640px){
+  .remarks-photos{ grid-template-columns: 1fr; }
+  .remarks-photos img{ max-width: 320px; }
+}
+
+/* =========================
+   NEW: Logo cards (Strategic Partners + Host/Co-host)
+   ========================= */
+.logo-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.logo-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.logo-card img{
+  max-height: 58px;
+  max-width: 140px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.logo-card .logo-fallback{
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+  padding: 6px;
 }
 </style>
 <script src="lunr.min.js"></script>
@@ -695,43 +812,47 @@
 
       <!-- Second row: enlarged nav + author dropdown -->
       <div class="nav-row">
-        <nav class="nav" id="siteNav" aria-label="Primary navigation">
-          <a href="index.html">HOME</a>
-          <a href="theme.html">THEME</a>
-          <a href="program.html">PROGRAM</a>
-          <a href="speaker.html">SPEAKERS</a>
-          <a href="venue.html">VENUE & TRAVEL</a>
-          <a href="#registration">REGISTRATION</a>
+    <nav class="nav" id="siteNav" aria-label="Primary navigation">
+  <a href="index.html">HOME</a>
+  <a href="theme.html">THEME</a>
+  <a href="program.html">PROGRAM</a>
+  <a href="speaker.html">SPEAKERS</a>
+  <a href="venue.html">VENUE</a>
+  <a href="#registration">REGISTRATION</a>
 
-          <!-- Authors dropdown (placeholders for now) -->
-          <div class="nav-dd" data-dd>
-            <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
-              AUTHORS <span class="nav-dd-caret" aria-hidden="true">▾</span>
-            </button>
-  <div class="nav-dd-menu" role="menu">
-  <a role="menuitem" href="public/author%20guidelines.pdf" target="_blank">
-    Author Guidelines
-  </a>
+  <!-- AUTHORS dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      AUTHORS <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
 
-  <a role="menuitem" href="public/ABSTRACT%20GUIDELINES%20MTERMS2026_FINALR3.pdf" target="_blank">
-    Abstract Guidelines and Template
-  </a>
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="public/author%20guidelines.pdf" target="_blank" rel="noopener">Author Guidelines</a>
+      <a role="menuitem" href="public/ABSTRACT%20GUIDELINES%20MTERMS2026_FINALR3.pdf" target="_blank" rel="noopener">Abstract Guidelines and Template</a>
+      <a role="menuitem" href="public/ORAL%20GUIDELINES%20MTERMS2026%20edited_FINAL.pdf" target="_blank" rel="noopener">Presenter / Oral Guidelines</a>
+      <a role="menuitem" href="#poster-info">Poster Instructions (TBA)</a>
+    </div>
+  </div>
 
-  <a role="menuitem" href="public/ORAL%20GUIDELINES%20MTERMS2026%20edited_FINAL.pdf" target="_blank">
-    Presenter / Oral Guidelines
-  </a>
+  <a href="sponsors.html">SPONSORS</a>
+  <a href="committee.html">COMMITTEE</a>
 
-  <a role="menuitem" href="#poster-info">
-    Poster Instructions (TBA)
-  </a>
+  <!-- TRAVEL dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      TRAVEL <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
 
-</div>
-          </div>
-          
-          <a href="sponsors.html">SPONSORS</a>
-          <a href="committee.html">COMMITTEE</a>
-          <a href="contact.html">CONTACT</a>
-        </nav>
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="gettingthere.html">Getting There</a>
+      <a role="menuitem" href="accomodation.html">Nearby Accommodations</a>
+      <a role="menuitem" href="destinations.html">Must Visit Destinations</a>
+      <a role="menuitem" href="restaurants.html">Popular Restaurants</a>
+    </div>
+  </div>
+
+  <a href="contact.html">CONTACT</a>
+</nav>
 
         <div class="header-actions">
           <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
@@ -740,6 +861,7 @@
 
     </div>
   </header>
+
 
 
 
