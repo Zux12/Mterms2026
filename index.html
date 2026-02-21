@@ -647,10 +647,11 @@
 /* New MTERMS logo in header (right side) */
 .site-header img.header-logo.header-logo--mterm{
   height: 80px !important;
-  max-height: none !important;   /* THIS is the key */
-  max-width: none !important;    /* prevents width restriction */
+  max-height: none !important;
+  max-width: none !important;
   width: auto !important;
   margin-left: 10px;
+  transform: translateY(4px); /* NEW: nudge down slightly */
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -811,74 +812,47 @@
 
       <!-- Second row: enlarged nav + author dropdown -->
       <div class="nav-row">
-        <nav class="nav" id="siteNav" aria-label="Primary navigation">
-          <a href="index.html">HOME</a>
-          <a href="theme.html">THEME</a>
-          <a href="program.html">PROGRAM</a>
-          <a href="speaker.html">SPEAKERS</a>
-          <a href="venue.html">VENUE</a>
-          <a href="#registration">REGISTRATION</a>
+    <nav class="nav" id="siteNav" aria-label="Primary navigation">
+  <a href="index.html">HOME</a>
+  <a href="theme.html">THEME</a>
+  <a href="program.html">PROGRAM</a>
+  <a href="speaker.html">SPEAKERS</a>
+  <a href="venue.html">VENUE</a>
+  <a href="#registration">REGISTRATION</a>
 
-          <!-- Authors dropdown (placeholders for now) -->
-          <div class="nav-dd" data-dd>
-            <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
-              AUTHORS <span class="nav-dd-caret" aria-hidden="true">▾</span>
-            </button>
+  <!-- AUTHORS dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      AUTHORS <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
 
-  <div class="nav-dd-menu" role="menu">
-  <a role="menuitem" href="public/author%20guidelines.pdf" target="_blank">
-    Author Guidelines
-  </a>
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="public/author%20guidelines.pdf" target="_blank" rel="noopener">Author Guidelines</a>
+      <a role="menuitem" href="public/ABSTRACT%20GUIDELINES%20MTERMS2026_FINALR3.pdf" target="_blank" rel="noopener">Abstract Guidelines and Template</a>
+      <a role="menuitem" href="public/ORAL%20GUIDELINES%20MTERMS2026%20edited_FINAL.pdf" target="_blank" rel="noopener">Presenter / Oral Guidelines</a>
+      <a role="menuitem" href="#poster-info">Poster Instructions (TBA)</a>
+    </div>
+  </div>
 
-  <a role="menuitem" href="public/ABSTRACT%20GUIDELINES%20MTERMS2026_FINALR3.pdf" target="_blank">
-    Abstract Guidelines and Template
-  </a>
+  <a href="sponsors.html">SPONSORS</a>
+  <a href="committee.html">COMMITTEE</a>
 
-  <a role="menuitem" href="public/ORAL%20GUIDELINES%20MTERMS2026%20edited_FINAL.pdf" target="_blank">
-    Presenter / Oral Guidelines
-  </a>
+  <!-- TRAVEL dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      TRAVEL <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
 
-  <a role="menuitem" href="#poster-info">
-    Poster Instructions (TBA)
-  </a>
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="gettingthere.html">Getting There</a>
+      <a role="menuitem" href="accomodation.html">Nearby Accommodations</a>
+      <a role="menuitem" href="destinations.html">Must Visit Destinations</a>
+      <a role="menuitem" href="restaurants.html">Popular Restaurants</a>
+    </div>
+  </div>
 
-</div>
-          </div>
-
-          <a href="sponsors.html">SPONSORS</a>
-          <a href="committee.html">COMMITTEE</a>
-
-
-
-
-                    <!-- Travel dropdown (placeholders for now) -->
-          <div class="nav-dd" data-dd>
-            <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
-              TRAVEL <span class="nav-dd-caret" aria-hidden="true">▾</span>
-            </button>
-
-  <div class="nav-dd-menu" role="menu">
-  <a role="menuitem" href="gettingthere.html" target="_blank">
-    Getting There
-  </a>
-
-  <a role="menuitem" href="accomodation.html" target="_blank">
-    Nearby Accomudations
-  </a>
-
-  <a role="menuitem" href="destinations.html" target="_blank">
-    Must Visit Destinations
-  </a>
-
-  <a role="menuitem" href="restaurants.html">
-    Popular Restaurants
-  </a>
-
-</div>          
-                  
-          
-          <a href="contact.html">CONTACT</a>
-        </nav>
+  <a href="contact.html">CONTACT</a>
+</nav>
 
         <div class="header-actions">
           <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
@@ -1757,15 +1731,14 @@
 
 <script>
 /* =========================
-   Header dropdown + mobile menu
+   Header dropdowns (multi) + mobile menu
    ========================= */
 (function(){
   const nav = document.getElementById('siteNav');
   const toggle = document.querySelector('.nav-toggle');
-  const dd = document.querySelector('[data-dd]');
-  const ddBtn = dd ? dd.querySelector('.nav-dd-btn') : null;
+  const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
 
-  // Mobile menu toggle (keeps compatibility with existing styling)
+  // Mobile menu toggle
   if (toggle && nav){
     toggle.addEventListener('click', () => {
       const open = nav.classList.toggle('open');
@@ -1773,29 +1746,41 @@
     });
   }
 
-  // Dropdown open/close
-  function closeDD(){
-    if (!dd) return;
-    dd.classList.remove('open');
-    if (ddBtn) ddBtn.setAttribute('aria-expanded', 'false');
-  }
-  function toggleDD(){
-    if (!dd) return;
-    const open = dd.classList.toggle('open');
-    if (ddBtn) ddBtn.setAttribute('aria-expanded', String(open));
-  }
-
-  if (ddBtn){
-    ddBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleDD();
+  function closeAll(){
+    dropdowns.forEach(dd => {
+      dd.classList.remove('open');
+      const btn = dd.querySelector('.nav-dd-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
   }
 
-  document.addEventListener('click', closeDD);
+  dropdowns.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = dd.classList.contains('open');
+      closeAll();
+
+      if (!isOpen){
+        dd.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Prevent clicks inside menu from closing immediately
+    const menu = dd.querySelector('.nav-dd-menu');
+    if (menu){
+      menu.addEventListener('click', (e) => e.stopPropagation());
+    }
+  });
+
+  document.addEventListener('click', closeAll);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDD();
+    if (e.key === 'Escape') closeAll();
   });
 })();
 </script>
