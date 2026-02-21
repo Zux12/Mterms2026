@@ -1378,15 +1378,14 @@
 
 <script>
 /* =========================
-   Header dropdown + mobile menu
+   Header dropdowns (multi) + mobile menu
    ========================= */
 (function(){
   const nav = document.getElementById('siteNav');
   const toggle = document.querySelector('.nav-toggle');
-  const dd = document.querySelector('[data-dd]');
-  const ddBtn = dd ? dd.querySelector('.nav-dd-btn') : null;
+  const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
 
-  // Mobile menu toggle (keeps compatibility with existing styling)
+  // Mobile menu toggle
   if (toggle && nav){
     toggle.addEventListener('click', () => {
       const open = nav.classList.toggle('open');
@@ -1394,29 +1393,41 @@
     });
   }
 
-  // Dropdown open/close
-  function closeDD(){
-    if (!dd) return;
-    dd.classList.remove('open');
-    if (ddBtn) ddBtn.setAttribute('aria-expanded', 'false');
-  }
-  function toggleDD(){
-    if (!dd) return;
-    const open = dd.classList.toggle('open');
-    if (ddBtn) ddBtn.setAttribute('aria-expanded', String(open));
-  }
-
-  if (ddBtn){
-    ddBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleDD();
+  function closeAll(){
+    dropdowns.forEach(dd => {
+      dd.classList.remove('open');
+      const btn = dd.querySelector('.nav-dd-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
   }
 
-  document.addEventListener('click', closeDD);
+  dropdowns.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = dd.classList.contains('open');
+      closeAll();
+
+      if (!isOpen){
+        dd.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Prevent clicks inside menu from closing immediately
+    const menu = dd.querySelector('.nav-dd-menu');
+    if (menu){
+      menu.addEventListener('click', (e) => e.stopPropagation());
+    }
+  });
+
+  document.addEventListener('click', closeAll);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDD();
+    if (e.key === 'Escape') closeAll();
   });
 })();
 </script>
