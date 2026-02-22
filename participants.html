@@ -520,278 +520,50 @@
         Tick <strong>one</strong> corresponding author only.
       </div>
 
-      <!-- Authors 1..10 -->
-      <div id="authorsWrap">
-        <!-- Author 1 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 1</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a1-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a1-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a1-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a1-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a1-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a1-corr"> Corresponding author
-          </label>
-        </fieldset>
+     <!-- Authors (dynamic, up to 10) -->
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">
+  <button type="button" id="addAuthorBtn" class="btn">+ Add author</button>
+  <button type="button" id="removeAuthorBtn" class="btn ghost">Remove last</button>
+  <span class="help" id="authorCountTxt"></span>
+</div>
 
-        <!-- Author 2 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 2</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a2-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a2-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a2-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a2-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a2-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a2-corr"> Corresponding author
-          </label>
-        </fieldset>
+<div id="authorsWrap"></div>
 
-        <!-- Author 3 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 3</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a3-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a3-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a3-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a3-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a3-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a3-corr"> Corresponding author
-          </label>
-        </fieldset>
+<!-- Template for author fieldset -->
+<template id="authorTpl">
+  <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+    <legend>Author __N__</legend>
 
-        <!-- Author 4 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 4</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a4-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a4-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a4-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a4-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a4-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a4-corr"> Corresponding author
-          </label>
-        </fieldset>
+    <div style="display:flex;justify-content:flex-end;margin:-6px 0 8px">
+      <button type="button" class="btn ghost authorRemoveOneBtn">Remove this author</button>
+    </div>
 
-        <!-- Author 5 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 5</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a5-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a5-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a5-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a5-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a5-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a5-corr"> Corresponding author
-          </label>
-        </fieldset>
+    <div class="grid-3">
+      <label>First name
+        <input id="a__N__-first" placeholder="First name">
+      </label>
+      <label>Last name
+        <input id="a__N__-last" placeholder="Last name">
+      </label>
+      <label>Email
+        <input id="a__N__-email" type="email" placeholder="email@example.com">
+      </label>
+    </div>
 
-        <!-- Author 6 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 6</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a6-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a6-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a6-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a6-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a6-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a6-corr"> Corresponding author
-          </label>
-        </fieldset>
+    <div class="grid-2">
+      <label>Affiliation
+        <input id="a__N__-affil" placeholder="University / Company">
+      </label>
+      <label>Country
+        <input id="a__N__-country" placeholder="Country">
+      </label>
+    </div>
 
-        <!-- Author 7 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 7</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a7-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a7-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a7-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a7-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a7-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a7-corr"> Corresponding author
-          </label>
-        </fieldset>
-
-        <!-- Author 8 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 8</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a8-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a8-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a8-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a8-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a8-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a8-corr"> Corresponding author
-          </label>
-        </fieldset>
-
-        <!-- Author 9 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 9</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a9-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a9-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a9-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a9-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a9-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a9-corr"> Corresponding author
-          </label>
-        </fieldset>
-
-        <!-- Author 10 -->
-        <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Author 10</legend>
-          <div class="grid-3">
-            <label>First name
-              <input id="a10-first" placeholder="First name">
-            </label>
-            <label>Last name
-              <input id="a10-last" placeholder="Last name">
-            </label>
-            <label>Email
-              <input id="a10-email" type="email" placeholder="email@example.com">
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Affiliation
-              <input id="a10-affil" placeholder="University / Company">
-            </label>
-            <label>Country
-              <input id="a10-country" placeholder="Country">
-            </label>
-          </div>
-          <label class="field-inline">
-            <input type="radio" name="corrAuthor" id="a10-corr"> Corresponding author
-          </label>
-        </fieldset>
-      </div>
+    <label class="field-inline">
+      <input type="radio" name="corrAuthor" id="a__N__-corr"> Corresponding author
+    </label>
+  </fieldset>
+</template>
 
       <div class="help" id="subMsg" style="margin-top:6px"></div>
     </div>
@@ -946,7 +718,53 @@
     submissionCard.classList.toggle('hidden', !on);
   }
 
-  function getAuthor(i){
+    // ===== Dynamic Authors (Participant) =====
+  const authorsWrap = $('authorsWrap');
+  const authorTpl = document.getElementById('authorTpl');
+  const addAuthorBtn = document.getElementById('addAuthorBtn');
+  const removeAuthorBtn = document.getElementById('removeAuthorBtn');
+  const authorCountTxt = document.getElementById('authorCountTxt');
+
+  const MAX_AUTHORS = 10;
+  let authorCount = 1;
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function setAuthorCount(n){
+    authorCount = clamp(n, 1, MAX_AUTHORS);
+    renderAuthors();
+  }
+
+  function renderAuthors(){
+    authorsWrap.innerHTML = '';
+
+    for (let i = 1; i <= authorCount; i++){
+      const html = authorTpl.innerHTML.replaceAll('__N__', String(i));
+      const temp = document.createElement('div');
+      temp.innerHTML = html.trim();
+      const fieldset = temp.firstElementChild;
+
+      // remove buttons logic
+      const removeThisBtn = fieldset.querySelector('.authorRemoveOneBtn');
+      if (i === 1){
+        removeThisBtn.style.display = 'none'; // never remove Author 1
+      } else {
+        removeThisBtn.addEventListener('click', () => {
+          // shift data up when removing middle author
+          removeAuthorAt(i);
+        });
+      }
+
+      authorsWrap.appendChild(fieldset);
+    }
+
+    // buttons state + counter
+    addAuthorBtn.disabled = authorCount >= MAX_AUTHORS;
+    removeAuthorBtn.disabled = authorCount <= 1;
+    authorCountTxt.textContent = `${authorCount} / ${MAX_AUTHORS} author(s) shown`;
+  }
+
+  function readAuthorAt(i){
     const first = $(`a${i}-first`)?.value?.trim() || '';
     const last  = $(`a${i}-last`)?.value?.trim()  || '';
     const email = $(`a${i}-email`)?.value?.trim() || '';
@@ -960,13 +778,65 @@
     return { firstName:first, lastName:last, email, affiliation:affil, country, isCorresponding:isCorr };
   }
 
+  function writeAuthorAt(i, a){
+    $(`a${i}-first`).value = a?.firstName || '';
+    $(`a${i}-last`).value  = a?.lastName || '';
+    $(`a${i}-email`).value = a?.email || '';
+    $(`a${i}-affil`).value = a?.affiliation || '';
+    $(`a${i}-country`).value = a?.country || '';
+    $(`a${i}-corr`).checked = !!a?.isCorresponding;
+  }
+
+  function removeAuthorAt(idx){
+    // Read all current authors into array (including blanks as null)
+    const arr = [];
+    for (let i = 1; i <= authorCount; i++){
+      arr.push(readAuthorAt(i));
+    }
+
+    // remove idx (1-based)
+    arr.splice(idx - 1, 1);
+
+    // decrease count
+    authorCount = Math.max(1, authorCount - 1);
+    renderAuthors();
+
+    // write back shifted data
+    for (let i = 1; i <= authorCount; i++){
+      writeAuthorAt(i, arr[i-1]);
+    }
+
+    // ensure only one corresponding author remains checked
+    normalizeCorrespondingAuthor();
+  }
+
+  function normalizeCorrespondingAuthor(){
+    // If multiple checked (shouldn't happen), keep the first checked
+    let found = false;
+    for (let i = 1; i <= authorCount; i++){
+      const r = $(`a${i}-corr`);
+      if (!r) continue;
+      if (r.checked && !found) { found = true; }
+      else if (r.checked && found) { r.checked = false; }
+    }
+  }
+
+  // Hook up buttons
+  addAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount + 1));
+  removeAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount - 1));
+
+  // replace old getAuthor/read/write with dynamic ones
+  function getAuthor(i){
+    return readAuthorAt(i);
+  }
+
   function readSubmissionFromForm(){
     const theme = subTheme.value || '';
     const field = subField.value || '';
     const title = subTitle.value?.trim() || '';
 
     const authors = [];
-    for (let i=1; i<=10; i++){
+    for (let i = 1; i <= authorCount; i++){
       const a = getAuthor(i);
       if (a) authors.push(a);
     }
@@ -981,6 +851,7 @@
     const authors = Array.isArray(sub?.authors) ? sub.authors : [];
 
     subTheme.value = theme;
+
     // populate fields based on theme first
     const fields = THEME_FIELDS[theme] || [];
     subField.innerHTML = `<option value="">Select field</option>` +
@@ -990,27 +861,25 @@
     subField.value = field;
     subTitle.value = title;
 
-    // clear authors
-    for (let i=1; i<=10; i++){
-      $(`a${i}-first`).value = '';
-      $(`a${i}-last`).value = '';
-      $(`a${i}-email`).value = '';
-      $(`a${i}-affil`).value = '';
-      $(`a${i}-country`).value = '';
-      $(`a${i}-corr`).checked = false;
+    // render correct number of author blocks:
+    // show at least 1, or enough to display loaded authors (max 10)
+    setAuthorCount(clamp(Math.max(1, authors.length), 1, MAX_AUTHORS));
+
+    // clear all visible authors first
+    for (let i = 1; i <= authorCount; i++){
+      writeAuthorAt(i, null);
     }
 
     // fill authors
-    authors.slice(0,10).forEach((a, idx) => {
-      const i = idx + 1;
-      $(`a${i}-first`).value = a?.firstName || '';
-      $(`a${i}-last`).value = a?.lastName || '';
-      $(`a${i}-email`).value = a?.email || '';
-      $(`a${i}-affil`).value = a?.affiliation || '';
-      $(`a${i}-country`).value = a?.country || '';
-      $(`a${i}-corr`).checked = !!a?.isCorresponding;
+    authors.slice(0, MAX_AUTHORS).forEach((a, idx) => {
+      writeAuthorAt(idx + 1, a);
     });
+
+    normalizeCorrespondingAuthor();
   }
+
+  // initial render (so author fields exist before prefill() writes)
+  renderAuthors();
 
   function validateSubmissionIfPresenter(){
     subMsg.textContent = '';
