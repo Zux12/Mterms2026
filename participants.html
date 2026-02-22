@@ -1110,6 +1110,26 @@ $('c-coc').checked  = !!user?.consents?.codeOfConduct;
 
 
   const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
+
+
+function pickLatestRow(rows){
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+
+  // Prefer highest version; fallback to uploadedAt
+  const sorted = rows.slice().sort((a,b)=> {
+    const va = Number(a.version) || 0;
+    const vb = Number(b.version) || 0;
+    if (vb !== va) return vb - va;
+
+    const ta = new Date(a.uploadedAt || 0).getTime();
+    const tb = new Date(b.uploadedAt || 0).getTime();
+    return tb - ta;
+  });
+
+  return sorted[0];
+}
+  
+  
 // =============================
 // Uploads (using OLD proven logic)
 // =============================
