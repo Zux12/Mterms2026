@@ -435,11 +435,27 @@
         </div>
       </details>
 
+
+
+
+
 <div style="margin:8px 0">
-  <!-- <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br> -->
-  <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
-  <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
-</div>
+  <label class="field-inline">
+    <input type="checkbox" id="c-pdpa">
+    I confirm all information submitted is true and accurate, and I consent to the processing of my personal data for conference administration purposes.
+  </label><br>
+
+  <label class="field-inline">
+    <input type="checkbox" id="c-coc">
+    I agree to the Code of Conduct.
+  </label>
+  
+    <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
+
+</div>    
+
+
+      
 
       <button id="saveBtn" class="btn">Save Changes</button>
       <span id="saveMsg" style="margin-left:10px;font-size:.95rem"></span>
@@ -1036,7 +1052,7 @@ function deepMerge(base, patch) {
     $('a-postcode').value = user?.address?.postcode || '';
     $('a-country').value  = user?.address?.country || '';
 
-// $('c-pdpa').checked = !!user?.consents?.pdpa;
+$('c-pdpa').checked = !!user?.consents?.pdpa;
 $('c-coc').checked  = !!user?.consents?.codeOfConduct;
 // $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
 
@@ -1087,6 +1103,10 @@ async function uploadDoc(type, fileInputId, msgId, latestBoxId){
   }
 
   const fd = new FormData();
+  if (user?.consents?.pdpa !== true) {
+  $(msgId).textContent = '❌ Please tick the PDPA consent and click "Save Changes" before uploading.';
+  return;
+}
   fd.append('regCode', user.regCode);
   fd.append('email', user.personal.email);
   fd.append('type', type);
@@ -1334,7 +1354,7 @@ async function loadLatest(type, latestBoxId){
         country:  $('a-country').value.trim()
       },
 consents: {
-  // pdpa: $('c-pdpa').checked,
+  pdpa: $('c-pdpa').checked,
   codeOfConduct: $('c-coc').checked,
   // marketingOptIn: $('c-mkt').checked
 }
