@@ -10,7 +10,24 @@
 
   <!-- Theme overrides + hero-independent palette -->
   <style id="theme-overrides">
-    :root.theme-light{--bg:#fff;--surface:#fff;--text:#0b1115;--border:#e5e7eb;--muted:#667085;}
+    :root.theme-light{
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --text:#0b1115;
+  --border:#e5e7eb;
+  --muted:#667085;
+
+  /* Subtle conference palette (UiTM navy + TESMA teal) */
+  --uitm-navy:#0B2A6B;
+  --tesma-teal:#0EA5A6;
+
+  /* Primary button gradient */
+  --primary1:#0B2A6B;
+  --primary2:#0EA5A6;
+
+  /* Soft background tint */
+  --bg-tint: rgba(14,165,166,0.06);
+}face:#fff;--text:#0b1115;--border:#e5e7eb;--muted:#667085;}
     html,body{background:var(--bg);color:var(--text);}
     .admin-wrap{width:min(1200px,92vw);margin:24px auto;}
     .admin-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px;}
@@ -32,8 +49,41 @@ input[type="radio"]{
     th,td{padding:8px;border-bottom:1px solid var(--border)}
     th{text-align:left}
     .actions{display:flex;gap:8px}
-    .btn{border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:#fff;cursor:pointer}
-    .btn.ghost{background:transparent}
+/* Buttons (bigger + themed) */
+.btn{
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.btn-primary{
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, var(--primary1), var(--primary2));
+  box-shadow: 0 10px 22px rgba(11,42,107,.14);
+}
+
+.btn-secondary{
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-logout{
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, #B42318, #DC6803);
+  box-shadow: 0 10px 22px rgba(180,35,24,.14);
+}
+
+.btn:hover{ transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+.btn-primary:hover{ filter: brightness(1.02); }
+.btn-secondary:hover{ box-shadow: 0 8px 18px rgba(0,0,0,.06); }
+.btn-logout:hover{ filter: brightness(1.02); }
     .badge{width:260px;height:400px;background:#fff;color:#0b1115;border-radius:16px;border:1px solid #e8e8e8;box-shadow:0 8px 24px rgba(0,0,0,.08);display:flex;flex-direction:column;overflow:hidden}
     .badge-top{padding:8px 10px 4px}
     .badge-logos{display:flex;justify-content:center;align-items:center;gap:8px}
@@ -95,6 +145,31 @@ button[disabled] {
   font-weight: 600;
 }
 
+
+/* Layout accents (professional, not overdone) */
+html, body{
+  background:
+    radial-gradient(900px 300px at 10% 0%, var(--bg-tint), transparent 60%),
+    radial-gradient(900px 300px at 90% 0%, rgba(11,42,107,0.06), transparent 60%),
+    var(--bg);
+}
+
+.admin-head{
+  padding: 10px 0 14px;
+  border-bottom: 2px solid rgba(14,165,166,0.18);
+}
+
+.admin-head h1{
+  letter-spacing: .2px;
+}
+
+.card{
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+}
+
+table thead th{
+  background: rgba(11,42,107,0.04);
+}    
   </style>
 </head>
 <body>
@@ -154,7 +229,7 @@ button[disabled] {
 
         
         
-        <button id="logoutBtn" class="btn ghost">Logout</button>
+<button id="logoutBtn" class="btn btn-logout">Logout</button>
       </div>
     </div>
 
@@ -177,8 +252,8 @@ button[disabled] {
             <input id="q" placeholder="e.g., Rahman, uitm.edu, MTERM2026-000123">
           </label>
           <div style="display:flex;gap:8px;align-items:end">
-            <button id="refresh" class="btn">Refresh</button>
-            <button id="printSel" class="btn">Print selected badges</button>
+<button id="refresh" class="btn btn-primary">Refresh</button>
+<button id="printSel" class="btn btn-primary">Print selected badges</button>
           </div>
         </div>
       </div>
@@ -202,9 +277,9 @@ button[disabled] {
           </tbody>
         </table>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-          <button id="prev" class="btn ghost">Prev</button>
+<button id="prev" class="btn btn-secondary">Prev</button>
           <span id="pageInfo" style="align-self:center"></span>
-          <button id="next" class="btn ghost">Next</button>
+<button id="next" class="btn btn-secondary">Next</button>
         </div>
       </div>
 
@@ -400,14 +475,16 @@ button[disabled] {
 </div>
         </div>
       
-            <!-- Bottom actions (moved here) -->
-      <div class="row" style="margin-top:14px">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button id="save" class="btn">Save changes</button>
-          <button id="cancelEdit" class="btn ghost" type="button">Cancel</button>
-          <span id="saveMsg" style="align-self:center"></span>
-        </div>
-      </div>
+<!-- Bottom actions (centered) -->
+<div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+  <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+    <button id="save" class="btn btn-primary">Save changes</button>
+    <button id="cancelEdit" class="btn btn-secondary" type="button">Cancel</button>
+  </div>
+  <div style="margin-top:10px;text-align:center">
+    <span id="saveMsg" style="font-size:1.02rem"></span>
+  </div>
+</div>
       
       </div>
 
@@ -721,8 +798,8 @@ button[disabled] {
             <td>${doc.payment?.status||'pending'}</td>
             <td>${doc.professional?.affiliation||''}</td>
             <td class="actions">
-              <button class="btn" data-act="edit" data-id="${doc._id}">Edit</button>
-            </td>
+<button class="btn btn-primary" data-act="edit" data-id="${doc._id}">Edit</button>
+</td>
           </tr>`;
         }).join('') || '<tr><td colspan="8"><em>No results</em></td></tr>';
         $('pageInfo').textContent = `Page ${page} • ${Math.min(page*limit, total)} / ${total}`;
@@ -1033,6 +1110,21 @@ button,
 
 
 
+
+
+<footer style="margin:22px auto 10px; width:min(1200px,92vw); text-align:center;">
+  <div style="font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.85;margin-bottom:10px;color:var(--uitm-navy)">
+    Organized by
+  </div>
+  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 10px 22px rgba(0,0,0,.06);">
+      <img src="public/uitm.png" alt="UiTM" style="height:34px;width:auto;object-fit:contain;display:block;">
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 10px 22px rgba(0,0,0,.06);">
+      <img src="public/tesma.png" alt="TESMA" style="height:34px;width:auto;object-fit:contain;display:block;">
+    </div>
+  </div>
+</footer>
   
 </body>
 </html>
