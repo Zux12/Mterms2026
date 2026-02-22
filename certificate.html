@@ -134,12 +134,40 @@
     }
 
     /* Print only the canvas (one per page) */
-    @media print{
-      body{ padding:0; }
-      .header, .grid .card:first-child, .grid .card:last-child .help, .noPrint { display:none !important; }
-      .previewWrap{ border:none; padding:0; }
-      canvas{ border:none; border-radius:0; }
-    }
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print{
+  html, body{
+    margin:0 !important;
+    padding:0 !important;
+    width:100%;
+    height:100%;
+  }
+
+  .header,
+  .grid .card:first-child,
+  .noPrint{
+    display:none !important;
+  }
+
+  .previewWrap{
+    border:none;
+    padding:0;
+  }
+
+  canvas{
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width:none !important;
+    max-height:none !important;
+    border:none !important;
+    border-radius:0 !important;
+    display:block;
+  }
+}
   </style>
 </head>
 
@@ -365,8 +393,16 @@ Prof Lim Wei Chen"></textarea>
     if (!templateImg.complete || !templateImg.naturalWidth) return;
 
     // Render at full template resolution for crisp printing
-    cv.width = templateImg.naturalWidth;
-    cv.height = templateImg.naturalHeight;
+// A4 landscape ratio (width > height)
+const A4_WIDTH = 3508;
+const A4_HEIGHT = 2480;
+
+cv.width = A4_WIDTH;
+cv.height = A4_HEIGHT;
+
+// draw template stretched to full A4 canvas
+ctx.clearRect(0,0,A4_WIDTH,A4_HEIGHT);
+ctx.drawImage(templateImg, 0, 0, A4_WIDTH, A4_HEIGHT);
 
     ctx.clearRect(0,0,cv.width, cv.height);
     ctx.drawImage(templateImg, 0, 0);
