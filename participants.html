@@ -51,6 +51,13 @@
       border: 1px solid var(--border);
     }
 
+    .btn.danger{
+  background: #dc2626; /* red */
+}
+.btn.danger:hover{
+  filter: brightness(.95);
+}
+
     input,select,textarea{
       width: 100%;
       padding: 8px;
@@ -439,26 +446,7 @@
 
 
 
-<div style="margin:8px 0">
-  <label class="field-inline">
-    <input type="checkbox" id="c-pdpa">
-    I confirm all information submitted is true and accurate, and I consent to the processing of my personal data for conference administration purposes.
-  </label><br>
 
-  <label class="field-inline">
-    <input type="checkbox" id="c-coc">
-    I agree to the Code of Conduct.
-  </label>
-  
-    <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
-
-</div>    
-
-
-      
-
-      <button id="saveBtn" class="btn">Save Changes</button>
-      <span id="saveMsg" style="margin-left:10px;font-size:.95rem"></span>
     </div>
 
 
@@ -698,6 +686,44 @@ UKM, Cheras, 56000 Kuala Lumpur, Malaysia
       </div>
     </div>
 
+
+
+
+
+
+<div class="card">
+  <h3>Consent & Declaration</h3>
+  <p class="help">
+    Please confirm before saving your registration details.
+  </p>
+
+  <div style="margin:8px 0">
+    <label class="field-inline">
+      <input type="checkbox" id="c-pdpa">
+      I confirm all information submitted is true and accurate, and I consent to the processing of my personal data (PDPA) for conference administration purposes.
+    </label><br>
+
+    <label class="field-inline">
+      <input type="checkbox" id="c-coc">
+      I agree to the Code of Conduct.
+    </label>
+
+        <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
+
+    
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px">
+    <button id="saveBtn" class="btn">Save Changes</button>
+    <button id="cancelBtn" class="btn danger">Cancel</button>
+    <span id="saveMsg" style="margin-left:6px;font-size:.95rem"></span>
+  </div>
+</div>
+
+
+    
+
+    
 
   </div>
 
