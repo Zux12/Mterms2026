@@ -365,10 +365,7 @@ button[disabled] {
           <input id="pay-amount" type="number" placeholder="Amount (MYR)">
         </div>
 
-        <div class="row">
-          <button id="save" class="btn">Save changes</button>
-          <span id="saveMsg" style="align-self:center"></span>
-        </div>
+
 
         <h4>Photo</h4>
         <div class="row">
@@ -391,15 +388,27 @@ button[disabled] {
               </div>
               <div class="badge-footer">MTERMS 2026 • Shah Alam</div>
             </div>
-            <div style="margin-top:8px" class="no-print">
-              <button id="printBadge" class="btn">Print this badge</button>
-            </div>
+
           </div>
-          <div>
-            <div id="photoMsg" style="opacity:.9"></div>
-            <button id="loadPhoto" class="btn">Load latest photo</button>
-          </div>
+  <div>
+  <div id="photoMsg" style="opacity:.9"></div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin-top:10px" class="no-print">
+    <button id="loadPhoto" class="btn">Load latest photo</button>
+    <button id="printBadge" class="btn">Print this badge</button>
+  </div>
+</div>
         </div>
+      
+            <!-- Bottom actions (moved here) -->
+      <div class="row" style="margin-top:14px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button id="save" class="btn">Save changes</button>
+          <button id="cancelEdit" class="btn ghost" type="button">Cancel</button>
+          <span id="saveMsg" style="align-self:center"></span>
+        </div>
+      </div>
+      
       </div>
 
       <!-- Hidden print layout for selected badges -->
@@ -800,6 +809,12 @@ $('c-coc').checked  = !!doc.consents?.codeOfConduct;
 
         // Bind save
         $('save').onclick = ()=>saveChanges(id, doc);
+                // Cancel button: hide editor + clear messages
+        $('cancelEdit').onclick = () => {
+          $('editCard').style.display = 'none';
+          $('saveMsg').textContent = '';
+          $('photoMsg').textContent = '';
+        };
         $('printBadge').onclick = ()=>{window.print();};
         $('loadPhoto').onclick = ()=>loadLatestPhoto(doc.regCode, doc.personal?.email);
       }catch(err){
