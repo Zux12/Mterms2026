@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8" />
+  <title>MTERMS 2026 — Participant Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <style id="theme-overrides">
+    :root.theme-light{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --border:#e5e7eb;
+    }
+    body{ background:var(--bg); color:var(--text); }
+    .card{ background:var(--surface); border:1px solid var(--border); }
+  </style>
+
+  <style>
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      padding: 20px;
+    }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn{
+      background: linear-gradient(90deg,#19c37d,#0ea5a6);
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .btn.ghost{
+      background: #ffffff;
+      color: #0b1115;
+      border: 1px solid var(--border);
+    }
+
+    input,select,textarea{
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #0b1115;
+      outline: none;
+    }
+    input::placeholder, textarea::placeholder{ color:#6b7280; }
+    input:focus,select:focus,textarea:focus{
+      border-color:#9ca3af;
+      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
+
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+    .hidden{ display:none; }
+    .help{ opacity:.9; font-size:.92rem; color:#374151; }
+
+    .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+    @media (max-width: 900px){ .row{ grid-template-columns:1fr; } }
+
+    .tag{
+      display:inline-block;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f9fafb;
+      margin-right: 8px;
+      font-size: .85rem;
+      color:#111827;
+    }
+
+    /* Badge */
+    .badge{
+      width: 260px; height: 400px;
+      background:#fff; color:#0b1115;
+      border-radius:16px; border:1px solid #e8e8e8;
+      box-shadow:0 8px 24px rgba(0,0,0,.15);
+      display:flex; flex-direction:column; overflow:hidden;
+      font-family: Inter, system-ui, sans-serif;
+    }
+    .badge-top{ padding:8px 10px 4px; }
+    .badge-mterm{ display:block; width:96px; height:auto; margin:0 auto 4px; object-fit:contain; }
+    .badge-logos{ display:flex; justify-content:center; align-items:center; gap:8px; }
+    .badge-logos img{ height:20px; width:auto; object-fit:contain; }
+
+    .badge-photo-wrap{
+      margin:8px auto 0; width:180px; height:240px;
+      position:relative; border:1px solid #ddd; border-radius:10px; overflow:hidden;
+      background:#f2f4f7;
+    }
+    .badge-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+    .badge-photo.ph{ display:flex; align-items:center; justify-content:center; color:#98a2b3; font-weight:700; letter-spacing:.06em; }
+
+    .badge-info{ padding:10px 12px 0; text-align:center; }
+    .badge-name{ font-weight:800; font-size:18px; line-height:1.2; }
+    .badge-affil{ font-size:12px; color:#475467; margin-top:2px; }
+    .badge-cat{ font-size:12px; color:#0b7a64; font-weight:700; margin-top:6px; }
+
+    .badge-footer{
+      margin-top:auto; font-size:11px; text-align:center; padding:8px 10px 10px; color:#667085;
+      border-top:1px solid #eef2f6; background:#fafafa;
+    }
+
+/* Keep inline checkbox/radio labels INSIDE the card (Safari-safe) */
+.field-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 !important;
+  width:100%;
+  max-width:100%;
+  justify-content:flex-start;
+  flex-wrap:wrap;              /* allow wrapping instead of pushing outside */
+  white-space:normal;          /* allow text to wrap */
+  overflow-wrap:anywhere;      /* prevent long words from overflowing */
+}
+
+.field-inline input{
+  width:auto !important;       /* stop input inheriting 100% width */
+  margin:0 !important;
+  flex:0 0 auto;
+}
+
+
+.card, fieldset { overflow:hidden; }
+    
+    #pr-presenting:where(input){ margin:0; }
+
+
+
+
+
+
+/* ===== MTERMS branding (no changes to existing .btn styles) ===== */
+.brand-wrap{
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.brand-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding: 10px 4px 18px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-logo{
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+.brand-logo img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.brand-title{
+  margin:0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.brand-subtitle{
+  margin:6px 0 0;
+  color:#374151;
+  font-size: .98rem;
+}
+
+.brand-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.org-footer{
+  max-width: 1100px;
+  margin: 18px auto 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  text-align:center;
+  color:#374151;
+}
+
+.org-label{
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: .9;
+}
+
+.org-logos{
+  display:flex;
+  justify-content:center;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+
+.logo-chip{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+.logo-chip img{
+  height: 36px;
+  width:auto;
+  object-fit:contain;
+  display:block;
+}
+
+/* Field labels for Personal/Affiliation inputs */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.field-name{
+  font-size: .88rem;
+  font-weight: 700;
+  color:#111827;
+}
+    
+  </style>
+</head>
+
+<body>
+  <div class="brand-wrap">
+ <header class="brand-header">
+  <div class="brand-left">
+    <div class="brand-logo">
+      <img src="public/mterm.jpg" alt="MTERMS 2026">
+    </div>
+    <div>
+      <h1 class="brand-title">MTERMS 2026 — Participant Portal</h1>
+      <p class="brand-subtitle">View or update your details, manage uploads, and preview your badge.</p>
+    </div>
+  </div>
+
+  <!-- optional right-side space (kept for future links/buttons if you want) -->
+  <div class="brand-right"></div>
+</header>
+  <!-- Inline login fallback (prevents redirect loop and shows real error) -->
+  <div id="loginBox" class="card hidden">
+    <h3>Session Required</h3>
+    <p class="help" style="margin-top:6px">
+      Your session was not detected. You can login here. If your browser blocks cross-site cookies (common on Safari),
+      the portal may not stay logged in unless the API returns a user profile.
+    </p>
+
+    <div class="grid-2">
+      <label>Email
+        <input id="l-email" type="email" placeholder="you@example.com" autocomplete="username">
+      </label>
+      <label>Password
+        <input id="l-pass" type="password" placeholder="Password" autocomplete="current-password">
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="l-btn" class="btn">Login</button>
+      <button id="l-goLogin" class="btn ghost">Open login.html</button>
+      <span id="l-msg" class="help"></span>
+    </div>
+
+    <div id="diagBox" class="help" style="margin-top:10px"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashBox" class="hidden">
+    <div class="card">
+      <div class="row" style="align-items:center">
+        <div>
+          <h2>Welcome, <span id="userName"></span></h2>
+          <div class="help">
+            <span class="tag">Code: <span id="userCode"></span></span>
+            <span class="tag">Category: <span id="userCategory"></span></span>
+            <span class="tag">Payment: <span id="userPayment"></span></span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <button id="logoutBtn" class="btn ghost">Logout</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <h3>My Details</h3>
+      <p class="help">Edit your information and save changes.</p>
+
+      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Registration Options</legend>
+        <div class="grid-2">
+          <label>Category
+            <select id="f-category">
+              <option value="student">Student</option>
+              <option value="academia">Academia</option>
+              <option value="industry">Industry</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+<fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+  <legend>Personal</legend>
+  <div class="grid-2">
+    <div class="field">
+      <div class="field-name">First Name</div>
+      <input id="p-firstName" placeholder="First name">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Last Name</div>
+      <input id="p-lastName" placeholder="Last name">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Email</div>
+      <input id="p-email" type="email" placeholder="Email">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Phone</div>
+      <input id="p-phone" placeholder="Phone">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Country</div>
+      <input id="p-country" placeholder="Country">
+    </div>
+  </div>
+</fieldset>
+
+<fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+  <legend>Affiliation</legend>
+  <div class="grid-2">
+    <div class="field">
+      <div class="field-name">University / Company</div>
+      <input id="pro-affiliation" placeholder="University / Company">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Department (Optional)</div>
+      <input id="pro-dept" placeholder="Department (optional)">
+    </div>
+
+    <div class="field">
+      <div class="field-name">Role / Title (Optional)</div>
+      <input id="pro-role" placeholder="Role/Title (optional)">
+    </div>
+  </div>
+</fieldset>
+
+      <fieldset id="studentOnly" style="display:none;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+        <legend>Student details</legend>
+        <div class="grid-3">
+          <input id="s-university" placeholder="University">
+          <select id="s-level">
+            <option value="">Level</option>
+            <option value="UG">UG</option>
+            <option value="MSc">MSc</option>
+            <option value="PhD">PhD</option>
+            <option value="Other">Other</option>
+          </select>
+          <input id="s-grad" type="number" placeholder="Expected grad year">
+        </div>
+      </fieldset>
+
+
+
+      <details style="margin-bottom:12px">
+        <summary>Billing & invoice (optional)</summary>
+        <div class="grid-2" style="margin-top:8px">
+          <input id="b-billTo" placeholder="Bill-to name">
+          <input id="b-taxNo" placeholder="Company Tax/GST/VAT No.">
+          <input id="b-po" placeholder="Purchase order #">
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px">
+        <summary>Postal address (optional)</summary>
+        <div class="grid-2" style="margin-top:8px">
+          <input id="a-line1" placeholder="Address line 1">
+          <input id="a-line2" placeholder="Address line 2">
+          <input id="a-city" placeholder="City">
+          <input id="a-state" placeholder="State/Province">
+          <input id="a-postcode" placeholder="Postcode">
+          <input id="a-country" placeholder="Country">
+        </div>
+      </details>
+
+<div style="margin:8px 0">
+  <!-- <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br> -->
+  <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
+  <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
+</div>
+
+      <button id="saveBtn" class="btn">Save Changes</button>
+      <span id="saveMsg" style="margin-left:10px;font-size:.95rem"></span>
+    </div>
+
+
+    
+        <div class="card">
+      <h3>My Uploads</h3>
+      <p class="help">
+        Upload your <strong>Abstract</strong> (PDF).<br>
+        1) Choose your file<br>
+        2) Click <strong>Upload Abstract</strong><br>
+        3) Use <strong>Refresh Latest</strong> to view the latest uploaded abstract
+      </p>
+
+      <!-- NOTE (legacy types wired to MongoDB): studentProof, slides, bankReceipt -->
+      <div class="grid-2">
+        <label>Type
+          <select id="absType" disabled>
+            <option value="abstract">Abstract</option>
+          </select>
+        </label>
+        <label>File
+          <input type="file" id="absFile" accept=".pdf">
+        </label>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="absUploadBtn" class="btn">Upload Abstract</button>
+        <button id="absRefreshBtn" class="btn ghost">Refresh latest</button>
+      </div>
+
+      <div id="absMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Latest Abstract</div>
+        <div id="absLatest" style="margin-top:8px;"></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Reviewer comment</div>
+        <div id="reviewComment" class="help" style="margin-top:8px;white-space:pre-wrap;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>My Payments</h3>
+      <p class="help">
+        Please make payment using the details below and upload your <strong>Bank Receipt</strong> after payment.
+      </p>
+
+      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-bottom:12px">
+        <div style="font-weight:800;margin-bottom:6px">Bank transfer details</div>
+        <div class="help" style="white-space:pre-wrap;margin:0">
+<strong>Bank name:</strong> CIMB Bank Berhad
+<strong>Account name:</strong> Tissue Engineering and Regenerative Medicine Society of Malaysia (TESMA)
+<strong>Account no:</strong> 8007995842
+<strong>SWIFT code:</strong> CIBB MYKL
+
+<strong>Billing address:</strong>
+Department of Tissue Engineering and Regenerative Medicine,
+15th Floor, Pre-clinical Block,
+Faculty of Medicine,
+UKM, Cheras, 56000 Kuala Lumpur, Malaysia
+
+<strong>Preferred payment method:</strong> Telegraphic Transfer (TT), Bank Draft / Banker's Cheque
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <label>Type
+          <select id="payType" disabled>
+            <option value="bankReceipt">Bank receipt</option>
+          </select>
+        </label>
+        <label>File
+          <input type="file" id="payFile" accept=".pdf,.jpg,.jpeg,.png">
+        </label>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="payUploadBtn" class="btn">Upload Bank Receipt</button>
+        <button id="payRefreshBtn" class="btn ghost">Refresh latest</button>
+      </div>
+
+      <div id="payMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Latest Receipt</div>
+        <div id="payLatest" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+      <legend>Program</legend>
+      <label class="field-inline">
+        <input type="checkbox" id="pr-presenting"> I am a presenter
+      </label>
+
+      <div id="presentFields" style="display:none;margin-top:8px">
+        <div class="grid-2">
+          <select id="pr-type">
+            <option value="talk">Oral</option>
+            <option value="poster">Poster</option>
+          </select>
+
+          <!-- Program.topicArea is repurposed for admin Poster-only lock (stored as "__POSTER_ONLY__") -->
+          <div id="posterLockedNote" class="help hidden" style="align-self:center">
+            Presentation type has been fixed to <strong>Poster</strong> by Secretariat.
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+        <!-- Submission (Theme + Field + Authors) -->
+    <div class="card hidden" id="submissionCard">
+      <h3>Abstract / Authors Details</h3>
+      <p class="help">
+        Fill in your theme, respective field, and author list (up to 10 authors). This will be used for abstract submission records.
+      </p>
+
+      <div class="grid-2">
+        <label>Theme
+          <select id="sub-theme">
+            <option value="">Select theme</option>
+          </select>
+        </label>
+
+        <label>Respective Field
+          <select id="sub-field" disabled>
+            <option value="">Select field</option>
+          </select>
+        </label>
+      </div>
+
+      <label>Submission / Abstract Title
+        <input id="sub-title" placeholder="e.g., Scaffold-assisted stem cell regeneration...">
+      </label>
+
+      <div class="help" style="margin:-4px 0 10px">
+        Tick <strong>one</strong> corresponding author only.
+      </div>
+
+     <!-- Authors (dynamic, up to 10) -->
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">
+  <button type="button" id="addAuthorBtn" class="btn">+ Add author</button>
+  <button type="button" id="removeAuthorBtn" class="btn ghost">Remove last</button>
+  <span class="help" id="authorCountTxt"></span>
+</div>
+
+<div id="authorsWrap"></div>
+
+<!-- Template for author fieldset -->
+<template id="authorTpl">
+  <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+    <legend>Author __N__</legend>
+
+    <div style="display:flex;justify-content:flex-end;margin:-6px 0 8px">
+      <button type="button" class="btn ghost authorRemoveOneBtn">Remove this author</button>
+    </div>
+
+    <div class="grid-3">
+      <label>First name
+        <input id="a__N__-first" placeholder="First name">
+      </label>
+      <label>Last name
+        <input id="a__N__-last" placeholder="Last name">
+      </label>
+      <label>Email
+        <input id="a__N__-email" type="email" placeholder="email@example.com">
+      </label>
+    </div>
+
+    <div class="grid-2">
+      <label>Affiliation
+        <input id="a__N__-affil" placeholder="University / Company">
+      </label>
+      <label>Country
+        <input id="a__N__-country" placeholder="Country">
+      </label>
+    </div>
+
+    <label class="field-inline">
+      <input type="radio" name="corrAuthor" id="a__N__-corr"> Corresponding author
+    </label>
+  </fieldset>
+</template>
+
+      <div class="help" id="subMsg" style="margin-top:6px"></div>
+    </div>
+
+    <!-- ID Photo & Badge -->
+    <div class="card">
+      <h3>ID Photo and Badge Preview</h3>
+      <p class="help">
+        Upload a portrait photo (front-facing, plain background). We’ll auto-fit it to standard ID proportions (3:4).
+      </p>
+
+      <div class="grid-2">
+        <label>Choose photo
+          <input type="file" id="idPhoto" accept="image/*">
+        </label>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <button id="idUploadBtn" class="btn">Upload & Save</button>
+          <button id="idRefreshBtn" class="btn ghost">Refresh</button>
+          <span id="idMsg" style="margin-left:6px;font-size:.9rem"></span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">
+        <div id="badge" class="badge">
+          <div class="badge-top">
+            <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS" />
+            <div class="badge-logos">
+              <img src="public/uitm.png" alt="UiTM">
+  
+              <img src="public/tesma.png" alt="TESMA">
+            </div>
+          </div>
+
+          <div class="badge-photo-wrap">
+            <img id="badgePhoto" class="badge-photo" alt="ID photo">
+            <div id="badgePlaceholder" class="badge-photo ph">PHOTO</div>
+          </div>
+
+          <div class="badge-info">
+            <div id="badgeName" class="badge-name">Participant Name</div>
+            <div id="badgeAffil" class="badge-affil">Institution / Company</div>
+            <div id="badgeCat" class="badge-cat">Category</div>
+          </div>
+
+          <div class="badge-footer">MTERMS 2026 • Shah Alam</div>
+        </div>
+
+        <div class="help" style="max-width:420px">
+          <strong>Printing note:</strong> This preview uses a white card background. The photo is constrained to a standard
+          3:4 portrait. On the admin page, the same badge block can be placed in a print-friendly layout for bulk printing.
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+<script>
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+  // Elements
+  const dashBox   = document.getElementById('dashBox');
+  const loginBox  = document.getElementById('loginBox');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  const saveBtn  = document.getElementById('saveBtn');
+  const saveMsg  = document.getElementById('saveMsg');
+
+  const $ = (id) => document.getElementById(id);
+  const studentOnly = $('studentOnly');
+  const presentFields = $('presentFields');
+
+
+
+    // ===== Submission (theme/field/authors) =====
+  const submissionCard = $('submissionCard');
+  const subTheme = $('sub-theme');
+  const subField = $('sub-field');
+  const subTitle = $('sub-title');
+  const subMsg   = $('subMsg');
+
+  const THEME_FIELDS = {
+    "Stem Cell Innovations and Clinical Applications": [
+      "Stem Cell Biology and Mechanisms of Differentiation",
+      "Tissue Engineering and Biomaterials",
+      "Organoids and 3D Bioprinting",
+      "Regenerative Medicine and Translational Therapies",
+      "Cellular Reprogramming and Induced Pluripotent Stem Cells (iPSCs)",
+      "Clinical Trials and Regulatory Science in Stem Cell Therapy",
+      "Gene Editing and Cell Engineering",
+      "Immunomodulation and Stem Cell Interactions",
+      "Neural Stem Cells and Neuroregeneration",
+      "Musculoskeletal Regeneration",
+      "Cardiac and Vascular Regeneration",
+      "Hepatic and Pancreatic Regeneration",
+      "Stem Cell-Derived Extracellular Vesicles and Secretome Therapy",
+      "Biomanufacturing and GMP Production of Stem Cells",
+      "Ethics, Policy, and Commercialization in Regenerative Medicine",
+      "Other relevant fields"
+    ],
+    "Biomaterials and Tissue Scaffolds": [
+      "Design and Development of Novel Biomaterials",
+      "Biocompatibility and Biofunctionality Assessment",
+      "3D Bioprinting and Additive Manufacturing",
+      "Smart and Responsive Biomaterials",
+      "Hydrogels and Injectable Scaffolds",
+      "Nanomaterials in Tissue Engineering",
+      "Bioactive Surface Modification",
+      "Degradable and Bioresorbable Scaffolds",
+      "Mechanical and Structural Characterization of Scaffolds",
+      "Vascularization Strategies in Engineered Tissues",
+      "Cell–Material Interactions and Mechanotransduction",
+      "Composite and Hybrid Scaffolds",
+      "Scaffold-Based Organoid and Tissue Models",
+      "Clinical Translation and Regulatory Challenges in Biomaterials",
+      "Sustainable and Green Biomaterials",
+      "Other relevant fields"
+    ],
+    "Student and Young Investigator Symposium (SYIS)": [
+      "All fields listed above (SYIS)"
+    ]
+  };
+
+  function initSubmissionUI(){
+    // fill theme dropdown
+    subTheme.innerHTML = `<option value="">Select theme</option>` +
+      Object.keys(THEME_FIELDS).map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+
+    subField.innerHTML = `<option value="">Select field</option>`;
+    subField.disabled = true;
+
+    subTheme.addEventListener('change', () => {
+      const t = subTheme.value;
+      const fields = THEME_FIELDS[t] || [];
+      subField.innerHTML = `<option value="">Select field</option>` +
+        fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+      subField.disabled = !fields.length;
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  function showSubmission(on){
+    // show only for presenters
+    submissionCard.classList.toggle('hidden', !on);
+  }
+
+    // ===== Dynamic Authors (Participant) =====
+  const authorsWrap = $('authorsWrap');
+  const authorTpl = document.getElementById('authorTpl');
+  const addAuthorBtn = document.getElementById('addAuthorBtn');
+  const removeAuthorBtn = document.getElementById('removeAuthorBtn');
+  const authorCountTxt = document.getElementById('authorCountTxt');
+
+  const MAX_AUTHORS = 10;
+  let authorCount = 1;
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function setAuthorCount(n){
+    authorCount = clamp(n, 1, MAX_AUTHORS);
+    renderAuthors();
+  }
+
+  function renderAuthors(){
+    authorsWrap.innerHTML = '';
+
+    for (let i = 1; i <= authorCount; i++){
+      const html = authorTpl.innerHTML.replaceAll('__N__', String(i));
+      const temp = document.createElement('div');
+      temp.innerHTML = html.trim();
+      const fieldset = temp.firstElementChild;
+
+      // remove buttons logic
+      const removeThisBtn = fieldset.querySelector('.authorRemoveOneBtn');
+      if (i === 1){
+        removeThisBtn.style.display = 'none'; // never remove Author 1
+      } else {
+        removeThisBtn.addEventListener('click', () => {
+          // shift data up when removing middle author
+          removeAuthorAt(i);
+        });
+      }
+
+      authorsWrap.appendChild(fieldset);
+    }
+
+    // buttons state + counter
+    addAuthorBtn.disabled = authorCount >= MAX_AUTHORS;
+    removeAuthorBtn.disabled = authorCount <= 1;
+    authorCountTxt.textContent = `${authorCount} / ${MAX_AUTHORS} author(s) shown`;
+  }
+
+  function readAuthorAt(i){
+    const first = $(`a${i}-first`)?.value?.trim() || '';
+    const last  = $(`a${i}-last`)?.value?.trim()  || '';
+    const email = $(`a${i}-email`)?.value?.trim() || '';
+    const affil = $(`a${i}-affil`)?.value?.trim() || '';
+    const country = $(`a${i}-country`)?.value?.trim() || '';
+    const isCorr = !!$(`a${i}-corr`)?.checked;
+
+    const anyFilled = !!(first || last || email || affil || country);
+    if (!anyFilled) return null;
+
+    return { firstName:first, lastName:last, email, affiliation:affil, country, isCorresponding:isCorr };
+  }
+
+  function writeAuthorAt(i, a){
+    $(`a${i}-first`).value = a?.firstName || '';
+    $(`a${i}-last`).value  = a?.lastName || '';
+    $(`a${i}-email`).value = a?.email || '';
+    $(`a${i}-affil`).value = a?.affiliation || '';
+    $(`a${i}-country`).value = a?.country || '';
+    $(`a${i}-corr`).checked = !!a?.isCorresponding;
+  }
+
+  function removeAuthorAt(idx){
+    // Read all current authors into array (including blanks as null)
+    const arr = [];
+    for (let i = 1; i <= authorCount; i++){
+      arr.push(readAuthorAt(i));
+    }
+
+    // remove idx (1-based)
+    arr.splice(idx - 1, 1);
+
+    // decrease count
+    authorCount = Math.max(1, authorCount - 1);
+    renderAuthors();
+
+    // write back shifted data
+    for (let i = 1; i <= authorCount; i++){
+      writeAuthorAt(i, arr[i-1]);
+    }
+
+    // ensure only one corresponding author remains checked
+    normalizeCorrespondingAuthor();
+  }
+
+  function normalizeCorrespondingAuthor(){
+    // If multiple checked (shouldn't happen), keep the first checked
+    let found = false;
+    for (let i = 1; i <= authorCount; i++){
+      const r = $(`a${i}-corr`);
+      if (!r) continue;
+      if (r.checked && !found) { found = true; }
+      else if (r.checked && found) { r.checked = false; }
+    }
+  }
+
+  // Hook up buttons
+  addAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount + 1));
+  removeAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount - 1));
+
+  // replace old getAuthor/read/write with dynamic ones
+  function getAuthor(i){
+    return readAuthorAt(i);
+  }
+
+  function readSubmissionFromForm(){
+    const theme = subTheme.value || '';
+    const field = subField.value || '';
+    const title = subTitle.value?.trim() || '';
+
+    const authors = [];
+    for (let i = 1; i <= authorCount; i++){
+      const a = getAuthor(i);
+      if (a) authors.push(a);
+    }
+
+    return { theme, field, title, authors };
+  }
+
+  function writeSubmissionToForm(sub){
+    const theme = sub?.theme || '';
+    const field = sub?.field || '';
+    const title = sub?.title || '';
+    const authors = Array.isArray(sub?.authors) ? sub.authors : [];
+
+    subTheme.value = theme;
+
+    // populate fields based on theme first
+    const fields = THEME_FIELDS[theme] || [];
+    subField.innerHTML = `<option value="">Select field</option>` +
+      fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+    subField.disabled = !fields.length;
+
+    subField.value = field;
+    subTitle.value = title;
+
+    // render correct number of author blocks:
+    // show at least 1, or enough to display loaded authors (max 10)
+    setAuthorCount(clamp(Math.max(1, authors.length), 1, MAX_AUTHORS));
+
+    // clear all visible authors first
+    for (let i = 1; i <= authorCount; i++){
+      writeAuthorAt(i, null);
+    }
+
+    // fill authors
+    authors.slice(0, MAX_AUTHORS).forEach((a, idx) => {
+      writeAuthorAt(idx + 1, a);
+    });
+
+    normalizeCorrespondingAuthor();
+  }
+
+  // initial render (so author fields exist before prefill() writes)
+  renderAuthors();
+
+  function validateSubmissionIfPresenter(){
+    subMsg.textContent = '';
+    const presenting = $('pr-presenting').checked;
+    if (!presenting) return { ok:true };
+
+    const sub = readSubmissionFromForm();
+    const anySubData = !!(sub.theme || sub.field || sub.title || sub.authors.length);
+
+    // if presenter but they didn't fill anything, we allow saving (no blocking)
+    if (!anySubData) return { ok:true };
+
+    if (!sub.theme) return { ok:false, msg:'❌ Please select a Theme.' };
+    if (!sub.field) return { ok:false, msg:'❌ Please select a Respective Field.' };
+    if (!sub.authors.length) return { ok:false, msg:'❌ Please fill at least Author 1.' };
+
+    const corrCount = sub.authors.filter(a => a.isCorresponding).length;
+    if (corrCount !== 1) return { ok:false, msg:'❌ Please tick exactly ONE corresponding author.' };
+
+    return { ok:true };
+  }
+  
+
+  function saveSession(data){ localStorage.setItem('mtermsUser', JSON.stringify(data)); }
+  function getSession(){ try{ return JSON.parse(localStorage.getItem('mtermsUser')||'{}'); }catch{return{}} }
+
+function deepMerge(base, patch) {
+  if (!patch || typeof patch !== 'object') return base;
+  const out = Array.isArray(base) ? [...base] : { ...(base || {}) };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      out[k] = deepMerge(out[k], v);
+    } else if (v !== undefined) {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+
+  
+  function clearSession(){ localStorage.removeItem('mtermsUser'); }
+
+  function showStudent(on){ studentOnly.style.display = on ? 'block' : 'none'; }
+  function showPresent(on){ presentFields.style.display = on ? 'block' : 'none'; }
+
+  function prefill(user){
+    $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
+    $('userCode').textContent = user?.regCode || '';
+    $('userCategory').textContent = user?.category || '';
+    $('userPayment').textContent = user?.payment?.status || 'pending';
+
+    $('f-category').value = user?.category || 'academia';
+
+    $('p-firstName').value = user?.personal?.firstName || '';
+    $('p-lastName').value  = user?.personal?.lastName  || '';
+    $('p-email').value     = user?.personal?.email     || '';
+    $('p-phone').value     = user?.personal?.phone     || '';
+    $('p-country').value   = user?.personal?.country   || '';
+
+    $('pro-affiliation').value = user?.professional?.affiliation || '';
+    $('pro-dept').value        = user?.professional?.department  || '';
+    $('pro-role').value        = user?.professional?.roleTitle   || '';
+
+    const isStudent = (user?.category === 'student');
+    showStudent(isStudent);
+    $('s-university').value = user?.student?.university || '';
+    $('s-level').value      = user?.student?.level || '';
+    $('s-grad').value       = user?.student?.expectedGradYear || '';
+
+    $('pr-presenting').checked = !!user?.program?.presenting;
+    showPresent(!!user?.program?.presenting);
+    // Program
+    const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
+    $('pr-type').value = (posterLocked ? 'poster' : (user?.program?.type || 'talk'));
+    $('pr-type').disabled = posterLocked;
+    $('posterLockedNote').classList.toggle('hidden', !posterLocked);
+
+    // Reviewer comment (repurposed from program.title)
+    $('reviewComment').textContent = (user?.program?.title || '—');
+
+    $('b-billTo').value = user?.billing?.billTo || '';
+    $('b-taxNo').value  = user?.billing?.taxNo  || '';
+    $('b-po').value     = user?.billing?.poNumber || '';
+
+    $('a-line1').value    = user?.address?.line1 || '';
+    $('a-line2').value    = user?.address?.line2 || '';
+    $('a-city').value     = user?.address?.city  || '';
+    $('a-state').value    = user?.address?.state || '';
+    $('a-postcode').value = user?.address?.postcode || '';
+    $('a-country').value  = user?.address?.country || '';
+
+// $('c-pdpa').checked = !!user?.consents?.pdpa;
+$('c-coc').checked  = !!user?.consents?.codeOfConduct;
+// $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
+
+
+        // Submission
+    if (user?.program?.presenting) {
+      showSubmission(true);
+    } else {
+      showSubmission(false);
+    }
+    writeSubmissionToForm(user?.submission || {});
+
+
+    
+  }
+
+  function requireSessionOrThrow(){
+    const user = getSession();
+    if (!user?.regCode || !user?.personal?.email) {
+      throw new Error('Session missing regCode/email. Please login again.');
+    }
+    return user;
+  }
+
+
+
+  const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
+
+  async function uploadFileFor(type, fileInputId, msgId, latestBoxId){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $(msgId).textContent = '❌ ' + e.message; showInlineLogin('Please login to upload files.'); return; }
+
+    const file = document.getElementById(fileInputId)?.files?.[0];
+    if (!file){ $(msgId).textContent='❌ Please select a file.'; return; }
+
+    const fd = new FormData();
+    fd.append('regCode', user.regCode);
+    fd.append('email', user.personal.email);
+    fd.append('type', type);
+    fd.append('file', file, file.name);
+
+    $(msgId).textContent = 'Uploading...';
+    try {
+      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Upload failed');
+      $(msgId).textContent = `✅ Uploaded version ${data.version}`;
+      document.getElementById(fileInputId).value = '';
+      await loadLatestFor(type, latestBoxId);
+    } catch(err){
+      $(msgId).textContent = '❌ ' + err.message;
+    }
+  }
+
+  function pickLatestRow(rows){
+    if (!Array.isArray(rows) || rows.length===0) return null;
+    // Prefer highest version; fallback to uploadedAt.
+    const sorted = rows.slice().sort((a,b)=> {
+      const va = Number(a.version)||0, vb = Number(b.version)||0;
+      if (vb !== va) return vb - va;
+      const ta = new Date(a.uploadedAt||0).getTime();
+      const tb = new Date(b.uploadedAt||0).getTime();
+      return tb - ta;
+    });
+    return sorted[0];
+  }
+
+  async function loadLatestFor(type, latestBoxId){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ document.getElementById(latestBoxId).innerHTML = `<span style="color:#b42318">❌ ${e.message}</span>`; return; }
+
+    const box  = document.getElementById(latestBoxId);
+    box.innerHTML = 'Loading...';
+
+    try {
+      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Error');
+
+      const latest = pickLatestRow(data.rows || []);
+      box.innerHTML = latest
+        ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px">
+            <strong>v${latest.version}</strong> — ${latest.filename}<br>
+            <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
+            <a href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+          </div>`
+        : '<em>No uploads yet.</em>';
+    } catch(err){
+      box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
+    }
+  }
+
+  // --- ID photo helpers ---
+  function fitCoverToCanvas(imgW, imgH, canW, canH){
+    const imgR = imgW / imgH, canR = canW / canH;
+    let w, h, sx, sy;
+    if (imgR > canR){
+      h = imgH; w = h * canR; sx = (imgW - w) / 2; sy = 0;
+    } else {
+      w = imgW; h = w / canR; sx = 0; sy = (imgH - h) / 2;
+    }
+    return { sx, sy, sw:w, sh:h };
+  }
+
+  async function resizeToIDPhoto(file){
+    const targetW = 360, targetH = 480;
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(file);
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW; canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, targetW, targetH);
+
+    const imgR = img.naturalWidth / img.naturalHeight;
+    const boxR = targetW / targetH;
+    let drawW, drawH;
+
+    if (imgR > boxR) { drawW = targetW; drawH = Math.round(drawW / imgR); }
+    else { drawH = targetH; drawW = Math.round(drawH * imgR); }
+
+    const dx = Math.round((targetW - drawW) / 2);
+    const dy = Math.round((targetH - drawH) / 2);
+
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, drawW, drawH);
+
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+    const previewUrl = URL.createObjectURL(blob);
+    return { blob, previewUrl };
+  }
+
+  async function uploadIDPhoto(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('idMsg').textContent = '❌ ' + e.message; showInlineLogin('Please login to upload photo.'); return; }
+
+    const file = document.getElementById('idPhoto').files?.[0];
+    const msg = document.getElementById('idMsg');
+    if (!file){ msg.textContent = '❌ Please choose an image.'; return; }
+
+    try{
+      msg.textContent = 'Processing…';
+      const { blob, previewUrl } = await resizeToIDPhoto(file);
+
+      setBadgePhoto(previewUrl);
+
+      const fd = new FormData();
+      fd.append('regCode', user.regCode);
+      fd.append('email', user.personal.email);
+      fd.append('type', 'profilePhoto');
+      fd.append('file', new File([blob], 'idphoto.jpg', { type:'image/jpeg' }));
+
+      msg.textContent = 'Uploading…';
+      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
+      let data = {};
+      try { data = await r.json(); } catch {}
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+      msg.textContent = '✅ Photo saved (v' + (data.version || '?') + ').';
+    }catch(err){
+      msg.textContent = '❌ ' + err.message;
+    }
+  }
+
+  async function refreshIDPhoto(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ $('idMsg').textContent = ''; clearBadgePhoto(); return; }
+
+    const msg = document.getElementById('idMsg');
+    msg.textContent = 'Loading…';
+    try{
+      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=profilePhoto`);
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Error');
+
+      if (data.count){
+        const last = data.rows[data.rows.length - 1];
+        setBadgePhoto(`${API}${last.downloadUrl}`);
+        msg.textContent = '';
+      } else {
+        clearBadgePhoto();
+        msg.textContent = 'No photo uploaded yet.';
+      }
+    }catch(err){
+      msg.textContent = '❌ ' + err.message;
+    }
+  }
+
+  function setBadgePhoto(url){
+    const img = document.getElementById('badgePhoto');
+    const ph  = document.getElementById('badgePlaceholder');
+    img.src = url; img.style.display = 'block'; ph.style.display = 'none';
+  }
+  function clearBadgePhoto(){
+    const img = document.getElementById('badgePhoto');
+    const ph  = document.getElementById('badgePlaceholder');
+    img.removeAttribute('src'); img.style.display = 'none'; ph.style.display = 'flex';
+  }
+
+  function fillBadgeText(user){
+    document.getElementById('badgeName').textContent =
+      [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim() || 'Participant Name';
+    document.getElementById('badgeAffil').textContent = user?.professional?.affiliation || 'Institution / Company';
+    document.getElementById('badgeCat').textContent   = (user?.category || 'Participant').toUpperCase();
+  }
+
+  async function saveChanges(){
+    let user;
+    try { user = requireSessionOrThrow(); }
+    catch(e){ saveMsg.textContent = '❌ ' + e.message; showInlineLogin('Please login to save changes.'); return; }
+
+    saveBtn.disabled = true;
+    saveMsg.textContent = 'Saving...';
+
+    const updates = {
+      category: $('f-category').value,
+      personal: {
+        firstName: $('p-firstName').value.trim(),
+        lastName:  $('p-lastName').value.trim(),
+        email:     $('p-email').value.trim(),
+        phone:     $('p-phone').value.trim(),
+        country:   $('p-country').value.trim()
+      },
+      professional: {
+        affiliation: $('pro-affiliation').value.trim(),
+        department:  $('pro-dept').value.trim(),
+        roleTitle:   $('pro-role').value.trim()
+      },
+      student: ($('f-category').value === 'student') ? {
+        university: $('s-university').value.trim(),
+        level:      $('s-level').value,
+        expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
+      } : undefined,
+      program: {
+        presenting: $('pr-presenting').checked,
+        type: (function(){
+          const presenting = $('pr-presenting').checked;
+          const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
+          if (!presenting) return 'none';
+          return posterLocked ? 'poster' : $('pr-type').value;
+        })(),
+        // program.title is repurposed for admin reviewer comments (participant must NOT overwrite)
+        title: user?.program?.title || '',
+        // program.topicArea is repurposed for admin Poster-only lock marker (participant must NOT overwrite)
+        topicArea: user?.program?.topicArea || ''
+      },
+
+      submission: readSubmissionFromForm(),
+      
+      billing: {
+        billTo:   $('b-billTo').value.trim(),
+        taxNo:    $('b-taxNo').value.trim(),
+        poNumber: $('b-po').value.trim()
+      },
+      address: {
+        line1: $('a-line1').value.trim(),
+        line2: $('a-line2').value.trim(),
+        city:  $('a-city').value.trim(),
+        state: $('a-state').value.trim(),
+        postcode: $('a-postcode').value.trim(),
+        country:  $('a-country').value.trim()
+      },
+consents: {
+  // pdpa: $('c-pdpa').checked,
+  codeOfConduct: $('c-coc').checked,
+  // marketingOptIn: $('c-mkt').checked
+}
+    };
+
+    const v = validateSubmissionIfPresenter();
+if (!v.ok) {
+  saveMsg.textContent = v.msg;
+  saveBtn.disabled = false;
+  return;
+}
+    if (updates.student === undefined) delete updates.student;
+
+
+
+    
+    try {
+      const r = await fetch(`${API}/api/registrations/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regCode: user.regCode, email: user.personal.email, updates })
+      });
+      const data = await r.json().catch(()=> ({}));
+      if (!r.ok) throw new Error(data.error || 'Update failed');
+
+      // accept {doc} or {user}
+      const returned = data?.doc || data?.user;
+if (returned) {
+  const merged = deepMerge(getSession(), returned);
+  saveSession(merged);
+  prefill(merged);
+  fillBadgeText(merged);
+}
+
+      saveMsg.textContent = '✅ Saved.';
+    } catch(err){
+      saveMsg.textContent = '❌ ' + err.message;
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await fetch(`${API}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (e) {}
+
+  clearSession();
+
+  // Force redirect to login page
+  window.location.replace('/login.html');
+});
+
+  // Abstract upload (latest only)
+  document.getElementById('absUploadBtn').addEventListener('click', ()=>uploadFileFor('abstract','absFile','absMsg','absLatest'));
+  document.getElementById('absRefreshBtn').addEventListener('click', ()=>loadLatestFor('abstract','absLatest'));
+
+  // Bank receipt upload (latest only)
+  document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadFileFor('bankReceipt','payFile','payMsg','payLatest'));
+  document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatestFor('bankReceipt','payLatest'));
+  $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
+
+  $('pr-presenting').addEventListener('change', () => {
+  const on = $('pr-presenting').checked;
+  showPresent(on);
+  showSubmission(on);
+});
+  
+  saveBtn.addEventListener('click', saveChanges);
+    initSubmissionUI();
+
+  document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
+  document.getElementById('idRefreshBtn').addEventListener('click', refreshIDPhoto);
+
+  function showDashboard(user){
+    prefill(user);
+    fillBadgeText(user);
+    dashBox.classList.remove('hidden');
+    loginBox.classList.add('hidden');
+    refreshIDPhoto();
+    loadLatestFor('abstract','absLatest');
+    loadLatestFor('bankReceipt','payLatest');
+  }
+
+  function showInlineLogin(reasonText){
+    loginBox.classList.remove('hidden');
+    dashBox.classList.add('hidden');
+    const diag = document.getElementById('diagBox');
+    diag.textContent = reasonText || '';
+  }
+
+  async function tryMe(){
+    const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+    const data = await r.json().catch(()=> ({}));
+    const user = data?.user || data?.doc; // ✅ accept both
+    return { ok: r.ok, status: r.status, data, user };
+  }
+
+    // Fetch full profile directly from registrations/check (cookie-free; Safari-safe)
+  async function fetchFullProfile(regCode, email){
+    const r = await fetch(`${API}/api/registrations/check?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`);
+    const doc = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(doc.error || `HTTP ${r.status}`);
+    return doc; // full Registration document
+  }
+
+  // Inline login actions
+  document.getElementById('l-goLogin').addEventListener('click', () => {
+    window.location.href = 'login.html';
+  });
+
+document.getElementById('l-btn').addEventListener('click', async () => {
+  const em = String(document.getElementById('l-email').value || '').trim().toLowerCase();
+  const pw = String(document.getElementById('l-pass').value || '');
+  const lmsg = document.getElementById('l-msg');
+  const diag = document.getElementById('diagBox');
+
+  lmsg.textContent = 'Logging in...';
+  diag.textContent = '';
+
+  try {
+    const r = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: em, password: pw })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    // ✅ KEY FIX: use login response FIRST (Safari may block cookie so /me will 401)
+    const userFromLogin = data?.user || data?.doc;
+
+if (userFromLogin?.regCode && userFromLogin?.personal?.email) {
+  // 1) Save what login returned (may be partial)
+  saveSession(userFromLogin);
+
+  // 2) Immediately fetch full profile from /registrations/check (Safari-safe)
+  try {
+    const full = await fetchFullProfile(userFromLogin.regCode, userFromLogin.personal.email);
+    saveSession(full);
+    showDashboard(full);
+  } catch (e) {
+    // fallback: show what we have
+    showDashboard(userFromLogin);
+  }
+
+  loadLatestFor('abstract','absLatest');
+  loadLatestFor('bankReceipt','payLatest');
+  lmsg.textContent = '✅ Logged in.';
+  return;
+}
+
+    // Fallback: store minimal info so you don't get stuck in a loop
+    // (portal features needing regCode will still require backend to return it)
+    saveSession({ personal: { email: em } });
+
+    lmsg.textContent = '⚠️ Logged in, but profile missing in login response.';
+    diag.innerHTML =
+      `Your backend <code>/api/auth/login</code> did not return <code>{user}</code> or <code>{doc}</code> with <code>regCode</code>.<br>
+       Safari blocks the session cookie, so <code>/api/auth/me</code> becomes <strong>401</strong>.<br>
+       ✅ Fix backend: make <code>/api/auth/login</code> return the user profile (incl. regCode).`;
+
+  } catch (err) {
+    lmsg.textContent = '❌ ' + (err.message || 'Login failed');
+  }
+});
+
+  // ====== Auto session bootstrap (server first; then localStorage; else inline login) ======
+(async () => {
+  // 1) localStorage first (so no second login required)
+const sess = getSession();
+if (sess?.regCode && sess?.personal?.email) {
+  try {
+    const full = await fetchFullProfile(sess.regCode, sess.personal.email);
+    saveSession(full);
+    showDashboard(full);
+  } catch {
+    showDashboard(sess);
+  }
+  loadLatestFor('abstract','absLatest');
+  loadLatestFor('bankReceipt','payLatest');
+  return;
+}
+
+  // 2) optional: try server session (may 401 on Safari)
+  try {
+    const me = await tryMe();
+    if (me.ok && me.user?.regCode && me.user?.personal?.email) {
+      saveSession(me.user);
+      showDashboard(me.user);
+      loadLatestFor('abstract','absLatest');
+  loadLatestFor('bankReceipt','payLatest');
+      return;
+    }
+  } catch {}
+
+  // 3) show inline login (no redirect loop)
+  showInlineLogin('No active session detected. Please login.');
+})();
+</script>
+
+
+
+<footer class="org-footer">
+  <div class="org-label">Organized by</div>
+  <div class="org-logos">
+    <div class="logo-chip"><img src="public/uitm.png" alt="UiTM"></div>
+    <div class="logo-chip"><img src="public/tesma.png" alt="TESMA"></div>
+  </div>
+</footer>
+    
+    </div>
+</body>
+</html>
