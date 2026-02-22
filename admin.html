@@ -10,24 +10,20 @@
 
   <!-- Theme overrides + hero-independent palette -->
   <style id="theme-overrides">
-    :root.theme-light{
+:root.theme-light{
   --bg:#ffffff;
   --surface:#ffffff;
   --text:#0b1115;
   --border:#e5e7eb;
   --muted:#667085;
 
-  /* Subtle conference palette (UiTM navy + TESMA teal) */
+  /* Subtle conference palette */
   --uitm-navy:#0B2A6B;
   --tesma-teal:#0EA5A6;
 
-  /* Primary button gradient */
-  --primary1:#0B2A6B;
-  --primary2:#0EA5A6;
-
   /* Soft background tint */
   --bg-tint: rgba(14,165,166,0.06);
-}face:#fff;--text:#0b1115;--border:#e5e7eb;--muted:#667085;}
+}
     html,body{background:var(--bg);color:var(--text);}
     .admin-wrap{width:min(1200px,92vw);margin:24px auto;}
     .admin-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px;}
@@ -80,6 +76,14 @@ input[type="radio"]{
   color: #fff;
 }
 
+/* Secondary = normal white button */
+.btn-secondary{
+  background:#ffffff;
+  border-color: var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover{ filter: brightness(0.98); }
+    
 /* Small hover, still professional */
 .btn-primary:hover{ filter: brightness(0.95); }
 .btn-danger:hover{ filter: brightness(0.95); }
@@ -134,10 +138,11 @@ button[disabled] {
 /* Light theme disabled buttons */
 .theme-light .btn:disabled,
 .theme-light button[disabled] {
-  background: #eef2f7;            /* soft grey on white */
-  color: #6b7280;                  /* slate-500 for legibility */
+  background: #eef2f7;
+  color: #48566a;
+  border-color: var(--border);
+  filter: none !important;
 }
-
 
 
 /* 4) Ghost buttons (e.g., Logout) need clearer text outlines in light mode */
@@ -377,8 +382,8 @@ table thead th{
 
 <!-- Authors (dynamic, up to 10) -->
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">
-  <button type="button" id="ad-addAuthorBtn" class="btn">+ Add author</button>
-  <button type="button" id="ad-removeAuthorBtn" class="btn ghost">Remove last</button>
+<button type="button" id="ad-addAuthorBtn" class="btn btn-primary">+ Add author</button>
+<button type="button" id="ad-removeAuthorBtn" class="btn btn-secondary">Remove last</button>
   <span style="opacity:.85" id="ad-authorCountTxt"></span>
 </div>
 
@@ -476,8 +481,8 @@ table thead th{
   <div id="photoMsg" style="opacity:.9"></div>
 
   <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin-top:10px" class="no-print">
-    <button id="loadPhoto" class="btn">Load latest photo</button>
-    <button id="printBadge" class="btn">Print this badge</button>
+<button id="loadPhoto" class="btn btn-secondary">Load latest photo</button>
+<button id="printBadge" class="btn btn-secondary">Print this badge</button>
   </div>
 </div>
         </div>
@@ -784,7 +789,7 @@ table thead th{
     });
 
     // Table/pagination
-    let page=1, limit=20, total=0, rows=[];
+    let page=1, limit=6, total=0, rows=[];
     async function loadPage(p){
       page=p;
       $('rows').innerHTML='<tr><td colspan="8">Loading…</td></tr>';
