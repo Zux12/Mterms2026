@@ -454,11 +454,14 @@ table thead th{
 
 <h4>Consents</h4>
 <div class="row">
-  <!-- <label><input type="checkbox" id="c-pdpa"> PDPA</label> -->
+  <label><input type="checkbox" id="c-pdpa"> Consent given</label>
   <label><input type="checkbox" id="c-coc"> Code of Conduct</label>
-  <!-- <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label> -->
+    <!-- <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label> -->
+
 </div>
 
+
+        
         <h4>Payment</h4>
         <div class="row">
           <select id="pay-status">
@@ -469,6 +472,14 @@ table thead th{
           <input id="pay-amount" type="number" placeholder="Amount (MYR)">
         </div>
 
+
+<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-top:12px">
+  <div style="font-weight:800;margin-bottom:6px">Latest Bank Receipt (uploaded by participant)</div>
+  <div id="adPayBox" style="margin-top:6px">Loading…</div>
+</div>
+
+
+        
 
 
         <h4>Photo</h4>
@@ -861,6 +872,10 @@ table thead th{
         // Fill
         $('editCard').style.display='block';
         $('editCode').textContent = doc.regCode;
+
+        $('badgePhoto').removeAttribute('src');
+        $('photoMsg').textContent = '';
+        
         $('f-category').value = doc.category || 'academia';
 
         $('p-firstName').value = doc.personal?.firstName||'';
@@ -886,6 +901,7 @@ table thead th{
 
         // Latest abstract preview
         loadLatestAbstract(doc.regCode, doc.personal?.email);
+        loadLatestBankReceipt(doc.regCode, doc.personal?.email);
 
 
 
@@ -905,7 +921,7 @@ table thead th{
         $('a-country').value  = doc.address?.country||'';
 
         
-// $('c-pdpa').checked = !!doc.consents?.pdpa;
+$('c-pdpa').checked = !!doc.consents?.pdpa;
 $('c-coc').checked  = !!doc.consents?.codeOfConduct;
 // $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
 
@@ -961,7 +977,7 @@ $('c-coc').checked  = !!doc.consents?.codeOfConduct;
         billing: { billTo:$('b-billTo').value.trim(), taxNo:$('b-taxNo').value.trim(), poNumber:$('b-po').value.trim() },
         address: { line1:$('a-line1').value.trim(), line2:$('a-line2').value.trim(), city:$('a-city').value.trim(), state:$('a-state').value.trim(), postcode:$('a-postcode').value.trim(), country:$('a-country').value.trim() },
 consents: {
-  // pdpa:$('c-pdpa').checked,
+  pdpa:$('c-pdpa').checked,
   codeOfConduct:$('c-coc').checked,
   // marketingOptIn:$('c-mkt').checked
 },
@@ -993,22 +1009,32 @@ consents: {
       }
     }
 
-    async function loadLatestPhoto(regCode, email){
-      const el=$('photoMsg'); el.textContent='Loading photo…';
-      try{
-        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=profilePhoto`);
-        const data = await r.json();
-        if(!r.ok) throw new Error(data.error||'Error');
-        if(data.count){
-          const last = data.rows[data.rows.length-1];
-          $('badgePhoto').src = `${API}${last.downloadUrl}`;
-          el.textContent='✅ Loaded';
-        }else{
-          $('badgePhoto').removeAttribute('src');
-          el.textContent='No photo on file.';
-        }
-      }catch(err){ el.textContent='❌ '+err.message; }
+async function loadLatestPhoto(regCode, email){
+  const el = $('photoMsg');
+  el.textContent = 'Loading photo…';
+
+  try{
+    const r = await fetch(
+      `${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=profilePhoto`
+    );
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Error');
+
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    const latest = pickLatestRow(rows);
+
+    if (latest){
+      $('badgePhoto').src = `${API}${latest.downloadUrl}`;
+      el.textContent = '✅ Loaded';
+    } else {
+      $('badgePhoto').removeAttribute('src');
+      el.textContent = 'No photo on file.';
     }
+  } catch (err){
+    el.textContent = '❌ ' + (err.message || 'Failed to load photo');
+  }
+}
 
 
     function pickLatestRow(rows){
@@ -1037,7 +1063,7 @@ consents: {
           ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff">
               <strong>v${latest.version}</strong> — ${latest.filename}<br>
               <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
-              <a href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+<a class="btn btn-primary" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
             </div>`
           : '<em>No abstract uploaded yet.</em>';
       }catch(err){
@@ -1045,6 +1071,30 @@ consents: {
       }
     }
 
+
+async function loadLatestBankReceipt(regCode, email){
+  const box = $('adPayBox');
+  if(!box) return;
+  box.innerHTML = 'Loading…';
+  try{
+    const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=bankReceipt`);
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error||'Error');
+
+    const latest = pickLatestRow(data.rows||[]);
+    box.innerHTML = latest
+      ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff">
+          <strong>v${latest.version}</strong> — ${latest.filename}<br>
+          <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
+          <a class="btn btn-primary" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+        </div>`
+      : '<em>No bank receipt uploaded yet.</em>';
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
+  }
+}
+
+    
 
     // Bulk print for selected
     $('printSel').addEventListener('click', async ()=>{
@@ -1069,14 +1119,25 @@ consents: {
           </div>
           <div class="badge-footer">MTERMS 2026 • Shah Alam</div>`;
         // try fetch latest photo
-        try{
-          const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(c.dataset.code)}&email=${encodeURIComponent(c.dataset.email)}&type=profilePhoto`);
-          const data = await r.json();
-          if(r.ok && data.count){
-            const last=data.rows[data.rows.length-1];
-            div.querySelector('.badge-photo').src = `${API}${last.downloadUrl}`;
-          }
-        }catch{}
+// try fetch latest photo (use pickLatestRow so it's truly latest)
+try{
+  const r = await fetch(
+    `${API}/api/uploads/history?regCode=${encodeURIComponent(c.dataset.code)}&email=${encodeURIComponent(c.dataset.email)}&type=profilePhoto`
+  );
+
+  const data = await r.json().catch(()=> ({}));
+  if (r.ok) {
+    const latest = pickLatestRow(Array.isArray(data.rows) ? data.rows : []);
+    if (latest) {
+      div.querySelector('.badge-photo').src = `${API}${latest.downloadUrl}`;
+    } else {
+      div.querySelector('.badge-photo').removeAttribute('src');
+    }
+  }
+}catch(e){
+  // keep silent so printing isn't blocked
+  div.querySelector('.badge-photo').removeAttribute('src');
+}
         area.appendChild(div);
       }
       window.print();
