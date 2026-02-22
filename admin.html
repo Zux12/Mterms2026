@@ -236,6 +236,7 @@ table thead th{
 >
   Committee Appointment Letter
 </button>
+        <button id="btnCert" class="btn btn-primary">Certificate Generator</button>
 
 
 
@@ -874,6 +875,28 @@ table thead th{
       if(act==='edit'){ openEditor(id); }
     });
 
+
+
+document.getElementById('btnCert').addEventListener('click', () => {
+  // Try to gather selected participants from the admin list.
+  // IMPORTANT: Update the selector below to match your checkbox class/name if different.
+  const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+    .filter(cb => cb.dataset && (cb.dataset.name || cb.dataset.code || cb.dataset.email));
+
+  const selected = checked.map(cb => ({
+    name: cb.dataset.name || '',
+    regCode: cb.dataset.code || cb.dataset.regcode || '',
+    email: cb.dataset.email || ''
+  })).filter(x => x.name);
+
+  // Save for certificate.html
+  localStorage.setItem('mtermsCertSelected', JSON.stringify(selected));
+
+  // Go to certificate generator
+  window.location.href = 'certificate.html';
+});
+    
+    
     // Load one doc and fill editor
     async function openEditor(id){
       try{
