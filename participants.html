@@ -435,11 +435,11 @@
         </div>
       </details>
 
-      <div style="margin:8px 0">
-        <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br>
-        <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
-        <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label>
-      </div>
+<div style="margin:8px 0">
+  <!-- <label><input type="checkbox" id="c-pdpa"> I consent to PDPA/privacy policy.</label><br> -->
+  <label><input type="checkbox" id="c-coc"> I agree to the Code of Conduct.</label><br>
+  <!-- <label><input type="checkbox" id="c-mkt"> I’d like to receive event updates.</label> -->
+</div>
 
       <button id="saveBtn" class="btn">Save Changes</button>
       <span id="saveMsg" style="margin-left:10px;font-size:.95rem"></span>
@@ -967,9 +967,9 @@ function deepMerge(base, patch) {
     $('a-postcode').value = user?.address?.postcode || '';
     $('a-country').value  = user?.address?.country || '';
 
-    $('c-pdpa').checked = !!user?.consents?.pdpa;
-    $('c-coc').checked  = !!user?.consents?.codeOfConduct;
-    $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
+// $('c-pdpa').checked = !!user?.consents?.pdpa;
+$('c-coc').checked  = !!user?.consents?.codeOfConduct;
+// $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
 
 
         // Submission
@@ -1216,11 +1216,11 @@ function deepMerge(base, patch) {
         postcode: $('a-postcode').value.trim(),
         country:  $('a-country').value.trim()
       },
-      consents: {
-        pdpa: $('c-pdpa').checked,
-        codeOfConduct: $('c-coc').checked,
-        marketingOptIn: $('c-mkt').checked
-      }
+consents: {
+  // pdpa: $('c-pdpa').checked,
+  codeOfConduct: $('c-coc').checked,
+  // marketingOptIn: $('c-mkt').checked
+}
     };
 
     const v = validateSubmissionIfPresenter();
