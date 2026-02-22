@@ -313,9 +313,9 @@
 
         <!-- Program -->
         <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
-          <legend>Program</legend>
+          <legend>Presentation Type</legend>
           <label style="display:flex;align-items:center;gap:8px">
-            <input type="checkbox" id="f-presenting" /> I am a presenter (oral/poster)
+            <input type="checkbox" id="f-presenting" /> Tick your presentation type from the drop down list below
           </label>
           <div id="presentFields" style="display:none;margin-top:8px">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -356,7 +356,7 @@
         <div style="margin:8px 0">
           <label><input type="checkbox" id="c-pdpa" required /> I acknowledge that all information submitted is true and accurate.</label><br>
           <label><input type="checkbox" id="c-coc" required /> I agree to the Code of Conduct.</label><br>
-          <!-- <label><input type="checkbox" id="c-mkt" /> I’d like to receive event updates (optional).</label> -->
+          <label><input type="checkbox" id="c-mkt" /> I’d like to receive event updates (optional).</label>
         </div>
 
         <!-- Keep your button styling exactly -->
@@ -535,7 +535,7 @@
           consents: {
             pdpa: $('c-pdpa').checked,
             codeOfConduct: $('c-coc').checked,
-            /* marketingOptIn: $('c-mkt').checked */
+            marketingOptIn: $('c-mkt').checked
           }
         };
 
