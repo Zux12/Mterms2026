@@ -1064,72 +1064,96 @@ $('c-coc').checked  = !!user?.consents?.codeOfConduct;
 
 
   const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
+// =============================
+// Uploads (using OLD proven logic)
+// =============================
 
-  async function uploadFileFor(type, fileInputId, msgId, latestBoxId){
-    let user;
-    try { user = requireSessionOrThrow(); }
-    catch(e){ $(msgId).textContent = '❌ ' + e.message; showInlineLogin('Please login to upload files.'); return; }
-
-    const file = document.getElementById(fileInputId)?.files?.[0];
-    if (!file){ $(msgId).textContent='❌ Please select a file.'; return; }
-
-    const fd = new FormData();
-    fd.append('regCode', user.regCode);
-    fd.append('email', user.personal.email);
-    fd.append('type', type);
-    fd.append('file', file, file.name);
-
-    $(msgId).textContent = 'Uploading...';
-    try {
-      const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body:fd });
-      const data = await r.json().catch(()=> ({}));
-      if (!r.ok) throw new Error(data.error || 'Upload failed');
-      $(msgId).textContent = `✅ Uploaded version ${data.version}`;
-      document.getElementById(fileInputId).value = '';
-      await loadLatestFor(type, latestBoxId);
-    } catch(err){
-      $(msgId).textContent = '❌ ' + err.message;
-    }
+// OLD logic: build the same FormData keys that your backend already accepts:
+// regCode, email, type, file
+async function uploadDoc(type, fileInputId, msgId, latestBoxId){
+  let user;
+  try { user = requireSessionOrThrow(); }
+  catch(e){
+    document.getElementById(msgId).textContent = '❌ ' + e.message;
+    showInlineLogin('Please login to upload files.');
+    return;
   }
 
-  function pickLatestRow(rows){
-    if (!Array.isArray(rows) || rows.length===0) return null;
-    // Prefer highest version; fallback to uploadedAt.
-    const sorted = rows.slice().sort((a,b)=> {
+  const input = document.getElementById(fileInputId);
+  const file = input?.files?.[0];
+  if (!file){
+    document.getElementById(msgId).textContent = '❌ Please select a file.';
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('regCode', user.regCode);
+  fd.append('email', user.personal.email);
+  fd.append('type', type);
+  fd.append('file', file, file.name);
+
+  document.getElementById(msgId).textContent = 'Uploading...';
+
+  try{
+    const r = await fetch(`${API}/api/uploads/gridfs`, { method:'POST', body: fd });
+    const data = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(data.error || 'Upload failed');
+
+    document.getElementById(msgId).textContent = `✅ Uploaded version ${data.version || ''}`.trim();
+    input.value = '';
+
+    await loadLatest(type, latestBoxId);
+  }catch(err){
+    document.getElementById(msgId).textContent = '❌ ' + err.message;
+  }
+}
+
+// OLD logic for history, but render LATEST ONLY
+async function loadLatest(type, latestBoxId){
+  let user;
+  try { user = requireSessionOrThrow(); }
+  catch(e){
+    document.getElementById(latestBoxId).innerHTML = `<span style="color:#b42318">❌ ${e.message}</span>`;
+    return;
+  }
+
+  const box = document.getElementById(latestBoxId);
+  box.innerHTML = 'Loading...';
+
+  try{
+    const r = await fetch(
+      `${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`
+    );
+    const data = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(data.error || 'Error');
+
+    // OLD portal assumed "rows" is returned. Pick the latest robustly:
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length){
+      box.innerHTML = '<em>No uploads yet.</em>';
+      return;
+    }
+
+    // Prefer highest version; fallback uploadedAt
+    const latest = rows.slice().sort((a,b)=>{
       const va = Number(a.version)||0, vb = Number(b.version)||0;
       if (vb !== va) return vb - va;
       const ta = new Date(a.uploadedAt||0).getTime();
       const tb = new Date(b.uploadedAt||0).getTime();
       return tb - ta;
-    });
-    return sorted[0];
+    })[0];
+
+    box.innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:8px">
+        <strong>v${latest.version}</strong> — ${latest.filename}<br>
+        <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
+        <a href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+      </div>
+    `;
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
   }
-
-  async function loadLatestFor(type, latestBoxId){
-    let user;
-    try { user = requireSessionOrThrow(); }
-    catch(e){ document.getElementById(latestBoxId).innerHTML = `<span style="color:#b42318">❌ ${e.message}</span>`; return; }
-
-    const box  = document.getElementById(latestBoxId);
-    box.innerHTML = 'Loading...';
-
-    try {
-      const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}&type=${encodeURIComponent(type)}`);
-      const data = await r.json().catch(()=> ({}));
-      if (!r.ok) throw new Error(data.error || 'Error');
-
-      const latest = pickLatestRow(data.rows || []);
-      box.innerHTML = latest
-        ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px">
-            <strong>v${latest.version}</strong> — ${latest.filename}<br>
-            <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
-            <a href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
-          </div>`
-        : '<em>No uploads yet.</em>';
-    } catch(err){
-      box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
-    }
-  }
+}
 
   // --- ID photo helpers ---
   function fitCoverToCanvas(imgW, imgH, canW, canH){
@@ -1368,12 +1392,12 @@ logoutBtn.addEventListener('click', async () => {
 });
 
   // Abstract upload (latest only)
-  document.getElementById('absUploadBtn').addEventListener('click', ()=>uploadFileFor('abstract','absFile','absMsg','absLatest'));
-  document.getElementById('absRefreshBtn').addEventListener('click', ()=>loadLatestFor('abstract','absLatest'));
+ document.getElementById('absUploadBtn').addEventListener('click', ()=>uploadDoc('abstract','absFile','absMsg','absLatest'));
+document.getElementById('absRefreshBtn').addEventListener('click', ()=>loadLatest('abstract','absLatest'));
 
   // Bank receipt upload (latest only)
-  document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadFileFor('bankReceipt','payFile','payMsg','payLatest'));
-  document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatestFor('bankReceipt','payLatest'));
+document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadDoc('bankReceipt','payFile','payMsg','payLatest'));
+document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatest('bankReceipt','payLatest'));
   $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
 
   $('pr-presenting').addEventListener('change', () => {
@@ -1394,8 +1418,8 @@ logoutBtn.addEventListener('click', async () => {
     dashBox.classList.remove('hidden');
     loginBox.classList.add('hidden');
     refreshIDPhoto();
-    loadLatestFor('abstract','absLatest');
-    loadLatestFor('bankReceipt','payLatest');
+loadLatest('abstract','absLatest');
+loadLatest('bankReceipt','payLatest');
   }
 
   function showInlineLogin(reasonText){
