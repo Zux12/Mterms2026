@@ -348,12 +348,12 @@ button[disabled] {
           <input id="a-country" placeholder="Country">
         </div>
 
-        <h4>Consents</h4>
-        <div class="row">
-          <label><input type="checkbox" id="c-pdpa"> PDPA</label>
-          <label><input type="checkbox" id="c-coc"> Code of Conduct</label>
-          <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label>
-        </div>
+<h4>Consents</h4>
+<div class="row">
+  <!-- <label><input type="checkbox" id="c-pdpa"> PDPA</label> -->
+  <label><input type="checkbox" id="c-coc"> Code of Conduct</label>
+  <!-- <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label> -->
+</div>
 
         <h4>Payment</h4>
         <div class="row">
@@ -785,9 +785,10 @@ button[disabled] {
         $('a-postcode').value = doc.address?.postcode||'';
         $('a-country').value  = doc.address?.country||'';
 
-        $('c-pdpa').checked = !!doc.consents?.pdpa;
-        $('c-coc').checked  = !!doc.consents?.codeOfConduct;
-        $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
+        
+// $('c-pdpa').checked = !!doc.consents?.pdpa;
+$('c-coc').checked  = !!doc.consents?.codeOfConduct;
+// $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
 
         $('pay-status').value = doc.payment?.status||'pending';
         $('pay-amount').value = doc.payment?.amount||'';
@@ -829,7 +830,11 @@ button[disabled] {
         
         billing: { billTo:$('b-billTo').value.trim(), taxNo:$('b-taxNo').value.trim(), poNumber:$('b-po').value.trim() },
         address: { line1:$('a-line1').value.trim(), line2:$('a-line2').value.trim(), city:$('a-city').value.trim(), state:$('a-state').value.trim(), postcode:$('a-postcode').value.trim(), country:$('a-country').value.trim() },
-        consents: { pdpa:$('c-pdpa').checked, codeOfConduct:$('c-coc').checked, marketingOptIn:$('c-mkt').checked },
+consents: {
+  // pdpa:$('c-pdpa').checked,
+  codeOfConduct:$('c-coc').checked,
+  // marketingOptIn:$('c-mkt').checked
+},
         payment: { status:$('pay-status').value, amount:$('pay-amount').value?Number($('pay-amount').value):undefined }
       };
       if (updates.student===undefined) delete updates.student;
