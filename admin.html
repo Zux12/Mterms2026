@@ -339,27 +339,39 @@ table thead th{
           </div>
         </div>
 
-        <h4>Program</h4>
-        <div class="row">
-          <label class="field-inline" style="display:flex;align-items:center;gap:8px">
-            <input type="checkbox" id="pr-presenting"> I am a presenter
-          </label>
+      <h4>Program</h4>
 
-          <select id="pr-type">
-            <option value="none">None</option>
-            <option value="talk">Oral</option>
-            <option value="poster">Poster</option>
-            <option value="workshop">Workshop</option>
-          </select>
+<!-- Presenter + Poster-only (stacked) -->
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
 
-          <!-- Repurposed: program.title -->
-          <textarea id="pr-title" placeholder="Reviewer comment to participant (visible in participant portal)" rows="2" style="min-height:42px"></textarea>
+  <label class="field-inline" style="display:flex;align-items:center;gap:8px">
+    <input type="checkbox" id="pr-presenting"> I am a presenter
+  </label>
 
-          <!-- Repurposed: program.topicArea (stored as marker string) -->
-          <label class="field-inline" style="display:flex;align-items:center;gap:8px;justify-content:flex-start">
-            <input type="checkbox" id="pr-posterOnly"> Poster only (lock participant to Poster)
-          </label>
-        </div>
+  <label class="field-inline" style="display:flex;align-items:center;gap:8px;justify-content:flex-start;margin-left:28px">
+    <input type="checkbox" id="pr-posterOnly"> Poster only (lock participant to Poster)
+  </label>
+
+  <div class="row" style="margin-top:4px">
+    <select id="pr-type">
+      <option value="none">None</option>
+      <option value="talk">Oral</option>
+      <option value="poster">Poster</option>
+      <option value="workshop">Workshop</option>
+    </select>
+  </div>
+</div>
+
+<!-- Reviewer Comment (full width) -->
+<div style="margin-top:8px">
+  <div style="font-weight:800;margin-bottom:6px">Reviewer Comment</div>
+
+  <!-- Repurposed: program.title -->
+  <textarea id="pr-title"
+    placeholder="Reviewer comment to participant (visible in participant portal)"
+    rows="3"
+    style="min-height:72px"></textarea>
+</div>
 
         <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-top:12px">
           <div style="font-weight:800;margin-bottom:6px">Latest Abstract (for review)</div>
@@ -467,7 +479,7 @@ table thead th{
           <select id="pay-status">
             <option value="pending">pending</option>
             <option value="paid">paid</option>
-            <option value="verified">verified</option>
+           <!-- <option value="verified">verified</option> -->
           </select>
           <input id="pay-amount" type="number" placeholder="Amount (MYR)">
         </div>
