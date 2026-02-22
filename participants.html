@@ -1486,8 +1486,8 @@ if (userFromLogin?.regCode && userFromLogin?.personal?.email) {
     showDashboard(userFromLogin);
   }
 
-  loadLatestFor('abstract','absLatest');
-  loadLatestFor('bankReceipt','payLatest');
+loadLatest('abstract','absLatest');
+loadLatest('bankReceipt','payLatest');
   lmsg.textContent = '✅ Logged in.';
   return;
 }
@@ -1519,8 +1519,8 @@ if (sess?.regCode && sess?.personal?.email) {
   } catch {
     showDashboard(sess);
   }
-  loadLatestFor('abstract','absLatest');
-  loadLatestFor('bankReceipt','payLatest');
+  loadLatest('abstract','absLatest');
+  loadLatest('bankReceipt','payLatest');
   return;
 }
 
@@ -1530,8 +1530,8 @@ if (sess?.regCode && sess?.personal?.email) {
     if (me.ok && me.user?.regCode && me.user?.personal?.email) {
       saveSession(me.user);
       showDashboard(me.user);
-      loadLatestFor('abstract','absLatest');
-  loadLatestFor('bankReceipt','payLatest');
+      loadLatest('abstract','absLatest');
+  loadLatest('bankReceipt','payLatest');
       return;
     }
   } catch {}
