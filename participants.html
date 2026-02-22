@@ -742,6 +742,7 @@ UKM, Cheras, 56000 Kuala Lumpur, Malaysia
   const studentOnly = $('studentOnly');
   const presentFields = $('presentFields');
 
+  let lastLoadedUser = null;
 
 
     // ===== Submission (theme/field/authors) =====
@@ -1063,6 +1064,7 @@ function deepMerge(base, patch) {
   function showPresent(on){ presentFields.style.display = on ? 'block' : 'none'; }
 
   function prefill(user){
+    lastLoadedUser = JSON.parse(JSON.stringify(user || {}));
     $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
     $('userCode').textContent = user?.regCode || '';
     $('userCategory').textContent = user?.category || '';
@@ -1508,6 +1510,20 @@ document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLates
 });
   
   saveBtn.addEventListener('click', saveChanges);
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+  if (!lastLoadedUser) return;
+
+  // Reset the UI back to the last loaded/saved values
+  prefill(lastLoadedUser);
+  fillBadgeText(lastLoadedUser);
+
+  // Optional: refresh uploads + photo to reflect saved state
+  refreshIDPhoto();
+  loadLatestFor('abstract','absLatest');
+  loadLatestFor('bankReceipt','payLatest');
+
+  saveMsg.textContent = 'Changes reverted.';
+});
     initSubmissionUI();
 
   document.getElementById('idUploadBtn').addEventListener('click', uploadIDPhoto);
