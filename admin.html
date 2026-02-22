@@ -49,35 +49,42 @@ input[type="radio"]{
     th,td{padding:8px;border-bottom:1px solid var(--border)}
     th{text-align:left}
     .actions{display:flex;gap:8px}
-/* Buttons (bigger + themed) */
+
+    
+    /* Buttons — back to normal sizing (no gradients) */
 .btn{
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 1.02rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-
-.btn-primary{
-  border: none;
-  color: #fff;
-  background: linear-gradient(90deg, var(--primary1), var(--primary2));
-  box-shadow: 0 10px 22px rgba(11,42,107,.14);
-}
-
-.btn-secondary{
-  background: #fff;
-  color: var(--text);
   border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;      /* back to original */
+  font-size: .95rem;      /* back to original */
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
 }
 
-.btn-logout{
-  border: none;
-  color: #fff;
-  background: linear-gradient(90deg, #B42318, #DC6803);
-  box-shadow: 0 10px 22px rgba(180,35,24,.14);
+.btn.ghost{
+  background: transparent;
 }
+
+/* Primary = normal green (used for Edit + Save + Refresh + Print selected) */
+.btn-primary{
+  background: #16a34a;   /* green */
+  border-color: #16a34a;
+  color: #fff;
+}
+
+/* Cancel + Logout = red */
+.btn-danger{
+  background: #dc2626;   /* red */
+  border-color: #dc2626;
+  color: #fff;
+}
+
+/* Small hover, still professional */
+.btn-primary:hover{ filter: brightness(0.95); }
+.btn-danger:hover{ filter: brightness(0.95); }
+
+    
 
 .btn:hover{ transform: translateY(-1px); }
 .btn:active{ transform: translateY(0); }
@@ -229,7 +236,7 @@ table thead th{
 
         
         
-<button id="logoutBtn" class="btn btn-logout">Logout</button>
+<button id="logoutBtn" class="btn btn-danger">Logout</button>
       </div>
     </div>
 
@@ -478,8 +485,8 @@ table thead th{
 <!-- Bottom actions (centered) -->
 <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
   <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
-    <button id="save" class="btn btn-primary">Save changes</button>
-    <button id="cancelEdit" class="btn btn-secondary" type="button">Cancel</button>
+ <button id="save" class="btn btn-primary">Save changes</button>
+<button id="cancelEdit" class="btn btn-danger" type="button">Cancel</button>
   </div>
   <div style="margin-top:10px;text-align:center">
     <span id="saveMsg" style="font-size:1.02rem"></span>
@@ -1074,39 +1081,10 @@ consents: {
 </style>
 
 
-  <style>
-/* Force all button text to black for visibility */
-button,
-.btn {
-  color: #000 !important;
-}
-
-/* Optional: keep dark background for dark mode but readable text */
-.theme-dark button,
-.theme-dark .btn {
-  color: #000 !important;
-  background-color: #f0f0f0 !important;
-  border: 1px solid #999 !important;
-}
-</style>
 
 
 
-<style>
 
-
-/* 2️⃣ Give the whole edit box a light-blue background and subtle border */
-#editCard {
-  background-color: #e6f4ff !important;   /* light blue */
-  border: 1px solid #b3d7ff !important;
-  border-radius: 12px;
-}
-
-/* optional: tone text contrast slightly darker inside that box */
-#editCard h3, #editCard h4, #editCard label {
-  color: #0b1115;
-}
-</style>
 
 
 
