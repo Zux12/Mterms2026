@@ -901,9 +901,39 @@ UKM, Cheras, 56000 Kuala Lumpur, Malaysia
     }
   }
 
+  function snapshotAuthors(){
+  const arr = [];
+  for (let i = 1; i <= authorCount; i++){
+    // capture even if null (keeps position)
+    arr.push(readAuthorAt(i));
+  }
+  return arr;
+}
+
+function restoreAuthors(arr){
+  const safe = Array.isArray(arr) ? arr : [];
+  for (let i = 1; i <= authorCount; i++){
+    writeAuthorAt(i, safe[i - 1] || null);
+  }
+  normalizeCorrespondingAuthor();
+}
+
+  
+
   // Hook up buttons
-  addAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount + 1));
-  removeAuthorBtn.addEventListener('click', () => setAuthorCount(authorCount - 1));
+ addAuthorBtn.addEventListener('click', () => {
+  const snap = snapshotAuthors();
+  setAuthorCount(authorCount + 1);
+  restoreAuthors(snap);
+});
+
+removeAuthorBtn.addEventListener('click', () => {
+  const snap = snapshotAuthors();
+  // shrink count by 1
+  setAuthorCount(authorCount - 1);
+  // restore what fits (extra last author is naturally dropped)
+  restoreAuthors(snap);
+});
 
   // replace old getAuthor/read/write with dynamic ones
   function getAuthor(i){
