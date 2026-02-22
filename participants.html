@@ -1266,14 +1266,19 @@ async function loadLatest(type, latestBoxId){
       const data = await r.json().catch(()=> ({}));
       if (!r.ok) throw new Error(data.error || 'Error');
 
-      if (data.count){
-        const last = data.rows[data.rows.length - 1];
-        setBadgePhoto(`${API}${last.downloadUrl}`);
-        msg.textContent = '';
-      } else {
-        clearBadgePhoto();
-        msg.textContent = 'No photo uploaded yet.';
-      }
+if (data.count){
+  const latest = pickLatestRow(data.rows || []);
+  if (latest) {
+    setBadgePhoto(`${API}${latest.downloadUrl}`);
+    msg.textContent = '';
+  } else {
+    clearBadgePhoto();
+    msg.textContent = 'No photo uploaded yet.';
+  }
+} else {
+  clearBadgePhoto();
+  msg.textContent = 'No photo uploaded yet.';
+}
     }catch(err){
       msg.textContent = '❌ ' + err.message;
     }
