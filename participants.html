@@ -1089,6 +1089,7 @@ function deepMerge(base, patch) {
     $('userCode').textContent = user?.regCode || '';
     $('userCategory').textContent = user?.category || '';
     $('userPayment').textContent = user?.payment?.status || 'pending';
+    updatePaymentTagColor();
 
     $('f-category').value = user?.category || 'academia';
 
