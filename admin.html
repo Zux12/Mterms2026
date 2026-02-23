@@ -560,7 +560,7 @@ background: #dc2626;
 <div class="row">
   <label><input type="checkbox" id="c-pdpa"> Consent given</label>
   <label><input type="checkbox" id="c-coc"> Code of Conduct</label>
-    <!-- <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label> -->
+  <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label>
 
 </div>
     </div>
@@ -1053,7 +1053,7 @@ document.getElementById('btnCert').addEventListener('click', () => {
         
 $('c-pdpa').checked = !!doc.consents?.pdpa;
 $('c-coc').checked  = !!doc.consents?.codeOfConduct;
-// $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
+$('c-mkt').checked  = !!doc.consents?.marketingOptIn;
 
         $('pay-status').value = doc.payment?.status||'pending';
         $('pay-amount').value = doc.payment?.amount||'';
@@ -1109,7 +1109,7 @@ $('c-coc').checked  = !!doc.consents?.codeOfConduct;
 consents: {
   pdpa:$('c-pdpa').checked,
   codeOfConduct:$('c-coc').checked,
-  // marketingOptIn:$('c-mkt').checked
+  marketingOptIn:$('c-mkt').checked
 },
         payment: { status:$('pay-status').value, amount:$('pay-amount').value?Number($('pay-amount').value):undefined }
       };
