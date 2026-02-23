@@ -117,17 +117,103 @@ input[type="radio"]{
 .btn-primary:hover{ filter: brightness(1.02); }
 .btn-secondary:hover{ box-shadow: 0 8px 18px rgba(0,0,0,.06); }
 .btn-logout:hover{ filter: brightness(1.02); }
-    .badge{width:260px;height:400px;background:#fff;color:#0b1115;border-radius:16px;border:1px solid #e8e8e8;box-shadow:0 8px 24px rgba(0,0,0,.08);display:flex;flex-direction:column;overflow:hidden}
-    .badge-top{padding:8px 10px 4px}
-    .badge-logos{display:flex;justify-content:center;align-items:center;gap:8px}
-    .badge-logos img{height:20px}
-    .badge-photo-wrap{margin:8px auto 0;width:180px;height:240px;position:relative;border:1px solid #ddd;border-radius:10px;overflow:hidden;background:#f2f4f7}
-    .badge-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-    .badge-info{text-align:center;padding:10px 12px 0}
-    .badge-name{font-weight:800;font-size:18px}
-    .badge-affil{font-size:12px;color:#475467}
-    .badge-cat{font-size:12px;color:#0b7a64;font-weight:700;margin-top:6px}
-    .badge-footer{margin-top:auto;font-size:11px;text-align:center;padding:8px 10px 10px;color:#667085;border-top:1px solid #eef2f6;background:#fafafa}
+
+
+
+    /* Badge (match participants.html exactly) */
+.badge{
+  width: 260px;
+  height: 400px;
+  background:#fff;
+  color:#0b1115;
+  border-radius:16px;
+  border:1px solid #e8e8e8;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.badge-top{
+  padding:8px 10px 4px;
+}
+
+.badge-mterm{
+  display:block;
+  width:96px;
+  height:auto;
+  margin:0 auto 4px;
+  object-fit:contain;
+}
+
+.badge-logos{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+}
+
+.badge-logos img{
+  height:20px;
+  width:auto;
+  object-fit:contain;
+}
+
+.badge-photo-wrap{
+  margin:8px auto 0;
+  width:180px;
+  height:240px;
+  position:relative;
+  border:1px solid #ddd;
+  border-radius:10px;
+  overflow:hidden;
+  background:#f2f4f7;
+}
+
+.badge-photo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.badge-info{
+  padding:10px 12px 0;
+  text-align:center;
+}
+
+.badge-name{
+  font-weight:800;
+  font-size:18px;
+  line-height:1.2;
+}
+
+.badge-affil{
+  font-size:12px;
+  color:#475467;
+  margin-top:2px;
+}
+
+.badge-cat{
+  font-size:12px;
+  color:#0b7a64;
+  font-weight:700;
+  margin-top:6px;
+}
+
+.badge-footer{
+  margin-top:auto;
+  font-size:11px;
+  text-align:center;
+  padding:8px 10px 10px;
+  color:#667085;
+  border-top:1px solid #eef2f6;
+  background:#fafafa;
+}
+
+    
 
     /* print */
     @media print{
@@ -592,24 +678,29 @@ background: #dc2626;
         <h4>Photo</h4>
         <div class="row">
           <div>
-            <div class="badge">
-              <div class="badge-top">
-                <div class="badge-logos">
-                  <img src="public/uitm.png" alt="UiTM">
-                  <img src="public/mohe.png" alt="MOHE">
-                  <img src="public/tesma.png" alt="TESMA">
-                </div>
-              </div>
-              <div class="badge-photo-wrap">
-                <img id="badgePhoto" class="badge-photo" alt="ID photo">
-              </div>
-              <div class="badge-info">
-                <div id="badgeName" class="badge-name">Participant Name</div>
-                <div id="badgeAffil" class="badge-affil">Institution / Company</div>
-                <div id="badgeCat" class="badge-cat">CATEGORY</div>
-              </div>
-              <div class="badge-footer">MTERMS 2026</div>
-            </div>
+<div class="badge">
+  <div class="badge-top">
+    <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS">
+    <div class="badge-logos">
+      <img src="public/uitm.png" alt="UiTM">
+      <img src="public/tesma.png" alt="TESMA">
+    </div>
+  </div>
+
+  <div class="badge-photo-wrap">
+    <img id="badgePhoto" class="badge-photo" alt="ID photo">
+  </div>
+
+  <div class="badge-info">
+    <div id="badgeName" class="badge-name">Participant Name</div>
+    <div id="badgeAffil" class="badge-affil">Institution / Company</div>
+    <div id="badgeCat" class="badge-cat">CATEGORY</div>
+  </div>
+
+  <div class="badge-footer">
+    MTERMS 2026
+  </div>
+</div>
 
           </div>
   <div>
