@@ -1128,7 +1128,7 @@ function deepMerge(base, patch) {
 
 $('c-pdpa').checked = !!user?.consents?.pdpa;
 $('c-coc').checked  = !!user?.consents?.codeOfConduct;
-// $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
+$('c-mkt').checked  = !!user?.consents?.marketingOptIn;
 
 
         // Submission
@@ -1455,7 +1455,7 @@ if (data.count){
 consents: {
   pdpa: $('c-pdpa').checked,
   codeOfConduct: $('c-coc').checked,
-  // marketingOptIn: $('c-mkt').checked
+  marketingOptIn: $('c-mkt').checked
 }
     };
 
