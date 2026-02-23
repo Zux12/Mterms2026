@@ -201,8 +201,16 @@ html, body{
   box-shadow: 0 10px 26px rgba(0,0,0,.06);
 }
 
-    .card-custom { 
+.card-custom { 
     background: #FFF5E6; 
+    border: 1px solid var(--border); 
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    }
+
+.card-purple { 
+    background: #f4ebf9; 
     border: 1px solid var(--border); 
     border-radius: 12px;
     padding: 16px;
@@ -368,17 +376,22 @@ background: #dc2626;
       <!-- Edit panel -->
       <div class="card" id="editCard" style="display:none">
         <h3>Edit Participant</h3>
-        <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
+        
+    <div class="card-purple">
+        Participant Registration Code: <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
+    </div>
+
+        
+    <div class="card">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <label style="flex:1 1 600px;margin:0;min-width:280px">Category
+  
+          <label style="flex:1 1 600px;margin:0;min-width:280px">Category
     <select id="f-category" style="width:100%">
       <option value="student">Student</option>
       <option value="academia">Academia</option>
       <option value="industry">Industry</option>
     </select>
   </label>
-
-
 </div>
 
 
@@ -408,7 +421,7 @@ background: #dc2626;
             <input id="s-grad" type="number" placeholder="Expected grad year">
           </div>
         </div>
-
+    </div>
     
     <div class="card">    
       <h4>Program</h4>
