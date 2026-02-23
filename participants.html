@@ -343,7 +343,9 @@
           <div class="help">
             <span class="tag">Code: <span id="userCode"></span></span>
             <span class="tag">Category: <span id="userCategory"></span></span>
-            <span class="tag">Payment: <span id="userPayment"></span></span>
+        <span id="paymentTag" class="tag">
+          Payment: <span id="userPayment"></span>
+        </span>          
           </div>
         </div>
 
@@ -1674,6 +1676,28 @@ if (sess?.regCode && sess?.personal?.email) {
   // 3) show inline login (no redirect loop)
   showInlineLogin('No active session detected. Please login.');
 })();
+
+
+// Payment bubble color logic (design only)
+function updatePaymentTagColor() {
+  const tag = document.getElementById('paymentTag');
+  const payment = document.getElementById('userPayment');
+
+  if (!tag || !payment) return;
+
+  const value = payment.textContent.trim().toLowerCase();
+
+  if (value === 'paid') {
+    tag.style.backgroundColor = '#16a34a'; // green
+    tag.style.color = '#ffffff';
+  } else {
+    tag.style.backgroundColor = '#f97316'; // orange
+    tag.style.color = '#ffffff';
+  }
+}
+
+// Run after page fully loads
+window.addEventListener('load', updatePaymentTagColor);
 </script>
 
 
