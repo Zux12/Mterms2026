@@ -418,10 +418,10 @@
       toggle.textContent = isPw ? 'Hide' : 'Show';
     });
 
-    document.getElementById('forgot').addEventListener('click', (e) => {
-      e.preventDefault();
-      showMsg('err', 'Forgot password will be enabled soon.');
-    });
+  document.getElementById('forgot').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.location.href = 'forgot.html';
+});
 
     async function doLogin(){
       showMsg('', '');
