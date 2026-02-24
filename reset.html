@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MTERMS 2026 — Reset Password</title>
+  <style>
+    :root{--uitm:#7a0026;--uitm2:#a10a39;--tesma:#0a4fb3;--ink:#0b1220;--muted:#526079;--line:rgba(15,23,42,.10);--shadow:0 22px 60px rgba(2,8,23,.14);--shadow2:0 10px 22px rgba(2,8,23,.10);--r20:20px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 15% 12%, rgba(122,0,38,.16), transparent 60%),
+        radial-gradient(900px 520px at 85% 18%, rgba(10,79,179,.14), transparent 60%),
+        radial-gradient(900px 520px at 55% 90%, rgba(122,0,38,.10), transparent 62%),
+        linear-gradient(180deg, #fbfcff, #eef2ff 60%, #f7f8fc);}
+    .page{max-width:980px;margin:0 auto;padding:42px 18px 26px;display:flex;flex-direction:column;gap:18px;min-height:100vh}
+    .hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+    .main-logo{display:inline-flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:22px;background:rgba(255,255,255,.78);border:1px solid rgba(15,23,42,.10);box-shadow:var(--shadow2);backdrop-filter:blur(10px)}
+    .main-logo img{height:92px;width:auto;object-fit:contain;display:block;border-radius:14px}
+    h1{margin:0;font-size:clamp(1.35rem,2.2vw,1.75rem);letter-spacing:-0.02em;line-height:1.15}
+    .subtitle{margin:0;color:var(--muted);font-size:1.02rem}
+    .card-wrap{display:flex;justify-content:center}
+    .card{width:min(560px,100%);background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:var(--r20);box-shadow:var(--shadow);backdrop-filter:blur(12px);overflow:hidden}
+    .card-topline{height:6px;background:linear-gradient(90deg,var(--uitm),var(--uitm2),var(--tesma))}
+    .card-body{padding:20px}
+    label{display:block;font-weight:850;font-size:.95rem;margin-bottom:6px;color:rgba(11,18,32,.92)}
+    .input{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(15,23,42,.14);background:rgba(255,255,255,.96);outline:none;font-size:1rem}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:12px}
+    .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:900;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--uitm),var(--uitm2));box-shadow:0 14px 30px rgba(122,0,38,.22)}
+    .btn:disabled{opacity:.65;cursor:not-allowed;box-shadow:none}
+    .link{color:var(--tesma);text-decoration:none;font-weight:850}
+    .link:hover{text-decoration:underline}
+    .msg{display:none;margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid rgba(15,23,42,.10);background:rgba(255,255,255,.70);font-weight:800}
+    .msg.show{display:block}
+    .msg.ok{color:#0b6b3a;border-color:rgba(6,118,71,.22);background:rgba(6,118,71,.06)}
+    .msg.err{color:#8a1f17;border-color:rgba(180,35,24,.25);background:rgba(180,35,24,.06)}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="main-logo"><img src="public/mterm.jpg" alt="MTERMS 2026 Logo"></div>
+      <div>
+        <h1>Reset password</h1>
+        <p class="subtitle">Set a new password for your account.</p>
+      </div>
+    </header>
+
+    <section class="card-wrap">
+      <div class="card">
+        <div class="card-topline"></div>
+        <div class="card-body">
+          <label for="pw1">New password</label>
+          <input id="pw1" class="input" type="password" autocomplete="new-password" required>
+
+          <label for="pw2" style="margin-top:12px;">Confirm password</label>
+          <input id="pw2" class="input" type="password" autocomplete="new-password" required>
+
+          <div class="row">
+            <button class="btn" id="resetBtn">Update password</button>
+            <a class="link" href="login.html">Back to login</a>
+          </div>
+
+          <div id="msg" class="msg"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+    const btn = document.getElementById('resetBtn');
+    const msg = document.getElementById('msg');
+    const pw1 = document.getElementById('pw1');
+    const pw2 = document.getElementById('pw2');
+
+    function show(type, text){
+      msg.className = 'msg show ' + (type || '');
+      msg.textContent = text || '';
+    }
+
+    function getToken(){
+      const u = new URL(window.location.href);
+      return u.searchParams.get('token') || '';
+    }
+
+    async function reset(){
+      show('', '');
+      msg.className = 'msg';
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+
+      try{
+        const token = getToken();
+        if(!token) throw new Error('Missing token. Please use the link from your email.');
+
+        const a = String(pw1.value || '');
+        const b = String(pw2.value || '');
+        if(a.length < 8) throw new Error('Password must be at least 8 characters.');
+        if(a !== b) throw new Error('Passwords do not match.');
+
+        const r = await fetch(`${API}/api/auth/reset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password: a })
+        });
+
+        const data = await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        show('ok', '✅ Password updated. You can now log in.');
+        setTimeout(()=>{ window.location.href = 'login.html'; }, 900);
+      }catch(e){
+        show('err', '❌ ' + (e.message || 'Reset failed'));
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Update password';
+      }
+    }
+
+    btn.addEventListener('click', reset);
+    pw2.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') reset(); });
+  </script>
+</body>
+</html>
