@@ -5,6 +5,7 @@ const Pricing = require('../models/Pricing');
 const Registration = require('../models/Registration');
 const Counter = require('../models/Counter');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 
 function addDays(date, days) { const d = new Date(date); d.setDate(d.getDate()+days); return d; }
 function pad(n, size=6) { return String(n).padStart(size, '0'); }
@@ -29,6 +30,73 @@ function phaseFor(date, start) {
   if (date >= regularBeg && date <= regularEnd) return 'Regular';
   if (date >= lateBeg && date <= lateEnd) return 'Late/On-site';
   return 'Closed';
+}
+
+function siteBaseUrl() {
+  return (process.env.SITE_BASE_URL || 'https://www.mterms2026.com').replace(/\/+$/, '');
+}
+
+function makeTransport() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !port || !user || !pass) {
+    throw new Error('SMTP env vars missing (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS)');
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // 465 = SSL, 587 = STARTTLS
+    auth: { user, pass }
+  });
+}
+
+async function sendRegistrationEmail({ to, firstName, lastName, regCode }) {
+  const base = siteBaseUrl();
+  const loginUrl = `${base}/login.html`;
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+
+  const subject = `MTERMS 2026 Registration Confirmed — Your Code: ${regCode}`;
+
+  const text =
+`Hi ${firstName} ${lastName},
+
+Thank you for registering for MTERMS 2026.
+
+Your Registration Code: ${regCode}
+
+Useful links:
+• Website: ${base}
+• Participant Login: ${loginUrl}
+
+You can view your registration details in the participant portal after logging in (use your email and the password you created during registration).
+
+If you need help, reply to this email.
+
+Regards,
+MTERMS 2026 Secretariat
+${from}`;
+
+  const html =
+`<p>Hi ${firstName} ${lastName},</p>
+<p>Thank you for registering for <b>MTERMS 2026</b>.</p>
+<p style="font-size:16px;margin:14px 0;">
+  <b>Your Registration Code:</b><br>
+  <span style="font-size:20px">${regCode}</span>
+</p>
+<p><b>Useful links:</b><br>
+• <a href="${base}">${base}</a><br>
+• <a href="${loginUrl}">Participant Login</a>
+</p>
+<p>You can view your registration details in the participant portal after logging in (use your email and the password you created during registration).</p>
+<p>If you need help, reply to this email.</p>
+<p>Regards,<br>MTERMS 2026 Secretariat<br>${from}</p>`;
+
+  const t = makeTransport();
+  await t.sendMail({ from: `"MTERMS 2026" <${from}>`, to, subject, text, html });
 }
 
 // Friendly GET message so /api/registrations isn't a 404
@@ -188,6 +256,20 @@ try {
     },
     payment: { method: 'manual', status: 'pending' }
   });
+
+// Fire registration confirmation email (do NOT block registration if email fails)
+try {
+  await sendRegistrationEmail({
+    to: doc.personal.email,
+    firstName: doc.personal.firstName,
+    lastName: doc.personal.lastName,
+    regCode: doc.regCode
+  });
+} catch (mailErr) {
+  console.error('Registration email failed:', mailErr.message || mailErr);
+}
+
+  
 } catch (err) {
   // Duplicate email (unique index)
   if (err && err.code === 11000) {
