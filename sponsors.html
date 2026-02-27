@@ -677,7 +677,26 @@
   text-align: justify;
 }
 
+/* ===== Sponsors: stretch the 2-card rows full width ===== */
+#sponsors .cards.cards-stretch{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 22px !important;
+  width: 100% !important;
+}
 
+/* Make sure cards can expand (override any fixed max-width from assets/styles.css) */
+#sponsors .cards.cards-stretch > .card{
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Mobile: stack 1 column */
+@media (max-width: 720px){
+  #sponsors .cards.cards-stretch{
+    grid-template-columns: 1fr !important;
+  }
+}
     
 </style>
 <script src="lunr.min.js"></script>
