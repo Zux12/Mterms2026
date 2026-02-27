@@ -90,14 +90,19 @@
     },
 
     // Deadlines / authors
-    {
-      id: "deadlines",
-      title: "Important Deadlines",
-      text:
-        "You can view the important deadlines on the Important Deadlines page.",
-      tags: "deadline deadlines important dates due date timeline",
-      linkKey: "deadlines"
-    },
+{
+  id: "deadlines",
+  title: "Important Deadlines",
+  text:
+    "Here are the key deadlines for MTERMS 2026:\n\n" +
+    "• Abstract Submission Deadline\n" +
+    "• Notification of Acceptance\n" +
+    "• Early Bird Registration Deadline\n" +
+    "• Final Registration Deadline\n\n" +
+    "For the full and latest deadline details, please visit the Important Deadlines page.",
+  tags: "deadline deadlines important dates due date abstract submission early bird registration timeline",
+  linkKey: "deadlines"
+},
     {
       id: "author_guidelines",
       title: "Author Guidelines",
