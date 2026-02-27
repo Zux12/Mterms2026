@@ -36,8 +36,9 @@
   position: fixed;
   bottom: 100px;
   right: 30px;
-  width: 350px;
-  height: 450px;
+  width: 380px;          /* slightly wider for justified text */
+  max-width: calc(100vw - 40px);
+  height: 480px;         /* slightly taller */
   background: var(--surface, #ffffff);
   border: 1px solid var(--border, #ddd);
   border-radius: 16px;
@@ -59,8 +60,9 @@
 .ai-header{
   background: var(--brand, #1e5aa8);
   color: white;
-  padding: 12px 14px;
-  font-weight: 700;
+  padding: 10px 14px;       /* slightly tighter */
+  font-weight: 600;         /* softer */
+  font-size: 0.9rem;        /* smaller header text */
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -136,12 +138,17 @@
   flex-wrap: wrap;
 }
 .ai-quick-btn{
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,.12);
   background: #fff;
-  padding: 6px 10px;
+  padding: 5px 9px;       /* slightly smaller */
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;        /* reduced */
   cursor: pointer;
+  transition: all .18s ease;
+}
+.ai-quick-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(0.98);
 }
 .ai-quick-btn:hover{ filter: brightness(0.98); }
 
@@ -187,3 +194,19 @@
   margin-top: 8px;
 }
 .ai-link-btn:hover{ filter: brightness(1.05); }
+
+/* Subtle fade-in for messages */
+@keyframes aiFadeIn{
+  from{
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-msg{
+  animation: aiFadeIn .22s ease forwards;
+}
