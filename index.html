@@ -620,11 +620,7 @@
   pointer-events:none;
 }
 
-    .hero video{
-  position:absolute;
-  inset:0;
-  z-index:1;
-}
+
 
 .hero-inner{
   position:relative;
@@ -1417,10 +1413,9 @@
     'public/herobanner3.png'
   ];
 
-  let currentIndex = -1; // -1 means video stage
-  let timer = null;
+  let stage = 0;   // 0 = video, 1..3 = slides
 
-  function showVideo(){
+  function playVideo(){
     hero.classList.add('video-mode');
     slideshow.classList.remove('active');
     video.currentTime = 0;
@@ -1443,39 +1438,32 @@
     }, 80);
   }
 
-  function nextStage(){
+  function startCycle(){
 
-    if(currentIndex === -1){
-      // Video just finished → go to first slide
-      currentIndex = 0;
-      showSlide(currentIndex);
-
-      timer = setTimeout(nextStage, 5000);
+    if(stage === 0){
+      playVideo();
       return;
     }
 
-    currentIndex++;
+    showSlide(stage - 1);
 
-    if(currentIndex >= slides.length){
-      // after last slide → restart cycle from video
-      currentIndex = -1;
-      showVideo();
-      return;
-    }
-
-    showSlide(currentIndex);
-    timer = setTimeout(nextStage, 5000);
+    setTimeout(() => {
+      stage++;
+      if(stage > slides.length){
+        stage = 0;
+      }
+      startCycle();
+    }, 5000);
   }
 
+  video.addEventListener('ended', () => {
+    stage = 1;
+    startCycle();
+  });
+
   window.addEventListener('load', () => {
-
-    video.addEventListener('ended', () => {
-      nextStage();
-    });
-
-    // Start first stage
-    showVideo();
-
+    stage = 0;
+    startCycle();
   });
 
 })();
