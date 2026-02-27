@@ -226,18 +226,32 @@
       msgsEl.scrollTop = msgsEl.scrollHeight;
     }
 
-    function sendMessage() {
-      const text = inputEl.value.trim();
-      if (!text) return;
+function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
 
-      addBubble(text, 'user');
-      inputEl.value = '';
+  addBubble(text, 'user');
+  inputEl.value = '';
 
-      setTimeout(() => {
-        const out = getSmartAnswer(text);
-        addBubble(out, 'bot', out.quick);
-      }, 150);
-    }
+  // Create typing bubble
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'ai-msg bot';
+  typingDiv.innerHTML = `
+    <div class="ai-typing">
+      <div class="ai-dot"></div>
+      <div class="ai-dot"></div>
+      <div class="ai-dot"></div>
+    </div>
+  `;
+  msgsEl.appendChild(typingDiv);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  setTimeout(() => {
+    typingDiv.remove();
+    const out = getSmartAnswer(text);
+    addBubble(out, 'bot', out.quick);
+  }, 500);  // slight natural delay
+}
 
     toggleBtn.addEventListener('click', () => windowEl.classList.toggle('hidden'));
     closeBtn.addEventListener('click', () => windowEl.classList.add('hidden'));
