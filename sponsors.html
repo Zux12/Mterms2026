@@ -676,13 +676,16 @@
 }
 
 
-/* Center sponsor cards */
-#sponsors .cards {
-  justify-content: center;
+/* Center the cards themselves inside the grid (Sponsors section only) */
+#sponsors .cards{
+  justify-items: center;   /* grid: centers each card in its cell */
 }
 
-#sponsors .cards .card {
-  max-width: 320px;
+#sponsors .cards .card{
+  width: 100%;
+  max-width: 360px;        /* adjust if you want wider cards */
+  margin-left: auto;       /* fallback centering */
+  margin-right: auto;
 }
 
     
