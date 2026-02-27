@@ -536,6 +536,55 @@
 /* =========================
    Hero corner logo + post-video slideshow
    ========================= */
+
+/* =========================
+   NEW: Intro MP4 first (white background, centered, no words)
+   ========================= */
+.hero.video-mode{
+  background: #ffffff !important;     /* white banner during mp4 */
+}
+
+/* remove the dark readability veil during video */
+.hero.video-mode::before{
+  display: none !important;
+}
+
+/* hide all hero words/buttons while video is playing */
+.hero.video-mode .hero-inner{
+  display: none !important;
+}
+
+/* video wrapper fills hero area */
+.hero-intro-video{
+  position: absolute;
+  inset: 0;
+  z-index: 2;                /* above background */
+  display: none;             /* default hidden until JS turns on */
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;       /* ensure white behind the square mp4 */
+}
+
+/* show wrapper during video-mode */
+.hero.video-mode .hero-intro-video{
+  display: flex;
+}
+
+/* square MP4 centered, contain (no crop) */
+.hero-intro-video video{
+  width: min(520px, 86vw);
+  height: auto;
+  aspect-ratio: 1 / 1;       /* keeps square layout even if browser tries to stretch */
+  object-fit: contain;       /* do NOT crop the square video */
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+/* keep slideshow below the intro video layer */
+.hero-slideshow{
+  z-index: 1 !important;
+}
+
 .hero{ position:relative; overflow:hidden; }
 .hero-corner-logo{
   position:absolute;
@@ -868,6 +917,17 @@
 
   <!-- Hero -->
   <section id="home" class="hero" style="--hero-img: url('https://images.unsplash.com/photo-1532634876-26909d0d4b6a?q=80&w=2400&auto=format&fit=crop');">
+        <!-- MTERMS intro video (plays first) -->
+    <div class="hero-intro-video" id="heroIntroVideoWrap" aria-hidden="true">
+      <video
+        id="mtermsHeroVideo"
+        src="public/mterms.mp4"
+        autoplay
+        muted
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
     <div class="hero-slideshow" id="heroSlideshow" aria-hidden="true">
       <img id="heroSlideImg" src="public/herobanner1.png" alt="">
     </div>
@@ -1322,8 +1382,6 @@
 
   
 
-  <link rel="stylesheet" href="assets/hero-video.css">
-<script src="assets/hero-video.js"></script>
   <link rel="stylesheet" href="assets/agenda-popup.css">
 <script src="assets/agenda-popup.js"></script>
 
@@ -1339,12 +1397,15 @@
 
 <script>
 /* =========================
-   Hero: keep text always + logo top-right
-   After MP4 ends -> slideshow herobanner1/2/3
+   Hero: play public/mterms.mp4 first (no text)
+   then start slideshow herobanner1/2/3 (text returns)
    ========================= */
 (function(){
   const hero = document.querySelector('#home.hero');
   if (!hero) return;
+
+  const videoWrap = document.getElementById('heroIntroVideoWrap');
+  const video = document.getElementById('mtermsHeroVideo');
 
   const slideshow = document.getElementById('heroSlideshow');
   const imgEl = document.getElementById('heroSlideImg');
@@ -1362,14 +1423,14 @@
     if (!imgEl || !slideshow) return;
     imgEl.classList.remove('show');
     imgEl.classList.add('slide-in');
-    // swap src after slight delay so the slide-in effect is visible
+
     setTimeout(() => {
       imgEl.src = slides[i];
       imgEl.onload = () => {
         imgEl.classList.remove('slide-in');
         imgEl.classList.add('show');
       };
-      // if cached
+      // for cached images
       imgEl.classList.remove('slide-in');
       imgEl.classList.add('show');
     }, 80);
@@ -1377,90 +1438,56 @@
 
   function startSlideshow(){
     if (!slideshow || !imgEl) return;
+
     slideshow.classList.add('active');
     idx = 0;
     showSlide(idx);
+
     clearInterval(timer);
-timer = setInterval(() => {
-  idx += 1;
-
-  // After last banner, go back to MP4
-  if (idx >= slides.length) {
-    clearInterval(timer);
-
-    // hide slideshow
-    slideshow.classList.remove('active');
-
-    // bring video back and replay
-    const v = findVideo();
-    if (v) {
-      v.style.opacity = '1';
-      v.currentTime = 0;
-      v.play().catch(()=>{});
-    }
-
-    // IMPORTANT: allow ended event again for next cycle
-    if (v) v.__mtermsHooked = false;
-
-    // re-hook so ended triggers next time
-    hookVideo(v);
-
-    return;
+    timer = setInterval(() => {
+      idx = (idx + 1) % slides.length;
+      showSlide(idx);
+    }, 5000);
   }
 
-  showSlide(idx);
-}, 5000);
-  }
+  function startIntroVideo(){
+    // enter "video-mode": white background + hide words
+    hero.classList.add('video-mode');
 
-  // Find the hero video (whether it's in the markup or injected by hero-video.js)
-  function findVideo(){
-    return hero.querySelector('video');
-  }
+    // ensure slideshow hidden until video ends
+    slideshow && slideshow.classList.remove('active');
 
-  // Robust attach: hero video may be injected by assets/hero-video.js after load
-  function hookVideo(v){
-    if (!v || v.__mtermsHooked) return false;
-    v.__mtermsHooked = true;
+    // show wrapper (CSS handles it), attempt play
+    if (video) {
+      video.currentTime = 0;
+      video.loop = false;
+      video.muted = true;
 
-    // Ensure the MP4 can actually "finish"
-    v.loop = false;
-
-    // When it ends, fade to the banner slideshow
-    v.addEventListener('ended', () => {
-      v.style.transition = 'opacity 700ms ease';
-      v.style.opacity = '0';
+      // Autoplay on Safari requires muted + playsinline (already set)
+      const p = video.play();
+      if (p && typeof p.catch === 'function') p.catch(()=>{});
+    } else {
+      // if video missing, just start slideshow
+      hero.classList.remove('video-mode');
       startSlideshow();
-    }, { once: true });
-
-    return true;
+    }
   }
 
-  function waitForVideo(){
-    const start = Date.now();
-    const maxMs = 8000; // wait up to 8s for injected video
-    const tick = () => {
-      const v = findVideo();
-      if (hookVideo(v)) return;
+  function onVideoEnded(){
+    // hide video layer and restore hero words
+    hero.classList.remove('video-mode');
 
-      if (Date.now() - start < maxMs){
-        setTimeout(tick, 200);
-      }
-    };
-    tick();
-  }
-
-  // Also observe DOM changes inside the hero (covers late injection)
-  function observeHero(){
-    const obs = new MutationObserver(() => {
-      const v = findVideo();
-      if (hookVideo(v)) obs.disconnect();
-    });
-    obs.observe(hero, { childList: true, subtree: true });
+    // start slideshow now
+    startSlideshow();
   }
 
   window.addEventListener('load', () => {
-    waitForVideo();
-    observeHero();
+    if (video) {
+      video.addEventListener('ended', onVideoEnded, { once: true });
+      startIntroVideo();
+    } else {
+      startSlideshow();
+    }
   });
 })();
 </script>
