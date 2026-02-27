@@ -676,18 +676,22 @@
 }
 
 
-/* Center the cards themselves inside the grid (Sponsors section only) */
-#sponsors .cards{
-  justify-items: center;   /* grid: centers each card in its cell */
+
+/* ===== Center ONLY the sponsor logo cards row ===== */
+#sponsors .sponsors-grid{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;  /* centers the row */
+  gap: 18px !important;
 }
 
-#sponsors .cards .card{
-  width: 100%;
-  max-width: 360px;        /* adjust if you want wider cards */
-  margin-left: auto;       /* fallback centering */
-  margin-right: auto;
+/* make each sponsor card a fixed readable width */
+#sponsors .sponsors-grid .card{
+  flex: 0 1 360px !important;  /* card width */
+  max-width: 360px !important;
 }
 
+/* keep your justified text as-is (no change needed) */
     
 </style>
 <script src="lunr.min.js"></script>
