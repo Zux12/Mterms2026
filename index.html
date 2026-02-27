@@ -1415,12 +1415,13 @@
 
   let stage = 0;   // 0 = video, 1..3 = slides
 
-  function playVideo(){
-    hero.classList.add('video-mode');
-    slideshow.classList.remove('active');
-    video.currentTime = 0;
-    video.play().catch(()=>{});
-  }
+function playVideo(){
+  document.getElementById('heroIntroVideoWrap').style.display = 'flex'; // show video layer again
+  hero.classList.add('video-mode');
+  slideshow.classList.remove('active');
+  video.currentTime = 0;
+  video.play().catch(()=>{});
+}}
 
   function showSlide(index){
     hero.classList.remove('video-mode');
@@ -1456,10 +1457,13 @@
     }, 5000);
   }
 
-  video.addEventListener('ended', () => {
-    stage = 1;
-    startCycle();
-  });
+video.addEventListener('ended', () => {
+  hero.classList.remove('video-mode');   // removes white mode
+  document.getElementById('heroIntroVideoWrap').style.display = 'none';  // hide video layer
+
+  stage = 1;
+  startCycle();
+});
 
   window.addEventListener('load', () => {
     stage = 0;
