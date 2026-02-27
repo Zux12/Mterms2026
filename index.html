@@ -187,6 +187,26 @@
   border-radius: 10px;
 }
 
+    /* Ensure hero text always sits ABOVE hero.mp4 */
+.hero .hero-inner{
+  position: relative;
+  z-index: 6 !important;
+}
+
+/* Keep hero.mp4 below the text */
+.hero-bg-video{
+  z-index: 2 !important;
+}
+
+/* Only hide text during mterms.mp4 intro stage */
+.hero.video-mode .hero-inner{
+  display: none !important;
+}
+
+/* But ALWAYS show text during hero.mp4 stage */
+.hero.hero-video-mode .hero-inner{
+  display: block !important;
+}
 
 /* Important Dates – clean UiTM-light card grid */
 .dates-card{
@@ -593,48 +613,35 @@
 }
 
 /* video wrapper fills hero area */
+/* Intro video wrapper is ALWAYS present, but invisible until video-mode */
 .hero-intro-video{
   position: absolute;
   inset: 0;
-  z-index: 5;
-  display: none;              /* keep hidden by default */
-  background: #ffffff;
-
+  z-index: 7;
+  display: flex;
   align-items: center;
   justify-content: center;
-}
+  background: #ffffff;
 
-/* Smooth fade animation for intro video */
-.hero-intro-video{
   opacity: 0;
+  pointer-events: none;
   transition: opacity 900ms ease;
 }
 
 .hero.video-mode .hero-intro-video{
   opacity: 1;
+  pointer-events: auto;
 }
 
-/* ensure slideshow fades nicely too */
-.hero-slideshow{
-  transition: opacity 700ms ease;
-}
-
-/* show only while video-mode is ON */
-.hero.video-mode .hero-intro-video{
-  display: flex;
-}
-
-/* ensure hero has height reference */
 .hero{
-  min-height: 75vh;  /* guarantees vertical centering works */
+  min-height: 75vh;
 }
 
-/* square MP4 centered, contain (no crop) */
 .hero-intro-video video{
   width: min(520px, 86vw);
   height: auto;
-  aspect-ratio: 1 / 1;       /* keeps square layout even if browser tries to stretch */
-  object-fit: contain;       /* do NOT crop the square video */
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   background: #ffffff;
   border-radius: 16px;
 }
@@ -1493,11 +1500,11 @@
     slideshow.classList.remove('active');
   }
 
-  function enterHeroVideoMode(){
-    hero.classList.remove('video-mode');
-    hero.classList.add('hero-video-mode');
-    slideshow.classList.remove('active');
-  }
+function enterHeroVideoMode(){
+  hero.classList.remove('video-mode');     // IMPORTANT
+  hero.classList.add('hero-video-mode');
+  slideshow.classList.remove('active');
+}
 
   function enterSlideMode(){
     hero.classList.remove('video-mode');
@@ -1565,14 +1572,16 @@
   }
 
   // When mterms.mp4 ends -> move to hero.mp4
-  introVideo.addEventListener('ended', () => {
-    // fade-out of intro handled by your CSS if you added it earlier
-    hero.classList.remove('video-mode');
-    setTimeout(() => {
-      stage = 1;
-      nextStage();
-    }, 900); // match your fade duration
-  });
+introVideo.addEventListener('ended', () => {
+  // start fade-out
+  hero.classList.remove('video-mode');
+
+  // wait for fade-out to complete (match CSS transition: 900ms)
+  setTimeout(() => {
+    stage = 1;        // move to hero.mp4 stage
+    nextStage();
+  }, 900);
+});
 
   // When hero.mp4 ends -> move to slide 1
   bgVideo.addEventListener('ended', () => {
