@@ -677,21 +677,17 @@
 
 
 
-/* ===== Center ONLY the sponsor logo cards row ===== */
-#sponsors .sponsors-grid{
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;  /* centers the row */
-  gap: 18px !important;
+/* Center the cards themselves inside the grid (Sponsors section only) */
+#sponsors .cards{
+  justify-items: center;
 }
 
-/* make each sponsor card a fixed readable width */
-#sponsors .sponsors-grid .card{
-  flex: 0 1 360px !important;  /* card width */
-  max-width: 360px !important;
+#sponsors .cards .card{
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
 }
-
-/* keep your justified text as-is (no change needed) */
     
 </style>
 <script src="lunr.min.js"></script>
@@ -905,8 +901,7 @@
       We will announce confirmed sponsors here. Company logos will link directly to the sponsor’s official website.
     </p>
 
-<div class="cards sponsors-grid" style="margin-top:14px;">
-  
+<div class="cards" style="margin-top:14px;">  
   <!-- Sponsor Placeholder 1 -->
       <div class="card">
         <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
