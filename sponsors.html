@@ -677,6 +677,76 @@
   text-align: justify;
 }
 
+/* ===== Sponsor tiers (minimal, professional) ===== */
+#sponsors .sponsor-tier{
+  margin-top: 16px;
+  padding: 14px 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.65);
+}
+
+#sponsors .tier-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+#sponsors .tier-title{
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: .1px;
+}
+
+#sponsors .tier-badge{
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.75);
+}
+
+/* Tier accents: subtle left border + very light tint */
+#sponsors .tier-platinum{
+  border-left: 6px solid rgba(30,90,168,.35);
+  background: linear-gradient(180deg, rgba(30,90,168,.06), rgba(255,255,255,.60));
+}
+
+#sponsors .tier-gold{
+  border-left: 6px solid rgba(217, 154, 25, .35);
+  background: linear-gradient(180deg, rgba(217, 154, 25, .06), rgba(255,255,255,.60));
+}
+
+#sponsors .tier-silver{
+  border-left: 6px solid rgba(100,116,139,.35);
+  background: linear-gradient(180deg, rgba(100,116,139,.06), rgba(255,255,255,.60));
+}
+
+/* Grid behavior */
+#sponsors .tier-grid{
+  width: 100%;
+}
+
+/* Slight hierarchy: Platinum cards a bit larger */
+#sponsors .tier-platinum .sponsor-card{
+  max-width: 420px;
+}
+
+/* Ensure the logo placeholder stays neat */
+#sponsors .sponsor-card img{
+  max-height: 90px;
+  object-fit: contain;
+}
+
+/* Responsive: keep spacing comfortable */
+@media (max-width: 720px){
+  #sponsors .sponsor-tier{ padding: 12px; }
+}    
+
 /* ===== Sponsors: stretch the 2-card rows full width ===== */
 #sponsors .cards.cards-stretch{
   display: grid !important;
@@ -904,108 +974,215 @@
 
     <hr style="margin:22px 0; opacity:.25;">
 
-    <!-- Sponsor showcase placeholders -->
-    <h3>Our Sponsors</h3>
-    <p style="margin-top:6px;">
-      We will announce confirmed sponsors here. Company logos will link directly to the sponsor’s official website.
-    </p>
+<!-- Sponsor showcase (tiered placeholders) -->
+<h3>Our Sponsors</h3>
+<p style="margin-top:6px;">
+  Confirmed sponsors will be announced here. Company logos will link directly to the sponsor’s official website.
+</p>
 
-    <div class="cards" style="margin-top:14px;">
-      <!-- Sponsor Placeholder 1 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
+<!-- Platinum -->
+<section class="sponsor-tier tier-platinum" aria-label="Platinum Sponsors">
+  <div class="tier-head">
+    <h4 class="tier-title">Platinum Sponsors</h4>
+    <span class="tier-badge">PLATINUM</span>
+  </div>
 
-      <!-- Sponsor Placeholder 2 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
-
-      <!-- Sponsor Placeholder 3 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
-
-      <!-- Sponsor Placeholder 4 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
-
-      <!-- Sponsor Placeholder 5 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
-
-      <!-- Sponsor Placeholder 6 -->
-      <div class="card">
-        <a href="https://example.com" target="_blank" rel="noopener" aria-label="Sponsor website (placeholder)">
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
-            alt="Sponsor logo placeholder"
-            style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
-          />
-        </a>
-        <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
-        <p style="margin:6px 0 0; opacity:.9;">
-          Short description placeholder. Replace with sponsor description later.
-        </p>
-      </div>
+  <div class="cards tier-grid" style="margin-top:14px;">
+    <!-- Platinum Placeholder 1 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Platinum sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Platinum sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
     </div>
 
-    <p style="margin-top:12px; opacity:.9;">
-      Want to be featured here? Email:
-      <a href="mailto:Lyoges@hctm.ukm.edu.my">Lyoges@hctm.ukm.edu.my</a>
-    </p>
+    <!-- Platinum Placeholder 2 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Platinum sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Platinum sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Platinum Placeholder 3 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Platinum sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Platinum sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Gold -->
+<section class="sponsor-tier tier-gold" aria-label="Gold Sponsors">
+  <div class="tier-head">
+    <h4 class="tier-title">Gold Sponsors</h4>
+    <span class="tier-badge">GOLD</span>
+  </div>
+
+  <div class="cards tier-grid" style="margin-top:14px;">
+    <!-- Gold Placeholder 1 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Gold sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Gold sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Gold Placeholder 2 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Gold sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Gold sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Gold Placeholder 3 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Gold sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Gold sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Gold Placeholder 4 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Gold sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Gold sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Silver -->
+<section class="sponsor-tier tier-silver" aria-label="Silver Sponsors">
+  <div class="tier-head">
+    <h4 class="tier-title">Silver Sponsors</h4>
+    <span class="tier-badge">SILVER</span>
+  </div>
+
+  <div class="cards tier-grid" style="margin-top:14px;">
+    <!-- Silver Placeholder 1 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Silver Placeholder 2 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Silver Placeholder 3 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Silver Placeholder 4 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Silver Placeholder 5 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+
+    <!-- Silver Placeholder 6 -->
+    <div class="card sponsor-card">
+      <a href="https://example.com" target="_blank" rel="noopener" aria-label="Silver sponsor website (placeholder)">
+        <img
+          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='180'><rect width='100%25' height='100%25' fill='%23f2f2f2'/><rect x='14' y='14' width='492' height='152' rx='14' fill='%23ffffff' stroke='%23d9d9d9' stroke-width='4'/><text x='50%25' y='52%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='34' fill='%23888888'>SPONSOR LOGO</text></svg>"
+          alt="Silver sponsor logo placeholder"
+          style="width:100%; height:auto; max-height:90px; object-fit:contain; display:block; margin:0 auto;"
+        />
+      </a>
+      <p style="margin:10px 0 0;"><strong>Sponsor Name (Coming Soon)</strong></p>
+      <p style="margin:6px 0 0; opacity:.9;">Short description placeholder. Replace with sponsor description later.</p>
+    </div>
+  </div>
+</section>
+
+<p style="margin-top:12px; opacity:.9;">
+  Want to be featured here? Email:
+  <a href="mailto:Lyoges@hctm.ukm.edu.my">Lyoges@hctm.ukm.edu.my</a>
+</p>
   </div>
 </section>
 
