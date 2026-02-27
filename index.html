@@ -1570,6 +1570,9 @@ if (!toggleBtn || !closeBtn || !infoBtn || !windowEl || !inputEl || !sendBtn || 
     // Smart FAQ dataset
     // ----------------------------
     const faq = Array.isArray(window.MTERMS_AI_QA) ? window.MTERMS_AI_QA : [];
+    if (!faq.length) {
+  console.warn("[AI BOT] MTERMS_AI_QA is empty. Check that assets/ai-qa.js exists and is loading.");
+}
 
     const synonyms = [
       ["where", "venue", "location", "hotel"],
