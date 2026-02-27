@@ -25,8 +25,11 @@
     wrap.innerHTML = `
       <div id="ai-chat-window" class="ai-window hidden">
         <div class="ai-header">
-          <span>MTERMS2026 AI Assistant</span>
-          <div class="ai-header-actions">
+<div style="display:flex;align-items:center;gap:8px;">
+  <img src="public/aichatbot.png" alt="AI" style="height:18px;width:18px;">
+  <span>MTERMS2026 AI Assistant</span>
+</div>
+<div class="ai-header-actions">
             <button id="ai-info-btn" class="ai-info-btn" type="button" aria-label="About this AI">i</button>
             <button id="ai-close-btn" aria-label="Close chat">×</button>
           </div>
