@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: blob: https:;
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+    base-uri 'self';
+    form-action 'self';
+    frame-src 'self' https://www.google.com https://*.google.com;
+    child-src 'self' https://www.google.com https://*.google.com
+  ">
+
+  <title>About the AI Developer — IgniteInno Ventures</title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <style>
+    :root.theme-light{
+      --bg:#f6fbff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --muted:#556b86;
+      --brand:#1e5aa8;
+      --border:#d7e6f7;
+    }
+
+    body{
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.10), transparent 60%),
+        radial-gradient(700px 420px at 85% 18%, rgba(30,90,168,.08), transparent 55%),
+        linear-gradient(180deg, #f6fbff 0%, #ffffff 55%, #f6fbff 100%);
+      margin:0;
+    }
+
+    .wrap{
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 18px;
+    }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(30,90,168,.10);
+      overflow:hidden;
+    }
+
+    .top{
+      background: var(--brand);
+      color: #fff;
+      padding: 18px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .top h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.55);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+      font-size:14px;
+    }
+    .btn:hover{ background: rgba(255,255,255,.16); }
+
+    .content{
+      padding: 22px 18px 26px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom: 14px;
+    }
+    .logo-box{
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: #0b1630;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(0,0,0,.06);
+      overflow:hidden;
+    }
+    .logo-box img{
+      height: 26px;
+      width: auto;
+      display:block;
+    }
+    .brand-title{
+      font-weight: 900;
+      font-size: 18px;
+      margin:0;
+    }
+    .muted{
+      color: var(--muted);
+      margin: 6px 0 0;
+      line-height: 1.5;
+    }
+
+    .section{
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .link{
+      color: var(--brand);
+      text-decoration: underline;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    ul{
+      margin: 10px 0 0 18px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <h1>About this AI Assistant</h1>
+        <a class="btn" href="index.html">Back to MTERMS 2026</a>
+      </div>
+
+      <div class="content">
+        <div class="brand">
+          <div class="logo-box">
+            <img src="public/logo-white.png" alt="IgniteInno Ventures logo">
+          </div>
+          <div>
+            <p class="brand-title">IgniteInno Ventures</p>
+            <p class="muted">
+              This MTERMS2026 AI Assistant was developed by IgniteInno Ventures to help visitors quickly find conference information.
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="muted">
+            Official website: <a class="link" href="https://igniteinnov.com" target="_blank" rel="noopener">igniteinnov.com</a>
+          </p>
+
+          <ul>
+            <li>Provides quick answers on program, venue, deadlines, registration, and author resources.</li>
+            <li>Offers friendly guidance even when questions are not related to the conference.</li>
+            <li>Can link visitors directly to the relevant MTERMS2026 pages when available.</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <p class="muted">
+            If you want improvements to this assistant (more topics, better answers, new links), please contact the MTERMS2026 team.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
