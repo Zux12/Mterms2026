@@ -566,6 +566,21 @@
   justify-content: center;
 }
 
+/* Smooth fade animation for intro video */
+.hero-intro-video{
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.hero.video-mode .hero-intro-video{
+  opacity: 1;
+}
+
+/* ensure slideshow fades nicely too */
+.hero-slideshow{
+  transition: opacity 700ms ease;
+}
+
 /* show only while video-mode is ON */
 .hero.video-mode .hero-intro-video{
   display: flex;
@@ -1462,10 +1477,18 @@
   }
 
   // When video ends, move to slide 1
-  video.addEventListener('ended', () => {
+video.addEventListener('ended', () => {
+
+  // Start fade out
+  hero.classList.remove('video-mode');
+
+  // Wait for fade-out transition (900ms) before moving to slide
+  setTimeout(() => {
     stage = 1;
     next();
-  });
+  }, 900);
+
+});
 
   window.addEventListener('load', () => {
     stage = 0;
