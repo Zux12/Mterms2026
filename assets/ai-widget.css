@@ -110,12 +110,16 @@
   border-radius: 14px;
   margin: 8px 0;
   max-width: 85%;
+  font-size: 0.85rem;          /* slightly smaller */
+  line-height: 1.5;            /* cleaner reading */
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 .ai-msg.bot{
   background: #eef3f9;
   align-self: flex-start;
+  text-align: justify;          /* justified text */
+  text-justify: inter-word;
 }
 .ai-msg.user{
   background: var(--brand, #1e5aa8);
