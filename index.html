@@ -1337,10 +1337,14 @@
 
   <div id="ai-widget">
   <div id="ai-chat-window" class="ai-window hidden">
-    <div class="ai-header">
-      <span>MTERMS2026 AI Assistant</span>
-      <button id="ai-close-btn" aria-label="Close chat">×</button>
-    </div>
+ <div class="ai-header">
+  <span>MTERMS2026 AI Assistant</span>
+
+  <div class="ai-header-actions">
+    <button id="ai-info-btn" class="ai-info-btn" type="button" aria-label="About this AI">i</button>
+    <button id="ai-close-btn" aria-label="Close chat">×</button>
+  </div>
+</div>
     <div id="ai-messages" class="ai-messages">
       <div class="ai-msg bot">
         Hello! I'm the MTERMS2026 AI agent. Ask me about the schedule, venue, or deadlines!
@@ -1430,6 +1434,32 @@
     font-size: 20px;
     cursor: pointer;
   }
+
+  .ai-header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.ai-info-btn{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.ai-info-btn:hover{
+  background: rgba(255,255,255,0.18);
+}
 
   /* Messages Area */
   .ai-messages {
@@ -1526,10 +1556,11 @@
     const inputEl   = document.getElementById('ai-input');
     const sendBtn   = document.getElementById('ai-send-btn');
     const msgsEl    = document.getElementById('ai-messages');
+    const infoBtn  = document.getElementById('ai-info-btn');
 
     // If your HTML IDs are wrong/missing, do NOT crash the whole page
-    if (!toggleBtn || !closeBtn || !windowEl || !inputEl || !sendBtn || !msgsEl) {
-      console.error("[AI BOT] Missing one or more required elements. Check your IDs:", {
+if (!toggleBtn || !closeBtn || !infoBtn || !windowEl || !inputEl || !sendBtn || !msgsEl) {
+  console.error("[AI BOT] Missing one or more required elements. Check your IDs:", {
         toggleBtn, closeBtn, windowEl, inputEl, sendBtn, msgsEl
       });
       return;
@@ -1673,6 +1704,10 @@ return {
       windowEl.classList.add('hidden');
     });
 
+    infoBtn.addEventListener('click', () => {
+  window.open('developer.html', '_blank');
+});
+
    function addBubble(payload, type, quickReplies = null) {
   const div = document.createElement('div');
   div.className = `ai-msg ${type}`;
@@ -1718,10 +1753,10 @@ return {
       addBubble(text, 'user');
       inputEl.value = '';
 
-      setTimeout(() => {
-        const out = getSmartAnswer(text);
-        addBubble(out.text, 'bot', out.quick);
-      }, 200);
+setTimeout(() => {
+  const out = getSmartAnswer(text);
+  addBubble(out, 'bot', out.quick);
+}, 200);
     }
 
     sendBtn.addEventListener('click', sendMessage);
