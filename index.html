@@ -1512,7 +1512,7 @@
 
 
 </style>
-
+<script src="assets/ai-qa.js"></script>
 <script>
 /* ========================================== */
 /* MTERMS AI ASSISTANT - SAFE SMART FAQ BOT    */
@@ -1538,44 +1538,7 @@
     // ----------------------------
     // Smart FAQ dataset
     // ----------------------------
-    const faq = [
-      {
-        id: "venue",
-        title: "Venue & location",
-        text: "Venue: Concorde Hotel, Shah Alam, Selangor, Malaysia.",
-        tags: "venue location hotel where shah alam concorde selangor"
-      },
-      {
-        id: "dates",
-        title: "Conference dates",
-        text: "Conference dates: 7 & 8 September 2026 (Monday & Tuesday).",
-        tags: "date when september 2026 7 8"
-      },
-      {
-        id: "abstract_deadline",
-        title: "Abstract deadline",
-        text: "Abstract submission deadline: 31 March 2026. Late abstract submission: 1 April 2026 – 15 August 2026.",
-        tags: "abstract deadline submit submission late april august"
-      },
-      {
-        id: "acceptance",
-        title: "Acceptance notification",
-        text: "Abstract acceptance notifications: 15 March 2026 – 15 April 2026.",
-        tags: "acceptance notification result decision"
-      },
-      {
-        id: "registration",
-        title: "Registration deadlines",
-        text: "Early bird registration ends on 15 May 2026. Late registration/payment is accepted until 1 September 2026. Walk-in registration is available after 1 September 2026 (subject to availability).",
-        tags: "register registration early bird late payment walk in onsite"
-      },
-      {
-        id: "contact",
-        title: "Contact",
-        text: "For help, email admin@mterms2026.com.",
-        tags: "contact email help admin"
-      }
-    ];
+    const faq = Array.isArray(window.MTERMS_AI_QA) ? window.MTERMS_AI_QA : [];
 
     const synonyms = [
       ["where", "venue", "location", "hotel"],
@@ -1621,6 +1584,14 @@
     function getSmartAnswer(userQuery) {
       const q = normalizeQuery(userQuery);
 
+  const raw = (userQuery || "").trim();
+const lower = raw.toLowerCase();
+
+if (["hi", "hello", "hey", "good morning", "good afternoon", "good evening"].includes(lower)) {
+  const greet = faq.find(x => x.id === "greeting");
+  return { text: greet ? greet.text : "Hi. How are you today? How can I help?", quick: ["Program", "Venue", "Deadlines", "Registration", "Contact"] };
+}
+      
       // If Lunr didn't load, still respond (so bot works)
       if (!idx) {
         return {
@@ -1639,10 +1610,11 @@
       const results = idx.search(q);
 
       if (!results.length) {
-        return {
-          text: "I couldn’t find that exactly. Try: venue, dates, abstract deadline, registration, or email admin@mterms2026.com.",
-          quick: ["Venue", "Dates", "Abstract deadline", "Registration", "Contact"]
-        };
+const off = faq.find(x => x.id === "offtopic");
+return {
+  text: off ? off.text : "I can help with that. For MTERMS 2026, ask me about program, venue, deadlines, registration, or author guidelines.",
+  quick: ["Program", "Venue", "Deadlines", "Registration", "Contact"]
+};
       }
 
       const top = results
@@ -1668,10 +1640,26 @@
         contact: ["Registration", "Abstract deadline", "Venue"]
       };
 
-      return {
-        text: best.text,
-        quick: (followUps[best.id] || ["Venue", "Dates", "Registration"])
-      };
+const links = window.MTERMS_AI_LINKS || {};
+let linkHtml = "";
+
+if (best.linkKey && links[best.linkKey]) {
+  const href = links[best.linkKey];
+
+  // open PDFs/external in new tab, internal pages in same tab
+  const isPdfOrExternal = href.startsWith("http") || href.toLowerCase().endsWith(".pdf");
+  const target = isPdfOrExternal ? ' target="_blank" rel="noopener"' : "";
+
+  linkHtml = `<div style="margin-top:8px;font-size:12px;opacity:.9;">
+    Open: <a href="${href}"${target} style="text-decoration:underline;">${href}</a>
+  </div>`;
+}
+
+// Show message + optional link
+return {
+  html: `${best.text}${linkHtml}`,
+  quick: (followUps[best.id] || ["Program", "Venue", "Deadlines", "Registration", "Contact"])
+};
     }
 
     // ----------------------------
@@ -1685,34 +1673,43 @@
       windowEl.classList.add('hidden');
     });
 
-    function addBubble(text, type, quickReplies = null) {
-      const div = document.createElement('div');
-      div.className = `ai-msg ${type}`;
-      div.innerText = text;
+   function addBubble(payload, type, quickReplies = null) {
+  const div = document.createElement('div');
+  div.className = `ai-msg ${type}`;
 
-      if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
-        const wrap = document.createElement("div");
-        wrap.className = "ai-quick";
+  // payload can be string OR {text, html}
+  if (typeof payload === "string") {
+    div.innerText = payload;
+  } else if (payload && typeof payload === "object") {
+    if (payload.html) div.innerHTML = payload.html;
+    else div.innerText = payload.text || "";
+  } else {
+    div.innerText = "";
+  }
 
-        quickReplies.slice(0, 5).forEach(label => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "ai-quick-btn";
-          b.textContent = label;
-          b.addEventListener("click", () => {
-            inputEl.value = label;
-            sendMessage();
-          });
-          wrap.appendChild(b);
-        });
+  if (type === "bot" && Array.isArray(quickReplies) && quickReplies.length) {
+    const wrap = document.createElement("div");
+    wrap.className = "ai-quick";
 
-        div.appendChild(document.createElement("br"));
-        div.appendChild(wrap);
-      }
+    quickReplies.slice(0, 5).forEach(label => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "ai-quick-btn";
+      b.textContent = label;
+      b.addEventListener("click", () => {
+        inputEl.value = label;
+        sendMessage();
+      });
+      wrap.appendChild(b);
+    });
 
-      msgsEl.appendChild(div);
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-    }
+    div.appendChild(document.createElement("br"));
+    div.appendChild(wrap);
+  }
+
+  msgsEl.appendChild(div);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
 
     function sendMessage() {
       const text = inputEl.value.trim();
