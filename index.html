@@ -1478,6 +1478,8 @@
     max-width: 80%;
     font-size: 0.9rem;
     line-height: 1.4;
+    word-break: break-word;
+overflow-wrap: anywhere;
   }
   .ai-msg.bot {
     background: #eef2f6;
@@ -1684,9 +1686,34 @@ if (best.linkKey && links[best.linkKey]) {
   const isPdfOrExternal = href.startsWith("http") || href.toLowerCase().endsWith(".pdf");
   const target = isPdfOrExternal ? ' target="_blank" rel="noopener"' : "";
 
-  linkHtml = `<div style="margin-top:8px;font-size:12px;opacity:.9;">
-    Open: <a href="${href}"${target} style="text-decoration:underline;">${href}</a>
-  </div>`;
+// Create a short readable label
+let label = "Open page";
+
+if (best.linkKey) {
+  const readable = best.linkKey
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, l => l.toUpperCase());
+
+  if (href.toLowerCase().endsWith(".pdf")) {
+    label = readable + " (PDF)";
+  } else {
+    label = readable;
+  }
+}
+
+linkHtml = `
+<div style="margin-top:8px;font-size:13px;">
+  <a href="${href}"${target}
+     style="display:inline-block;
+            background:#1e5aa8;
+            color:#fff;
+            padding:6px 12px;
+            border-radius:999px;
+            text-decoration:none;
+            font-weight:600;">
+     ${label}
+  </a>
+</div>`;
 }
 
 // Show message + optional link
