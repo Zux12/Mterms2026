@@ -558,16 +558,24 @@
 .hero-intro-video{
   position: absolute;
   inset: 0;
-  z-index: 2;                /* above background */
-  display: none;             /* default hidden until JS turns on */
+  z-index: 5;
+  display: none;
+  background: #ffffff;
+
+  /* PERFECT CENTERING */
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;       /* ensure white behind the square mp4 */
 }
 
-/* show wrapper during video-mode */
+/* show only in video-mode */
 .hero.video-mode .hero-intro-video{
   display: flex;
+}
+
+/* ensure hero has height reference */
+.hero{
+  min-height: 75vh;  /* guarantees vertical centering works */
 }
 
 /* square MP4 centered, contain (no crop) */
@@ -1396,17 +1404,10 @@
 <script src="assets/ai-widget.js"></script>
 
 <script>
-/* =========================
-   Hero: play public/mterms.mp4 first (no text)
-   then start slideshow herobanner1/2/3 (text returns)
-   ========================= */
 (function(){
+
   const hero = document.querySelector('#home.hero');
-  if (!hero) return;
-
-  const videoWrap = document.getElementById('heroIntroVideoWrap');
   const video = document.getElementById('mtermsHeroVideo');
-
   const slideshow = document.getElementById('heroSlideshow');
   const imgEl = document.getElementById('heroSlideImg');
 
@@ -1416,79 +1417,67 @@
     'public/herobanner3.png'
   ];
 
-  let idx = 0;
+  let currentIndex = -1; // -1 means video stage
   let timer = null;
 
-  function showSlide(i){
-    if (!imgEl || !slideshow) return;
+  function showVideo(){
+    hero.classList.add('video-mode');
+    slideshow.classList.remove('active');
+    video.currentTime = 0;
+    video.play().catch(()=>{});
+  }
+
+  function showSlide(index){
+    hero.classList.remove('video-mode');
+    slideshow.classList.add('active');
+
     imgEl.classList.remove('show');
     imgEl.classList.add('slide-in');
 
     setTimeout(() => {
-      imgEl.src = slides[i];
+      imgEl.src = slides[index];
       imgEl.onload = () => {
         imgEl.classList.remove('slide-in');
         imgEl.classList.add('show');
       };
-      // for cached images
-      imgEl.classList.remove('slide-in');
-      imgEl.classList.add('show');
     }, 80);
   }
 
-  function startSlideshow(){
-    if (!slideshow || !imgEl) return;
+  function nextStage(){
 
-    slideshow.classList.add('active');
-    idx = 0;
-    showSlide(idx);
+    if(currentIndex === -1){
+      // Video just finished → go to first slide
+      currentIndex = 0;
+      showSlide(currentIndex);
 
-    clearInterval(timer);
-    timer = setInterval(() => {
-      idx = (idx + 1) % slides.length;
-      showSlide(idx);
-    }, 5000);
-  }
-
-  function startIntroVideo(){
-    // enter "video-mode": white background + hide words
-    hero.classList.add('video-mode');
-
-    // ensure slideshow hidden until video ends
-    slideshow && slideshow.classList.remove('active');
-
-    // show wrapper (CSS handles it), attempt play
-    if (video) {
-      video.currentTime = 0;
-      video.loop = false;
-      video.muted = true;
-
-      // Autoplay on Safari requires muted + playsinline (already set)
-      const p = video.play();
-      if (p && typeof p.catch === 'function') p.catch(()=>{});
-    } else {
-      // if video missing, just start slideshow
-      hero.classList.remove('video-mode');
-      startSlideshow();
+      timer = setTimeout(nextStage, 5000);
+      return;
     }
-  }
 
-  function onVideoEnded(){
-    // hide video layer and restore hero words
-    hero.classList.remove('video-mode');
+    currentIndex++;
 
-    // start slideshow now
-    startSlideshow();
+    if(currentIndex >= slides.length){
+      // after last slide → restart cycle from video
+      currentIndex = -1;
+      showVideo();
+      return;
+    }
+
+    showSlide(currentIndex);
+    timer = setTimeout(nextStage, 5000);
   }
 
   window.addEventListener('load', () => {
-    if (video) {
-      video.addEventListener('ended', onVideoEnded, { once: true });
-      startIntroVideo();
-    } else {
-      startSlideshow();
-    }
+
+    video.addEventListener('ended', () => {
+      nextStage();
+    });
+
+    // Start first stage
+    showVideo();
+
   });
+
 })();
 </script>
 
