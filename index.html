@@ -1526,23 +1526,35 @@ function enterHeroVideoMode(){
     bgVideo.play().catch(()=>{});
   }
 
-  function showSlide(i){
-    enterSlideMode();
+function showSlide(i){
+  enterSlideMode();
 
-    imgEl.classList.remove('show');
-    imgEl.classList.add('slide-in');
+  imgEl.classList.remove('show');
+  imgEl.classList.add('slide-in');
 
-    setTimeout(() => {
-      imgEl.src = slides[i];
-      imgEl.onload = () => {
-        imgEl.classList.remove('slide-in');
-        imgEl.classList.add('show');
-      };
-    }, 80);
+  setTimeout(() => {
+    imgEl.src = slides[i];
 
-    clearTimer();
-    timer = setTimeout(nextStage, 5000);
-  }
+    // advance even if image is cached and onload doesn't fire
+    imgEl.onload = () => {
+      imgEl.classList.remove('slide-in');
+      imgEl.classList.add('show');
+    };
+
+    // if cached, force show anyway
+    imgEl.classList.remove('slide-in');
+    imgEl.classList.add('show');
+  }, 80);
+
+  clearTimer();
+  timer = setTimeout(() => {
+    stage++;
+    if (stage > (1 + slides.length)) {   // after last image -> back to mterms.mp4
+      stage = 0;
+    }
+    nextStage();
+  }, 5000);
+}
 
   function nextStage(){
     clearTimer();
