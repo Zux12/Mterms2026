@@ -646,6 +646,34 @@
   border-radius: 16px;
 }
 
+/* stack video + buttons vertically */
+.intro-video-stack{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* buttons fade timing only (no restyling) */
+.intro-cta-row{
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 500ms ease, transform 500ms ease;
+  transition-delay: 500ms;   /* appear 0.5s after video fades in */
+}
+
+.hero.video-mode .intro-cta-row{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* fade buttons slightly before video fades out */
+.hero.intro-fading-out .intro-cta-row{
+  transition-delay: 0ms;
+  opacity: 0;
+  transform: translateY(10px);
+}    
+
 /* keep slideshow below the intro video layer */
 .hero-slideshow{
   z-index: 1 !important;
@@ -980,16 +1008,27 @@
   <!-- Hero -->
   <section id="home" class="hero" style="--hero-img: url('https://images.unsplash.com/photo-1532634876-26909d0d4b6a?q=80&w=2400&auto=format&fit=crop');">
         <!-- MTERMS intro video (plays first) -->
-    <div class="hero-intro-video" id="heroIntroVideoWrap" aria-hidden="true">
-      <video
-        id="mtermsHeroVideo"
-        src="public/mterms.mp4"
-        autoplay
-        muted
-        playsinline
-        preload="auto"
-      ></video>
+<div class="hero-intro-video" id="heroIntroVideoWrap" aria-hidden="true">
+
+  <div class="intro-video-stack">
+    <video
+      id="mtermsHeroVideo"
+      src="public/mterms.mp4"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+
+    <!-- reuse existing button styles -->
+    <div class="cta-row intro-cta-row">
+      <a class="btn primary" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register</a>
+      <a class="btn" href="login.html">Login</a>
+      <a class="btn ghost" href="program.html">View Program</a>
     </div>
+  </div>
+
+</div>
 
     <!-- Existing hero banner MP4 (plays after mterms.mp4) -->
 <div class="hero-bg-video" id="heroBgVideoWrap" aria-hidden="true">
@@ -1585,14 +1624,21 @@ function showSlide(i){
 
   // When mterms.mp4 ends -> move to hero.mp4
 introVideo.addEventListener('ended', () => {
-  // start fade-out
-  hero.classList.remove('video-mode');
 
-  // wait for fade-out to complete (match CSS transition: 900ms)
+  // Start button fade-out first
+  hero.classList.add('intro-fading-out');
+
+  // Slight delay before video fade-out
   setTimeout(() => {
-    stage = 1;        // move to hero.mp4 stage
+    hero.classList.remove('video-mode');
+  }, 200);  // buttons fade slightly before video
+
+  // After video fade finishes
+  setTimeout(() => {
+    hero.classList.remove('intro-fading-out');
+    stage = 1;   // move to hero.mp4
     nextStage();
-  }, 900);
+  }, 900);  // must match your intro video fade duration
 });
 
   // When hero.mp4 ends -> move to slide 1
