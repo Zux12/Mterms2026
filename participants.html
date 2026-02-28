@@ -467,12 +467,12 @@
 
     
         <div class="card">
-      <h3>My Uploads</h3>
+      <h3>Upload and Submit Abstract</h3>
       <p class="help">
-        Upload your <strong>Abstract</strong> (PDF).<br>
+        Upload and submit your <strong>Abstract</strong> (.doc or docx only).<br>
         1) Choose your file<br>
-        2) Click <strong>Upload Abstract</strong><br>
-        3) Use <strong>Refresh Latest</strong> to view the latest uploaded abstract
+        2) Click <strong>Submit Abstract</strong><br>
+        3) Use <strong>Refresh Latest</strong> to view the latest submitted abstract
       </p>
 
       <!-- NOTE (legacy types wired to MongoDB): studentProof, slides, bankReceipt -->
@@ -483,12 +483,12 @@
           </select>
         </label>
         <label>File
-          <input type="file" id="absFile" accept=".pdf">
+          <input type="file" id="absFile" accept=".doc,.docx">
         </label>
       </div>
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button id="absUploadBtn" class="btn">Upload Abstract</button>
+        <button id="absUploadBtn" class="btn">Submit Abstract</button>
         <button id="absRefreshBtn" class="btn ghost">Refresh latest</button>
       </div>
 
@@ -1218,7 +1218,7 @@ async function uploadDoc(type, fileInputId, msgId, latestBoxId){
     const data = await r.json().catch(()=> ({}));
     if (!r.ok) throw new Error(data.error || 'Upload failed');
 
-    document.getElementById(msgId).textContent = `✅ Uploaded version ${data.version || ''}`.trim();
+    document.getElementById(msgId).textContent = `✅ Submitted version ${data.version || ''}`.trim();
     input.value = '';
 
     await loadLatest(type, latestBoxId);
