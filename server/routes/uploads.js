@@ -11,8 +11,16 @@ const upload = multer({
 });
 
 const ALLOWED_TYPES = ['studentProof','bankReceipt','abstract','slides','profilePhoto'];
-const ALLOWED_MIME  = ['application/pdf','image/png','image/jpeg'];
-
+const ALLOWED_MIME = {
+  abstract: [
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ],
+  bankReceipt: ['application/pdf', 'image/png', 'image/jpeg'],
+  studentProof: ['application/pdf', 'image/png', 'image/jpeg'],
+  slides: ['application/pdf', 'image/png', 'image/jpeg'],
+  profilePhoto: ['image/png', 'image/jpeg']
+};
 function safeName(name='file') {
   return String(name).replace(/[^\w\-.]+/g, '_').slice(0, 120);
 }
@@ -34,9 +42,17 @@ router.post('/gridfs', upload.single('file'), async (req, res) => {
     if (!ALLOWED_TYPES.includes(type)) {
       return res.status(400).json({ error: 'Invalid upload type' });
     }
-    if (!ALLOWED_MIME.includes(file.mimetype)) {
-      return res.status(400).json({ error: 'Only PDF/JPG/PNG accepted' });
-    }
+const allowed = ALLOWED_MIME[type] || [];
+    
+if (!allowed.includes(file.mimetype)) {
+  const nice = (type === 'abstract')
+    ? 'DOC or DOCX'
+    : (type === 'profilePhoto')
+      ? 'JPG or PNG'
+      : 'PDF, JPG, or PNG';
+
+  return res.status(400).json({ error: `Invalid file type. Accepted: ${nice}` });
+}
 
     const reg = await loadReg(regCode.trim(), email.trim());
     if (!reg) return res.status(404).json({ error: 'Registration not found' });
