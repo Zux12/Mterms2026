@@ -134,13 +134,27 @@
   display:none;
   width:210mm;
   padding:20mm;
-  padding-top:24mm;     /* add this */
-  box-sizing:border-box;/* add this */
+  padding-top:24mm;     
+  box-sizing:border-box;
   background:#fff;
   color:#000;
   font-family:"Times New Roman", Times, serif;
   font-size:12pt;
   line-height:1.55;
+}
+
+    /* Safe printable width to prevent right-edge clipping in html2pdf canvas */
+#letterInner{
+  width: 170mm;          /* narrower than A4 content width */
+  margin: 0 auto;        /* center it */
+  box-sizing: border-box;
+}
+
+/* Ensure long words never get cut */
+#letterPreview, #letterPreview *{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
     .letter-header{
       display:flex;
@@ -232,17 +246,18 @@
 
   <!-- Hidden A4 letter template -->
   <div id="letterPreview" aria-hidden="true">
+   <div id="letterInner">
 <!-- Logos Header (same as committee-appointment.html) -->
 <div style="
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:20px;
-    padding:0 6mm;  /* add this */
+    padding:0 6mm;  
   ">
   <!-- MTERMS main logo -->
-  <img src="public/mterm.jpg" alt="MTERMS Logo"
-       style="height:70px;object-fit:contain;" />
+<img src="public/mterm.jpg" alt="MTERMS Logo"
+     style="height:90px;object-fit:contain;display:block;" />
 
   <!-- Organiser Logos -->
   <div style="display:flex;gap:18px;align-items:center;">
@@ -299,6 +314,7 @@
 
     </div>
   </div>
+    </div>
 
   <script>
     // Match admin.html auth pattern
@@ -528,7 +544,7 @@
         const filename = pdfFilename(name);
 
 const opt = {
-  margin: [15, 15, 15, 15], // top, right, bottom, left (mm)
+  margin: [18, 22, 18, 22], // top, right, bottom, left (mm)
   filename,
   image: { type: 'jpeg', quality: 0.98 },
   html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
