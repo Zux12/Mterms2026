@@ -1,402 +1,579 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-light">
 <head>
-  <meta charset="UTF-8" />
-  <title>MTERMS 2026 – Committee Appointment Letter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <!-- Simple internal styling, only for this page -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: blob: https:;
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+  <title>Acceptance Letter Generator — MTERMS 2026</title>
+
+  <!-- Keep styling simple and professional (committee-appointment-like) -->
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f7fb;
+    :root{
+      --bg:#ffffff;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --soft:#f9fafb;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --warn:#b45309;
+      --btn:#0f172a;
+      --btnText:#ffffff;
+      --btnDisabled:#9ca3af;
+    }
+    body{ margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); }
+    .container{ max-width:1100px; margin:0 auto; padding:22px 16px 40px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; margin-bottom:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .brand img{ height:52px; width:auto; display:block; }
+    h1{ font-size:18px; margin:0; font-weight:700; }
+    .sub{ color:var(--muted); font-size:13px; margin-top:4px; }
+    .actions{ display:flex; gap:10px; align-items:center; }
+    .btn{
+      background:var(--btn); color:var(--btnText); border:0; border-radius:10px;
+      padding:10px 12px; font-size:13px; cursor:pointer;
+    }
+    .btn:disabled{ background:var(--btnDisabled); cursor:not-allowed; }
+
+    .card{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:14px; padding:14px; box-shadow:0 6px 18px rgba(0,0,0,.04);
+    }
+    .note{
+      margin:10px 0 0;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:var(--soft);
+      border-radius:12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .note b{ color:var(--text); }
+
+    .toolbar{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      margin-top:12px;
+    }
+    .search{
+      display:flex; gap:8px; align-items:center;
+      flex:1;
+    }
+    .search input{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:13px;
+      outline:none;
+    }
+    .pager{ display:flex; gap:8px; align-items:center; }
+    .pager .muted{ color:var(--muted); font-size:13px; }
+
+    table{ width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td{
+      border-top:1px solid var(--border);
+      padding:10px 8px;
+      font-size:13px;
+      vertical-align:middle;
+    }
+    th{ text-align:left; color:var(--muted); font-weight:700; background:#fff; position:sticky; top:0; }
+    .row-muted{ opacity:0.45; }
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--border);
+      background:var(--soft);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill.ok{ color:var(--ok); border-color:rgba(22,163,74,.25); background:rgba(22,163,74,.06); }
+    .pill.warn{ color:var(--warn); border-color:rgba(180,83,9,.25); background:rgba(180,83,9,.06); }
+    .pill.bad{ color:var(--bad); border-color:rgba(220,38,38,.25); background:rgba(220,38,38,.06); }
+
+    .mini-btn{
+      border:0;
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+      cursor:pointer;
+      background:var(--btn);
+      color:var(--btnText);
+    }
+    .mini-btn:disabled{
+      background:var(--btnDisabled);
+      cursor:not-allowed;
+    }
+    .status{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
     }
 
-    .page {
-      max-width: 900px;
-      margin: 24px auto;
-      padding: 24px;
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    /* Hidden letter preview (A4) */
+    #letterPreview{
+      display:none;
+      width:210mm;
+      padding:20mm;
+      background:#fff;
+      color:#000;
+      font-family:"Times New Roman", Times, serif;
+      font-size:12pt;
+      line-height:1.55;
     }
-
-    h1 {
-      font-size: 20px;
-      margin-bottom: 4px;
+    .letter-header{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:10mm;
     }
-
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 24px;
+    .letter-header img{ height:80px; width:auto; display:block; }
+    .letter-body{ text-align:justify; }
+    .addr-block{ margin-top:2mm; margin-bottom:6mm; }
+    .addr-block .nm{ font-weight:700; }
+    .letter-footer{
+      margin-top:10mm;
     }
-
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 16px;
+    .org-by{
+      margin-top:12mm;
+      border-top:1px solid #ddd;
+      padding-top:6mm;
+      text-align:center;
     }
-
-    .field {
-      flex: 1 1 260px;
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
+    .org-by .label{ font-size:10.5pt; margin-bottom:4mm; }
+    .org-logos{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:18px;
+      margin-top:2mm;
     }
-
-    label {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    input,
-    select {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccd2e3;
-      font-size: 14px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: #3652d3;
-      box-shadow: 0 0 0 2px rgba(54,82,211,0.15);
-    }
-
-    .actions {
-      margin-top: 16px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: #3652d3;
-      color: #fff;
-    }
-
-    .btn-secondary {
-      background: #e3e7f5;
-      color: #333;
-    }
-
-    .note {
-      font-size: 12px;
-      color: #777;
-      margin-top: 12px;
-    }
-
-    /* Printable letter wrapper (A4) */
-    .letter-wrapper {
-      width: 210mm;          /* A4 width */
-      min-height: 250mm;
-      box-sizing: border-box;
-      background: #ffffff;
-      color: #000000;
-      font-family: "Times New Roman", serif;
-      font-size: 11pt;
-    }
-
-    /* Hidden by default (only used for PDF generation) */
-    #letterPreview {
-      display: none;
-    }
+    .org-logos img{ height:44px; width:auto; display:block; }
   </style>
-</head>
-<body>
-  <div class="page">
-    <h1>Committee Appointment Letter Generator</h1>
-    <div class="subtitle">
-      MTERMS 2026 – Malaysian Tissue Engineering and Regenerative Medicine Scientific Meeting
-    </div>
 
-    <div class="form-row">
-      <div class="field">
-        <label for="committeeName">Committee Member Name</label>
-        <input type="text" id="committeeName" placeholder="Enter full name" />
-      </div>
-      <div class="field">
-<label>Address Line 1
-  <input type="text" id="addr1" placeholder="e.g. Jalan Ilmu 1/1" />
-</label>
-
-<label>Address Line 2
-  <input type="text" id="addr2" placeholder="(optional)" />
-</label>
-
-<label>Address Line 3
-  <input type="text" id="addr3" placeholder="(optional)" />
-</label>
-
-<label>Address Line 4
-  <input type="text" id="addr4" placeholder="(optional)" />
-</label>
-
-<label>Postcode 
-  <input type="text" id="addrPostcode" placeholder="e.g. 40450" />
-</label>
-
-<label>City
-  <input type="text" id="addrCity" placeholder="e.g. Shah Alam" />
-</label>
-
-<label>State
-  <input type="text" id="addrState" placeholder="e.g. Selangor" />
-</label>
-
-
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="field">
-        <label for="committeeRole">Role / Position</label>
-        <select id="committeeRole">
-          <option value="">-- Please select --</option>
-          <option value="President">President</option>
-          <option value="Vice President">Vice President</option>
-          <option value="Treasurer">Treasurer</option>
-          <option value="Secretariat">Secretariat</option>
-          <option value="Head of Secretariat">Head of Secretariat</option>
-          <option value="Logistics Committee">Logistics Committee</option>
-          <option value="Head of Logistics Committee">Head of Logistics Committee</option>
-          <option value="Programme Committee">Programme Committee</option>
-          <option value="Head of Programme Committee">Head of Programme Committee</option>
-          <option value="Sponsorship Committee">Sponsorship Committee</option>
-          <option value="Head of Sponsorship Committee">Head of Sponsorship Committee</option>
-          <option value="Technical Committee">Technical Committee</option>
-          <option value="Head of Technical Committee">Head of Technical Committee</option>
-          <option value="Publicity & Media Committee">Publicity & Media Committee</option>
-          <option value="Head of Publicity & Media Committee">Head of Publicity & Media Committee</option>
-          <option value="Committee Member">Committee Member</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="appointmentDate">Appointment Date</label>
-        <input type="date" id="appointmentDate" />
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="generateBtn" class="btn btn-primary">
-        Generate Appointment Letter (PDF)
-      </button>
-      <button type="button" class="btn btn-secondary" onclick="window.location.href='admin.html'">
-        Back to Admin Page
-      </button>
-    </div>
-
-    <div class="note">
-      Note: This page is intended for admin use only. Do not link it from public menus.
-    </div>
-  </div>
-
-  <!-- Hidden letter template for PDF generation -->
-  <div id="letterPreview">
-<div class="letter-wrapper"
-     style="padding:8mm 33mm 20mm 22mm;">
-
-      <!-- Logos Header -->
-      <div style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:20px;
-        ">
-        <!-- MTERMS main logo -->
-        <img src="public/mterm.jpg" alt="MTERMS Logo"
-             style="height:70px;object-fit:contain;" />
-
-        <!-- Organiser Logos -->
-        <div style="display:flex;gap:18px;align-items:center;">
-          <img src="public/uitm.png" alt="UITM Logo" style="height:55px;object-fit:contain;" />
-          <img src="public/tesma.png" alt="TESMA Logo" style="height:55px;object-fit:contain;" />
-
-        </div>
-      </div>
-
-      <!-- Title -->
-      <div style="
-          text-align:center;
-          font-weight:bold;
-          font-size:14pt;
-          margin-bottom:16px;
-          text-decoration:underline;
-        ">
-        APPOINTMENT LETTER <p>MTERMS 2026 ORGANISING COMMITTEE</p>
-      </div>
-
-      <!-- Ref & Date -->
-      <div style="margin-bottom:14px;line-height:1.4;">
-        Ref: MTERMS2026/COMMITTEE/<span id="metaRefCode"></span><br />
-        Date: <span id="metaDate"></span>
-      </div>
-
-      <!-- Body -->
-      <div style="text-align:justify;line-height:1.32;">
-    <p style="margin:0 0 10px 0;">
-  <span id="previewName"></span><br />
-  <span id="previewAddress"></span>
-</p>
-
-
-   
-
-        <p style="margin:0 0 10px 0;">
-          We are pleased to formally appoint you as <strong><span id="previewRole"></span></strong>
-          for the <strong>Malaysian Tissue Engineering and Regenerative Medicine Scientific Meeting 2026 (MTERMS 2026)</strong>.
-          This appointment is in recognition of your expertise, experience and commitment to advancing tissue engineering
-          and regenerative medicine in Malaysia.
-        </p>
-
-        <p style="margin:0 0 10px 0;">
-          In this role, you will be part of the Organising Committee responsible for supporting the planning, coordination
-          and successful delivery of MTERMS 2026. Your key responsibilities will include, but are not limited to:
-        </p>
-
-        <ul style="margin:0 0 10px 20px;padding:0;line-height:1.35;">
-          <li>Providing input and advice within your area of responsibility;</li>
-          <li>Attending and contributing to relevant committee meetings and discussions; and</li>
-          <li>Supporting the execution of activities leading up to and during MTERMS 2026 event.</li>
-        </ul>
-
-   <p style="margin:0 0 10px 0;">
-  This appointment takes effect on <strong><span id="previewStartDate"></span></strong> and remains valid until the completion of MTERMS 2026.
-</p>
-
-
-<p style="margin:0 0 10px 0;">
-  We appreciate your willingness to serve and look forward to your contributions to the success of MTERMS 2026.
-</p>
-
-<p style="margin:0 0 10px 0;">
-  If you require any clarification regarding this appointment, please contact the Secretariat.
-</p>
-
-
-        <p style="margin:0 0 16px 0;">
-          Thank you, and congratulations on your appointment.
-        </p>
-
-        <!-- Signature -->
-        <div style="margin-top:20px;">
-          <p style="margin:0 0 6px 0;">Yours sincerely,</p>
-
-          <img src="public/signaturesample.png" alt="Signature"
-               style="height:50px;margin-bottom:4px;" />
-
-          <p style="margin:0;">
-            <strong>Associate Professor. Ts. Dr. Nur Aliana Hidayah Mohamed</strong><br />
-            Chair <br /> MTERMS 2026 Organising Committee <br />.
-          </p>
-        </div>
-      </div>
-
-      <!-- Footer -->
-   
-    </div>
-  </div>
-
-  <!-- html2pdf.js CDN (bundled with html2canvas + jsPDF) -->
+  <!-- html2pdf -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <img src="public/mterm.jpg" alt="MTERMS Logo">
+        <div>
+          <h1>Acceptance Letter Generator</h1>
+          <div class="sub">Tick a presenter to enable emailing the acceptance letter PDF.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="backBtn" type="button">Back to Admin</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="note">
+        <b>Important:</b>
+        Tick a row to enable its Email button.
+        Clicking <b>Email PDF</b> will <b>generate the acceptance letter PDF</b>, <b>email the participant</b>, and <b>auto-download the PDF</b> to your computer.
+        <br>
+        <b>Batch note:</b> Even if multiple rows are ticked, <b>Email PDF sends only for the clicked row</b>.
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <input id="q" type="text" placeholder="Search by name, email, reg code, affiliation..." />
+          <button class="btn" id="searchBtn" type="button">Search</button>
+        </div>
+
+        <div class="pager">
+          <button class="btn" id="prevBtn" type="button">Prev</button>
+          <div class="muted" id="pageInfo">Page 1</div>
+          <button class="btn" id="nextBtn" type="button">Next</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;">Tick</th>
+            <th>Name</th>
+            <th style="width:150px;">Type</th>
+            <th>Email</th>
+            <th style="width:130px;">Action</th>
+            <th style="width:140px;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Hidden A4 letter template -->
+  <div id="letterPreview" aria-hidden="true">
+    <div class="letter-header">
+      <img src="public/mterm.jpg" alt="MTERMS 2026">
+    </div>
+
+    <div class="addr-block">
+      <div class="nm" id="lp-name">[NAME]</div>
+      <div id="lp-addr1">[ADDRESS LINE 1]</div>
+      <div id="lp-addr2" style="display:none;">[ADDRESS LINE 2]</div>
+      <div id="lp-addr3">[CITY STATE POSTCODE]</div>
+      <div id="lp-addr4">[COUNTRY]</div>
+    </div>
+
+    <div style="margin-bottom:6mm;">
+      <div id="lp-date">[DATE]</div>
+    </div>
+
+    <div class="letter-body">
+      <p>Dear <span id="lp-dear">[NAME]</span>,</p>
+
+      <p><b>LETTER OF ACCEPTANCE</b></p>
+
+      <p>
+        We are pleased to inform you that your abstract titled
+        <b>"<span id="lp-title">[ABSTRACT TITLE]</span>"</b> has been accepted for
+        <b><span id="lp-type">[ORAL/POSTER]</span></b> presentation at
+        <b>Malaysian Tissue Engineering and Regenerative Medicine Society Conference 2026 (MTERMS 2026)</b>
+        which will be held on <b>August 6–7, 2026</b>.
+      </p>
+
+      <p>
+        Further information and updates related to the conference will be announced through our official channels.
+        For inquiries, please contact <b>admin@mterms2026.com</b>.
+      </p>
+
+      <p>Thank you.</p>
+
+      <div class="letter-footer">
+        <p>
+          Sincerely,<br>
+          <b>MTERMS 2026 Secretariat</b>
+        </p>
+
+        <!-- Keep the same signature block style you already use in committee-appointment.html if you prefer.
+             If your committee-appointment.html already contains an image signature, copy that exact HTML here. -->
+      </div>
+
+      <div class="org-by">
+        <div class="label">Organized by</div>
+        <div class="org-logos">
+          <img src="public/uitm.png" alt="UiTM">
+          <img src="public/tesma.png" alt="TESMA">
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Helper to format date as e.g. "23 November 2025"
-    function formatDateLong(dateStr) {
-      if (!dateStr) return "";
-      const d = new Date(dateStr);
-      const options = { day: "numeric", month: "long", year: "numeric" };
-      return d.toLocaleDateString("en-MY", options);
+    // Match admin.html auth pattern
+    const ADMIN_KEY = 'mterms-admin-basic';
+    function authHeader(){
+      const token = localStorage.getItem(ADMIN_KEY);
+      return token ? { 'Authorization': 'Basic ' + token } : {};
     }
 
-    function formatTodayLong() {
+    const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+    const $ = (id) => document.getElementById(id);
+
+    let page = 1;
+    const limit = 20;
+    let total = 0;
+
+    function safeText(v){ return (v === null || v === undefined) ? '' : String(v); }
+
+    function fullName(doc){
+      const fn = doc?.personal?.firstName || '';
+      const ln = doc?.personal?.lastName || '';
+      return (fn + ' ' + ln).trim();
+    }
+
+    function toOralPoster(programType){
+      if (programType === 'talk') return 'Oral';
+      if (programType === 'poster') return 'Poster';
+      return '';
+    }
+
+    function formatAddress(doc){
+      const a = doc?.address || {};
+      const line1 = safeText(a.line1).trim();
+      const line2 = safeText(a.line2).trim();
+      const city = safeText(a.city).trim();
+      const state = safeText(a.state).trim();
+      const postcode = safeText(a.postcode).trim();
+      const country = safeText(a.country).trim();
+
+      const line3 = [city, state, postcode].filter(Boolean).join(', ').replace(/,\s*,/g, ', ');
+      return { line1, line2, line3, country };
+    }
+
+    function todayLong(){
+      // “1 March 2026” style
       const d = new Date();
-      const options = { day: "numeric", month: "long", year: "numeric" };
-      return d.toLocaleDateString("en-MY", options);
+      return d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
     }
 
-   document.getElementById("generateBtn").addEventListener("click", function () {
-  const name = document.getElementById("committeeName").value.trim();
-  const role = document.getElementById("committeeRole").value;
-  const startDate = document.getElementById("appointmentDate").value;
+    function setStatus(id, text, kind){
+      const el = document.querySelector(`[data-status="${id}"]`);
+      if (!el) return;
+      el.textContent = text;
+      el.style.color = kind === 'ok' ? 'var(--ok)' : (kind === 'bad' ? 'var(--bad)' : 'var(--muted)');
+    }
 
-  if (!name) {
-    alert("Please enter the committee member's name.");
-    return;
-  }
-  if (!role) {
-    alert("Please select a role.");
-    return;
-  }
-  if (!startDate) {
-    alert("Please select an appointment date.");
-    return;
-  }
+    async function apiGet(path){
+      const r = await fetch(API + path, { headers: { ...authHeader() } });
+      if (!r.ok) throw new Error(`Request failed (${r.status})`);
+      return r.json();
+    }
 
-  // Populate preview fields
-  document.getElementById("previewName").textContent = name;
+    async function apiPost(path, body){
+      const r = await fetch(API + path, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', ...authHeader() },
+        body: JSON.stringify(body || {})
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j?.error || `Request failed (${r.status})`);
+      return j;
+    }
 
-  // Build formatted address
-const a1 = document.getElementById("addr1").value.trim();
-const a2 = document.getElementById("addr2").value.trim();
-const a3 = document.getElementById("addr3").value.trim();
-const a4 = document.getElementById("addr4").value.trim();
-const pc = document.getElementById("addrPostcode").value.trim();
-const city = document.getElementById("addrCity").value.trim();
-const st = document.getElementById("addrState").value.trim();
+    function rowEligibility(doc){
+      const presenting = !!doc?.program?.presenting;
+      const ptype = doc?.program?.type || 'none';
 
-let fullAddress = a1;
-if (a2) fullAddress += "<br>" + a2;
-if (a3) fullAddress += "<br>" + a3;
-if (a4) fullAddress += "<br>" + a4;
-fullAddress += "<br>" + pc + " " + city + ", " + st;
+      if (!presenting) return { ok:false, reason:'Participant Only', code:'participant' };
 
-document.getElementById("previewAddress").innerHTML = fullAddress;
+      // Option 1 (strict): only allow talk/poster
+      if (ptype !== 'talk' && ptype !== 'poster') {
+        return { ok:false, reason:'Set Oral/Poster in Admin first', code:'needType' };
+      }
 
+      return { ok:true, reason:'', code:'ok' };
+    }
 
-  document.getElementById("previewRole").textContent = role;
-  document.getElementById("previewStartDate").textContent = formatDateLong(startDate);
+    function renderRows(rows){
+      const tb = $('rows');
+      tb.innerHTML = '';
 
+      rows.forEach(doc => {
+        const id = doc._id;
+        const name = fullName(doc) || '(No name)';
+        const email = doc?.personal?.email || '';
+        const ptype = doc?.program?.type || 'none';
+        const oralPoster = toOralPoster(ptype);
 
-      // Meta info: date on letter and a simple ref code
-      document.getElementById("metaDate").textContent = formatTodayLong();
-      const simpleRef = new Date().getFullYear().toString().slice(-2) + "-" + Date.now().toString().slice(-4);
-      document.getElementById("metaRefCode").textContent = simpleRef;
+        const el = rowEligibility(doc);
 
-      const element = document.getElementById("letterPreview");
-      element.style.display = "block"; // show for rendering
+        const tr = document.createElement('tr');
+        if (!el.ok) tr.classList.add('row-muted');
 
-      const fileNameSafeName = name.replace(/[^a-z0-9]/gi, "_");
-      const opt = {
-        margin: 0,
-        filename: "MTERMS2026_Appointment_" + fileNameSafeName + ".pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-      };
+        const typeCell = el.ok
+          ? `<span class="pill ok">${oralPoster}</span>`
+          : `<span class="pill ${el.code === 'participant' ? 'bad' : 'warn'}">${el.reason}</span>`;
 
- html2pdf().from(element).set(opt).save().then(function () {
-  element.style.display = "none"; // hide again after export
-});
+        tr.innerHTML = `
+          <td>
+            <input type="checkbox"
+              data-tick="${id}"
+              ${el.ok ? '' : 'disabled'}
+            />
+          </td>
+          <td><b>${escapeHtml(name)}</b></td>
+          <td>${typeCell}</td>
+          <td>${escapeHtml(email)}</td>
+          <td>
+            <button class="mini-btn"
+              data-emailbtn="${id}"
+              disabled
+              type="button">Email PDF</button>
+          </td>
+          <td class="status" data-status="${id}">—</td>
+        `;
 
+        tb.appendChild(tr);
+
+        const tick = tr.querySelector(`[data-tick="${id}"]`);
+        const btn  = tr.querySelector(`[data-emailbtn="${id}"]`);
+
+        if (tick && btn){
+          tick.addEventListener('change', () => {
+            btn.disabled = !tick.checked;
+          });
+
+          btn.addEventListener('click', async () => {
+            // send only this row (even if others ticked)
+            await sendOne(doc);
+          });
+        }
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str || '').replace(/[&<>"']/g, (m) => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[m]));
+    }
+
+    async function loadPage(){
+      const q = $('q').value.trim();
+      const qs = new URLSearchParams({ q, page:String(page), limit:String(limit) }).toString();
+      const data = await apiGet(`/api/admin/registrations?${qs}`);
+      total = data.total || 0;
+
+      renderRows(data.rows || []);
+      const pages = Math.max(1, Math.ceil(total / limit));
+      $('pageInfo').textContent = `Page ${page} / ${pages} (${total} records)`;
+      $('prevBtn').disabled = page <= 1;
+      $('nextBtn').disabled = page >= pages;
+    }
+
+    function fillLetter(doc){
+      const name = fullName(doc) || '';
+      const addr = formatAddress(doc);
+      const oralPoster = toOralPoster(doc?.program?.type);
+
+      // Use submission title if available, else program title, else placeholder
+      const abstractTitle =
+        (doc?.submission?.title && String(doc.submission.title).trim()) ||
+        (doc?.program?.title && String(doc.program.title).trim()) ||
+        '—';
+
+      $('lp-name').textContent = name;
+      $('lp-dear').textContent = name;
+
+      $('lp-addr1').textContent = addr.line1 || '—';
+      if (addr.line2){
+        $('lp-addr2').style.display = 'block';
+        $('lp-addr2').textContent = addr.line2;
+      } else {
+        $('lp-addr2').style.display = 'none';
+      }
+      $('lp-addr3').textContent = addr.line3 || '—';
+      $('lp-addr4').textContent = addr.country || '—';
+
+      $('lp-date').textContent = todayLong();
+      $('lp-type').textContent = oralPoster || '—';
+      $('lp-title').textContent = abstractTitle;
+    }
+
+    function pdfFilename(name){
+      const safe = (name || 'Participant')
+        .replace(/[\\\/:*?"<>|]+/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return `MTERMS 2026 Acceptance Letter - ${safe}.pdf`;
+    }
+
+    async function sendOne(doc){
+      const id = doc._id;
+      const name = fullName(doc);
+      const email = doc?.personal?.email || '';
+
+      const elig = rowEligibility(doc);
+      if (!elig.ok){
+        setStatus(id, elig.reason, 'bad');
+        return;
+      }
+      if (!email){
+        setStatus(id, 'Missing email', 'bad');
+        return;
+      }
+
+      try{
+        setStatus(id, 'Generating PDF…', '');
+
+        // Fill letter template
+        fillLetter(doc);
+
+        // Ensure preview is visible for render (but offscreen)
+        const letter = document.getElementById('letterPreview');
+        letter.style.display = 'block';
+
+        const filename = pdfFilename(name);
+
+        const opt = {
+          margin: 10,
+          filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Build PDF and get jsPDF instance
+        const worker = html2pdf().set(opt).from(letter).toPdf();
+        const pdf = await worker.get('pdf');
+
+        // base64 (no data: prefix)
+        const dataUri = pdf.output('datauristring');
+        const base64 = dataUri.split(',')[1] || '';
+
+        setStatus(id, 'Emailing…', '');
+
+        // Send via backend
+        await apiPost('/api/admin/acceptance-letter/send', {
+          registrationId: id,
+          filename,
+          pdfBase64: base64
+        });
+
+        // Auto-download after email request success
+        pdf.save(filename);
+
+        // Hide preview again
+        letter.style.display = 'none';
+
+        const t = new Date().toLocaleString('en-GB');
+        setStatus(id, `Sent (${t})`, 'ok');
+
+      } catch(err){
+        console.error(err);
+        const msg = (err && err.message) ? err.message : 'Failed';
+        setStatus(id, `Failed: ${msg}`, 'bad');
+
+        // Hide preview if something failed
+        const letter = document.getElementById('letterPreview');
+        letter.style.display = 'none';
+      }
+    }
+
+    // Events
+    $('searchBtn').addEventListener('click', () => { page = 1; loadPage(); });
+    $('q').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){ page = 1; loadPage(); }
+    });
+    $('prevBtn').addEventListener('click', () => { page = Math.max(1, page-1); loadPage(); });
+    $('nextBtn').addEventListener('click', () => { page = page+1; loadPage(); });
+
+    $('backBtn').addEventListener('click', () => {
+      window.location.href = 'admin.html';
+    });
+
+    // Initial load
+    loadPage().catch(err => {
+      console.error(err);
+      alert('Unable to load registrations. Make sure you are logged in as admin and adminBasic token exists.');
     });
   </script>
 </body>
