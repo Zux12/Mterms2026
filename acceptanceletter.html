@@ -230,9 +230,23 @@
 
   <!-- Hidden A4 letter template -->
   <div id="letterPreview" aria-hidden="true">
-    <div class="letter-header">
-      <img src="public/mterm.jpg" alt="MTERMS 2026">
-    </div>
+<!-- Logos Header (same as committee-appointment.html) -->
+<div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  ">
+  <!-- MTERMS main logo -->
+  <img src="public/mterm.jpg" alt="MTERMS Logo"
+       style="height:70px;object-fit:contain;" />
+
+  <!-- Organiser Logos -->
+  <div style="display:flex;gap:18px;align-items:center;">
+    <img src="public/uitm.png" alt="UITM Logo" style="height:55px;object-fit:contain;" />
+    <img src="public/tesma.png" alt="TESMA Logo" style="height:55px;object-fit:contain;" />
+  </div>
+</div>
 
     <div class="addr-block">
       <div class="nm" id="lp-name">[NAME]</div>
@@ -266,23 +280,20 @@
 
       <p>Thank you.</p>
 
-      <div class="letter-footer">
-        <p>
-          Sincerely,<br>
-          <b>MTERMS 2026 Secretariat</b>
-        </p>
+<!-- Signature (same as committee-appointment.html) -->
+<div style="margin-top:20px;">
+  <p style="margin:0 0 6px 0;">Yours sincerely,</p>
 
-        <!-- Keep the same signature block style you already use in committee-appointment.html if you prefer.
-             If your committee-appointment.html already contains an image signature, copy that exact HTML here. -->
-      </div>
+  <img src="public/signaturesample.png" alt="Signature"
+       style="height:50px;margin-bottom:4px;" />
 
-      <div class="org-by">
-        <div class="label">Organized by</div>
-        <div class="org-logos">
-          <img src="public/uitm.png" alt="UiTM">
-          <img src="public/tesma.png" alt="TESMA">
-        </div>
-      </div>
+  <p style="margin:0;">
+    <strong>Associate Professor. Ts. Dr. Nur Aliana Hidayah Mohamed</strong><br />
+    Chair <br /> MTERMS 2026 Organising Committee <br />.
+  </p>
+</div>
+
+
     </div>
   </div>
 
