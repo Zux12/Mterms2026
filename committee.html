@@ -670,6 +670,135 @@
   justify-content:flex-end;
   gap: 10px;
 }
+
+
+/* =========================
+   Committee (portfolio blocks)
+   ========================= */
+.committee-hero{
+  text-align:center;
+  max-width: 900px;
+  margin: 0 auto 18px;
+}
+.committee-hero h2{ margin-bottom: 6px; }
+.committee-sub{
+  color: var(--muted);
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.committee-wrap{
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.portfolio-block{
+  background: linear-gradient(180deg, rgba(47,123,220,.07), rgba(255,255,255,1));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 28px rgba(30,90,168,.06);
+}
+
+.portfolio-head{
+  display:flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.portfolio-head h3{
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+.portfolio-count{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--brand);
+  background: rgba(30,90,168,.10);
+  border: 1px solid rgba(30,90,168,.16);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.member-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.member-card{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(30,90,168,.14);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.avatar{
+  height: 42px;
+  width: 42px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+  letter-spacing: .4px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--brand), #166534);
+  flex: 0 0 auto;
+  box-shadow: 0 10px 22px rgba(30,90,168,.14);
+}
+
+.member-meta{ min-width: 0; }
+.member-name{
+  font-weight: 800;
+  line-height: 1.25;
+}
+.member-aff{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.35;
+}
+
+.portfolio-notes{
+  margin: -4px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(30,90,168,.22);
+  background: rgba(255,255,255,.75);
+}
+.notes-title{
+  font-weight: 800;
+  color: var(--brand);
+  font-size: .9rem;
+  margin-bottom: 6px;
+}
+.notes-list{
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.notes-list li{ margin: 4px 0; }
+
+@media (max-width: 980px){
+  .member-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px){
+  .member-grid{ grid-template-columns: 1fr; }
+  .portfolio-head{ flex-direction: column; align-items:flex-start; }
+}    
 </style>
 <script src="lunr.min.js"></script>
 </head>
@@ -759,30 +888,374 @@
 
 
 
-  <!-- Committee -->
-  <section id="committee" class="section">
-    <div class="container">
-      <h2>Organising Committee</h2>
-      <div class="grid-3">
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?q=80&w=800&auto=format&fit=crop" alt="Committee member placeholder" />
-          <h3>Chair</h3>
-          <p>Institution — Name TBA</p>
-        </div>
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=800&auto=format&fit=crop" alt="Committee member placeholder" />
-          <h3>Co-Chair</h3>
-          <p>Institution — Name TBA</p>
-        </div>
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=800&auto=format&fit=crop" alt="Committee member placeholder" />
-          <h3>Scientific Program Lead</h3>
-          <p>Institution — Name TBA</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
+
+  
+  <!-- Committee -->
+<!-- Committee -->
+<section id="committee" class="section">
+  <div class="container">
+
+    <div class="committee-hero">
+      <h2>Organising Committee</h2>
+      <p class="committee-sub">
+        MTERMS 2026 is made possible by a multi-institutional committee spanning scientific, logistics, and stakeholder engagement portfolios.
+      </p>
+    </div>
+
+    <div class="committee-wrap">
+
+      <!-- Chair -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Chair</h3>
+          <span class="portfolio-count">1 member</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NH</div>
+            <div class="member-meta">
+              <div class="member-name">Ts AP Dr Nur Aliana Hidayah Mohamed</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Co-Chair -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Co-Chair</h3>
+          <span class="portfolio-count">1 member</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">MB</div>
+            <div class="member-meta">
+              <div class="member-name">AP. Dr. Mohd Fauzi Md Busra</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Secretary 1 -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Secretary 1</h3>
+          <span class="portfolio-count">1 member</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NH</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Nam Hui Yin (Head)</div>
+              <div class="member-aff">Department of Pre-clinical Sciences, M. Kandiah Faculty of Medicine and Health Sciences, Universiti Tunku Abdul Rahman, Selangor, Malaysia</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Secretary 2 -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Secretary 2</h3>
+          <span class="portfolio-count">1 member</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">FS</div>
+            <div class="member-meta">
+              <div class="member-name">Ts Dr Faezah Sabirin (UiTM)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Treasurer -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Treasurer</h3>
+          <span class="portfolio-count">3 members</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">SA</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Siti Aminah (Head)</div>
+              <div class="member-aff">Ming Medical Sdn. Bhd.</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">AA</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Asmaa Abdullah</div>
+              <div class="member-aff">USM</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">ZU</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Zahirrah (UKM)</div>
+              <div class="member-aff">Fakulti Pergigian, Universiti Kebangsaan Malaysia, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scientific Program -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Scientific Program</h3>
+          <span class="portfolio-count">13 members</span>
+        </div>
+
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">TC</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr Tan Suat Cheng (Head)</div>
+              <div class="member-aff">School of Health Science, Health Campus, Universiti Sains Malaysia, Kelantan, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NH</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Nurhaslina Hasan (UiTM) (Head)</div>
+              <div class="member-aff">Centre of Preclinical Sci Studies, Faculty of Dentistry, Universiti Teknologi MARA, Selangor, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NN</div>
+            <div class="member-meta">
+              <div class="member-name">Prof. Dr. Norshariza Nordin</div>
+              <div class="member-aff">Department of Biomedical Science, Faculty of Medicine and Health Sciences, Universiti Putra Malaysia, Selangor, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NM</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Nurul ‘Izzah Mohd Sarmin</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">MM</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Manira Maarof</div>
+              <div class="member-aff">Department of Tissue Engineering &amp; Regenerative Medicine, National Orthopaedic Centre of Excellence in Research &amp; Learning (NOCERAL), Faculty of Medicine, Universiti Kebangsaan Malaysia, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">AH</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Adila A . Hamid</div>
+              <div class="member-aff">Department of Physiology, Faculty of Medicine, Universiti Kebangsaan Malaysia Medical Centre, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">WZ</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Wan Safwani Wan Kamarul Zaman</div>
+              <div class="member-aff">Department of Pharmaceutical Life Sciences, Faculty of Pharmacy, Universiti Malaya, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NY</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Nam Hui Yin</div>
+              <div class="member-aff">Department of Pre-clinical Sciences, M. Kandiah Faculty of Medicine and Health Sciences, Universiti Tunku Abdul Rahman, Selangor, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">TL</div>
+            <div class="member-meta">
+              <div class="member-name">Dr .Tan Sik Loo</div>
+              <div class="member-aff">Department of Orthopaedic Surgery, Faculty of Medicine, Universiti Malaya, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">PH</div>
+            <div class="member-meta">
+              <div class="member-name">Dr. Pezhman Hafez</div>
+              <div class="member-aff">Yakin Health Management Sdn Bhd, Signature Office, Mid Valley City, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">KH</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr Ts. Khor Goot Heah</div>
+              <div class="member-aff">Centre of Preclinical Science Studies, Faculty of Dentistry, Universiti Teknologi MARA, Selangor, Malaysia</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">MB</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr. Mohd Fauzi Md Busra (UKM)</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">YL</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr. Yogeswaran Lokanathan (UKM)- (Head)</div>
+              <div class="member-aff">Department of Tissue Engineering &amp; Regenerative Medicine, National Orthopaedic Centre of Excellence in Research &amp; Learning (NOCERAL), Faculty of Medicine, Universiti Kebangsaan Malaysia, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sponsorship / Exhibition -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Sponsorship / Exhibition</h3>
+          <span class="portfolio-count">2 members</span>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">YL</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr. Yogeswaran Lokanathan (UKM)- (Head)</div>
+              <div class="member-aff">Department of Tissue Engineering &amp; Regenerative Medicine, National Orthopaedic Centre of Excellence in Research &amp; Learning (NOCERAL), Faculty of Medicine, Universiti Kebangsaan Malaysia, Kuala Lumpur, Malaysia</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">MB</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr. Mohd Fauzi Md Busra (UKM)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AV & Technical Setup (notes only) -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>AV &amp; Technical Setup</h3>
+          <span class="portfolio-count">0 members</span>
+        </div>
+
+        <div class="portfolio-notes">
+          <div class="notes-title">Notes</div>
+          <ul class="notes-list">
+            <li>Break up room / technical set up (6 people)</li>
+          </ul>
+        </div>
+
+        <div class="member-grid"></div>
+      </section>
+
+      <!-- Secretariat & Registration -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Secretariat and Registration (Involved the lanyard/ venue/ logistics/ speaker’s accommodation/transportation)</h3>
+          <span class="portfolio-count">4 members</span>
+        </div>
+
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">ZR</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Zatilfarihiah Rasdi (UiTM) – (Head)</div>
+              <div class="member-aff">Fakulti Pergigian, Universiti Teknologi MARA, Sungai Buloh, Selangor</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">EH</div>
+            <div class="member-meta">
+              <div class="member-name">AP Ts Dr Eddy Hasrul Hassan (UiTM)</div>
+              <div class="member-aff">Fakulti Pergigian</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">IH</div>
+            <div class="member-meta">
+              <div class="member-name">Izyan Hazwani (UiTM)</div>
+              <div class="member-aff">Fakulti Pergigian, Universiti Teknologi MARA, Sungai Buloh, Selangor</div>
+            </div>
+          </div>
+
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NF</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Nurfarhana Ferdaos</div>
+              <div class="member-aff">Fakulti Farmasi UiTM</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Protocol -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Protocol</h3>
+          <span class="portfolio-count">3 members</span>
+        </div>
+
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">FN</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Fazlina Nordin (UKM)- (Head)</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">AW</div>
+            <div class="member-meta">
+              <div class="member-name">AP Dr Angela Ng Min Hwei (UKM)</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NU</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Norashikin (Sc Off) (UiTM)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Publicity / Media / Marketing -->
+      <section class="portfolio-block">
+        <div class="portfolio-head">
+          <h3>Publicity/ Media / Marketing</h3>
+          <span class="portfolio-count">3 members</span>
+        </div>
+
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">OC</div>
+            <div class="member-meta">
+              <div class="member-name">Ts. Ooi Ghee Chien</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">NL</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Ng Sook Luan (Head)</div>
+            </div>
+          </div>
+          <div class="member-card">
+            <div class="avatar" aria-hidden="true">FN</div>
+            <div class="member-meta">
+              <div class="member-name">Dr Fazlina Nordin</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
 
 
 
