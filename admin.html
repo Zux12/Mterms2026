@@ -1123,7 +1123,7 @@ document.getElementById('btnCert').addEventListener('click', () => {
         // Latest abstract preview
         loadLatestAbstract(doc.regCode, doc.personal?.email);
         loadLatestBankReceipt(doc.regCode, doc.personal?.email);
-
+        mountAuditTrails(doc.regCode, doc.personal?.email);
 
 
                 // Submission: show only if presenter
@@ -1161,6 +1161,7 @@ $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
           $('editCard').style.display = 'none';
           $('saveMsg').textContent = '';
           $('photoMsg').textContent = '';
+          document.getElementById('auditMount').style.display = 'none';
         };
         $('printBadge').onclick = ()=>{window.print();};
         $('loadPhoto').onclick = ()=>loadLatestPhoto(doc.regCode, doc.personal?.email);
@@ -1315,6 +1316,96 @@ async function loadLatestBankReceipt(regCode, email){
   }
 }
 
+
+let _auditPartialLoaded = false;
+
+async function ensureAuditPartialLoaded(){
+  const mount = document.getElementById('auditMount');
+  if (!mount) return;
+  if (_auditPartialLoaded) return;
+
+  mount.style.display = 'block';
+  mount.innerHTML = 'Loading…';
+
+  try{
+    const r = await fetch('audit-trails.html', { cache: 'no-store' });
+    const html = await r.text();
+    if (!r.ok) throw new Error('Failed to load audit-trails.html');
+    mount.innerHTML = html;
+    _auditPartialLoaded = true;
+  }catch(err){
+    mount.innerHTML = `<div class="card" style="width:min(1200px,92vw); margin:18px auto 0;">
+      <div style="color:#b42318;font-weight:700">❌ ${escapeHtml(err.message || 'Failed to load Audit Trails')}</div>
+    </div>`;
+  }
+}
+
+async function loadAuditTrails(regCode, email){
+  const box = document.getElementById('auditTrailsBox');
+  if(!box) return;
+
+  box.innerHTML = 'Loading…';
+
+  try{
+    // IMPORTANT: no &type=  → returns ALL uploads for this participant
+    const r = await fetch(
+      `${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`
+    );
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Error');
+
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    if(!rows.length){
+      box.innerHTML = '<em>No uploads found.</em>';
+      return;
+    }
+
+    // newest first
+    rows.sort((a,b)=>{
+      const ta = new Date(a.uploadedAt||0).getTime();
+      const tb = new Date(b.uploadedAt||0).getTime();
+      if (tb !== ta) return tb - ta;
+      return (Number(b.version)||0) - (Number(a.version)||0);
+    });
+
+    box.innerHTML = `
+      <div style="overflow:auto;background:#fff;border:1px solid var(--border);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:.92rem">
+          <thead>
+            <tr>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Type</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Version</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Filename</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Uploaded</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(u => `
+              <tr>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${escapeHtml(u.type || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">v${escapeHtml(u.version || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${escapeHtml(u.filename || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${new Date(u.uploadedAt).toLocaleString()}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${escapeHtml(err.message || 'Failed')}</span>`;
+  }
+}
+
+async function mountAuditTrails(regCode, email){
+  const mount = document.getElementById('auditMount');
+  if (!mount) return;
+
+  mount.style.display = 'block';
+  await ensureAuditPartialLoaded();
+  await loadAuditTrails(regCode, email);
+}    
     
 
     // Bulk print for selected
@@ -1434,7 +1525,8 @@ try{
 
 
 
-
+<!-- Audit Trails mount point (injected from audit-trails.html) -->
+<div id="auditMount" style="display:none"></div>
 
 
 
