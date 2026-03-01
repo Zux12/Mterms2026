@@ -130,16 +130,18 @@
     }
 
     /* Hidden letter preview (A4) */
-    #letterPreview{
-      display:none;
-      width:210mm;
-      padding:20mm;
-      background:#fff;
-      color:#000;
-      font-family:"Times New Roman", Times, serif;
-      font-size:12pt;
-      line-height:1.55;
-    }
+#letterPreview{
+  display:none;
+  width:210mm;
+  padding:20mm;
+  padding-top:24mm;     /* add this */
+  box-sizing:border-box;/* add this */
+  background:#fff;
+  color:#000;
+  font-family:"Times New Roman", Times, serif;
+  font-size:12pt;
+  line-height:1.55;
+}
     .letter-header{
       display:flex;
       align-items:center;
@@ -236,6 +238,7 @@
     justify-content:space-between;
     align-items:center;
     margin-bottom:20px;
+    padding:0 6mm;  /* add this */
   ">
   <!-- MTERMS main logo -->
   <img src="public/mterm.jpg" alt="MTERMS Logo"
@@ -524,13 +527,13 @@
 
         const filename = pdfFilename(name);
 
-        const opt = {
-          margin: 10,
-          filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+const opt = {
+  margin: [15, 15, 15, 15], // top, right, bottom, left (mm)
+  filename,
+  image: { type: 'jpeg', quality: 0.98 },
+  html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
 
         // Build PDF and get jsPDF instance
         const worker = html2pdf().set(opt).from(letter).toPdf();
