@@ -495,10 +495,14 @@
       const oralPoster = toOralPoster(doc?.program?.type);
 
       // Use submission title if available, else program title, else placeholder
+const rawTitle = doc?.submission?.title;
 const abstractTitle =
-  (doc?.submission?.title && String(doc.submission.title).trim()) ||
-  (doc?.program?.title && String(doc.program.title).trim()) ||
-  '—';
+  (typeof rawTitle === 'string' && rawTitle.trim().length > 0)
+    ? rawTitle.trim()
+    : 'Title Not Submitted';
+
+
+      
 
       $('lp-name').textContent = name;
       $('lp-dear').textContent = name;
