@@ -151,9 +151,15 @@
 }
 
 /* Ensure long words never get cut */
-#letterPreview, #letterPreview *{
-  overflow-wrap: anywhere;
-  word-break: break-word;
+/* Preserve natural word spacing for justified text */
+#letterPreview{
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+}
+#letterPreview p{
+  overflow-wrap: break-word;
+  word-break: normal;
   hyphens: auto;
 }
     .letter-header{
