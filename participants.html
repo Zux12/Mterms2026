@@ -1038,6 +1038,23 @@ removeAuthorBtn.addEventListener('click', () => {
   // initial render (so author fields exist before prefill() writes)
   renderAuthors();
 
+
+function validateTitleIfPresenter(){
+  // Do not disturb existing submission validation logic
+  // Only enforce: Presenter => Submission / Abstract Title is required
+
+  subMsg.textContent = '';
+
+  const presenting = $('pr-presenting').checked;
+  if (!presenting) return { ok:true };
+
+  const title = (subTitle.value || '').trim();
+  if (!title) return { ok:false, msg:'❌ Submission / Abstract Title is required for presenters.' };
+
+  return { ok:true };
+}
+
+  
   function validateSubmissionIfPresenter(){
     subMsg.textContent = '';
     const presenting = $('pr-presenting').checked;
@@ -1464,7 +1481,14 @@ consents: {
 }
     };
 
-    const v = validateSubmissionIfPresenter();
+const vt = validateTitleIfPresenter();
+if (!vt.ok) {
+  saveMsg.textContent = vt.msg;
+  saveBtn.disabled = false;
+  return;
+}
+
+const v = validateSubmissionIfPresenter();
 if (!v.ok) {
   saveMsg.textContent = v.msg;
   saveBtn.disabled = false;
