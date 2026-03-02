@@ -153,14 +153,15 @@
 /* Ensure long words never get cut */
 /* Preserve natural word spacing for justified text */
 #letterPreview{
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
   word-break: normal;
-  hyphens: auto;
+  hyphens: none;
 }
+
 #letterPreview p{
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
   word-break: normal;
-  hyphens: auto;
+  hyphens: none;
 }
     .letter-header{
       display:flex;
