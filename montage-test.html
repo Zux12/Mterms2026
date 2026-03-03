@@ -1,6 +1,8 @@
 <!-- Sponsor Cinematic Montage (copy-paste ready)
      - 2 Platinum, 3 Gold, 5 Silver
-     - Luxurious + elegant (no overlap): JS controls active scene; CSS uses transitions
+     - Dark cinematic + elegant
+     - Tiered luxury cards (Platinum subtle champagne glow, Gold warm accent, Silver cool)
+     - No overlap: JS controls active scene; CSS transitions
 -->
 
 <section class="sponsor-cine" aria-label="Sponsor montage">
@@ -101,13 +103,21 @@
   :root{
     --bg0:#070B18;
     --bg1:#0B1230;
+
     --glass: rgba(255,255,255,.10);
     --glass2: rgba(255,255,255,.16);
     --stroke: rgba(255,255,255,.18);
+
     --text: rgba(255,255,255,.92);
     --muted: rgba(255,255,255,.72);
     --muted2: rgba(255,255,255,.58);
+
     --shadow: 0 18px 60px rgba(0,0,0,.45);
+
+    /* Luxury accents (muted, not flashy) */
+    --platinum-tint: rgba(255, 236, 208, .10); /* champagne */
+    --gold-tint:     rgba(255, 208, 120, .10); /* warm gold */
+    --silver-tint:   rgba(195, 210, 255, .10); /* cool silver */
   }
 
   .sponsor-cine{
@@ -275,6 +285,50 @@
     color: var(--muted2);
   }
 
+  /* Tiered luxury accent:
+     - Uses a very subtle warm/cool tint + metallic top line.
+     - Active tier gets slightly stronger (still restrained).
+  */
+  .logo-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity: 0;
+    transition: opacity 520ms ease;
+    background: radial-gradient(700px 220px at 50% 0%, rgba(255,255,255,.10), transparent 55%);
+  }
+  .logo-card::after{
+    content:"";
+    position:absolute;
+    left: 10%;
+    right: 10%;
+    top: 10px;
+    height: 2px;
+    border-radius: 999px;
+    pointer-events:none;
+    opacity: 0;
+    transition: opacity 520ms ease;
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.28), rgba(255,255,255,0));
+  }
+
+  /* Base tint per tier (very subtle) */
+  .scene-platinum .logo-card{ --tierTint: var(--platinum-tint); --tierLine: rgba(255,236,208,.60); }
+  .scene-gold     .logo-card{ --tierTint: var(--gold-tint);     --tierLine: rgba(255,208,120,.55); }
+  .scene-silver   .logo-card{ --tierTint: var(--silver-tint);   --tierLine: rgba(195,210,255,.55); }
+
+  /* Apply tint + line only when that tier is active (premium focus) */
+  .cine-scene.is-active .logo-card{
+    background:
+      radial-gradient(900px 260px at 50% 0%, var(--tierTint), transparent 60%),
+      linear-gradient(180deg, var(--glass2), var(--glass));
+  }
+  .cine-scene.is-active .logo-card::before{ opacity: .55; }
+  .cine-scene.is-active .logo-card::after{
+    opacity: .70;
+    background: linear-gradient(90deg, rgba(255,255,255,0), var(--tierLine), rgba(255,255,255,0));
+  }
+
   /* Stagger per tier */
   .scene-platinum .logo-card:nth-child(1){ --stagger: 120ms; }
   .scene-platinum .logo-card:nth-child(2){ --stagger: 240ms; }
@@ -347,10 +401,11 @@
 
   @media (prefers-reduced-motion: reduce){
     .cine-bg, .cine-progress-bar, .shine{ animation: none !important; }
-    .cine-scene, .logo-card{ transition: none !important; }
+    .cine-scene, .logo-card, .logo-card::before, .logo-card::after{ transition: none !important; }
     .cine-scene{ opacity: 1; position: static; transform:none; filter:none; pointer-events:auto; }
     .cine-stage{ min-height: auto; }
     .logo-card{ opacity: 1; transform:none; }
+    .logo-card::before, .logo-card::after{ opacity: 0 !important; }
   }
 
   /* When paused (JS toggles this) */
@@ -392,8 +447,8 @@
   };
 
   // Timing (luxury)
-  const HOLD_MS = 4600;     // time each tier stays visible
-  const FADE_MS = 520;      // keep aligned with CSS transition duration
+  const HOLD_MS = 4600;
+  const FADE_MS = 520;
   const CYCLE_MS = (HOLD_MS + FADE_MS) * scenes.length;
 
   // Sync progress bar speed
@@ -414,10 +469,8 @@
     if (subEl) subEl.textContent = meta.sub;
   }
 
-  // Start immediately with first tier active
   setActive(idx);
 
-  // Loop
   setInterval(() => {
     idx = (idx + 1) % scenes.length;
     setActive(idx);
