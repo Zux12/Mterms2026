@@ -261,7 +261,6 @@
     padding-left: 90px;
     padding-right: 120px;
   }
-  ...
 }
 
 /* ===== FINAL HEADER OVERRIDE (forces correct layout & logo size) ===== */
@@ -1337,80 +1336,62 @@
 
 <script>
 /* =========================
-   Dropdowns (AUTHORS/TRAVEL) — click on desktop + click on mobile (robust)
-   - Opens nav on mobile if it isn't open yet
-   - Uses pointerdown to avoid mobile "tap closes immediately" issues
+   Header dropdowns (multi) + mobile menu (touch-safe)
    ========================= */
-(function () {
+(function(){
   const nav = document.getElementById('siteNav');
   const toggle = document.querySelector('.nav-toggle');
   const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
-  const mqMobile = window.matchMedia('(max-width: 980px)');
-  const mqDesktop = window.matchMedia('(min-width: 981px)');
 
-  if (!nav || !dropdowns.length) return;
+  if (!nav) return;
 
-  function setOpen(dd, open) {
-    dd.classList.toggle('open', open);
-    const btn = dd.querySelector('.nav-dd-btn');
-    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  function closeAll(){
+    dropdowns.forEach(dd => {
+      dd.classList.remove('open');
+      const btn = dd.querySelector('.nav-dd-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
   }
 
-  function closeAll() {
-    dropdowns.forEach(dd => setOpen(dd, false));
+  // Mobile menu toggle
+  if (toggle){
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+
+      if (!open) closeAll();
+    });
   }
 
-  function ensureNavOpenOnMobile() {
-    if (!mqMobile.matches) return true;
-    if (nav.classList.contains('open')) return true;
-
-    // Force open (safe even if assets/main.js also toggles)
-    nav.classList.add('open');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    return true;
-  }
-
+  // Dropdown toggle (mobile-friendly)
   dropdowns.forEach(dd => {
-    if (dd.__ddBound) return;
-    dd.__ddBound = true;
-
     const btn = dd.querySelector('.nav-dd-btn');
     const menu = dd.querySelector('.nav-dd-menu');
     if (!btn) return;
 
-    // Use pointerdown for mobile reliability; capture=true to beat other document handlers
     btn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      ensureNavOpenOnMobile();
-
       const isOpen = dd.classList.contains('open');
       closeAll();
-      setOpen(dd, !isOpen);
-    }, true);
 
-    // Fallback for browsers that behave oddly with pointerdown
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (!isOpen){
+        dd.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
 
-      ensureNavOpenOnMobile();
+    if (menu){
+      menu.addEventListener('pointerdown', (e) => e.stopPropagation());
 
-      const isOpen = dd.classList.contains('open');
-      closeAll();
-      setOpen(dd, !isOpen);
-    }, true);
-
-    if (menu) {
-      menu.addEventListener('pointerdown', (e) => e.stopPropagation(), true);
-      menu.addEventListener('click', (e) => e.stopPropagation(), true);
-
-      // On mobile, when choosing an item, close dropdown and close nav
       menu.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', () => {
           closeAll();
-          if (mqMobile.matches) {
+          if (nav.classList.contains('open')) {
             nav.classList.remove('open');
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
           }
@@ -1419,28 +1400,16 @@
     }
   });
 
-  // Outside click/tap closes dropdowns
+  // Close when tapping outside
   document.addEventListener('pointerdown', (e) => {
     if (e.target.closest('[data-dd]')) return;
     if (toggle && e.target.closest('.nav-toggle')) return;
     closeAll();
-  }, true);
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeAll();
   });
-
-  // If the nav is closed (e.g., hamburger tapped), also close dropdowns
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      setTimeout(() => {
-        if (!nav.classList.contains('open')) closeAll();
-      }, 0);
-    }, true);
-  }
-
-  mqMobile.addEventListener('change', closeAll);
-  mqDesktop.addEventListener('change', closeAll);
 })();
 </script>
 
