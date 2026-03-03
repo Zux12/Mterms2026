@@ -798,6 +798,10 @@
 @media (max-width: 620px){
   .member-grid{ grid-template-columns: 1fr; }
   .portfolio-head{ flex-direction: column; align-items:flex-start; }
+} 
+
+@media (max-width: 980px){
+  .nav-dd-btn{ touch-action: manipulation; width: 100%; justify-content: space-between; }
 }    
 </style>
 <script src="lunr.min.js"></script>
@@ -1335,57 +1339,104 @@
 
 <script>
 /* =========================
-   Header dropdowns (multi) + mobile menu
+   Dropdowns (AUTHORS/TRAVEL) — click-only on desktop + click on mobile
+   - Does NOT rely on hover
+   - Does NOT break hamburger behavior in assets/main.js
    ========================= */
-(function(){
+(function () {
   const nav = document.getElementById('siteNav');
   const toggle = document.querySelector('.nav-toggle');
   const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
+  const mqMobile = window.matchMedia('(max-width: 980px)');
+  const mqDesktop = window.matchMedia('(min-width: 981px)');
 
-  // Mobile menu toggle
-  if (toggle && nav){
-    toggle.addEventListener('click', () => {
-      const open = nav.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', String(open));
-    });
-  }
+  if (!nav || !dropdowns.length) return;
 
-  function closeAll(){
-    dropdowns.forEach(dd => {
-      dd.classList.remove('open');
-      const btn = dd.querySelector('.nav-dd-btn');
-      if (btn) btn.setAttribute('aria-expanded', 'false');
-    });
-  }
-
-  dropdowns.forEach(dd => {
+  function setOpen(dd, open) {
+    dd.classList.toggle('open', open);
     const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function closeAll() {
+    dropdowns.forEach(dd => setOpen(dd, false));
+  }
+
+  // Bind button clicks once (works for BOTH desktop & mobile, behavior gated by media query)
+  dropdowns.forEach(dd => {
+    if (dd.__ddBound) return;
+    dd.__ddBound = true;
+
+    const btn = dd.querySelector('.nav-dd-btn');
+    const menu = dd.querySelector('.nav-dd-menu');
     if (!btn) return;
 
+    // Button click toggles dropdown (desktop + mobile)
     btn.addEventListener('click', (e) => {
+      // If nav is closed on mobile, do nothing (prevents weird taps)
+      if (mqMobile.matches && !nav.classList.contains('open')) return;
+
       e.preventDefault();
       e.stopPropagation();
 
       const isOpen = dd.classList.contains('open');
-      closeAll();
 
-      if (!isOpen){
-        dd.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
-      }
+      // On mobile: allow multiple? (usually better to keep only one open)
+      // On desktop: keep only one open
+      closeAll();
+      setOpen(dd, !isOpen);
     });
 
-    // Prevent clicks inside menu from closing immediately
-    const menu = dd.querySelector('.nav-dd-menu');
-    if (menu){
+    // Allow clicking inside menu without closing immediately
+    if (menu) {
       menu.addEventListener('click', (e) => e.stopPropagation());
+
+      // Mobile UX: when a menu link is clicked, close dropdown + close nav
+      menu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          closeAll();
+          if (mqMobile.matches && nav.classList.contains('open')) {
+            nav.classList.remove('open');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
     }
   });
 
-  document.addEventListener('click', closeAll);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAll();
+  // Click outside closes dropdowns:
+  // - Desktop: always close on outside click
+  // - Mobile: close dropdowns if you tap outside dropdowns (while nav is open)
+  document.addEventListener('click', (e) => {
+    const insideDropdown = !!e.target.closest('[data-dd]');
+    const onToggle = !!(toggle && e.target.closest('.nav-toggle'));
+
+    if (onToggle) return;
+    if (insideDropdown) return;
+
+    if (mqDesktop.matches) {
+      closeAll();
+      return;
+    }
+
+    if (mqMobile.matches && nav.classList.contains('open')) {
+      closeAll();
+    }
   });
+
+  // When hamburger closes the nav, also close dropdowns (safe even if main.js also runs)
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      // Let assets/main.js toggle nav first, then react
+      setTimeout(() => {
+        if (!nav.classList.contains('open')) closeAll();
+      }, 0);
+    });
+  }
+
+  // If screen size changes, reset open states
+  mqMobile.addEventListener('change', closeAll);
+  mqDesktop.addEventListener('change', closeAll);
 })();
 </script>
 
