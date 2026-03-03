@@ -831,6 +831,95 @@
   <script src="assets/main.js"></script>
 
 
+
+  
+
+  <script>
+/* =========================
+   Desktop-only dropdown helper (does not run on mobile)
+   ========================= */
+(function () {
+  const mqDesktop = window.matchMedia('(min-width: 981px)');
+  const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
+
+  if (!dropdowns.length) return;
+
+  function setOpen(dd, open) {
+    dd.classList.toggle('open', open);
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function closeAll() {
+    dropdowns.forEach(dd => setOpen(dd, false));
+  }
+
+  function enableDesktop() {
+    // Close any leftover open state when switching to desktop
+    closeAll();
+
+    dropdowns.forEach(dd => {
+      // Avoid double-binding if user resizes
+      if (dd.__desktopBound) return;
+      dd.__desktopBound = true;
+
+      // Hover open/close
+      dd.addEventListener('mouseenter', () => {
+        if (!mqDesktop.matches) return;
+        closeAll();
+        setOpen(dd, true);
+      });
+
+      dd.addEventListener('mouseleave', () => {
+        if (!mqDesktop.matches) return;
+        setOpen(dd, false);
+      });
+
+      // Keyboard accessibility: open on focus within, close when leaving
+      dd.addEventListener('focusin', () => {
+        if (!mqDesktop.matches) return;
+        closeAll();
+        setOpen(dd, true);
+      });
+
+      dd.addEventListener('focusout', (e) => {
+        if (!mqDesktop.matches) return;
+        // If focus moved outside this dropdown, close it
+        if (!dd.contains(e.relatedTarget)) setOpen(dd, false);
+      });
+
+      // Desktop click toggle as fallback (optional but helpful)
+      const btn = dd.querySelector('.nav-dd-btn');
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          if (!mqDesktop.matches) return; // IMPORTANT: don't affect mobile
+          e.preventDefault();
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll();
+          setOpen(dd, !isOpen);
+        });
+      }
+    });
+
+    // Click outside closes dropdowns (desktop only)
+    document.addEventListener('click', (e) => {
+      if (!mqDesktop.matches) return;
+      if (e.target.closest('[data-dd]')) return;
+      closeAll();
+    }, { passive: true });
+  }
+
+  // Run once and also respond to resizing
+  enableDesktop();
+  mqDesktop.addEventListener('change', () => {
+    // When switching between mobile/desktop, ensure dropdowns are closed
+    closeAll();
+  });
+})();
+</script>
+
+
 <link rel="stylesheet" href="assets/ai-widget.css">
 <script src="assets/ai-widget.js"></script>
 
