@@ -1339,9 +1339,9 @@
 
 <script>
 /* =========================
-   Dropdowns (AUTHORS/TRAVEL) — click-only on desktop + click on mobile
-   - Does NOT rely on hover
-   - Does NOT break hamburger behavior in assets/main.js
+   Dropdowns (AUTHORS/TRAVEL) — click on desktop + click on mobile (robust)
+   - Opens nav on mobile if it isn't open yet
+   - Uses pointerdown to avoid mobile "tap closes immediately" issues
    ========================= */
 (function () {
   const nav = document.getElementById('siteNav');
@@ -1362,7 +1362,16 @@
     dropdowns.forEach(dd => setOpen(dd, false));
   }
 
-  // Bind button clicks once (works for BOTH desktop & mobile, behavior gated by media query)
+  function ensureNavOpenOnMobile() {
+    if (!mqMobile.matches) return true;
+    if (nav.classList.contains('open')) return true;
+
+    // Force open (safe even if assets/main.js also toggles)
+    nav.classList.add('open');
+    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    return true;
+  }
+
   dropdowns.forEach(dd => {
     if (dd.__ddBound) return;
     dd.__ddBound = true;
@@ -1371,31 +1380,39 @@
     const menu = dd.querySelector('.nav-dd-menu');
     if (!btn) return;
 
-    // Button click toggles dropdown (desktop + mobile)
-    btn.addEventListener('click', (e) => {
-      // If nav is closed on mobile, do nothing (prevents weird taps)
-      if (mqMobile.matches && !nav.classList.contains('open')) return;
-
+    // Use pointerdown for mobile reliability; capture=true to beat other document handlers
+    btn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      const isOpen = dd.classList.contains('open');
+      ensureNavOpenOnMobile();
 
-      // On mobile: allow multiple? (usually better to keep only one open)
-      // On desktop: keep only one open
+      const isOpen = dd.classList.contains('open');
       closeAll();
       setOpen(dd, !isOpen);
-    });
+    }, true);
 
-    // Allow clicking inside menu without closing immediately
+    // Fallback for browsers that behave oddly with pointerdown
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      ensureNavOpenOnMobile();
+
+      const isOpen = dd.classList.contains('open');
+      closeAll();
+      setOpen(dd, !isOpen);
+    }, true);
+
     if (menu) {
-      menu.addEventListener('click', (e) => e.stopPropagation());
+      menu.addEventListener('pointerdown', (e) => e.stopPropagation(), true);
+      menu.addEventListener('click', (e) => e.stopPropagation(), true);
 
-      // Mobile UX: when a menu link is clicked, close dropdown + close nav
+      // On mobile, when choosing an item, close dropdown and close nav
       menu.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', () => {
           closeAll();
-          if (mqMobile.matches && nav.classList.contains('open')) {
+          if (mqMobile.matches) {
             nav.classList.remove('open');
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
           }
@@ -1404,37 +1421,26 @@
     }
   });
 
-  // Click outside closes dropdowns:
-  // - Desktop: always close on outside click
-  // - Mobile: close dropdowns if you tap outside dropdowns (while nav is open)
-  document.addEventListener('click', (e) => {
-    const insideDropdown = !!e.target.closest('[data-dd]');
-    const onToggle = !!(toggle && e.target.closest('.nav-toggle'));
+  // Outside click/tap closes dropdowns
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('[data-dd]')) return;
+    if (toggle && e.target.closest('.nav-toggle')) return;
+    closeAll();
+  }, true);
 
-    if (onToggle) return;
-    if (insideDropdown) return;
-
-    if (mqDesktop.matches) {
-      closeAll();
-      return;
-    }
-
-    if (mqMobile.matches && nav.classList.contains('open')) {
-      closeAll();
-    }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
   });
 
-  // When hamburger closes the nav, also close dropdowns (safe even if main.js also runs)
+  // If the nav is closed (e.g., hamburger tapped), also close dropdowns
   if (toggle) {
     toggle.addEventListener('click', () => {
-      // Let assets/main.js toggle nav first, then react
       setTimeout(() => {
         if (!nav.classList.contains('open')) closeAll();
       }, 0);
-    });
+    }, true);
   }
 
-  // If screen size changes, reset open states
   mqMobile.addEventListener('change', closeAll);
   mqDesktop.addEventListener('change', closeAll);
 })();
