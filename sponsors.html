@@ -677,6 +677,23 @@
   text-align: justify;
 }
 
+/* ===== Sponsors intro video (rounded like cards) ===== */
+#sponsors .sponsor-intro-video{
+  width: 100%;
+  border-radius: 16px;                /* matches your cards */
+  overflow: hidden;                   /* clips video corners */
+  border: 1px solid var(--border);
+  background: #000;                   /* clean edges while loading */
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+  margin: 0 0 16px 0;                 /* space before the H2 */
+}
+
+#sponsors .sponsor-video{
+  width: 100%;
+  height: auto;
+  display: block;
+}    
+
 /* ===== Sponsor tiers (minimal, professional) ===== */
 #sponsors .sponsor-tier{
   margin-top: 16px;
@@ -858,6 +875,23 @@
 <!-- Sponsors -->
 <section id="sponsors" class="section section-alt">
   <div class="container">
+
+
+
+<!-- Sponsors intro video -->
+<div class="sponsor-intro-video">
+  <video
+    class="sponsor-video"
+    src="public/sponsor720.mp4"
+    autoplay
+    loop
+    muted
+    playsinline
+    preload="metadata"
+  ></video>
+</div>
+    
+    
     <h2>Sponsorship & Partnership Opportunities</h2>
 
     <p>
