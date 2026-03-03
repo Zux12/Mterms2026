@@ -1,7 +1,6 @@
-<!-- Sponsor Cinematic Montage (drop-in prototype)
+<!-- Sponsor Cinematic Montage (copy-paste ready)
      - 2 Platinum, 3 Gold, 5 Silver
-     - Looped timeline
-     - Premium glass + light sweep + subtle background motion
+     - Luxurious + elegant (no overlap): JS controls active scene; CSS uses transitions
 -->
 
 <section class="sponsor-cine" aria-label="Sponsor montage">
@@ -14,23 +13,22 @@
       <span class="cine-kicker">Our Valued Sponsors</span>
     </div>
 
+    <!-- ONE fixed title (JS updates this per tier) -->
+    <div class="cine-title">
+      <div id="cineTierBadge" class="tier-badge tier-platinum">PLATINUM PARTNERS</div>
+      <div id="cineTierSub" class="tier-sub">Premier supporters powering the mission</div>
+    </div>
+
     <!-- Scenes -->
     <div class="cine-stage">
-
-      <!-- Scene 1: Platinum -->
-      <div class="cine-scene scene-platinum" data-scene="platinum">
-        <div class="scene-header">
-          <div class="tier-badge tier-platinum">PLATINUM PARTNERS</div>
-          <div class="tier-sub">Premier supporters powering the mission</div>
-        </div>
-
+      <!-- Platinum -->
+      <div class="cine-scene scene-platinum" data-tier="platinum">
         <div class="logo-grid grid-platinum">
           <div class="logo-card logo-xl">
             <div class="logo-mark">PLATINUM 1</div>
             <div class="logo-note">Replace with logo</div>
             <div class="shine" aria-hidden="true"></div>
           </div>
-
           <div class="logo-card logo-xl">
             <div class="logo-mark">PLATINUM 2</div>
             <div class="logo-note">Replace with logo</div>
@@ -39,13 +37,8 @@
         </div>
       </div>
 
-      <!-- Scene 2: Gold -->
-      <div class="cine-scene scene-gold" data-scene="gold">
-        <div class="scene-header">
-          <div class="tier-badge tier-gold">GOLD SPONSORS</div>
-          <div class="tier-sub">Key partners advancing translational impact</div>
-        </div>
-
+      <!-- Gold -->
+      <div class="cine-scene scene-gold" data-tier="gold">
         <div class="logo-grid grid-gold">
           <div class="logo-card logo-lg">
             <div class="logo-mark">GOLD 1</div>
@@ -65,13 +58,8 @@
         </div>
       </div>
 
-      <!-- Scene 3: Silver -->
-      <div class="cine-scene scene-silver" data-scene="silver">
-        <div class="scene-header">
-          <div class="tier-badge tier-silver">SILVER SPONSORS</div>
-          <div class="tier-sub">Trusted supporters strengthening the community</div>
-        </div>
-
+      <!-- Silver -->
+      <div class="cine-scene scene-silver" data-tier="silver">
         <div class="logo-grid grid-silver">
           <div class="logo-card logo-md">
             <div class="logo-mark">SILVER 1</div>
@@ -101,11 +89,10 @@
         </div>
       </div>
 
-      <!-- Progress (optional, subtle) -->
+      <!-- Progress (subtle) -->
       <div class="cine-progress" aria-hidden="true">
         <div class="cine-progress-bar"></div>
       </div>
-
     </div>
   </div>
 </section>
@@ -127,14 +114,14 @@
     position: relative;
     overflow: hidden;
     border-radius: 18px;
-    background: radial-gradient(1200px 600px at 30% 20%, rgba(120,140,255,.18), transparent 60%),
-                radial-gradient(900px 500px at 70% 60%, rgba(255,215,120,.14), transparent 60%),
-                linear-gradient(135deg, var(--bg0), var(--bg1));
+    background:
+      radial-gradient(1200px 600px at 30% 20%, rgba(120,140,255,.18), transparent 60%),
+      radial-gradient(900px 500px at 70% 60%, rgba(255,215,120,.14), transparent 60%),
+      linear-gradient(135deg, var(--bg0), var(--bg1));
     box-shadow: var(--shadow);
     min-height: 440px;
   }
 
-  /* Subtle moving background texture */
   .cine-bg{
     position:absolute; inset:-40%;
     background:
@@ -148,7 +135,6 @@
     animation: bgDrift 14s ease-in-out infinite alternate;
     pointer-events:none;
   }
-
   @keyframes bgDrift{
     from{ transform: translate3d(-2%, -1%, 0) rotate(-1deg); }
     to  { transform: translate3d( 2%,  1%, 0) rotate( 1deg); }
@@ -173,25 +159,8 @@
   }
   .cine-dot{ opacity:.55; }
 
-  .cine-stage{
-    position: relative;
-    margin-top: 18px;
-    min-height: 340px;
-  }
-
-  .cine-scene{
-    position:absolute;
-    inset: 0;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap: 18px;
-    opacity: 0;
-    transform: translateY(10px) scale(.99);
-    pointer-events:none;
-  }
-
-  .scene-header{
+  .cine-title{
+    margin-top: 14px;
     text-align:center;
     display:flex;
     flex-direction:column;
@@ -210,6 +179,7 @@
     font-weight: 700;
     letter-spacing: .10em;
     font-size: 12px;
+    text-transform: uppercase;
   }
   .tier-sub{
     color: var(--muted);
@@ -217,10 +187,39 @@
     line-height: 1.35;
   }
 
-  /* Tier accents (subtle) */
   .tier-platinum{ background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); }
   .tier-gold    { background: linear-gradient(180deg, rgba(255,215,120,.18), rgba(255,255,255,.06)); }
   .tier-silver  { background: linear-gradient(180deg, rgba(210,220,255,.16), rgba(255,255,255,.06)); }
+
+  .cine-stage{
+    position: relative;
+    margin-top: 18px;
+    min-height: 340px;
+  }
+
+  /* Scenes: hidden by default, shown via .is-active */
+  .cine-scene{
+    position:absolute;
+    inset: 0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap: 18px;
+
+    opacity: 0;
+    transform: translateY(10px) scale(.995);
+    filter: blur(1px);
+    pointer-events: none;
+
+    transition: opacity 520ms ease, transform 520ms ease, filter 520ms ease;
+  }
+  .cine-scene.is-active{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    pointer-events: auto;
+    z-index: 2;
+  }
 
   .logo-grid{
     width: min(980px, 92%);
@@ -248,6 +247,15 @@
     justify-content:center;
     text-align:center;
     padding: 18px 14px;
+
+    opacity: 0;
+    transform: translateY(10px) scale(.99);
+    transition: opacity 520ms ease, transform 520ms ease;
+    transition-delay: var(--stagger, 0ms);
+  }
+  .cine-scene.is-active .logo-card{
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 
   .logo-xl{ min-height: 132px; }
@@ -267,65 +275,40 @@
     color: var(--muted2);
   }
 
-  /* Light sweep */
+  /* Stagger per tier */
+  .scene-platinum .logo-card:nth-child(1){ --stagger: 120ms; }
+  .scene-platinum .logo-card:nth-child(2){ --stagger: 240ms; }
+
+  .scene-gold .logo-card:nth-child(1){ --stagger: 120ms; }
+  .scene-gold .logo-card:nth-child(2){ --stagger: 240ms; }
+  .scene-gold .logo-card:nth-child(3){ --stagger: 360ms; }
+
+  .scene-silver .logo-card:nth-child(1){ --stagger: 90ms; }
+  .scene-silver .logo-card:nth-child(2){ --stagger: 180ms; }
+  .scene-silver .logo-card:nth-child(3){ --stagger: 270ms; }
+  .scene-silver .logo-card:nth-child(4){ --stagger: 360ms; }
+  .scene-silver .logo-card:nth-child(5){ --stagger: 450ms; }
+
+  /* Light sweep (slower + calmer for luxury) */
   .shine{
     position:absolute;
     top:-40%;
     left:-60%;
     width: 60%;
     height: 200%;
-    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.22), rgba(255,255,255,0));
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.18), rgba(255,255,255,0));
     transform: rotate(18deg);
-    opacity: .55;
-    animation: sweep 4.6s ease-in-out infinite;
+    opacity: .45;
+    animation: sweep 8.5s ease-in-out infinite;
   }
   @keyframes sweep{
     0%   { transform: translateX(-30%) rotate(18deg); opacity:0; }
-    18%  { opacity:.55; }
-    55%  { opacity:.35; }
+    18%  { opacity:.45; }
+    55%  { opacity:.22; }
     100% { transform: translateX(260%) rotate(18deg); opacity:0; }
   }
 
-  /* Scene timeline: 18s loop total (Platinum 0-6, Gold 6-12, Silver 12-18) */
-  .scene-platinum{ animation: sceneCycle 18s infinite; }
-  .scene-gold    { animation: sceneCycle 18s infinite; animation-delay: 6s; }
-  .scene-silver  { animation: sceneCycle 18s infinite; animation-delay: 12s; }
-
-  @keyframes sceneCycle{
-    0%   { opacity:0; transform: translateY(12px) scale(.985); filter: blur(1px); }
-    10%  { opacity:1; transform: translateY(0) scale(1);     filter: blur(0); }
-    80%  { opacity:1; transform: translateY(0) scale(1);     filter: blur(0); }
-    100% { opacity:0; transform: translateY(-10px) scale(.99); filter: blur(1px); }
-  }
-
-  /* Staggered pop-in for cards (per scene) */
-  .cine-scene .logo-card{
-    opacity: 0;
-    transform: translateY(10px) scale(.985);
-    animation: cardIn 18s infinite;
-  }
-  .scene-platinum .logo-card:nth-child(1){ animation-delay: .35s; }
-  .scene-platinum .logo-card:nth-child(2){ animation-delay: .55s; }
-
-  .scene-gold .logo-card:nth-child(1){ animation-delay: 6.30s; }
-  .scene-gold .logo-card:nth-child(2){ animation-delay: 6.50s; }
-  .scene-gold .logo-card:nth-child(3){ animation-delay: 6.70s; }
-
-  .scene-silver .logo-card:nth-child(1){ animation-delay: 12.25s; }
-  .scene-silver .logo-card:nth-child(2){ animation-delay: 12.40s; }
-  .scene-silver .logo-card:nth-child(3){ animation-delay: 12.55s; }
-  .scene-silver .logo-card:nth-child(4){ animation-delay: 12.70s; }
-  .scene-silver .logo-card:nth-child(5){ animation-delay: 12.85s; }
-
-  @keyframes cardIn{
-    0%   { opacity:0; transform: translateY(12px) scale(.985); }
-    6%   { opacity:0; }
-    10%  { opacity:1; transform: translateY(0) scale(1); }
-    78%  { opacity:1; transform: translateY(0) scale(1); }
-    100% { opacity:0; transform: translateY(-8px) scale(.99); }
-  }
-
-  /* Progress bar synced to 18s */
+  /* Progress bar (synced in JS via CSS variable) */
   .cine-progress{
     position:absolute;
     left: 50%;
@@ -343,14 +326,13 @@
     width: 40%;
     border-radius: 999px;
     background: rgba(255,255,255,.35);
-    animation: progress 18s linear infinite;
+    animation: progress var(--cycle, 15s) linear infinite;
   }
   @keyframes progress{
     from{ transform: translateX(-120%); }
     to  { transform: translateX(220%); }
   }
 
-  /* Responsive */
   @media (max-width: 980px){
     .grid-silver{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
@@ -363,47 +345,82 @@
     .tier-sub{ font-size: 13px; }
   }
 
-  /* Accessibility: reduce motion */
   @media (prefers-reduced-motion: reduce){
-    .cine-bg, .cine-scene, .logo-card, .shine, .cine-progress-bar{
-      animation: none !important;
-      transition: none !important;
-    }
-    .cine-scene{ opacity: 1; position: static; transform:none; pointer-events:auto; }
+    .cine-bg, .cine-progress-bar, .shine{ animation: none !important; }
+    .cine-scene, .logo-card{ transition: none !important; }
+    .cine-scene{ opacity: 1; position: static; transform:none; filter:none; pointer-events:auto; }
     .cine-stage{ min-height: auto; }
+    .logo-card{ opacity: 1; transform:none; }
+  }
+
+  /* When paused (JS toggles this) */
+  .cine-paused .cine-bg,
+  .cine-paused .cine-progress-bar,
+  .cine-paused .shine{
+    animation-play-state: paused !important;
   }
 </style>
 
 <script>
-  // Optional: If you want the montage to start only after the section is visible (more premium + saves CPU)
-  // Comment out if you prefer it to animate immediately.
-  (function () {
-    const root = document.querySelector(".sponsor-cine");
-    if (!root) return;
+(function () {
+  const root = document.querySelector(".sponsor-cine");
+  if (!root) return;
 
-    const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
+  const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
 
-    root.classList.add("cine-paused");
+  // Pause until visible (premium + saves CPU)
+  root.classList.add("cine-paused");
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) root.classList.remove("cine-paused");
+      else root.classList.add("cine-paused");
+    }
+  }, { threshold: 0.25 });
+  io.observe(root);
 
-    // Pause by default until it enters viewport
-    const style = document.createElement("style");
-    style.textContent = `
-      .cine-paused .cine-bg,
-      .cine-paused .cine-scene,
-      .cine-paused .logo-card,
-      .cine-paused .shine,
-      .cine-paused .cine-progress-bar { animation-play-state: paused !important; }
-    `;
-    document.head.appendChild(style);
+  const scenes = Array.from(root.querySelectorAll(".cine-scene[data-tier]"));
+  if (!scenes.length) return;
 
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) root.classList.remove("cine-paused");
-        else root.classList.add("cine-paused");
-      }
-    }, { threshold: 0.25 });
+  const badgeEl = root.querySelector("#cineTierBadge");
+  const subEl   = root.querySelector("#cineTierSub");
 
-    io.observe(root);
-  })();
+  const tierMeta = {
+    platinum: { badgeClass: "tier-platinum", text: "PLATINUM PARTNERS", sub: "Premier supporters powering the mission" },
+    gold:     { badgeClass: "tier-gold",     text: "GOLD SPONSORS",     sub: "Key partners advancing translational impact" },
+    silver:   { badgeClass: "tier-silver",   text: "SILVER SPONSORS",   sub: "Trusted supporters strengthening the community" }
+  };
+
+  // Timing (luxury)
+  const HOLD_MS = 4600;     // time each tier stays visible
+  const FADE_MS = 520;      // keep aligned with CSS transition duration
+  const CYCLE_MS = (HOLD_MS + FADE_MS) * scenes.length;
+
+  // Sync progress bar speed
+  root.style.setProperty("--cycle", (CYCLE_MS / 1000) + "s");
+
+  let idx = 0;
+  function setActive(i) {
+    scenes.forEach((s, k) => s.classList.toggle("is-active", k === i));
+
+    const tier = scenes[i].getAttribute("data-tier");
+    const meta = tierMeta[tier] || tierMeta.platinum;
+
+    if (badgeEl) {
+      badgeEl.textContent = meta.text;
+      badgeEl.classList.remove("tier-platinum", "tier-gold", "tier-silver");
+      badgeEl.classList.add(meta.badgeClass);
+    }
+    if (subEl) subEl.textContent = meta.sub;
+  }
+
+  // Start immediately with first tier active
+  setActive(idx);
+
+  // Loop
+  setInterval(() => {
+    idx = (idx + 1) % scenes.length;
+    setActive(idx);
+  }, HOLD_MS + FADE_MS);
+})();
 </script>
