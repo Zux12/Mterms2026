@@ -31,6 +31,14 @@
     padding: 16px;
     margin-bottom: 20px;
     }
+
+    .card-program {
+    background: #eef6ff;   /* very light professional blue */
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
   </style>
 
   <style>
@@ -466,7 +474,7 @@
 
 
     
-        <div class="card">
+        <div class="card-program">
       <h3>Upload and Submit Abstract</h3>
       <p class="help">
         Upload and submit your <strong>Abstract</strong> (.doc or docx only).<br>
@@ -505,53 +513,7 @@
       </div>
     </div>
 
-    <div class="card-orange">
-      <h3>My Payments</h3>
-      <p class="help">
-        Please make payment using the details below and upload your <strong>Bank Receipt</strong> after payment.
-      </p>
 
-      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-bottom:12px">
-        <div style="font-weight:800;margin-bottom:6px">Bank transfer details</div>
-        <div class="help" style="white-space:pre-wrap;margin:0">
-<strong>Bank name:</strong> CIMB Bank Berhad
-<strong>Account name:</strong> Tissue Engineering and Regenerative Medicine Society of Malaysia (TESMA)
-<strong>Account no:</strong> 8007995842
-<strong>SWIFT code:</strong> CIBB MYKL
-
-<strong>Billing address:</strong>
-Department of Tissue Engineering and Regenerative Medicine,
-15th Floor, Pre-clinical Block,
-Faculty of Medicine,
-UKM, Cheras, 56000 Kuala Lumpur, Malaysia
-
-<strong>Preferred payment method:</strong> Telegraphic Transfer (TT), Bank Draft / Banker's Cheque
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <label>Type
-          <select id="payType" disabled>
-            <option value="bankReceipt">Bank receipt</option>
-          </select>
-        </label>
-        <label>File Upload (Accepts .PDF, .JPG or .PNG only)
-          <input type="file" id="payFile" accept=".pdf,.jpg,.jpeg,.png">
-        </label>
-      </div>
-
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button id="payUploadBtn" class="btn">Upload Bank Receipt</button>
-        <button id="payRefreshBtn" class="btn ghost">Refresh latest</button>
-      </div>
-
-      <div id="payMsg" style="margin-top:8px;font-size:.9rem;"></div>
-
-      <div style="margin-top:12px;">
-        <div class="tag">Latest Submitted Receipt is Shown Below</div>
-        <div id="payLatest" style="margin-top:8px;"></div>
-      </div>
-    </div>
 
     <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
       <legend>Program</legend>
@@ -651,6 +613,61 @@ UKM, Cheras, 56000 Kuala Lumpur, Malaysia
       <div class="help" id="subMsg" style="margin-top:6px"></div>
     </div>
 
+
+
+
+
+
+    <div class="card-orange">
+      <h3>My Payments</h3>
+      <p class="help">
+        Please make payment using the details below and upload your <strong>Bank Receipt</strong> after payment.
+      </p>
+
+      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-bottom:12px">
+        <div style="font-weight:800;margin-bottom:6px">Bank transfer details</div>
+        <div class="help" style="white-space:pre-wrap;margin:0">
+<strong>Bank name:</strong> CIMB Bank Berhad
+<strong>Account name:</strong> Tissue Engineering and Regenerative Medicine Society of Malaysia (TESMA)
+<strong>Account no:</strong> 8007995842
+<strong>SWIFT code:</strong> CIBB MYKL
+
+<strong>Billing address:</strong>
+Department of Tissue Engineering and Regenerative Medicine,
+15th Floor, Pre-clinical Block,
+Faculty of Medicine,
+UKM, Cheras, 56000 Kuala Lumpur, Malaysia
+
+<strong>Preferred payment method:</strong> Telegraphic Transfer (TT), Bank Draft / Banker's Cheque
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <label>Type
+          <select id="payType" disabled>
+            <option value="bankReceipt">Bank receipt</option>
+          </select>
+        </label>
+        <label>File Upload (Accepts .PDF, .JPG or .PNG only)
+          <input type="file" id="payFile" accept=".pdf,.jpg,.jpeg,.png">
+        </label>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="payUploadBtn" class="btn">Upload Bank Receipt</button>
+        <button id="payRefreshBtn" class="btn ghost">Refresh latest</button>
+      </div>
+
+      <div id="payMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Latest Submitted Receipt is Shown Below</div>
+        <div id="payLatest" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+
+    
     <!-- ID Photo & Badge -->
     <div class="card">
       <h3>ID Photo and Badge Preview</h3>
