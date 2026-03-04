@@ -473,45 +473,7 @@
     </div>
 
 
-    
-        <div class="card-program">
-      <h3>Upload and Submit Abstract</h3>
-      <p class="help">
-        Upload and submit your <strong>Abstract</strong> (.doc or docx only).<br>
-        1) Choose your file<br>
-        2) Click <strong>Submit Abstract</strong><br>
-        3) Use <strong>Refresh Latest</strong> to view the latest submitted abstract
-      </p>
-
-      <!-- NOTE (legacy types wired to MongoDB): studentProof, slides, bankReceipt -->
-      <div class="grid-2">
-        <label>Type
-          <select id="absType" disabled>
-            <option value="abstract">Abstract</option>
-          </select>
-        </label>
-        <label>File Upload (Accepts .DOC or .DOCX files only)
-          <input type="file" id="absFile" accept=".doc,.docx">
-        </label>
-      </div>
-
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button id="absUploadBtn" class="btn">Submit Abstract</button>
-        <button id="absRefreshBtn" class="btn ghost">Refresh latest</button>
-      </div>
-
-      <div id="absMsg" style="margin-top:8px;font-size:.9rem;"></div>
-
-      <div style="margin-top:12px;">
-        <div class="tag">Latest Submitted Abstract is Shown Below</div>
-        <div id="absLatest" style="margin-top:8px;"></div>
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="tag">Reviewer Comment Section</div>
-        <div id="reviewComment" class="help" style="margin-top:8px;white-space:pre-wrap;"></div>
-      </div>
-    </div>
+ 
 
 
 
@@ -617,6 +579,56 @@
 
 
 
+
+   
+        <div class="card-program">
+      <h3>Upload and Submit Abstract</h3>
+      <p class="help">
+        Upload and submit your <strong>Abstract</strong> (.doc or docx only).<br>
+        1) Choose your file<br>
+        2) Click <strong>Submit Abstract</strong><br>
+        3) Use <strong>Refresh Latest</strong> to view the latest submitted abstract
+      </p>
+
+      <!-- NOTE (legacy types wired to MongoDB): studentProof, slides, bankReceipt -->
+      <div class="grid-2">
+        <label>Type
+          <select id="absType" disabled>
+            <option value="abstract">Abstract</option>
+          </select>
+        </label>
+        <label>File Upload (Accepts .DOC or .DOCX files only)
+          <input type="file" id="absFile" accept=".doc,.docx">
+        </label>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="absUploadBtn" class="btn">Submit Abstract</button>
+        <button id="absRefreshBtn" class="btn ghost">Refresh latest</button>
+      </div>
+
+      <div id="absMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Latest Submitted Abstract is Shown Below</div>
+        <div id="absLatest" style="margin-top:8px;"></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="tag">Reviewer Comment Section</div>
+        <div id="reviewComment" class="help" style="margin-top:8px;white-space:pre-wrap;"></div>
+      </div>
+    </div>
+
+
+
+
+    
+
+
+
+
+    
 
     <div class="card-orange">
       <h3>My Payments</h3>
