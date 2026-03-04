@@ -1289,7 +1289,8 @@ if (shell) shell.style.display = 'none';
       const topHeader = document.getElementById('adminTopHeader');
 if (topHeader) topHeader.style.display = 'flex';
       $('dash').style.display='block';
-      document.getElementById('adminNav').style.display = 'block';
+const nav = document.getElementById('adminNav');
+if (nav) nav.style.display = 'block';
       loadPage(1);
     });
     $('logoutBtn').addEventListener('click',()=>{
@@ -1751,7 +1752,8 @@ if (shell) shell.style.display = 'none';
         const topHeader = document.getElementById('adminTopHeader');
 if (topHeader) topHeader.style.display = 'flex';
         $('dash').style.display='block';
-        document.getElementById('adminNav').style.display = 'block';
+const nav = document.getElementById('adminNav');
+if (nav) nav.style.display = 'block';
         loadPage(1);
       }
     })();
