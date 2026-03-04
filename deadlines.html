@@ -353,24 +353,24 @@
     </div>
   </div>
 
-  <div class="item">
-    <div class="badge warn">Announcement</div>
+<div class="item" id="lateAnnouncement">
+  <div class="badge warn">Announcement</div>
     <div class="content">
       <p class="label">Late Breaking Abstract (only for Poster) — Announcement</p>
       <p class="date">Announce after 30 April 2026</p>
     </div>
   </div>
 
-  <div class="item">
-    <div class="badge warn">Late Breaking</div>
+<div class="item" id="lateSubmission">
+  <div class="badge warn">Late Breaking</div>
     <div class="content">
       <p class="label">Late Breaking Abstract (only for Poster) — Submission Deadline</p>
       <p class="date">1 May 2026 – 31 July 2026</p>
     </div>
   </div>
 
-  <div class="item">
-    <div class="badge warn">Late Breaking</div>
+<div class="item" id="lateAcceptance">
+  <div class="badge warn">Late Breaking</div>
     <div class="content">
       <p class="label">Late Breaking Abstract (only for Poster) — Acceptance Notification Date</p>
       <p class="date">1 August 2026 – 30 August 2026</p>
@@ -392,6 +392,30 @@
     </footer>
   </div>
 
+
+<script>
+  // Show Late Breaking items only after 1 April 2026
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const showDate = new Date("2026-04-01T00:00:00");
+    const today = new Date();
+
+    if (today < showDate) {
+      const idsToHide = [
+        "lateAnnouncement",
+        "lateSubmission",
+        "lateAcceptance"
+      ];
+
+      idsToHide.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+      });
+    }
+
+  });
+</script>
+  
   <script>
     function goBack(){
       // If there is history, go back. Otherwise return to index.html
