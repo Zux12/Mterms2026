@@ -1283,7 +1283,6 @@ document.addEventListener('click', (e) => {
       const token=btoa(u+':'+p);
       localStorage.setItem(ADMIN_KEY, token);
       $('aMsg').textContent='✅ Logged in';
-      $('loginCard').style.display='none';
 const shell = document.getElementById('adminLoginShell');
 if (shell) shell.style.display = 'none';
       const topHeader = document.getElementById('adminTopHeader');
@@ -1746,7 +1745,6 @@ try{
     (function(){
       const token = localStorage.getItem(ADMIN_KEY);
       if(token){
-        $('loginCard').style.display='none';
 const shell = document.getElementById('adminLoginShell');
 if (shell) shell.style.display = 'none';
         const topHeader = document.getElementById('adminTopHeader');
