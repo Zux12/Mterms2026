@@ -700,13 +700,18 @@
   position: absolute;
   bottom: 18px;
   right: 18px;
-  padding: 10px 18px;
+
+  padding: 9px 18px;
   font-weight: 700;
-  font-size: .95rem;
+  font-size: .92rem;
   border-radius: 999px;
   text-decoration: none;
 
-  background: linear-gradient(145deg, #e6e6e6, #cfcfcf);
+  /* Semi-transparent silver */
+  background: rgba(220, 220, 220, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
   color: #000000;
   border: 1px solid rgba(0,0,0,.15);
 
@@ -714,13 +719,19 @@
   transition: all .25s ease;
 }
 
+#sponsors .video-sponsor-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  background: rgba(220, 220, 220, 0.88);
+}
+
 /* ===== Mobile adjustment for video button ===== */
 @media (max-width: 560px){
   #sponsors .video-sponsor-btn{
-    padding: 7px 14px;
-    font-size: .82rem;
-    bottom: 12px;
-    right: 12px;
+    padding: 6px 12px;
+    font-size: .75rem;
+    bottom: 10px;
+    right: 10px;
   }
 }
 
