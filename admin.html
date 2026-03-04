@@ -473,12 +473,91 @@ table thead th{
   margin-top: 12px;
 }
 
+/* ===== Admin login: label beside input ===== */
+.admin-login-form{
+  margin-top: 6px;
+}
+
+.admin-field{
+  display:grid;
+  grid-template-columns: 140px 1fr;   /* label | input */
+  gap: 12px;
+  align-items:center;
+  margin: 10px 0;
+}
+
+.admin-label{
+  font-weight: 800;
+  color: #111827;
+}
+
+.admin-control input{
+  width: 100%;
+}
+
+/* Actions row: Login + Back beside each other */
+.admin-login-actions-row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+
+/* Organized by inside card */
+.admin-login-org{
+  border-top: 1px solid rgba(0,0,0,.06);
+  margin-top: 16px;
+  padding-top: 14px;
+  text-align:center;
+}
+
+.admin-login-org-title{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  opacity:.85;
+  margin-bottom:10px;
+  color: var(--uitm-navy);
+}
+
+.admin-login-org-logos{
+  display:flex;
+  justify-content:center;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+
+.logo-chip{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 12px;
+  box-shadow:0 10px 22px rgba(0,0,0,.06);
+}
+
+.logo-chip img{
+  height:34px;
+  width:auto;
+  object-fit:contain;
+  display:block;
+}
+
+/* Mobile: stack label above input */
+@media (max-width: 720px){
+  .admin-field{
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-items:stretch;
+  }
+}
     
   </style>
 </head>
 <body>
   <div class="admin-wrap">
-<header class="brand-header">
+<header class="brand-header" id="adminTopHeader" style="display:none;">
   <div class="brand-left">
     <div class="brand-logo">
       <img src="public/mterm.jpg" alt="MTERMS 2026">
@@ -524,34 +603,67 @@ table thead th{
     </div>
   </div>
 </header>
-<!-- Admin Login (participant-style) -->
+<!-- Admin Login (clean, no redundant top header) -->
 <div id="adminLoginShell" class="admin-login-shell">
   <div class="admin-login-wrap">
 
-    <div class="admin-login-logo">
-      <img src="public/mterm.jpg" alt="MTERMS 2026">
-    </div>
-
-    <h1 class="admin-login-title">MTERMS 2026 — Admin</h1>
-    <div class="admin-login-sub">Log in to manage participants, review uploads, and print badges.</div>
-
-    <div id="loginCard" class="admin-login-card">
+    <div class="admin-login-card">
       <div class="topbar"></div>
-      <div class="inner">
-        <div style="font-weight:900; font-size:1.05rem; margin-bottom:10px;">Admin Login</div>
 
-        <div class="admin-login-grid">
-          <label>Username
-            <input id="aUser" value="admin" autocomplete="username">
-          </label>
-          <label>Password
-            <input id="aPass" type="password" value="admin" autocomplete="current-password">
-          </label>
+      <div class="inner">
+        <div style="display:flex;justify-content:center;margin-bottom:10px">
+          <div class="admin-login-logo" style="margin:0">
+            <img src="public/mterm.jpg" alt="MTERMS 2026">
+          </div>
         </div>
 
-        <div class="admin-login-actions">
-          <button id="aLogin" class="btn btn-primary">Login</button>
-          <span id="aMsg" style="font-size:.95rem"></span>
+        <div style="text-align:center;margin-bottom:12px">
+          <div style="font-weight:900;font-size:1.35rem;letter-spacing:.2px">MTERMS 2026 — Admin</div>
+          <div style="color:#475467;margin-top:4px">Log in to manage participants, review uploads, and print badges.</div>
+        </div>
+
+        <!-- Fields: label + input side-by-side, password below username -->
+        <div class="admin-login-form">
+
+          <div class="admin-field">
+            <div class="admin-label">Username</div>
+            <div class="admin-control">
+              <input id="aUser" value="admin" autocomplete="username">
+            </div>
+          </div>
+
+          <div class="admin-field">
+            <div class="admin-label">Password</div>
+            <div class="admin-control">
+              <input id="aPass" type="password" value="admin" autocomplete="current-password">
+            </div>
+          </div>
+
+          <!-- Actions: Login + Back button together -->
+          <div class="admin-login-actions-row">
+            <button id="aLogin" class="btn btn-primary">Login</button>
+
+            <button id="backToMainBtn" type="button" class="btn btn-secondary"
+              onclick="window.location.href='index.html'">
+              ← Back to Main Page
+            </button>
+
+            <span id="aMsg" style="font-size:.95rem"></span>
+          </div>
+
+          <!-- Organized by inside the card -->
+          <div class="admin-login-org">
+            <div class="admin-login-org-title">Organized by</div>
+            <div class="admin-login-org-logos">
+              <div class="logo-chip">
+                <img src="public/uitm.png" alt="UiTM">
+              </div>
+              <div class="logo-chip">
+                <img src="public/tesma.png" alt="TESMA">
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -1174,6 +1286,8 @@ document.addEventListener('click', (e) => {
       $('loginCard').style.display='none';
 const shell = document.getElementById('adminLoginShell');
 if (shell) shell.style.display = 'none';
+      const topHeader = document.getElementById('adminTopHeader');
+if (topHeader) topHeader.style.display = 'flex';
       $('dash').style.display='block';
       document.getElementById('adminNav').style.display = 'block';
       loadPage(1);
@@ -1634,6 +1748,8 @@ try{
         $('loginCard').style.display='none';
 const shell = document.getElementById('adminLoginShell');
 if (shell) shell.style.display = 'none';
+        const topHeader = document.getElementById('adminTopHeader');
+if (topHeader) topHeader.style.display = 'flex';
         $('dash').style.display='block';
         document.getElementById('adminNav').style.display = 'block';
         loadPage(1);
@@ -1697,19 +1813,6 @@ if (shell) shell.style.display = 'none';
 
 
 
-<footer style="margin:22px auto 10px; width:min(1200px,92vw); text-align:center;">
-  <div style="font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.85;margin-bottom:10px;color:var(--uitm-navy)">
-    Organized by
-  </div>
-  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 10px 22px rgba(0,0,0,.06);">
-      <img src="public/uitm.png" alt="UiTM" style="height:34px;width:auto;object-fit:contain;display:block;">
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 10px 22px rgba(0,0,0,.06);">
-      <img src="public/tesma.png" alt="TESMA" style="height:34px;width:auto;object-fit:contain;display:block;">
-    </div>
-  </div>
-</footer>
   
 </body>
 </html>
