@@ -383,7 +383,97 @@ html, body{
 
 table thead th{
   background: rgba(11,42,107,0.04);
-}    
+}
+
+
+/* ===== Admin Login (make it like participant login) ===== */
+.admin-login-shell{
+  min-height: calc(100vh - 220px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 22px 0 10px;
+}
+
+.admin-login-wrap{
+  width: min(820px, 92vw);
+  text-align:center;
+}
+
+.admin-login-logo{
+  width: 96px;
+  height: 96px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background:#fff;
+  padding: 12px;
+  margin: 0 auto 12px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.admin-login-logo img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.admin-login-title{
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.admin-login-sub{
+  margin: 6px 0 16px;
+  color: #475467;
+  font-size: 1rem;
+}
+
+.admin-login-card{
+  width: min(720px, 92vw);
+  margin: 0 auto;
+  background:#fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  overflow:hidden;
+}
+
+.admin-login-card .topbar{
+  height: 6px;
+  background: linear-gradient(90deg, #7c1d1d, #1d4ed8); /* maroon -> blue */
+}
+
+.admin-login-card .inner{
+  padding: 16px 18px 18px;
+  text-align:left;
+}
+
+.admin-login-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 720px){
+  .admin-login-grid{ grid-template-columns: 1fr; }
+}
+
+.admin-login-actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+
+    
   </style>
 </head>
 <body>
@@ -434,18 +524,40 @@ table thead th{
     </div>
   </div>
 </header>
+<!-- Admin Login (participant-style) -->
+<div id="adminLoginShell" class="admin-login-shell">
+  <div class="admin-login-wrap">
 
-    <!-- Login card -->
-    <div id="loginCard" class="card">
-      <h3>Admin Login</h3>
-      <div class="row">
-        <label>Username <input id="aUser" value="admin"></label>
-        <label>Password <input id="aPass" type="password" value="admin"></label>
-      </div>
-      <button id="aLogin" class="btn btn-primary">Login</button>
-
-      <span id="aMsg" style="margin-left:8px;font-size:.95rem"></span>
+    <div class="admin-login-logo">
+      <img src="public/mterm.jpg" alt="MTERMS 2026">
     </div>
+
+    <h1 class="admin-login-title">MTERMS 2026 — Admin</h1>
+    <div class="admin-login-sub">Log in to manage participants, review uploads, and print badges.</div>
+
+    <div id="loginCard" class="admin-login-card">
+      <div class="topbar"></div>
+      <div class="inner">
+        <div style="font-weight:900; font-size:1.05rem; margin-bottom:10px;">Admin Login</div>
+
+        <div class="admin-login-grid">
+          <label>Username
+            <input id="aUser" value="admin" autocomplete="username">
+          </label>
+          <label>Password
+            <input id="aPass" type="password" value="admin" autocomplete="current-password">
+          </label>
+        </div>
+
+        <div class="admin-login-actions">
+          <button id="aLogin" class="btn btn-primary">Login</button>
+          <span id="aMsg" style="font-size:.95rem"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
     <!-- Dashboard -->
     <div id="dash" class="no-print" style="display:none">
@@ -1060,6 +1172,8 @@ document.addEventListener('click', (e) => {
       localStorage.setItem(ADMIN_KEY, token);
       $('aMsg').textContent='✅ Logged in';
       $('loginCard').style.display='none';
+const shell = document.getElementById('adminLoginShell');
+if (shell) shell.style.display = 'none';
       $('dash').style.display='block';
       document.getElementById('adminNav').style.display = 'block';
       loadPage(1);
@@ -1518,6 +1632,8 @@ try{
       const token = localStorage.getItem(ADMIN_KEY);
       if(token){
         $('loginCard').style.display='none';
+const shell = document.getElementById('adminLoginShell');
+if (shell) shell.style.display = 'none';
         $('dash').style.display='block';
         document.getElementById('adminNav').style.display = 'block';
         loadPage(1);
