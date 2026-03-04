@@ -62,6 +62,71 @@ input[type="radio"]{
   background: transparent;
 }
 
+
+
+/* ===== Admin brand header (match participant portal style) ===== */
+.brand-wrap{
+  width:min(1200px,92vw);
+  margin:24px auto;
+}
+
+.brand-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding: 10px 4px 18px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid rgba(14,165,166,0.18);
+}
+
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-logo{
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+.brand-logo img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.brand-title{
+  margin:0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.brand-subtitle{
+  margin:6px 0 0;
+  color:#374151;
+  font-size: .98rem;
+}
+
+.brand-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+    
+
 /* Primary = normal green (used for Edit + Save + Refresh + Print selected) */
 .btn-primary{
   background: #16a34a;   /* green */
@@ -318,124 +383,53 @@ table thead th{
 </head>
 <body>
   <div class="admin-wrap">
-    <div class="admin-head">
-      <div>
-        <h1 style="margin:0">MTERMS 2026 — Admin</h1>
-        <div style="opacity:.8">Manage participants, edit details, preview photos, and print badges.</div>
-      </div>
-      <div class="no-print">
-
-        <button 
-  onclick="window.location.href='index.html'" 
-  style="
-    display:inline-block;
-    margin-top:12px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    background:linear-gradient(90deg,#19c37d,#0ea5a6);
-    color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"
->
-  ← Back to Main Page
-</button>
-
-
-        <button 
-  onclick="window.location.href='committee-appointment.html'" 
-  style="
-    display:inline-block;
-    margin-top:12px;
-    margin-left:8px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    background:linear-gradient(90deg,#6366f1,#0ea5e9);
-    color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"
->
-  Committee Appointment Letter
-</button>
-
-
-        <button 
-  onclick="window.location.href='acceptanceletter.html'" 
-  style="
-    display:inline-block;
-    margin-top:12px;
-    margin-left:8px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    background:linear-gradient(90deg,#6366f1,#0ea5e9);
-    color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"
->
-  Invitation Letter Generator
-</button>        
-
-        
-
-        
-     <button id="btnCert"   
-    style="
-    display:inline-block;
-    margin-top:12px;
-    margin-left:8px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-    background: linear-gradient(90deg, #FF9900, #FFD500);
-    color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"">Certificate Generator</button>
-
-
-
-        
-        
-<button id="logoutBtn" 
-  style="
-    display:inline-block;
-    margin-top:12px;
-    margin-left:8px;
-    padding:6px 12px;
-    border:none;
-    border-radius:8px;
-background: #dc2626;
-  color:#fff;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  "
-  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
-  onmouseout="this.style.transform='';this.style.boxShadow='';"">Logout</button>
-      </div>
+<header class="brand-header">
+  <div class="brand-left">
+    <div class="brand-logo">
+      <img src="public/mterm.jpg" alt="MTERMS 2026">
     </div>
+    <div>
+      <h1 class="brand-title">MTERMS 2026 — Admin</h1>
+      <p class="brand-subtitle">
+        Manage participants, edit details, preview photos, and print badges.
+      </p>
+    </div>
+  </div>
+
+  <div class="brand-right no-print">
+
+    <!-- Always visible -->
+    <button onclick="window.location.href='index.html'" class="btn btn-secondary">
+      ← Back to Main Page
+    </button>
+
+    <!-- Hidden until login -->
+    <div id="adminNav" style="display:none; display:flex; gap:10px; flex-wrap:wrap;">
+
+      <button data-auth="1"
+        onclick="window.location.href='committee-appointment.html'"
+        class="btn btn-secondary">
+        Committee Appointment Letter
+      </button>
+
+      <button data-auth="1"
+        onclick="window.location.href='acceptanceletter.html'"
+        class="btn btn-secondary">
+        Invitation Letter Generator
+      </button>
+
+      <button data-auth="1" id="btnCert"
+        class="btn btn-secondary">
+        Certificate Generator
+      </button>
+
+      <button id="logoutBtn" class="btn btn-danger">
+        Logout
+      </button>
+
+    </div>
+  </div>
+</header>
 
     <!-- Login card -->
     <div id="loginCard" class="card">
@@ -780,7 +774,26 @@ background: #dc2626;
     const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
     const $=id=>document.getElementById(id);
 
+function isAdminAuthed(){
+  return !!localStorage.getItem(ADMIN_KEY);
+}
 
+// Block protected nav buttons if not logged in (extra safety)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-auth="1"]');
+  if (!btn) return;
+
+  if (!isAdminAuthed()){
+    e.preventDefault();
+    alert('Please login as admin first.');
+    // keep nav hidden
+    const nav = document.getElementById('adminNav');
+    if (nav) nav.style.display = 'none';
+    // show login
+    document.getElementById('loginCard').style.display = 'block';
+    document.getElementById('dash').style.display = 'none';
+  }
+});
 
 
 
@@ -1044,6 +1057,7 @@ background: #dc2626;
       $('aMsg').textContent='✅ Logged in';
       $('loginCard').style.display='none';
       $('dash').style.display='block';
+      document.getElementById('adminNav').style.display = 'block';
       loadPage(1);
     });
     $('logoutBtn').addEventListener('click',()=>{
@@ -1501,6 +1515,7 @@ try{
       if(token){
         $('loginCard').style.display='none';
         $('dash').style.display='block';
+        document.getElementById('adminNav').style.display = 'block';
         loadPage(1);
       }
     })();
