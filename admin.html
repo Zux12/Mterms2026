@@ -46,6 +46,11 @@ input[type="radio"]{
     th{text-align:left}
     .actions{display:flex;gap:8px}
 
+    .admin-nav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
     
     /* Buttons — back to normal sizing (no gradients) */
 .btn{
@@ -404,9 +409,8 @@ table thead th{
     </button>
 
     <!-- Hidden until login -->
-    <div id="adminNav" style="display:none; display:flex; gap:10px; flex-wrap:wrap;">
-
-      <button data-auth="1"
+<div id="adminNav" class="admin-nav" style="display:none;">
+  <button data-auth="1"
         onclick="window.location.href='committee-appointment.html'"
         class="btn btn-secondary">
         Committee Appointment Letter
