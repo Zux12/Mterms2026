@@ -676,9 +676,37 @@
   text-align: justify;
   text-justify: inter-word;
 }
+
+    
 .center-justify h2,
 .center-justify h3{
   text-align: center;
+}
+
+/* =========================
+   Industrial Speaker - Under Construction video
+   ========================= */
+.speaker-note{
+  max-width: 900px;
+  margin: 8px auto 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.uc-video-wrap{
+  max-width: 980px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+}
+
+.uc-video{
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* =========================
@@ -876,33 +904,22 @@
 
 
   <!-- Speakers (placeholder cards) -->
-  <section id="speakers" class="section section-alt">
-    <div class="container">
-      <h2>Industrial Speakers</h2>
-      <div class="grid-3">
-        <!-- Duplicate/modify these as you confirm speakers -->
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" alt="Speaker headshot placeholder" />
-          <h3>Industrial Speaker 1</h3>
-          <p>Affiliation / Topic TBA</p>
-          <a href="#" class="mini-link">Bio coming soon</a>
-        </div>
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=800&auto=format&fit=crop" alt="Speaker headshot placeholder" />
-          <h3>Industial Speaker 2</h3>
-          <p>Affiliation / Topic TBA</p>
-          <a href="#" class="mini-link">Bio coming soon</a>
-        </div>
-        <div class="person">
-          <img src="https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?q=80&w=800&auto=format&fit=crop" alt="Speaker headshot placeholder" />
-          <h3>Invited Speaker</h3>
-          <p>Affiliation / Topic TBA</p>
-          <a href="#" class="mini-link">Bio coming soon</a>
-        </div>
-      </div>
-    </div>
-  </section>
+<!-- Speakers (Under Construction video) -->
+<section id="speakers" class="section section-alt">
+  <div class="container">
+    <h2>Industrial Speaker</h2>
+    <p class="speaker-note">
+      The invited industry speaker(s) will be displayed here soon. Please check back for updates.
+    </p>
 
+    <div class="uc-video-wrap" aria-label="Industrial speaker section under construction video">
+      <video class="uc-video" autoplay loop muted playsinline preload="metadata">
+        <source src="public/underconstruction.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</section>
   
 
 
