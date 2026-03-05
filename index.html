@@ -924,6 +924,50 @@
   .nav-dd-btn{ touch-action: manipulation; width: 100%; justify-content: space-between; }
 }
 
+
+/* Welcoming Remarks (separated per person: photo on top, remarks below) */
+.remarks-wrapper{
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.remarks-person{
+  margin-top: 40px;
+  margin-bottom: 60px;
+}
+
+.remarks-photo{
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.remarks-photo img{
+  width: 200px;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  display: block;
+  margin: 0 auto;
+}
+
+.remarks-text{
+  text-align: justify;
+}
+
+/* Optional: tighten the name/title block spacing */
+.remarks-text p:first-child{
+  margin-top: 0;
+}
+
+/* Mobile tuning */
+@media (max-width: 640px){
+  .remarks-photo img{
+    width: 170px;
+  }
+  .remarks-person{
+    margin-bottom: 50px;
+  }
+}
     
 </style>
 <script src="lunr.min.js"></script>
