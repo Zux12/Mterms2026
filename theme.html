@@ -900,12 +900,12 @@
 /* Cropping window (video width follows .container width) */
 .theme-video-frame{
   width: 100%;
-  height: 54vh;
-  min-height: 260px;
-  max-height: 560px;
+  height: 42vh;          /* cinematic banner height */
+  min-height: 220px;
+  max-height: 480px;
   overflow: hidden;
   background: #000;
-  border-radius: 16px; /* optional: match your card rounding */
+  border-radius: 14px;
 }
 
 /* Video fills the frame */
@@ -917,6 +917,21 @@
   /* crop tuning (same as before) */
   transform: scale(1.18);
   object-position: 50% 62%;
+}
+
+  /* Tablet */
+@media (max-width: 1024px){
+  .theme-video-frame{
+    height: 36vh;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px){
+  .theme-video-frame{
+    height: 30vh;
+    min-height: 180px;
+  }
 }
 </style>
 
