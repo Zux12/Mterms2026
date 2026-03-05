@@ -1,0 +1,59 @@
+<!-- presentation-submission.html (place next to participants.html) -->
+<div class="card-program" id="presCard" style="display:none">
+  <h3>Presentation Material Submission</h3>
+  <p class="help" id="presBanner" style="margin-top:-6px"></p>
+
+  <div id="slidesPane" style="display:none">
+    <div class="grid-2">
+      <label>Type
+        <select disabled>
+          <option>Oral Presentation Slides</option>
+        </select>
+      </label>
+      <label>File Upload (PDF only, max 10 MB)
+        <input type="file" id="slidesFile" accept="application/pdf,.pdf">
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="slidesUploadBtn" class="btn">Submit Slides</button>
+      <button id="slidesRefreshBtn" class="btn ghost">Refresh latest</button>
+    </div>
+
+    <div id="slidesMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+    <div style="margin-top:12px;">
+      <div class="tag">Latest Submitted Slides is Shown Below</div>
+      <div id="slidesLatest" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div id="posterPane" style="display:none">
+    <div class="grid-2">
+      <label>Type
+        <select disabled>
+          <option>Poster File</option>
+        </select>
+      </label>
+      <label>File Upload (PDF / JPG / PNG, max 2 MB)
+        <input type="file" id="posterFile" accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg">
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="posterUploadBtn" class="btn">Submit Poster</button>
+      <button id="posterRefreshBtn" class="btn ghost">Refresh latest</button>
+    </div>
+
+    <div id="posterMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+    <div style="margin-top:12px;">
+      <div class="tag">Latest Submitted Poster is Shown Below</div>
+      <div id="posterLatest" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div class="help" style="margin-top:10px">
+    Notes: Your programme type is determined by the Organising Committee. If you believe it is incorrect, please contact the Secretariat.
+  </div>
+</div>
