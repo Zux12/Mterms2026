@@ -7,55 +7,41 @@ const Pricing = require('../server/models/Pricing');
   try {
     await mongoose.connect(process.env.MTERM2026_DB_URI);
 
-    const EVENT_START_DATE = process.env.EVENT_START_DATE || '2026-08-01';
+    // Strict rule you confirmed
+    const EARLY_BIRD_DEADLINE = new Date('2026-07-01T23:59:59.999Z');
 
     const payload = {
       key: 'pricing-2026',
-      currency: 'MYR',
-      eventStartDate: new Date(EVENT_START_DATE),
+      earlyBirdDeadline: EARLY_BIRD_DEADLINE,
 
-      // 🔵 KEEP EXISTING STRUCTURE (so no HTML breaks)
-      base: { student: 250, academia: 350, industry: 500 },
-      adjustments: {
-        early: { student: -50, academia: -50, industry: -50 },
-        late:  { student:  50, academia:  50, industry: 100 }
-      },
-      dinnerAddon: 0, // you removed gala dinner earlier
-
-      // 🟢 NEW: Detailed official fee table (from your image)
-      officialTable: [
-        {
-          category: 'Local Student',
-          earlyBird: 'RM 450',
-          normal: 'RM 550'
+      fees: {
+        localStudent: {
+          early:  { amount: 450, currency: 'MYR' },
+          normal: { amount: 550, currency: 'MYR' }
         },
-        {
-          category: 'International Student',
-          earlyBird: 'USD 140',
-          normal: 'USD 180'
+        internationalStudent: {
+          early:  { amount: 140, currency: 'USD' },
+          normal: { amount: 180, currency: 'USD' }
         },
-        {
-          category: 'Local Professional',
-          earlyBird: 'RM 750',
-          normal: 'RM 850',
-          notes: [
-            'Follow student rate: RM 450 (TESMA/MTERM Comm)',
-            'Member: RM 650',
-            'Symposia Speaker: RM 650',
-            'Keynote: Free / Preliminary: Free'
-          ]
+        localProfessional: {
+          standard:  { early: { amount: 750, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
+          committee: { early: { amount: 450, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
+          member:    { early: { amount: 650, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
+          symposia:  { early: { amount: 650, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
+          keynote:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } },
+          plenary:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } }
         },
-        {
-          category: 'International Professional',
-          earlyBird: 'USD 200',
-          normal: 'USD 250'
+        internationalProfessional: {
+          early:  { amount: 200, currency: 'USD' },
+          normal: { amount: 250, currency: 'USD' }
         },
-        {
-          category: 'Industrial Booth',
-          earlyBird: 'RM 1,000',
-          normal: 'RM 1,500'
+        industrialBooth: {
+          early:  { amount: 1000, currency: 'MYR' },
+          normal: { amount: 1500, currency: 'MYR' }
         }
-      ]
+      },
+
+      dinnerAddon: 0
     };
 
     const doc = await Pricing.findOneAndUpdate(
@@ -64,10 +50,10 @@ const Pricing = require('../server/models/Pricing');
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    console.log('✔ Seeded pricing safely:', {
-      eventStartDate: doc.eventStartDate.toISOString().slice(0,10),
-      base: doc.base,
-      officialTableRows: doc.officialTable?.length || 0
+    console.log('✔ Seeded pricing (official table):', {
+      key: doc.key,
+      earlyBirdDeadline: doc.earlyBirdDeadline.toISOString().slice(0, 10),
+      dinnerAddon: doc.dinnerAddon
     });
 
     process.exit(0);
