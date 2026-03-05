@@ -23,7 +23,7 @@ const PricingSchema = new mongoose.Schema({
       normal: { type: FeeSchema, required: true }
     },
     localProfessional: {
-      standard: { early: FeeSchema, normal: FeeSchema },
+      standard:  { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
       committee:{ early: FeeSchema, normal: FeeSchema },
       member:   { early: FeeSchema, normal: FeeSchema },
       symposia: { early: FeeSchema, normal: FeeSchema },
