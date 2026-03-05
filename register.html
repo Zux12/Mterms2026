@@ -204,17 +204,39 @@
       <div style="font-weight:700;margin-bottom:8px">Registration</div>
 
       <form id="fullRegForm">
-        <!-- Category -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-          <label>Category
-            <select name="category" id="f-category" required>
-              <option value="">Select…</option>
-              <option value="student">Student</option>
-              <option value="academia">Academia</option>
-              <option value="industry">Industry</option>
-            </select>
-          </label>
-        </div>
+<!-- Registration Options (Option B) -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+  <label>Role
+    <select name="roleType" id="f-roleType" required>
+      <option value="">Select…</option>
+      <option value="Student">Student</option>
+      <option value="Professional">Professional</option>
+      <option value="Industrial Booth">Industrial Booth</option>
+    </select>
+  </label>
+
+  <label>Nationality
+    <select name="nationality" id="f-nationality" required>
+      <option value="">Select…</option>
+      <option value="Malaysian">Malaysian</option>
+      <option value="Non-Malaysian">Non-Malaysian</option>
+    </select>
+  </label>
+</div>
+
+<!-- Professional subtype (only for Malaysian Professional) -->
+<div id="proSubtypeWrap" style="display:none;margin-bottom:12px">
+  <label>Professional Category
+    <select name="professionalSubtype" id="f-profSubtype">
+      <option value="Standard">Standard</option>
+      <option value="Committee">TESMA/MTERM Committee</option>
+      <option value="Member">Member</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+      <option value="Keynote">Keynote Speaker</option>
+      <option value="Plenary">Plenary Speaker</option>
+    </select>
+  </label>
+</div>
 
         <!-- Personal -->
         <fieldset style="border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:12px">
@@ -389,9 +411,11 @@
 
     // Wait until the elements exist
     function ready(fn, tries = 0) {
-      const need = [
-        'pricingMount','fullRegForm','fullRegResult','f-category','studentOnly','f-presenting','presentFields'
-      ];
+const need = [
+  'pricingMount','fullRegForm','fullRegResult',
+  'f-roleType','f-nationality','f-profSubtype','proSubtypeWrap',
+  'studentOnly','f-presenting','presentFields'
+];
       const allOk = need.every(id => $(id));
       if (allOk) return fn();
       if (tries > 100) return console.warn('register.js: elements not found after retries');
@@ -406,29 +430,50 @@
           const r = await fetch(`${API}/api/pricing/table`, { cache: 'no-store' });
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           const data = await r.json();
-          mount.innerHTML = `
-            <div style="font-weight:700;margin-bottom:8px">Indicative Registration Fees (${data.currency})</div>
-            <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
-              <thead>
-                <tr>
-                  <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Phase</th>
-                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Student</th>
-                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Academia</th>
-                  <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Industry</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${data.rows.map(r => `
-                  <tr>
-                    <td style="padding:8px">${r.phase}</td>
-                    <td style="padding:8px;text-align:right">RM ${r.prices.student.toFixed(0)}</td>
-                    <td style="padding:8px;text-align:right">RM ${r.prices.academia.toFixed(0)}</td>
-                    <td style="padding:8px;text-align:right">RM ${r.prices.industry.toFixed(0)}</td>
-                  </tr>`).join('')}
-              </tbody>
-            </table>
-            <div style="margin-top:4px;opacity:0.75">Current phase: <strong>${data.nowPhase}</strong>.</div>
-          `;
+mount.innerHTML = `
+  <div style="font-weight:700;margin-bottom:8px">Registration Fees</div>
+
+  <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Category</th>
+        <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Early Bird</th>
+        <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Normal</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${Array.isArray(data.rows) ? data.rows.map(row => {
+        const early = row.earlyBird ? `${row.earlyBird.currency} ${Number(row.earlyBird.amount).toFixed(0)}` : '—';
+        const normal = row.normal ? `${row.normal.currency} ${Number(row.normal.amount).toFixed(0)}` : '—';
+
+        const notes = (row.category === 'Local Professional' && row.notes)
+          ? `<div style="margin-top:8px;font-size:.88em;opacity:.9;line-height:1.35;text-align:left">
+               <div style="font-weight:800;margin-bottom:4px">Early Bird notes</div>
+               <ul style="margin:0;padding-left:18px">
+                 <li>Committee: ${row.notes.committeeEarly.currency} ${Number(row.notes.committeeEarly.amount).toFixed(0)}</li>
+                 <li>Member: ${row.notes.memberEarly.currency} ${Number(row.notes.memberEarly.amount).toFixed(0)}</li>
+                 <li>Symposia Speaker: ${row.notes.symposiaEarly.currency} ${Number(row.notes.symposiaEarly.amount).toFixed(0)}</li>
+                 <li>Keynote: Free</li>
+                 <li>Plenary: Free</li>
+               </ul>
+             </div>`
+          : '';
+
+        return `
+          <tr>
+            <td style="padding:8px;vertical-align:top">${row.category}${notes}</td>
+            <td style="padding:8px;text-align:right;vertical-align:top">${early}</td>
+            <td style="padding:8px;text-align:right;vertical-align:top">${normal}</td>
+          </tr>
+        `;
+      }).join('') : ''}
+    </tbody>
+  </table>
+
+  <div style="margin-top:4px;opacity:0.75">
+    Current phase: <strong>${data.nowPhase || '—'}</strong>.
+  </div>
+`;
         } catch (e) {
           mount.innerHTML = `<div style="color:#ff6b6b">❌ Pricing load failed: ${e.message}</div>`;
           console.error('Pricing preview failed', e);
@@ -438,23 +483,23 @@
       /* ================== Registration form ================== */
       const form = $('fullRegForm');
       const out  = $('fullRegResult');
-      const selCategory = $('f-category');
-      const studentOnly = $('studentOnly');
-      const chkPresenting = $('f-presenting');
-      const presentFields = $('presentFields');
-      const submitBtn = $('reg-submit');
+const selRole = $('f-roleType');
+const selNat  = $('f-nationality');
+const proSubtypeWrap = $('proSubtypeWrap');
 
-      const pwEl = document.getElementById('pw');
-      const pwToggle = document.getElementById('pwToggle');
-      if (pwEl && pwToggle){
-        pwToggle.addEventListener('click', () => {
-          const isPw = pwEl.type === 'password';
-          pwEl.type = isPw ? 'text' : 'password';
-          pwToggle.textContent = isPw ? 'Hide' : 'Show';
-        });
-      }
+function refreshOptionBUI(){
+  const role = selRole.value;
+  const nat  = selNat.value;
 
-      selCategory.addEventListener('change', () => show(studentOnly, selCategory.value === 'student'));
+  // Student section shows for ANY Student (local or international)
+  show(studentOnly, role === 'Student');
+
+  // Professional subtype only for Malaysian + Professional
+  show(proSubtypeWrap, role === 'Professional' && nat === 'Malaysian');
+}
+
+selRole.addEventListener('change', refreshOptionBUI);
+selNat.addEventListener('change', refreshOptionBUI);
       chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
 
       function setSubmitBusy(busy) {
@@ -491,7 +536,9 @@
         }
 
         const payload = {
-          category: fd.get('category'),
+roleType: fd.get('roleType'),
+nationality: fd.get('nationality'),
+professionalSubtype: fd.get('professionalSubtype'),
           password: pw,
           addons: { dinner: false },
           personal: {
@@ -525,12 +572,12 @@
             title:      $('f-title')?.value || '',
             topicArea:  $('f-topicArea')?.value || ''
           },
-          student: (fd.get('category') === 'student') ? {
+          student: (fd.get('roleType') === 'Student') ? {
             university: fd.get('student.university'),
             level:      fd.get('student.level') || 'Other',
             expectedGradYear: fd.get('student.expectedGradYear') ? Number(fd.get('student.expectedGradYear')) : undefined
           } : undefined,
-          studentProof: (fd.get('category') === 'student') ? {
+          studentProof: (fd.get('roleType') === 'Student') ? {
             deferred: (document.querySelector('input[name="studentProof"]:checked')?.value === 'later')
           } : undefined,
           consents: {
@@ -552,7 +599,7 @@
           out.innerHTML = `
 ✅ Registration Successful. Your code: <strong>${data.regCode}</strong><br>
 You can now log in using your <strong>email + password</strong>.<br>
-Amount due: <strong>RM ${data.amount}</strong> (${data.currency}) — Phase: ${data.phase}<br>
+Amount due: <strong>${data.currency} ${data.amount}</strong> — Phase: ${data.phase}<br>
 Student proof: ${data.studentProof?.required ? (data.studentProof.deferred ? 'Upload later' : 'Required') : 'Not applicable'}<br>
  <a class="btn" href="login.html">Login Now</a>
           `;
