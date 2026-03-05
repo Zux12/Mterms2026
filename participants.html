@@ -1213,7 +1213,7 @@ $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
 
     
   }
-
+refreshOptionBUI();
 
     // Ensure Oral Slides / Poster submission section is loaded and reflects current programme type
     ensurePresentationPartialLoaded();
@@ -1572,7 +1572,6 @@ if (!v.ok) {
   saveBtn.disabled = false;
   return;
 }
-    if (updates.student === undefined) delete updates.student;
 
 
 
@@ -1656,6 +1655,22 @@ $('f-nationality').addEventListener('change', refreshOptionBUI);
   showPresent(on);
   showSubmission(on);
 });
+
+  function refreshOptionBUI(){
+  const role = $('f-roleType').value;
+  const nat  = $('f-nationality').value;
+
+  showStudent(role === 'Student');
+
+  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
+  document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+
+  // If not applicable, force Standard (keeps UI clean)
+  if (!showSubtype) $('f-profSubtype').value = 'Standard';
+}
+
+$('f-roleType').addEventListener('change', refreshOptionBUI);
+$('f-nationality').addEventListener('change', refreshOptionBUI);
   
   saveBtn.addEventListener('click', saveChanges);
   document.getElementById('cancelBtn').addEventListener('click', () => {
