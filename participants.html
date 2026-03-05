@@ -365,18 +365,39 @@
       <h3>My Details</h3>
       <p class="help">Edit your information and save changes.</p>
 
-      <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-        <legend>Registration Options</legend>
-        <div class="grid-2">
-          <label>Category
-            <select id="f-category">
-              <option value="student">Student</option>
-              <option value="academia">Academia</option>
-              <option value="industry">Industry</option>
-            </select>
-          </label>
-        </div>
-      </fieldset>
+<fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+  <legend>Registration Options</legend>
+
+  <div class="grid-2">
+    <label>Role
+      <select id="f-roleType">
+        <option value="Student">Student</option>
+        <option value="Professional">Professional</option>
+        <option value="Industrial Booth">Industrial Booth</option>
+      </select>
+    </label>
+
+    <label>Nationality
+      <select id="f-nationality">
+        <option value="Malaysian">Malaysian</option>
+        <option value="Non-Malaysian">Non-Malaysian</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="proSubtypeWrap" class="hidden" style="margin-top:8px">
+    <label>Professional Category
+      <select id="f-profSubtype">
+        <option value="Standard">Standard</option>
+        <option value="Committee">TESMA/MTERM Committee</option>
+        <option value="Member">Member</option>
+        <option value="Symposia Speaker">Symposia Speaker</option>
+        <option value="Keynote">Keynote Speaker</option>
+        <option value="Plenary">Plenary Speaker</option>
+      </select>
+    </label>
+  </div>
+</fieldset>
 <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
   <legend>Personal</legend>
   <div class="grid-2">
@@ -1140,20 +1161,16 @@ function deepMerge(base, patch) {
     $('userPayment').textContent = user?.payment?.status || 'pending';
     updatePaymentTagColor();
 
-    $('f-category').value = user?.category || 'academia';
+ $('f-roleType').value = user?.roleType || 'Professional';
+$('f-nationality').value = user?.nationality || 'Malaysian';
+$('f-profSubtype').value = user?.professionalSubtype || 'Standard';
 
-    $('p-firstName').value = user?.personal?.firstName || '';
-    $('p-lastName').value  = user?.personal?.lastName  || '';
-    $('p-email').value     = user?.personal?.email     || '';
-    $('p-phone').value     = user?.personal?.phone     || '';
-    $('p-country').value   = user?.personal?.country   || '';
+const isStudent = (user?.roleType === 'Student');
+showStudent(isStudent);
 
-    $('pro-affiliation').value = user?.professional?.affiliation || '';
-    $('pro-dept').value        = user?.professional?.department  || '';
-    $('pro-role').value        = user?.professional?.roleTitle   || '';
-
-    const isStudent = (user?.category === 'student');
-    showStudent(isStudent);
+// show subtype only if Professional + Malaysian
+const showSubtype = (user?.roleType === 'Professional' && user?.nationality === 'Malaysian');
+document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
     $('s-university').value = user?.student?.university || '';
     $('s-level').value      = user?.student?.level || '';
     $('s-grad').value       = user?.student?.expectedGradYear || '';
@@ -1474,60 +1491,73 @@ if (data.count){
     saveBtn.disabled = true;
     saveMsg.textContent = 'Saving...';
 
-    const updates = {
-      category: $('f-category').value,
-      personal: {
-        firstName: $('p-firstName').value.trim(),
-        lastName:  $('p-lastName').value.trim(),
-        email:     $('p-email').value.trim(),
-        phone:     $('p-phone').value.trim(),
-        country:   $('p-country').value.trim()
-      },
-      professional: {
-        affiliation: $('pro-affiliation').value.trim(),
-        department:  $('pro-dept').value.trim(),
-        roleTitle:   $('pro-role').value.trim()
-      },
-      student: ($('f-category').value === 'student') ? {
-        university: $('s-university').value.trim(),
-        level:      $('s-level').value,
-        expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
-      } : undefined,
-      program: {
-        presenting: $('pr-presenting').checked,
-        type: (function(){
-          const presenting = $('pr-presenting').checked;
-          const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
-          if (!presenting) return 'none';
-          return posterLocked ? 'poster' : $('pr-type').value;
-        })(),
-        // program.title is repurposed for admin reviewer comments (participant must NOT overwrite)
-        title: user?.program?.title || '',
-        // program.topicArea is repurposed for admin Poster-only lock marker (participant must NOT overwrite)
-        topicArea: user?.program?.topicArea || ''
-      },
+const updates = {
+  // ✅ Option B fields (replace old category-based selection)
+  roleType: $('f-roleType').value,
+  nationality: $('f-nationality').value,
+  professionalSubtype: $('f-profSubtype').value,
 
-      submission: readSubmissionFromForm(),
-      
-      billing: {
-        billTo:   $('b-billTo').value.trim(),
-        taxNo:    $('b-taxNo').value.trim(),
-        poNumber: $('b-po').value.trim()
-      },
-      address: {
-        line1: $('a-line1').value.trim(),
-        line2: $('a-line2').value.trim(),
-        city:  $('a-city').value.trim(),
-        state: $('a-state').value.trim(),
-        postcode: $('a-postcode').value.trim(),
-        country:  $('a-country').value.trim()
-      },
-consents: {
-  pdpa: $('c-pdpa').checked,
-  codeOfConduct: $('c-coc').checked,
-  marketingOptIn: $('c-mkt').checked
-}
-    };
+  personal: {
+    firstName: $('p-firstName').value.trim(),
+    lastName:  $('p-lastName').value.trim(),
+    email:     $('p-email').value.trim(),
+    phone:     $('p-phone').value.trim(),
+    country:   $('p-country').value.trim()
+  },
+
+  professional: {
+    affiliation: $('pro-affiliation').value.trim(),
+    department:  $('pro-dept').value.trim(),
+    roleTitle:   $('pro-role').value.trim()
+  },
+
+  // ✅ Student details only when Role = Student (local or international)
+  student: ($('f-roleType').value === 'Student') ? {
+    university: $('s-university').value.trim(),
+    level:      $('s-level').value,
+    expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
+  } : undefined,
+
+  program: {
+    presenting: $('pr-presenting').checked,
+    type: (function(){
+      const presenting = $('pr-presenting').checked;
+      const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
+      if (!presenting) return 'none';
+      return posterLocked ? 'poster' : $('pr-type').value;
+    })(),
+    // program.title is repurposed for admin reviewer comments (participant must NOT overwrite)
+    title: user?.program?.title || '',
+    // program.topicArea is repurposed for admin Poster-only lock marker (participant must NOT overwrite)
+    topicArea: user?.program?.topicArea || ''
+  },
+
+  submission: readSubmissionFromForm(),
+
+  billing: {
+    billTo:   $('b-billTo').value.trim(),
+    taxNo:    $('b-taxNo').value.trim(),
+    poNumber: $('b-po').value.trim()
+  },
+
+  address: {
+    line1: $('a-line1').value.trim(),
+    line2: $('a-line2').value.trim(),
+    city:  $('a-city').value.trim(),
+    state: $('a-state').value.trim(),
+    postcode: $('a-postcode').value.trim(),
+    country:  $('a-country').value.trim()
+  },
+
+  consents: {
+    pdpa: $('c-pdpa').checked,
+    codeOfConduct: $('c-coc').checked,
+    marketingOptIn: $('c-mkt').checked
+  }
+};
+
+// Keep this line you already have (so student is not sent when not Student)
+if (updates.student === undefined) delete updates.student;
 
 const vt = validateTitleIfPresenter();
 if (!vt.ok) {
@@ -1610,8 +1640,17 @@ document.getElementById('absRefreshBtn').addEventListener('click', async () => {
   // Bank receipt upload (latest only)
 document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadDoc('bankReceipt','payFile','payMsg','payLatest'));
 document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatest('bankReceipt','payLatest'));
-  $('f-category').addEventListener('change', () => showStudent($('f-category').value === 'student'));
+function refreshOptionBUI(){
+  const role = $('f-roleType').value;
+  const nat  = $('f-nationality').value;
 
+  showStudent(role === 'Student');
+
+  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
+  document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+}
+$('f-roleType').addEventListener('change', refreshOptionBUI);
+$('f-nationality').addEventListener('change', refreshOptionBUI);
   $('pr-presenting').addEventListener('change', () => {
   const on = $('pr-presenting').checked;
   showPresent(on);
