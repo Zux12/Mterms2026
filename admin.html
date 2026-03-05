@@ -46,125 +46,9 @@ input[type="radio"]{
     th{text-align:left}
     .actions{display:flex;gap:8px}
 
-    .admin-nav{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
+ 
 
-/* Header right toolbar alignment */
-.brand-right{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;                 /* keep in one row on desktop */
-}
 
-/* The nav container should not force wrapping */
-.admin-nav{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;                 /* keep in one row */
-}
-
-/* Make all header buttons same height */
-.brand-right .btn,
-.admin-nav .btn,
-.admin-tools > summary.btn{
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 12px;              /* pill-ish */
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-}
-
-/* Mobile: allow wrap */
-@media (max-width: 720px){
-  .brand-right,
-  .admin-nav{ flex-wrap:wrap; }
-}
-
-/* Admin Tools dropdown - make it look like a proper menu */
-.admin-tools{ position:relative; }
-
-/* Remove the default triangle marker */
-.admin-tools > summary{
-  list-style:none;
-}
-.admin-tools > summary::-webkit-details-marker{ display:none; }
-
-/* Give the summary a cleaner, premium button feel */
-.admin-tools > summary.btn{
-  background:#fff;
-  border:1px solid var(--border);
-  box-shadow: 0 10px 22px rgba(0,0,0,.06);
-}
-.admin-tools[open] > summary.btn{
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
-}
-
-/* Dropdown panel */
-.admin-tools-menu{
-  position:absolute;
-  right:0;
-  top: calc(100% + 10px);
-  min-width: 300px;
-  padding: 10px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 24px 70px rgba(0,0,0,.18);
-  display:grid;
-  gap:8px;
-  z-index: 100;
-}
-
-/* Items inside menu should look like menu rows, not chunky buttons */
-.admin-tools-menu .btn{
-  height: 40px;
-  width:100%;
-  justify-content:flex-start;
-  border-radius: 10px;
-  background:#fff;
-}
-.admin-tools-menu .btn:hover{
-  background: rgba(11,42,107,0.04);
-}
-
-/* Admin Tools dropdown */
-.admin-tools{ position:relative; }
-.admin-tools > summary{ list-style:none; }
-.admin-tools > summary::-webkit-details-marker{ display:none; }
-
-.admin-tools-menu{
-  position:absolute;
-  right:0;
-  top: calc(100% + 8px);
-  display:grid;
-  gap:8px;
-  padding:10px;
-  min-width: 280px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:12px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
-  z-index: 50;
-}
-
-/* On mobile: let it flow normally (no absolute dropdown) */
-@media (max-width: 720px){
-  .admin-tools-menu{
-    position:static;
-    min-width: unset;
-    box-shadow:none;
-    padding:8px 0 0;
-    border:none;
-    background:transparent;
-  }
-}
     
     /* Buttons — back to normal sizing (no gradients) */
 .btn{
@@ -1984,74 +1868,79 @@ if (nav) nav.style.display = 'block';
 .admin-wrap .actions .btn:disabled { font-weight: 700 !important; }
 
 
-
-/* ===== FINAL header button overrides (must be last) ===== */
+/* ===== FINAL header toolbar + dropdown (wins over assets/styles.css) ===== */
 header.brand-header .brand-right{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  flex-wrap:nowrap !important;
 }
 
 header.brand-header #adminNav.admin-nav{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  flex-wrap:nowrap !important;
 }
 
-/* uniform button sizing in header only */
-header.brand-header .btn,
+/* Make header buttons look premium (header only) */
+header.brand-header button.btn,
+header.brand-header a.btn,
 header.brand-header .admin-tools > summary.btn{
-  height:40px;
-  padding:0 14px;
-  border-radius:12px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
+  height:42px !important;
+  padding:0 16px !important;
+  border-radius:14px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:1 !important;
+  box-shadow:0 10px 22px rgba(0,0,0,.06) !important;
 }
 
-/* Admin tools dropdown look */
-header.brand-header .admin-tools{ position:relative; }
-header.brand-header .admin-tools > summary{ list-style:none; }
-header.brand-header .admin-tools > summary::-webkit-details-marker{ display:none; }
+/* Dropdown trigger should not show browser marker */
+header.brand-header .admin-tools{ position:relative !important; }
+header.brand-header .admin-tools > summary{ list-style:none !important; }
+header.brand-header .admin-tools > summary::-webkit-details-marker{ display:none !important; }
 
+/* Dropdown panel */
 header.brand-header .admin-tools-menu{
-  position:absolute;
-  right:0;
-  top:calc(100% + 10px);
-  min-width:300px;
-  padding:10px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 24px 70px rgba(0,0,0,.18);
-  display:grid;
-  gap:8px;
-  z-index:100;
+  position:absolute !important;
+  right:0 !important;
+  top:calc(100% + 10px) !important;
+  min-width:320px !important;
+  padding:10px !important;
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-radius:14px !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.18) !important;
+  display:grid !important;
+  gap:8px !important;
+  z-index:999 !important;
 }
 
+/* Menu items look like clean rows */
 header.brand-header .admin-tools-menu .btn{
-  width:100%;
-  justify-content:flex-start;
-  border-radius:10px;
+  width:100% !important;
+  justify-content:flex-start !important;
+  border-radius:12px !important;
+  box-shadow:none !important;
 }
 
-/* mobile */
+/* Mobile: allow wrap + make dropdown flow naturally */
 @media (max-width:720px){
   header.brand-header .brand-right,
-  header.brand-header #adminNav.admin-nav{ flex-wrap:wrap; }
-
-  header.brand-header .admin-tools-menu{
-    position:static;
-    min-width:unset;
-    box-shadow:none;
-    padding:8px 0 0;
-    border:none;
-    background:transparent;
+  header.brand-header #adminNav.admin-nav{
+    flex-wrap:wrap !important;
   }
-}  
+  header.brand-header .admin-tools-menu{
+    position:static !important;
+    min-width:unset !important;
+    padding:8px 0 0 !important;
+    border:none !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+}
 </style>
 
 
