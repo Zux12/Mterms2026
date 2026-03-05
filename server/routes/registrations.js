@@ -373,38 +373,73 @@ router.put('/update', async (req, res) => {
     const allow = (obj, keys) =>
       Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keys.includes(k)));
 
-    const safe = {
-      category: updates.category, // optional if you want to allow category change; remove if not
-      addons: allow(updates.addons, ['dinner']),
-      personal: allow(updates.personal, ['firstName','lastName','email','phone','country']),
-      professional: allow(updates.professional, ['affiliation','department','roleTitle']),
-      address: allow(updates.address, ['line1','line2','city','state','postcode','country']),
-      billing: allow(updates.billing, ['billTo','taxNo','poNumber']),
-      program: allow(updates.program, ['presenting','type','title','topicArea']),
+const safe = {
+  // ✅ Option B fields (participant may update)
+  roleType: updates.roleType,
+  nationality: updates.nationality,
+  professionalSubtype: updates.professionalSubtype,
+
+  // ❌ Do NOT allow direct category editing by participants anymore
+  // category: updates.category,
+
+  // Dinner is removed; keep addons only if you still want to store it (otherwise comment out)
+  addons: allow(updates.addons, ['dinner']),
+
+  personal: allow(updates.personal, ['firstName','lastName','email','phone','country']),
+  professional: allow(updates.professional, ['affiliation','department','roleTitle']),
+  address: allow(updates.address, ['line1','line2','city','state','postcode','country']),
+  billing: allow(updates.billing, ['billTo','taxNo','poNumber']),
+  program: allow(updates.program, ['presenting','type','title','topicArea']),
+
+  submission: {
+    theme: updates.submission?.theme,
+    field: updates.submission?.field,
+    title: updates.submission?.title,
+    authors: Array.isArray(updates.submission?.authors)
+      ? updates.submission.authors.slice(0, 10).map(a => ({
+          firstName: a?.firstName,
+          lastName: a?.lastName,
+          email: a?.email,
+          affiliation: a?.affiliation,
+          country: a?.country,
+          isCorresponding: !!a?.isCorresponding
+        }))
+      : [],
+    updatedAt: new Date()
+  },
+
+  student: allow(updates.student, ['university','level','expectedGradYear']),
+  consents: allow(updates.consents, ['pdpa','codeOfConduct','marketingOptIn'])
+};
 
 
-      submission: {
-        theme: updates.submission?.theme,
-        field: updates.submission?.field,
-        title: updates.submission?.title,
-        authors: Array.isArray(updates.submission?.authors)
-          ? updates.submission.authors.slice(0, 10).map(a => ({
-              firstName: a?.firstName,
-              lastName: a?.lastName,
-              email: a?.email,
-              affiliation: a?.affiliation,
-              country: a?.country,
-              isCorresponding: !!a?.isCorresponding
-            }))
-          : [],
-        updatedAt: new Date()
-      },
+// ---- Validate Option B fields on participant update (prevents inconsistent states)
+const roleOk = ['Student','Professional','Industrial Booth'].includes(safe.roleType);
+const natOk  = ['Malaysian','Non-Malaysian'].includes(safe.nationality);
+const subOk  = ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'].includes(safe.professionalSubtype || 'Standard');
 
-      
-      student: allow(updates.student, ['university','level','expectedGradYear']),
-      consents: allow(updates.consents, ['pdpa','codeOfConduct','marketingOptIn'])
-    };
+if (safe.roleType && !roleOk) return res.status(400).json({ error: 'Invalid roleType' });
+if (safe.nationality && !natOk) return res.status(400).json({ error: 'Invalid nationality' });
 
+// subtype only meaningful for Malaysian + Professional
+if (safe.roleType === 'Professional' && safe.nationality === 'Malaysian') {
+  if (!subOk) return res.status(400).json({ error: 'Invalid professionalSubtype' });
+} else {
+  // force Standard when not Local Professional
+  safe.professionalSubtype = 'Standard';
+}
+
+
+    // ---- Derive finalCategory and keep `category` consistent
+let finalCategory = '';
+if (safe.roleType === 'Student' && safe.nationality === 'Malaysian') finalCategory = 'Local Student';
+if (safe.roleType === 'Student' && safe.nationality === 'Non-Malaysian') finalCategory = 'International Student';
+if (safe.roleType === 'Professional' && safe.nationality === 'Malaysian') finalCategory = 'Local Professional';
+if (safe.roleType === 'Professional' && safe.nationality === 'Non-Malaysian') finalCategory = 'International Professional';
+if (safe.roleType === 'Industrial Booth') finalCategory = 'Industrial Booth';
+
+if (finalCategory) safe.category = finalCategory;
+    
     // remove empty sub-objects to keep $set clean
     Object.keys(safe).forEach(k => {
       if (safe[k] && typeof safe[k] === 'object' && !Object.keys(safe[k]).length) delete safe[k];
