@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MTERMS 2026 — Admin</title>
+
+  <!-- Reuse your main CSS -->
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Theme overrides + hero-independent palette -->
+  <style id="theme-overrides">
+:root.theme-light{
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --text:#0b1115;
+  --border:#e5e7eb;
+  --muted:#667085;
+
+  /* Subtle conference palette */
+  --uitm-navy:#0B2A6B;
+  --tesma-teal:#0EA5A6;
+
+  /* Soft background tint */
+  --bg-tint: rgba(14,165,166,0.06);
+}
+    html,body{background:var(--bg);color:var(--text);}
+    .admin-wrap{width:min(1200px,92vw);margin:24px auto;}
+    .admin-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px;}
+    .theme-toggle{margin-left:8px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff;color:#0b1115}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:16px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    input,select,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+
+    /* IMPORTANT: don't apply 100% width to checkbox/radio */
+input[type="checkbox"],
+input[type="radio"]{
+  width:auto !important;
+  padding:0 !important;
+  border:none !important;
+  box-shadow:none !important;
+}
+    table{width:100%;border-collapse:collapse;font-size:.95rem}
+    th,td{padding:8px;border-bottom:1px solid var(--border)}
+    th{text-align:left}
+    .actions{display:flex;gap:8px}
+
+    .admin-nav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+    
+    /* Buttons — back to normal sizing (no gradients) */
+.btn{
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;      /* back to original */
+  font-size: .95rem;      /* back to original */
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn.ghost{
+  background: transparent;
+}
+
+
+
+/* ===== Admin brand header (match participant portal style) ===== */
+.brand-wrap{
+  width:min(1200px,92vw);
+  margin:24px auto;
+}
+
+.brand-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding: 10px 4px 18px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid rgba(14,165,166,0.18);
+}
+
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-logo{
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+.brand-logo img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.brand-title{
+  margin:0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.brand-subtitle{
+  margin:6px 0 0;
+  color:#374151;
+  font-size: .98rem;
+}
+
+.brand-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+    
+
+/* Primary = normal green (used for Edit + Save + Refresh + Print selected) */
+.btn-primary{
+  background: #16a34a;   /* green */
+  border-color: #16a34a;
+  color: #fff;
+}
+
+
+/* all button = normal green (used for  Save + Refresh + Print selected) */
+ .btn-custom {
+    style="
+    display:inline-block;
+    margin-top:12px;
+    padding:6px 12px;
+    border:none;
+    border-radius:8px;
+    background: #16a34a;
+     color:#fff;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  "
+  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.25)';"
+  onmouseout="this.style.transform='';this.style.boxShadow='';"
+ }
+    
+
+    
+/* Cancel + Logout = red */
+.btn-danger{
+  background: #dc2626;   /* red */
+  border-color: #dc2626;
+  color: #fff;
+}
+
+/* Secondary = normal white button */
+.btn-secondary{
+  background:#ffffff;
+  border-color: var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover{ filter: brightness(0.98); }
+    
+/* Small hover, still professional */
+.btn-primary:hover{ filter: brightness(0.95); }
+.btn-danger:hover{ filter: brightness(0.95); }
+
+    
+
+.btn:hover{ transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+.btn-primary:hover{ filter: brightness(1.02); }
+.btn-secondary:hover{ box-shadow: 0 8px 18px rgba(0,0,0,.06); }
+.btn-logout:hover{ filter: brightness(1.02); }
+
+
+
+    /* Badge (match participants.html exactly) */
+.badge{
+  width: 260px;
+  height: 400px;
+  background:#fff;
+  color:#0b1115;
+  border-radius:16px;
+  border:1px solid #e8e8e8;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.badge-top{
+  padding:8px 10px 4px;
+}
+
+.badge-mterm{
+  display:block;
+  width:96px;
+  height:auto;
+  margin:0 auto 4px;
+  object-fit:contain;
+}
+
+.badge-logos{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+}
+
+.badge-logos img{
+  height:20px;
+  width:auto;
+  object-fit:contain;
+}
+
+.badge-photo-wrap{
+  margin:8px auto 0;
+  width:180px;
+  height:240px;
+  position:relative;
+  border:1px solid #ddd;
+  border-radius:10px;
+  overflow:hidden;
+  background:#f2f4f7;
+}
+
+.badge-photo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.badge-info{
+  padding:10px 12px 0;
+  text-align:center;
+}
+
+.badge-name{
+  font-weight:800;
+  font-size:18px;
+  line-height:1.2;
+}
+
+.badge-affil{
+  font-size:12px;
+  color:#475467;
+  margin-top:2px;
+}
+
+.badge-cat{
+  font-size:12px;
+  color:#0b7a64;
+  font-weight:700;
+  margin-top:6px;
+}
+
+.badge-footer{
+  margin-top:auto;
+  font-size:11px;
+  text-align:center;
+  padding:8px 10px 10px;
+  color:#667085;
+  border-top:1px solid #eef2f6;
+  background:#fafafa;
+}
+
+    
+
+    /* print */
+    @media print{
+      body{background:#fff;color:#000}
+      .no-print{display:none !important}
+      .print-grid{display:grid;grid-template-columns:repeat(2, 280px);gap:20px}
+      .badge{break-inside:avoid}
+    }
+
+    /* ---------- Readability fixes (target only the faint areas) ---------- */
+
+/* 1) Inputs: ensure good text + placeholder contrast */
+input, select, textarea { color: var(--text); }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+
+/* 2) Table headers: stronger contrast in light & dark */
+table thead th {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* 3) Buttons: make disabled states readable (remove default washed-out opacity) */
+.btn:disabled,
+button[disabled] {
+  opacity: 1;                     /* cancel browser fade */
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+
+/* Light theme disabled buttons */
+.theme-light .btn:disabled,
+.theme-light button[disabled] {
+  background: #eef2f7;
+  color: #48566a;
+  border-color: var(--border);
+  filter: none !important;
+}
+
+
+/* 4) Ghost buttons (e.g., Logout) need clearer text outlines in light mode */
+.theme-light .btn.ghost {
+  color: #0b1115;                  /* solid dark text */
+  background: transparent;
+  border-color: var(--border);
+}
+
+/* 5) Make the small “Edit” buttons readable even when disabled */
+.actions .btn:disabled {
+  font-weight: 600;
+}
+
+
+/* Layout accents (professional, not overdone) */
+html, body{
+  background:
+    radial-gradient(900px 300px at 10% 0%, var(--bg-tint), transparent 60%),
+    radial-gradient(900px 300px at 90% 0%, rgba(11,42,107,0.06), transparent 60%),
+    var(--bg);
+}
+
+.admin-head{
+  padding: 10px 0 14px;
+  border-bottom: 2px solid rgba(14,165,166,0.18);
+}
+
+.admin-head h1{
+  letter-spacing: .2px;
+}
+
+.card{
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+}
+
+.card-custom { 
+    background: #FFF5E6; 
+    border: 1px solid var(--border); 
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    }
+
+.card-purple { 
+    background: #f4ebf9; 
+    border: 1px solid var(--border); 
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    }
+
+    .card-program {
+    background: #eef6ff;   /* very light professional blue */
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+table thead th{
+  background: rgba(11,42,107,0.04);
+}
+
+
+/* ===== Admin Login (make it like participant login) ===== */
+.admin-login-shell{
+  min-height: calc(100vh - 220px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 22px 0 10px;
+}
+
+.admin-login-wrap{
+  width: min(820px, 92vw);
+  text-align:center;
+}
+
+.admin-login-logo{
+  width: 96px;
+  height: 96px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background:#fff;
+  padding: 12px;
+  margin: 0 auto 12px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.admin-login-logo img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.admin-login-title{
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.admin-login-sub{
+  margin: 6px 0 16px;
+  color: #475467;
+  font-size: 1rem;
+}
+
+.admin-login-card{
+  width: min(720px, 92vw);
+  margin: 0 auto;
+  background:#fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  overflow:hidden;
+}
+
+.admin-login-card .topbar{
+  height: 6px;
+  background: linear-gradient(90deg, #7c1d1d, #1d4ed8); /* maroon -> blue */
+}
+
+.admin-login-card .inner{
+  padding: 16px 18px 18px;
+  text-align:left;
+}
+
+.admin-login-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 720px){
+  .admin-login-grid{ grid-template-columns: 1fr; }
+}
+
+.admin-login-actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+
+/* ===== Admin login: label beside input ===== */
+.admin-login-form{
+  margin-top: 6px;
+}
+
+.admin-field{
+  display:grid;
+  grid-template-columns: 140px 1fr;   /* label | input */
+  gap: 12px;
+  align-items:center;
+  margin: 10px 0;
+}
+
+.admin-label{
+  font-weight: 800;
+  color: #111827;
+}
+
+.admin-control input{
+  width: 100%;
+}
+
+/* Actions row: Login + Back beside each other */
+.admin-login-actions-row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
+
+/* Organized by inside card */
+.admin-login-org{
+  border-top: 1px solid rgba(0,0,0,.06);
+  margin-top: 16px;
+  padding-top: 14px;
+  text-align:center;
+}
+
+.admin-login-org-title{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  opacity:.85;
+  margin-bottom:10px;
+  color: var(--uitm-navy);
+}
+
+.admin-login-org-logos{
+  display:flex;
+  justify-content:center;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+
+.logo-chip{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 12px;
+  box-shadow:0 10px 22px rgba(0,0,0,.06);
+}
+
+.logo-chip img{
+  height:34px;
+  width:auto;
+  object-fit:contain;
+  display:block;
+}
+
+/* Mobile: stack label above input */
+@media (max-width: 720px){
+  .admin-field{
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-items:stretch;
+  }
+}
+    
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+<header class="brand-header" id="adminTopHeader" style="display:none;">
+  <div class="brand-left">
+    <div class="brand-logo">
+      <img src="public/mterm.jpg" alt="MTERMS 2026">
+    </div>
+    <div>
+      <h1 class="brand-title">MTERMS 2026 — Admin</h1>
+      <p class="brand-subtitle">
+        Manage participants, edit details, preview photos, and print badges.
+      </p>
+    </div>
+  </div>
+
+  <div class="brand-right no-print">
+
+    <!-- Always visible -->
+    <button onclick="window.location.href='index.html'" class="btn btn-secondary">
+      ← Back to Main Page
+    </button>
+
+    <!-- Hidden until login -->
+<div id="adminNav" class="admin-nav" style="display:none;">
+  <button data-auth="1"
+        onclick="window.location.href='committee-appointment.html'"
+        class="btn btn-secondary">
+        Committee Appointment Letter
+      </button>
+
+      <button data-auth="1"
+        onclick="window.location.href='acceptanceletter.html'"
+        class="btn btn-secondary">
+        Invitation Letter Generator
+      </button>
+
+      <button data-auth="1" id="btnCert"
+        class="btn btn-secondary">
+        Certificate Generator
+      </button>
+
+      <button id="logoutBtn" class="btn btn-danger">
+        Logout
+      </button>
+
+    </div>
+  </div>
+</header>
+<!-- Admin Login (clean, no redundant top header) -->
+<div id="adminLoginShell" class="admin-login-shell">
+  <div class="admin-login-wrap">
+
+    <div class="admin-login-card">
+      <div class="topbar"></div>
+
+      <div class="inner">
+        <div style="display:flex;justify-content:center;margin-bottom:10px">
+          <div class="admin-login-logo" style="margin:0">
+            <img src="public/mterm.jpg" alt="MTERMS 2026">
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:12px">
+          <div style="font-weight:900;font-size:1.35rem;letter-spacing:.2px">MTERMS 2026 — Admin</div>
+          <div style="color:#475467;margin-top:4px">Log in to manage participants, review uploads, and print badges.</div>
+        </div>
+
+        <!-- Fields: label + input side-by-side, password below username -->
+        <div class="admin-login-form">
+
+          <div class="admin-field">
+            <div class="admin-label">Username</div>
+            <div class="admin-control">
+              <input id="aUser" value="admin" autocomplete="username">
+            </div>
+          </div>
+
+          <div class="admin-field">
+            <div class="admin-label">Password</div>
+            <div class="admin-control">
+              <input id="aPass" type="password" value="admin" autocomplete="current-password">
+            </div>
+          </div>
+
+          <!-- Actions: Login + Back button together -->
+          <div class="admin-login-actions-row">
+            <button id="aLogin" class="btn btn-primary">Login</button>
+
+            <button id="backToMainBtn" type="button" class="btn btn-secondary"
+              onclick="window.location.href='index.html'">
+              ← Back to Main Page
+            </button>
+
+            <span id="aMsg" style="font-size:.95rem"></span>
+          </div>
+
+          <!-- Organized by inside the card -->
+          <div class="admin-login-org">
+            <div class="admin-login-org-title">Organized by</div>
+            <div class="admin-login-org-logos">
+              <div class="logo-chip">
+                <img src="public/uitm.png" alt="UiTM">
+              </div>
+              <div class="logo-chip">
+                <img src="public/tesma.png" alt="TESMA">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+    <!-- Dashboard -->
+    <div id="dash" class="no-print" style="display:none">
+      <div class="card">
+        <div class="row">
+          <label>Search (name, email, code)
+            <input id="q" placeholder="e.g., Rahman, uitm.edu, MTERM2026-000123">
+          </label>
+          <div style="display:flex;gap:8px;align-items:end">
+<button id="refresh" class="btn btn-custom">Refresh</button>
+<button id="printSel" class="btn btn-custom">Print selected badges</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="overflow:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selAll"></th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Email</th>
+              <th>Payment</th>
+              <th>Affiliation</th>
+              <th style="width:160px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+<button id="prev" class="btn btn-secondary">Prev</button>
+          <span id="pageInfo" style="align-self:center"></span>
+<button id="next" class="btn btn-secondary">Next</button>
+        </div>
+      </div>
+
+      <!-- Edit panel -->
+      <div class="card" id="editCard" style="display:none">
+        <h3>Edit Participant</h3>
+        
+    <div class="card-purple">
+        Participant Registration Code: <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
+    </div>
+
+        
+    <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  
+          <label style="flex:1 1 600px;margin:0;min-width:280px">Category
+    <select id="f-category" style="width:100%">
+      <option value="student">Student</option>
+      <option value="academia">Academia</option>
+      <option value="industry">Industry</option>
+    </select>
+  </label>
+</div>
+
+
+        <h4>Personal</h4>
+        <div class="row">
+          <input id="p-firstName" placeholder="First name">
+          <input id="p-lastName" placeholder="Last name">
+          <input id="p-email" placeholder="Email">
+          <input id="p-phone" placeholder="Phone">
+          <input id="p-country" placeholder="Country">
+        </div>
+
+        <h4>Professional</h4>
+        <div class="row">
+          <input id="pro-affiliation" placeholder="University / Company">
+          <input id="pro-dept" placeholder="Department">
+          <input id="pro-role" placeholder="Role/Title">
+        </div>
+
+        <div id="studentOnly" style="display:none">
+          <h4>Student</h4>
+          <div class="row-3">
+            <input id="s-university" placeholder="University">
+            <select id="s-level">
+              <option value="">Level</option><option>UG</option><option>MSc</option><option>PhD</option><option>Other</option>
+            </select>
+            <input id="s-grad" type="number" placeholder="Expected grad year">
+          </div>
+        </div>
+    </div>
+    
+    <div class="card card-program">    
+      <h4>Program</h4>
+
+<!-- Presenter + Poster-only (stacked) -->
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+
+  <label class="field-inline" style="display:flex;align-items:center;gap:8px">
+    <input type="checkbox" id="pr-presenting"> I am a presenter
+  </label>
+
+  <label class="field-inline" style="display:flex;align-items:center;gap:8px;justify-content:flex-start;margin-left:28px">
+    <input type="checkbox" id="pr-posterOnly"> Poster only (lock participant to Poster). Please select Poster from drop down list below.
+  </label>
+
+  <div class="row" style="margin-top:4px">
+    <select id="pr-type">
+      <option value="none">None</option>
+      <option value="talk">Oral</option>
+      <option value="poster">Poster</option>
+      <option value="workshop">Workshop</option>
+    </select>
+  </div>
+</div>
+
+<!-- Reviewer Comment (full width) -->
+<div style="margin-top:8px">
+  <div style="font-weight:800;margin-bottom:6px">Reviewer Comment</div>
+
+  <!-- Repurposed: program.title -->
+  <textarea id="pr-title"
+    placeholder="Reviewer comment to participant (visible in participant portal)"
+    rows="3"
+    style="min-height:72px"></textarea>
+</div>
+
+        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-top:12px">
+          <div style="font-weight:800;margin-bottom:6px">Latest Abstract (for review)</div>
+          <div id="adAbsBox" style="margin-top:6px">Loading…</div>
+          <div class="help" style="margin-top:8px">
+            Tip: Leave a reviewer comment above and ask the participant to re-upload the abstract if corrections are needed.
+          </div>
+        </div>
+
+        <div id="presentationReviewMount" style="display:none;margin-top:12px"></div>
+    </div>
+
+        <!-- Submission (Theme + Field + Authors) -->
+        <div class="card" id="ad-submissionCard" style="display:none;margin-top:12px">
+          <h4>Abstract / Authors Details</h4>
+          <div style="opacity:.85;margin-top:-6px;margin-bottom:10px">
+            Theme, respective field, and author list (up to 10). Tick <strong>one</strong> corresponding author only.
+          </div>
+
+          <div class="row">
+            <label>Theme
+              <select id="ad-sub-theme">
+                <option value="">Select theme</option>
+              </select>
+            </label>
+
+            <label>Respective Field
+              <select id="ad-sub-field" disabled>
+                <option value="">Select field</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Submission / Abstract Title
+            <input id="ad-sub-title" placeholder="e.g., Scaffold-assisted stem cell regeneration...">
+          </label>
+
+          <div id="ad-subMsg" style="margin:6px 0 12px;opacity:.9"></div>
+
+<!-- Authors (dynamic, up to 10) -->
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">
+<button type="button" id="ad-addAuthorBtn" class="btn btn-primary">+ Add author</button>
+<button type="button" id="ad-removeAuthorBtn" class="btn btn-secondary">Remove last</button>
+  <span style="opacity:.85" id="ad-authorCountTxt"></span>
+</div>
+
+<div id="ad-authorsWrap"></div>
+
+<template id="ad-authorTpl">
+  <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+    <legend>Author __N__</legend>
+
+    <div style="display:flex;justify-content:flex-end;margin:-6px 0 8px">
+      <button type="button" class="btn ghost adAuthorRemoveOneBtn">Remove this author</button>
+    </div>
+
+    <div class="row-3">
+      <label>First name <input id="ad-a__N__-first" placeholder="First name"></label>
+      <label>Last name <input id="ad-a__N__-last" placeholder="Last name"></label>
+      <label>Email <input id="ad-a__N__-email" type="email" placeholder="email@example.com"></label>
+    </div>
+
+    <div class="row">
+      <label>Affiliation <input id="ad-a__N__-affil" placeholder="University / Company"></label>
+      <label>Country <input id="ad-a__N__-country" placeholder="Country"></label>
+    </div>
+
+    <label class="field-inline">
+      <input type="radio" name="adCorrAuthor" id="ad-a__N__-corr"> Corresponding author
+    </label>
+  </fieldset>
+</template>       
+        
+        </div>
+
+
+            <div class="card">        
+        <h4>Billing</h4>
+        <div class="row">
+          <input id="b-billTo" placeholder="Bill-to name">
+          <input id="b-taxNo" placeholder="Company Tax/GST/VAT No.">
+          <input id="b-po" placeholder="PO number">
+        </div>
+            </div>
+
+
+       <div class="card">            
+        <h4>Address</h4>
+        <div class="row-3">
+          <input id="a-line1" placeholder="Address line 1">
+          <input id="a-line2" placeholder="Address line 2">
+          <input id="a-city" placeholder="City">
+          <input id="a-state" placeholder="State/Province">
+          <input id="a-postcode" placeholder="Postcode">
+          <input id="a-country" placeholder="Country">
+        </div>
+       </div> 
+
+
+
+    <div class="card">        
+<h4>Consents</h4>
+<div class="row">
+  <label><input type="checkbox" id="c-pdpa"> Consent given</label>
+  <label><input type="checkbox" id="c-coc"> Code of Conduct</label>
+  <label><input type="checkbox" id="c-mkt"> Marketing opt-in</label>
+
+</div>
+    </div>
+
+
+    <div class="card-custom">
+        <h4>Payment</h4>
+        <div class="row">
+          <select id="pay-status">
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+           <!-- <option value="verified">verified</option> -->
+          </select>
+          <input id="pay-amount" type="number" placeholder="Amount (MYR)">
+        </div>
+  
+
+
+        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-top:12px">
+          <div style="font-weight:800;margin-bottom:6px">Latest Bank Receipt (uploaded by participant)</div>
+          <div id="adPayBox" style="margin-top:6px">Loading…</div>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>Photo</h4>
+        <div class="row">
+          <div>
+<div class="badge">
+  <div class="badge-top">
+    <img class="badge-mterm" src="public/mterm.jpg" alt="MTERMS">
+    <div class="badge-logos">
+      <img src="public/uitm.png" alt="UiTM">
+      <img src="public/tesma.png" alt="TESMA">
+    </div>
+  </div>
+
+  <div class="badge-photo-wrap">
+    <img id="badgePhoto" class="badge-photo" alt="ID photo">
+  </div>
+
+  <div class="badge-info">
+    <div id="badgeName" class="badge-name">Participant Name</div>
+    <div id="badgeAffil" class="badge-affil">Institution / Company</div>
+    <div id="badgeCat" class="badge-cat">CATEGORY</div>
+  </div>
+
+  <div class="badge-footer">
+    MTERMS 2026
+  </div>
+</div>
+
+          </div>
+  <div>
+  <div id="photoMsg" style="opacity:.9"></div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin-top:10px" class="no-print">
+<button id="loadPhoto" class="btn btn-secondary">Load latest photo</button>
+<button id="printBadge" class="btn btn-secondary">Print this badge</button>
+  </div>
+</div>
+        </div>
+    </div>
+
+
+<!-- Audit Trails mount point (injected from audit-trails.html) -->
+<div id="auditMount" style="display:none"></div>
+
+        
+<!-- Bottom actions (centered) -->
+<div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+  <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+ <button id="save" class="btn btn-primary">Save changes</button>
+<button id="cancelEdit" class="btn btn-danger" type="button">Cancel</button>
+  </div>
+  <div style="margin-top:10px;text-align:center">
+    <span id="saveMsg" style="font-size:1.02rem"></span>
+  </div>
+</div>
+      
+      </div>
+
+      <!-- Hidden print layout for selected badges -->
+      <div id="printArea" class="print-grid" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+   
+
+    // Simple client-side auth (dev only) — matches Basic auth we'll add on backend (admin/admin)
+    const ADMIN_KEY='mterms-admin-basic';
+    function authHeader(){
+      const token = localStorage.getItem(ADMIN_KEY);
+      return token ? {'Authorization':'Basic '+token} : {};
+    }
+
+    const API='https://mterm2026-559f9bf571b5.herokuapp.com';
+    const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
+    const $=id=>document.getElementById(id);
+
+function isAdminAuthed(){
+  return !!localStorage.getItem(ADMIN_KEY);
+}
+
+// Block protected nav buttons if not logged in (extra safety)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-auth="1"]');
+  if (!btn) return;
+
+  if (!isAdminAuthed()){
+    e.preventDefault();
+    alert('Please login as admin first.');
+    // keep nav hidden
+    const nav = document.getElementById('adminNav');
+    if (nav) nav.style.display = 'none';
+    // show login
+    document.getElementById('loginCard').style.display = 'block';
+    document.getElementById('dash').style.display = 'none';
+  }
+});
+
+
+
+        // ===== Submission (theme/field/authors) for Admin =====
+    const adSubCard  = $('ad-submissionCard');
+    const adSubTheme = $('ad-sub-theme');
+    const adSubField = $('ad-sub-field');
+    const adSubTitle = $('ad-sub-title');
+    const adSubMsg   = $('ad-subMsg');
+
+    const THEME_FIELDS = {
+      "Stem Cell Innovations and Clinical Applications": [
+        "Stem Cell Biology and Mechanisms of Differentiation",
+        "Tissue Engineering and Biomaterials",
+        "Organoids and 3D Bioprinting",
+        "Regenerative Medicine and Translational Therapies",
+        "Cellular Reprogramming and Induced Pluripotent Stem Cells (iPSCs)",
+        "Clinical Trials and Regulatory Science in Stem Cell Therapy",
+        "Gene Editing and Cell Engineering",
+        "Immunomodulation and Stem Cell Interactions",
+        "Neural Stem Cells and Neuroregeneration",
+        "Musculoskeletal Regeneration",
+        "Cardiac and Vascular Regeneration",
+        "Hepatic and Pancreatic Regeneration",
+        "Stem Cell-Derived Extracellular Vesicles and Secretome Therapy",
+        "Biomanufacturing and GMP Production of Stem Cells",
+        "Ethics, Policy, and Commercialization in Regenerative Medicine",
+        "Other relevant fields"
+      ],
+      "Biomaterials and Tissue Scaffolds": [
+        "Design and Development of Novel Biomaterials",
+        "Biocompatibility and Biofunctionality Assessment",
+        "3D Bioprinting and Additive Manufacturing",
+        "Smart and Responsive Biomaterials",
+        "Hydrogels and Injectable Scaffolds",
+        "Nanomaterials in Tissue Engineering",
+        "Bioactive Surface Modification",
+        "Degradable and Bioresorbable Scaffolds",
+        "Mechanical and Structural Characterization of Scaffolds",
+        "Vascularization Strategies in Engineered Tissues",
+        "Cell–Material Interactions and Mechanotransduction",
+        "Composite and Hybrid Scaffolds",
+        "Scaffold-Based Organoid and Tissue Models",
+        "Clinical Translation and Regulatory Challenges in Biomaterials",
+        "Sustainable and Green Biomaterials",
+        "Other relevant fields"
+      ],
+      "Student and Young Investigator Symposium (SYIS)": [
+        "All fields listed above (SYIS)"
+      ]
+    };
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function initAdminSubmissionUI(){
+      adSubTheme.innerHTML =
+        `<option value="">Select theme</option>` +
+        Object.keys(THEME_FIELDS).map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+
+      adSubField.innerHTML = `<option value="">Select field</option>`;
+      adSubField.disabled = true;
+
+      adSubTheme.addEventListener('change', () => {
+        const t = adSubTheme.value;
+        const fields = THEME_FIELDS[t] || [];
+        adSubField.innerHTML =
+          `<option value="">Select field</option>` +
+          fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+        adSubField.disabled = !fields.length;
+      });
+    }
+
+    function toggleAdminSubmission(on){
+      adSubCard.style.display = on ? 'block' : 'none';
+      adSubMsg.textContent = '';
+    }
+    // ===== Dynamic Authors (Admin) =====
+    const adAuthorsWrap = $('ad-authorsWrap');
+    const adAuthorTpl = document.getElementById('ad-authorTpl');
+    const adAddAuthorBtn = document.getElementById('ad-addAuthorBtn');
+    const adRemoveAuthorBtn = document.getElementById('ad-removeAuthorBtn');
+    const adAuthorCountTxt = document.getElementById('ad-authorCountTxt');
+
+    const AD_MAX_AUTHORS = 10;
+    let adAuthorCount = 1;
+
+    function adClamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function setAdAuthorCount(n){
+      adAuthorCount = adClamp(n, 1, AD_MAX_AUTHORS);
+      renderAdAuthors();
+    }
+
+    function renderAdAuthors(){
+      adAuthorsWrap.innerHTML = '';
+
+      for (let i = 1; i <= adAuthorCount; i++){
+        const html = adAuthorTpl.innerHTML.replaceAll('__N__', String(i));
+        const temp = document.createElement('div');
+        temp.innerHTML = html.trim();
+        const fieldset = temp.firstElementChild;
+
+        const removeThisBtn = fieldset.querySelector('.adAuthorRemoveOneBtn');
+        if (i === 1){
+          removeThisBtn.style.display = 'none';
+        } else {
+          removeThisBtn.addEventListener('click', () => {
+            removeAdAuthorAt(i);
+          });
+        }
+
+        adAuthorsWrap.appendChild(fieldset);
+      }
+
+      adAddAuthorBtn.disabled = adAuthorCount >= AD_MAX_AUTHORS;
+      adRemoveAuthorBtn.disabled = adAuthorCount <= 1;
+      adAuthorCountTxt.textContent = `${adAuthorCount} / ${AD_MAX_AUTHORS} author(s) shown`;
+    }
+
+    function readAdAuthorAt(i){
+      const first = $(`ad-a${i}-first`)?.value?.trim() || '';
+      const last  = $(`ad-a${i}-last`)?.value?.trim()  || '';
+      const email = $(`ad-a${i}-email`)?.value?.trim() || '';
+      const affil = $(`ad-a${i}-affil`)?.value?.trim() || '';
+      const country = $(`ad-a${i}-country`)?.value?.trim() || '';
+      const isCorr = !!$(`ad-a${i}-corr`)?.checked;
+
+      const anyFilled = !!(first || last || email || affil || country);
+      if (!anyFilled) return null;
+
+      return { firstName:first, lastName:last, email, affiliation:affil, country, isCorresponding:isCorr };
+    }
+
+    function writeAdAuthorAt(i, a){
+      $(`ad-a${i}-first`).value = a?.firstName || '';
+      $(`ad-a${i}-last`).value  = a?.lastName || '';
+      $(`ad-a${i}-email`).value = a?.email || '';
+      $(`ad-a${i}-affil`).value = a?.affiliation || '';
+      $(`ad-a${i}-country`).value = a?.country || '';
+      $(`ad-a${i}-corr`).checked = !!a?.isCorresponding;
+    }
+
+    function normalizeAdCorrespondingAuthor(){
+      let found = false;
+      for (let i = 1; i <= adAuthorCount; i++){
+        const r = $(`ad-a${i}-corr`);
+        if (!r) continue;
+        if (r.checked && !found) { found = true; }
+        else if (r.checked && found) { r.checked = false; }
+      }
+    }
+
+    function removeAdAuthorAt(idx){
+      const arr = [];
+      for (let i = 1; i <= adAuthorCount; i++){
+        arr.push(readAdAuthorAt(i));
+      }
+      arr.splice(idx - 1, 1);
+
+      adAuthorCount = Math.max(1, adAuthorCount - 1);
+      renderAdAuthors();
+
+      for (let i = 1; i <= adAuthorCount; i++){
+        writeAdAuthorAt(i, arr[i-1]);
+      }
+      normalizeAdCorrespondingAuthor();
+    }
+
+    adAddAuthorBtn.addEventListener('click', () => setAdAuthorCount(adAuthorCount + 1));
+    adRemoveAuthorBtn.addEventListener('click', () => setAdAuthorCount(adAuthorCount - 1));
+
+    // keep compatibility with existing validation logic
+    function getAdAuthor(i){
+      return readAdAuthorAt(i);
+    }
+
+    function readAdminSubmissionFromForm(){
+      const theme = adSubTheme.value || '';
+      const field = adSubField.value || '';
+      const title = adSubTitle.value?.trim() || '';
+
+      const authors = [];
+      for (let i = 1; i <= adAuthorCount; i++){
+        const a = getAdAuthor(i);
+        if (a) authors.push(a);
+      }
+      return { theme, field, title, authors };
+    }
+
+    function writeAdminSubmissionToForm(sub){
+      const theme = sub?.theme || '';
+      const field = sub?.field || '';
+      const title = sub?.title || '';
+      const authors = Array.isArray(sub?.authors) ? sub.authors : [];
+
+      adSubTheme.value = theme;
+
+      const fields = THEME_FIELDS[theme] || [];
+      adSubField.innerHTML =
+        `<option value="">Select field</option>` +
+        fields.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+      adSubField.disabled = !fields.length;
+
+      adSubField.value = field;
+      adSubTitle.value = title;
+
+      setAdAuthorCount(adClamp(Math.max(1, authors.length), 1, AD_MAX_AUTHORS));
+
+      for (let i = 1; i <= adAuthorCount; i++){
+        writeAdAuthorAt(i, null);
+      }
+
+      authors.slice(0, AD_MAX_AUTHORS).forEach((a, idx) => {
+        writeAdAuthorAt(idx + 1, a);
+      });
+
+      normalizeAdCorrespondingAuthor();
+    }
+
+    // initial render
+    renderAdAuthors();
+
+    function validateAdminSubmissionIfPresenter(){
+      adSubMsg.textContent = '';
+      if (!$('pr-presenting').checked) return { ok:true };
+
+      const sub = readAdminSubmissionFromForm();
+      const anySubData = !!(sub.theme || sub.field || sub.title || sub.authors.length);
+      if (!anySubData) return { ok:true };
+
+      if (!sub.theme) return { ok:false, msg:'❌ Please select a Theme.' };
+      if (!sub.field) return { ok:false, msg:'❌ Please select a Respective Field.' };
+      if (!sub.authors.length) return { ok:false, msg:'❌ Please fill at least Author 1.' };
+
+      const corrCount = sub.authors.filter(a => a.isCorresponding).length;
+      if (corrCount !== 1) return { ok:false, msg:'❌ Please tick exactly ONE corresponding author.' };
+
+      return { ok:true };
+    }
+
+    // init once
+    initAdminSubmissionUI();
+
+    // show/hide on presenter toggle
+    $('pr-presenting').addEventListener('change', () => {
+      toggleAdminSubmission($('pr-presenting').checked);
+    });
+    // Login flow
+    $('aLogin').addEventListener('click',()=>{
+      const u=$('aUser').value.trim(), p=$('aPass').value;
+      if(!u||!p){$('aMsg').textContent='❌ Enter username & password';return;}
+      const token=btoa(u+':'+p);
+      localStorage.setItem(ADMIN_KEY, token);
+      $('aMsg').textContent='✅ Logged in';
+const shell = document.getElementById('adminLoginShell');
+if (shell) shell.style.display = 'none';
+      const topHeader = document.getElementById('adminTopHeader');
+if (topHeader) topHeader.style.display = 'flex';
+      $('dash').style.display='block';
+const nav = document.getElementById('adminNav');
+if (nav) nav.style.display = 'block';
+      loadPage(1);
+    });
+    $('logoutBtn').addEventListener('click',()=>{
+      localStorage.removeItem(ADMIN_KEY); location.reload();
+    });
+
+    // Table/pagination
+    let page=1, limit=5, total=0, rows=[];
+    async function loadPage(p){
+      page=p;
+      $('rows').innerHTML='<tr><td colspan="8">Loading…</td></tr>';
+      const q = encodeURIComponent($('q').value||'');
+      try{
+        const r = await fetch(`${API}/api/admin/registrations?page=${page}&limit=${limit}&q=${q}`, { headers: authHeader() });
+        const data = await r.json();
+        if(!r.ok) throw new Error(data.error||'HTTP '+r.status);
+        rows=data.rows||[]; total=data.total||0;
+        $('rows').innerHTML = rows.map(doc=>{
+          const name=[doc.personal?.firstName||'',doc.personal?.lastName||''].join(' ').trim();
+          return `<tr>
+            <td><input type="checkbox" class="sel" data-id="${doc._id}" data-code="${doc.regCode}" data-email="${doc.personal?.email||''}" data-name="${name}" data-aff="${doc.professional?.affiliation||''}" data-cat="${(doc.category||'').toUpperCase()}"></td>
+            <td>${doc.regCode||''}</td>
+            <td>${name||''}</td>
+            <td>${doc.category||''}</td>
+            <td>${doc.personal?.email||''}</td>
+            <td>${doc.payment?.status||'pending'}</td>
+            <td>${doc.professional?.affiliation||''}</td>
+            <td class="actions">
+<button class="btn btn-primary" data-act="edit" data-id="${doc._id}">Edit</button>
+</td>
+          </tr>`;
+        }).join('') || '<tr><td colspan="8"><em>No results</em></td></tr>';
+        $('pageInfo').textContent = `Page ${page} • ${Math.min(page*limit, total)} / ${total}`;
+      }catch(err){
+        $('rows').innerHTML = `<tr><td colspan="8" style="color:#c00">❌ ${err.message}</td></tr>`;
+      }
+    }
+
+    $('refresh').addEventListener('click',()=>loadPage(1));
+    $('prev').addEventListener('click',()=>{if(page>1) loadPage(page-1);});
+    $('next').addEventListener('click',()=>{if(page*limit<total) loadPage(page+1);});
+    $('q').addEventListener('input',()=>{clearTimeout(window._t); window._t=setTimeout(()=>loadPage(1),300);});
+
+    // Row actions
+    document.getElementById('tbl').addEventListener('click',async(e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const act = btn.dataset.act, id = btn.dataset.id;
+      if(act==='edit'){ openEditor(id); }
+    });
+
+
+
+document.getElementById('btnCert').addEventListener('click', () => {
+  // Try to gather selected participants from the admin list.
+  // IMPORTANT: Update the selector below to match your checkbox class/name if different.
+  const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+    .filter(cb => cb.dataset && (cb.dataset.name || cb.dataset.code || cb.dataset.email));
+
+  const selected = checked.map(cb => ({
+    name: cb.dataset.name || '',
+    regCode: cb.dataset.code || cb.dataset.regcode || '',
+    email: cb.dataset.email || ''
+  })).filter(x => x.name);
+
+  // Save for certificate.html
+  localStorage.setItem('mtermsCertSelected', JSON.stringify(selected));
+
+  // Go to certificate generator
+  window.location.href = 'certificate.html';
+});
+    
+    
+    // Load one doc and fill editor
+    async function openEditor(id){
+      try{
+        const r = await fetch(`${API}/api/admin/registrations/${id}`, { headers: authHeader() });
+        const {doc} = await r.json();
+        if(!r.ok) throw new Error('Load failed');
+
+        // Fill
+        $('editCard').style.display='block';
+        $('editCode').textContent = doc.regCode;
+
+        $('badgePhoto').removeAttribute('src');
+        $('photoMsg').textContent = '';
+        
+        $('f-category').value = doc.category || 'academia';
+
+        $('p-firstName').value = doc.personal?.firstName||'';
+        $('p-lastName').value  = doc.personal?.lastName||'';
+        $('p-email').value     = doc.personal?.email||'';
+        $('p-phone').value     = doc.personal?.phone||'';
+        $('p-country').value   = doc.personal?.country||'';
+
+        $('pro-affiliation').value = doc.professional?.affiliation||'';
+        $('pro-dept').value        = doc.professional?.department||'';
+        $('pro-role').value        = doc.professional?.roleTitle||'';
+
+        const isStudent = (doc.category==='student');
+        $('studentOnly').style.display = isStudent ? 'block' : 'none';
+        $('s-university').value = doc.student?.university||'';
+        $('s-level').value      = doc.student?.level||'';
+        $('s-grad').value       = doc.student?.expectedGradYear||'';
+
+        $('pr-presenting').checked = !!doc.program?.presenting;
+        $('pr-type').value   = doc.program?.type||'none';
+        $('pr-title').value  = doc.program?.title||'';
+        $('pr-posterOnly').checked = (doc.program?.topicArea === POSTER_LOCK_MARKER);
+
+        // Latest abstract preview
+        loadLatestAbstract(doc.regCode, doc.personal?.email);
+        loadLatestBankReceipt(doc.regCode, doc.personal?.email);
+        mountAuditTrails(doc.regCode, doc.personal?.email)
+        mountPresentationReviewSection(doc.regCode, doc.personal?.email);
+
+
+                // Submission: show only if presenter
+        toggleAdminSubmission(!!doc.program?.presenting);
+        writeAdminSubmissionToForm(doc.submission || {});
+
+        $('b-billTo').value = doc.billing?.billTo||'';
+        $('b-taxNo').value  = doc.billing?.taxNo||'';
+        $('b-po').value     = doc.billing?.poNumber||'';
+
+        $('a-line1').value = doc.address?.line1||'';
+        $('a-line2').value = doc.address?.line2||'';
+        $('a-city').value  = doc.address?.city||'';
+        $('a-state').value = doc.address?.state||'';
+        $('a-postcode').value = doc.address?.postcode||'';
+        $('a-country').value  = doc.address?.country||'';
+
+        
+$('c-pdpa').checked = !!doc.consents?.pdpa;
+$('c-coc').checked  = !!doc.consents?.codeOfConduct;
+$('c-mkt').checked  = !!doc.consents?.marketingOptIn;
+
+        $('pay-status').value = doc.payment?.status||'pending';
+        $('pay-amount').value = doc.payment?.amount||'';
+
+        // Badge preview text
+        $('badgeName').textContent = [doc.personal?.firstName||'',doc.personal?.lastName||''].join(' ').trim()||'Participant Name';
+        $('badgeAffil').textContent = doc.professional?.affiliation||'Institution / Company';
+        $('badgeCat').textContent = (doc.category||'Participant').toUpperCase();
+
+        // Bind save
+        $('save').onclick = ()=>saveChanges(id, doc);
+                // Cancel button: hide editor + clear messages
+        $('cancelEdit').onclick = () => {
+          $('editCard').style.display = 'none';
+          $('saveMsg').textContent = '';
+          $('photoMsg').textContent = '';
+          document.getElementById('auditMount').style.display = 'none';
+        };
+        $('printBadge').onclick = ()=>{window.print();};
+        $('loadPhoto').onclick = ()=>loadLatestPhoto(doc.regCode, doc.personal?.email);
+      }catch(err){
+        alert('Failed to open editor: '+err.message);
+      }
+    }
+
+    async function saveChanges(id, orig){
+      $('save').disabled = true; $('saveMsg').textContent = 'Saving…';
+      const updates = {
+        category: $('f-category').value,
+        personal: {
+          firstName:$('p-firstName').value.trim(), lastName:$('p-lastName').value.trim(),
+          email:$('p-email').value.trim(), phone:$('p-phone').value.trim(), country:$('p-country').value.trim()
+        },
+        professional: {
+          affiliation:$('pro-affiliation').value.trim(), department:$('pro-dept').value.trim(), roleTitle:$('pro-role').value.trim()
+        },
+        student: ($('f-category').value==='student') ? {
+          university:$('s-university').value.trim(), level:$('s-level').value, expectedGradYear:$('s-grad').value?Number($('s-grad').value):undefined
+        } : undefined,
+        program: {
+          presenting: $('pr-presenting').checked,
+          type: $('pr-type').value,
+          // program.title is repurposed for reviewer comment (visible to participant)
+          title: $('pr-title').value.trim(),
+          // program.topicArea is repurposed for Poster-only lock marker
+          topicArea: $('pr-posterOnly').checked ? POSTER_LOCK_MARKER : ''
+        },
+
+                submission: readAdminSubmissionFromForm(),
+
+        
+        billing: { billTo:$('b-billTo').value.trim(), taxNo:$('b-taxNo').value.trim(), poNumber:$('b-po').value.trim() },
+        address: { line1:$('a-line1').value.trim(), line2:$('a-line2').value.trim(), city:$('a-city').value.trim(), state:$('a-state').value.trim(), postcode:$('a-postcode').value.trim(), country:$('a-country').value.trim() },
+consents: {
+  pdpa:$('c-pdpa').checked,
+  codeOfConduct:$('c-coc').checked,
+  marketingOptIn:$('c-mkt').checked
+},
+        payment: { status:$('pay-status').value, amount:$('pay-amount').value?Number($('pay-amount').value):undefined }
+      };
+      if (updates.student===undefined) delete updates.student;
+
+            const v = validateAdminSubmissionIfPresenter();
+      if (!v.ok) {
+        $('saveMsg').textContent = v.msg;
+        $('save').disabled = false;
+        return;
+      }
+      
+      try{
+        const r = await fetch(`${API}/api/admin/registrations/${id}`, {
+          method:'PUT',
+          headers:{ 'Content-Type':'application/json', ...authHeader() },
+          body: JSON.stringify({ updates })
+        });
+        const data = await r.json();
+        if(!r.ok) throw new Error(data.error||'Update failed');
+        $('saveMsg').textContent='✅ Saved';
+        loadPage(page);
+      }catch(err){
+        $('saveMsg').textContent='❌ '+err.message;
+      }finally{
+        $('save').disabled = false;
+      }
+    }
+
+async function loadLatestPhoto(regCode, email){
+  const el = $('photoMsg');
+  el.textContent = 'Loading photo…';
+
+  try{
+    const r = await fetch(
+      `${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=profilePhoto`
+    );
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Error');
+
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    const latest = pickLatestRow(rows);
+
+    if (latest){
+      $('badgePhoto').src = `${API}${latest.downloadUrl}`;
+      el.textContent = '✅ Loaded';
+    } else {
+      $('badgePhoto').removeAttribute('src');
+      el.textContent = 'No photo on file.';
+    }
+  } catch (err){
+    el.textContent = '❌ ' + (err.message || 'Failed to load photo');
+  }
+}
+
+
+    function pickLatestRow(rows){
+      if(!Array.isArray(rows) || rows.length===0) return null;
+      const sorted = rows.slice().sort((a,b)=>{
+        const va = Number(a.version)||0, vb = Number(b.version)||0;
+        if(vb !== va) return vb - va;
+        const ta = new Date(a.uploadedAt||0).getTime();
+        const tb = new Date(b.uploadedAt||0).getTime();
+        return tb - ta;
+      });
+      return sorted[0];
+    }
+
+    async function loadLatestAbstract(regCode, email){
+      const box = $('adAbsBox');
+      if(!box) return;
+      box.innerHTML = 'Loading…';
+      try{
+        const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=abstract`);
+        const data = await r.json().catch(()=>({}));
+        if(!r.ok) throw new Error(data.error||'Error');
+
+        const latest = pickLatestRow(data.rows||[]);
+        box.innerHTML = latest
+          ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff">
+              <strong>v${latest.version}</strong> — ${latest.filename}<br>
+              <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
+<a class="btn btn-primary" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+            </div>`
+          : '<em>No abstract uploaded yet.</em>';
+      }catch(err){
+        box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
+      }
+    }
+
+
+async function loadLatestBankReceipt(regCode, email){
+  const box = $('adPayBox');
+  if(!box) return;
+  box.innerHTML = 'Loading…';
+  try{
+    const r = await fetch(`${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=bankReceipt`);
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error||'Error');
+
+    const latest = pickLatestRow(data.rows||[]);
+    box.innerHTML = latest
+      ? `<div style="border:1px solid var(--border);border-radius:8px;padding:8px;background:#fff">
+          <strong>v${latest.version}</strong> — ${latest.filename}<br>
+          <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
+          <a class="btn btn-primary" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+        </div>`
+      : '<em>No bank receipt uploaded yet.</em>';
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${err.message}</span>`;
+  }
+}
+
+
+let _auditPartialLoaded = false;
+
+async function ensureAuditPartialLoaded(){
+  const mount = document.getElementById('auditMount');
+  if (!mount) return;
+  if (_auditPartialLoaded) return;
+
+  mount.style.display = 'block';
+  mount.innerHTML = 'Loading…';
+
+  try{
+    const r = await fetch('audit-trails.html', { cache: 'no-store' });
+    const html = await r.text();
+    if (!r.ok) throw new Error('Failed to load audit-trails.html');
+    mount.innerHTML = html;
+    _auditPartialLoaded = true;
+  }catch(err){
+    mount.innerHTML = `<div class="card" style="width:min(1200px,92vw); margin:18px auto 0;">
+      <div style="color:#b42318;font-weight:700">❌ ${escapeHtml(err.message || 'Failed to load Audit Trails')}</div>
+    </div>`;
+  }
+}
+
+async function loadAuditTrails(regCode, email){
+  const box = document.getElementById('auditTrailsBox');
+  if(!box) return;
+
+  box.innerHTML = 'Loading…';
+
+  try{
+    // IMPORTANT: no &type=  → returns ALL uploads for this participant
+    const r = await fetch(
+      `${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}`
+    );
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Error');
+
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    if(!rows.length){
+      box.innerHTML = '<em>No uploads found.</em>';
+      return;
+    }
+
+    // newest first
+    rows.sort((a,b)=>{
+      const ta = new Date(a.uploadedAt||0).getTime();
+      const tb = new Date(b.uploadedAt||0).getTime();
+      if (tb !== ta) return tb - ta;
+      return (Number(b.version)||0) - (Number(a.version)||0);
+    });
+
+    box.innerHTML = `
+      <div style="overflow:auto;background:#fff;border:1px solid var(--border);border-radius:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:.92rem">
+          <thead>
+            <tr>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Type</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Version</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Filename</th>
+              <th style="padding:8px;border-bottom:1px solid var(--border)">Uploaded</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(u => `
+              <tr>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${escapeHtml(u.type || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">v${escapeHtml(u.version || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${escapeHtml(u.filename || '')}</td>
+                <td style="padding:8px;border-bottom:1px solid var(--border)">${new Date(u.uploadedAt).toLocaleString()}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${escapeHtml(err.message || 'Failed')}</span>`;
+  }
+}
+
+async function mountAuditTrails(regCode, email){
+  const mount = document.getElementById('auditMount');
+  if (!mount) return;
+
+  mount.style.display = 'block';
+  await ensureAuditPartialLoaded();
+  await loadAuditTrails(regCode, email);
+}
+
+let _presReviewPartialLoaded = false;
+
+async function ensurePresentationReviewPartialLoaded(){
+  const mount = document.getElementById('presentationReviewMount');
+  if (!mount) return;
+  if (_presReviewPartialLoaded) return;
+  _presReviewPartialLoaded = true;
+
+  try{
+    const html = await fetch('admin-presentation-review.html', { cache: 'no-store' }).then(r=>r.text());
+    mount.innerHTML = html;
+
+    // load JS once
+    if (!document.getElementById('admin-presentation-review-js')){
+      const s = document.createElement('script');
+      s.id = 'admin-presentation-review-js';
+      s.src = 'admin-presentation-review.js';
+      document.body.appendChild(s);
+    }
+  }catch(err){
+    mount.style.display = 'block';
+    mount.innerHTML = `<div class="help" style="color:#b91c1c">Failed to load presentation review section: ${String(err.message||err)}</div>`;
+  }
+}
+
+async function mountPresentationReviewSection(regCode, email){
+  const mount = document.getElementById('presentationReviewMount');
+  if (!mount) return;
+
+  await ensurePresentationReviewPartialLoaded();
+
+  // wait for JS global to exist
+  const tryMount = () => {
+    if (typeof window.mountPresentationReview === 'function') {
+      window.mountPresentationReview(regCode, email);
+      return true;
+    }
+    return false;
+  };
+  if (tryMount()) return;
+
+  // small retry loop
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    if (tryMount() || tries > 20) clearInterval(t);
+  }, 50);
+}
+    
+    
+
+    // Bulk print for selected
+    $('printSel').addEventListener('click', async ()=>{
+      const checks=[...document.querySelectorAll('.sel:checked')];
+      if(!checks.length){ alert('Select at least one row.'); return; }
+      const area=$('printArea'); area.innerHTML=''; area.style.display='grid';
+      for(const c of checks){
+        const div=document.createElement('div'); div.className='badge';
+        div.innerHTML = `
+          <div class="badge-top">
+            <div class="badge-logos">
+              <img src="public/uitm.png" alt="UiTM">
+              <img src="public/mohe.png" alt="MOHE">
+              <img src="public/tesma.png" alt="TESMA">
+            </div>
+          </div>
+          <div class="badge-photo-wrap"><img class="badge-photo" src="" alt="ID"></div>
+          <div class="badge-info">
+            <div class="badge-name">${c.dataset.name||'Participant Name'}</div>
+            <div class="badge-affil">${c.dataset.aff||'Institution / Company'}</div>
+            <div class="badge-cat">${(c.dataset.cat||'PARTICIPANT')}</div>
+          </div>
+          <div class="badge-footer">MTERMS 2026 • Shah Alam</div>`;
+        // try fetch latest photo
+// try fetch latest photo (use pickLatestRow so it's truly latest)
+try{
+  const r = await fetch(
+    `${API}/api/uploads/history?regCode=${encodeURIComponent(c.dataset.code)}&email=${encodeURIComponent(c.dataset.email)}&type=profilePhoto`
+  );
+
+  const data = await r.json().catch(()=> ({}));
+  if (r.ok) {
+    const latest = pickLatestRow(Array.isArray(data.rows) ? data.rows : []);
+    if (latest) {
+      div.querySelector('.badge-photo').src = `${API}${latest.downloadUrl}`;
+    } else {
+      div.querySelector('.badge-photo').removeAttribute('src');
+    }
+  }
+}catch(e){
+  // keep silent so printing isn't blocked
+  div.querySelector('.badge-photo').removeAttribute('src');
+}
+        area.appendChild(div);
+      }
+      window.print();
+      setTimeout(()=>{area.style.display='none'; area.innerHTML='';}, 500);
+    });
+
+    // Select all
+    $('selAll').addEventListener('change', (e)=>{
+      document.querySelectorAll('.sel').forEach(x=>x.checked=e.target.checked);
+    });
+
+    // Auto-show dashboard if already “logged in”
+    (function(){
+      const token = localStorage.getItem(ADMIN_KEY);
+      if(token){
+const shell = document.getElementById('adminLoginShell');
+if (shell) shell.style.display = 'none';
+        const topHeader = document.getElementById('adminTopHeader');
+if (topHeader) topHeader.style.display = 'flex';
+        $('dash').style.display='block';
+const nav = document.getElementById('adminNav');
+if (nav) nav.style.display = 'block';
+        loadPage(1);
+      }
+    })();
+  </script>
+
+  <style>
+/* ---------- Admin readability hard-overrides ---------- */
+
+/* 1) Search/inputs: visible placeholder in Safari/Chrome/Firefox */
+.admin-wrap input,
+.admin-wrap select,
+.admin-wrap textarea { color: var(--text) !important; }
+
+/* Safari/Chromium */
+.admin-wrap input::-webkit-input-placeholder,
+.admin-wrap textarea::-webkit-input-placeholder { color: var(--muted) !important; opacity: 1 !important; }
+/* Firefox */
+.admin-wrap input::placeholder,
+.admin-wrap textarea::placeholder { color: var(--muted) !important; opacity: 1 !important; }
+
+/* 2) Table headers: stronger contrast */
+.admin-wrap table thead th {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+.theme-light .admin-wrap table thead th { color: #0b1115 !important; }
+
+/* 3) Disabled buttons: stop Safari’s dimming and set readable colors */
+.admin-wrap .btn:disabled,
+.admin-wrap button[disabled] {
+  opacity: 1 !important;            /* cancel browser fade */
+  cursor: not-allowed !important;
+  border-color: var(--border) !important;
+}
+
+/* light */
+.theme-light .admin-wrap .btn:disabled,
+.theme-light .admin-wrap button[disabled] {
+  background: #eef2f7 !important;
+  color: #48566a !important;
+}
+
+
+/* 4) Ghost buttons (Logout) text contrast in light */
+.theme-light .admin-wrap .btn.ghost {
+  color: #0b1115 !important;
+  border-color: var(--border) !important;
+}
+
+/* 5) Make tiny “Edit” labels readable even when disabled */
+.admin-wrap .actions .btn:disabled { font-weight: 700 !important; }
+</style>
+
+
+
+
+
+
+
+
+
+  
+</body>
+</html>
+
