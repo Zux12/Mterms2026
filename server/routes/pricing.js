@@ -18,17 +18,17 @@ router.get('/table', async (req, res) => {
   const rows = [
     {
       category: 'Local Student',
-      early:  doc.fees.localStudent.early,
+      earlyBird:  doc.fees.localStudent.early,
       normal: doc.fees.localStudent.normal
     },
     {
       category: 'International Student',
-      early:  doc.fees.internationalStudent.early,
+      earlyBird:  doc.fees.internationalStudent.early,
       normal: doc.fees.internationalStudent.normal
     },
     {
       category: 'Local Professional',
-      early:  doc.fees.localProfessional.standard.early,
+      earlyBird:  doc.fees.localProfessional.standard.early,
       normal: doc.fees.localProfessional.standard.normal,
       notes: {
         committee: doc.fees.localProfessional.committee.early.amount,
@@ -40,12 +40,12 @@ router.get('/table', async (req, res) => {
     },
     {
       category: 'International Professional',
-      early:  doc.fees.internationalProfessional.early,
+      earlyBird:  doc.fees.internationalProfessional.early,
       normal: doc.fees.internationalProfessional.normal
     },
     {
       category: 'Industrial Booth',
-      early:  doc.fees.industrialBooth.early,
+      earlyBird:  doc.fees.industrialBooth.early,
       normal: doc.fees.industrialBooth.normal
     }
   ];
