@@ -712,7 +712,7 @@ table thead th{
 
       <!-- Edit panel -->
       <div class="card" id="editCard" style="display:none">
-        <h3>Edit Participant</h3>
+        <h3>View and Edit Participant</h3>
         
     <div class="card-purple">
         Participant Registration Code: <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
@@ -1320,7 +1320,7 @@ if (nav) nav.style.display = 'block';
             <td>${doc.payment?.status||'pending'}</td>
             <td>${doc.professional?.affiliation||''}</td>
             <td class="actions">
-<button class="btn btn-primary" data-act="edit" data-id="${doc._id}">Edit</button>
+<button class="btn btn-primary" data-act="edit" data-id="${doc._id}">View</button>
 </td>
           </tr>`;
         }).join('') || '<tr><td colspan="8"><em>No results</em></td></tr>';
