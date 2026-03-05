@@ -1639,17 +1639,7 @@ document.getElementById('absRefreshBtn').addEventListener('click', async () => {
   // Bank receipt upload (latest only)
 document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadDoc('bankReceipt','payFile','payMsg','payLatest'));
 document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatest('bankReceipt','payLatest'));
-function refreshOptionBUI(){
-  const role = $('f-roleType').value;
-  const nat  = $('f-nationality').value;
 
-  showStudent(role === 'Student');
-
-  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
-  document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
-}
-$('f-roleType').addEventListener('change', refreshOptionBUI);
-$('f-nationality').addEventListener('change', refreshOptionBUI);
   $('pr-presenting').addEventListener('change', () => {
   const on = $('pr-presenting').checked;
   showPresent(on);
@@ -1682,8 +1672,8 @@ $('f-nationality').addEventListener('change', refreshOptionBUI);
 
   // Optional: refresh uploads + photo to reflect saved state
   refreshIDPhoto();
-  loadLatestFor('abstract','absLatest');
-  loadLatestFor('bankReceipt','payLatest');
+loadLatest('abstract','absLatest');
+loadLatest('bankReceipt','payLatest');
 
   saveMsg.textContent = 'Changes reverted.';
 });
