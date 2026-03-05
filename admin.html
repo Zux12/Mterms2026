@@ -1406,103 +1406,103 @@ document.getElementById('btnCert').addEventListener('click', () => {
     
     
     // Load one doc and fill editor
-    async function openEditor(id){
-      try{
-        const r = await fetch(`${API}/api/admin/registrations/${id}`, { headers: authHeader() });
-        const {doc} = await r.json();
-        if(!r.ok) throw new Error('Load failed');
+ async function openEditor(id){
+  try{
+    const r = await fetch(`${API}/api/admin/registrations/${id}`, { headers: authHeader() });
+    const {doc} = await r.json();
+    if(!r.ok) throw new Error('Load failed');
 
-        // Fill
-        $('editCard').style.display='block';
-        $('editCode').textContent = doc.regCode;
+    // Fill
+    $('editCard').style.display='block';
+    $('editCode').textContent = doc.regCode;
 
-        $('badgePhoto').removeAttribute('src');
-        $('photoMsg').textContent = '';
-        
-       $('f-category').value = doc.category || 'Local Professional';
+    $('badgePhoto').removeAttribute('src');
+    $('photoMsg').textContent = '';
+    
+    $('f-category').value = doc.category || 'Local Professional';
 
-$('f-roleType').value = doc.roleType || 'Professional';
-$('f-nationality').value = doc.nationality || 'Malaysian';
-$('f-profSubtype').value = doc.professionalSubtype || 'Standard';
+    $('f-roleType').value = doc.roleType || 'Professional';
+    $('f-nationality').value = doc.nationality || 'Malaysian';
+    $('f-profSubtype').value = doc.professionalSubtype || 'Standard';
 
-// Student-only block: based on roleType
-const isStudent = (doc.roleType === 'Student');
-$('studentOnly').style.display = isStudent ? 'block' : 'none';
+    // Student-only block: based on roleType
+    const isStudent = (doc.roleType === 'Student');
+    $('studentOnly').style.display = isStudent ? 'block' : 'none';
 
-// Show subtype only for Malaysian Professional
-const showSubtype = (doc.roleType === 'Professional' && doc.nationality === 'Malaysian');
-document.getElementById('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
+    // Show subtype only for Malaysian Professional
+    const showSubtype = (doc.roleType === 'Professional' && doc.nationality === 'Malaysian');
+    document.getElementById('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
 
+    $('p-firstName').value = doc?.personal?.firstName || '';
+    $('p-lastName').value  = doc?.personal?.lastName  || '';
+    $('p-email').value     = doc?.personal?.email     || '';
+    $('p-phone').value     = doc?.personal?.phone     || '';
+    $('p-country').value   = doc?.personal?.country   || '';
 
-        $('p-firstName').value = user?.personal?.firstName || '';
-$('p-lastName').value  = user?.personal?.lastName  || '';
-$('p-email').value     = user?.personal?.email     || '';
-$('p-phone').value     = user?.personal?.phone     || '';
-$('p-country').value   = user?.personal?.country   || '';
+    $('pro-affiliation').value = doc?.professional?.affiliation || '';
+    $('pro-dept').value        = doc?.professional?.department  || '';
+    $('pro-role').value        = doc?.professional?.roleTitle   || '';
+    
+    $('s-university').value = doc.student?.university || '';
+    $('s-level').value      = doc.student?.level || '';
+    $('s-grad').value       = doc.student?.expectedGradYear || '';
 
-$('pro-affiliation').value = user?.professional?.affiliation || '';
-$('pro-dept').value        = user?.professional?.department  || '';
-$('pro-role').value        = user?.professional?.roleTitle   || '';
-        
-        $('s-university').value = doc.student?.university||'';
-        $('s-level').value      = doc.student?.level||'';
-        $('s-grad').value       = doc.student?.expectedGradYear||'';
+    $('pr-presenting').checked = !!doc.program?.presenting;
+    $('pr-type').value   = doc.program?.type || 'none';
+    $('pr-title').value  = doc.program?.title || '';
+    $('pr-posterOnly').checked = (doc.program?.topicArea === POSTER_LOCK_MARKER);
 
-        $('pr-presenting').checked = !!doc.program?.presenting;
-        $('pr-type').value   = doc.program?.type||'none';
-        $('pr-title').value  = doc.program?.title||'';
-        $('pr-posterOnly').checked = (doc.program?.topicArea === POSTER_LOCK_MARKER);
+    // Latest abstract preview
+    loadLatestAbstract(doc.regCode, doc.personal?.email);
+    loadLatestBankReceipt(doc.regCode, doc.personal?.email);
+    mountAuditTrails(doc.regCode, doc.personal?.email);
+    mountPresentationReviewSection(doc.regCode, doc.personal?.email);
 
-        // Latest abstract preview
-        loadLatestAbstract(doc.regCode, doc.personal?.email);
-        loadLatestBankReceipt(doc.regCode, doc.personal?.email);
-        mountAuditTrails(doc.regCode, doc.personal?.email)
-        mountPresentationReviewSection(doc.regCode, doc.personal?.email);
+    // Submission: show only if presenter
+    toggleAdminSubmission(!!doc.program?.presenting);
+    writeAdminSubmissionToForm(doc.submission || {});
 
+    $('b-billTo').value = doc.billing?.billTo || '';
+    $('b-taxNo').value  = doc.billing?.taxNo || '';
+    $('b-po').value     = doc.billing?.poNumber || '';
 
-                // Submission: show only if presenter
-        toggleAdminSubmission(!!doc.program?.presenting);
-        writeAdminSubmissionToForm(doc.submission || {});
+    $('a-line1').value = doc.address?.line1 || '';
+    $('a-line2').value = doc.address?.line2 || '';
+    $('a-city').value  = doc.address?.city || '';
+    $('a-state').value = doc.address?.state || '';
+    $('a-postcode').value = doc.address?.postcode || '';
+    $('a-country').value  = doc.address?.country || '';
 
-        $('b-billTo').value = doc.billing?.billTo||'';
-        $('b-taxNo').value  = doc.billing?.taxNo||'';
-        $('b-po').value     = doc.billing?.poNumber||'';
+    $('c-pdpa').checked = !!doc.consents?.pdpa;
+    $('c-coc').checked  = !!doc.consents?.codeOfConduct;
+    $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
 
-        $('a-line1').value = doc.address?.line1||'';
-        $('a-line2').value = doc.address?.line2||'';
-        $('a-city').value  = doc.address?.city||'';
-        $('a-state').value = doc.address?.state||'';
-        $('a-postcode').value = doc.address?.postcode||'';
-        $('a-country').value  = doc.address?.country||'';
+    $('pay-status').value = doc.payment?.status || 'pending';
+    $('pay-amount').value = doc.payment?.amount || '';
 
-        
-$('c-pdpa').checked = !!doc.consents?.pdpa;
-$('c-coc').checked  = !!doc.consents?.codeOfConduct;
-$('c-mkt').checked  = !!doc.consents?.marketingOptIn;
+    // Badge preview text
+    $('badgeName').textContent = [doc.personal?.firstName || '', doc.personal?.lastName || ''].join(' ').trim() || 'Participant Name';
+    $('badgeAffil').textContent = doc.professional?.affiliation || 'Institution / Company';
+    $('badgeCat').textContent = (doc.category || 'Participant').toUpperCase();
 
-        $('pay-status').value = doc.payment?.status||'pending';
-        $('pay-amount').value = doc.payment?.amount||'';
+    // Bind save
+    $('save').onclick = () => saveChanges(id, doc);
 
-        // Badge preview text
-        $('badgeName').textContent = [doc.personal?.firstName||'',doc.personal?.lastName||''].join(' ').trim()||'Participant Name';
-        $('badgeAffil').textContent = doc.professional?.affiliation||'Institution / Company';
-        $('badgeCat').textContent = (doc.category||'Participant').toUpperCase();
+    // Cancel button: hide editor + clear messages
+    $('cancelEdit').onclick = () => {
+      $('editCard').style.display = 'none';
+      $('saveMsg').textContent = '';
+      $('photoMsg').textContent = '';
+      document.getElementById('auditMount').style.display = 'none';
+    };
 
-        // Bind save
-        $('save').onclick = ()=>saveChanges(id, doc);
-                // Cancel button: hide editor + clear messages
-        $('cancelEdit').onclick = () => {
-          $('editCard').style.display = 'none';
-          $('saveMsg').textContent = '';
-          $('photoMsg').textContent = '';
-          document.getElementById('auditMount').style.display = 'none';
-        };
-        $('printBadge').onclick = ()=>{window.print();};
-        $('loadPhoto').onclick = ()=>loadLatestPhoto(doc.regCode, doc.personal?.email);
-      }catch(err){
-        alert('Failed to open editor: '+err.message);
-      }
-    }
+    $('printBadge').onclick = () => { window.print(); };
+    $('loadPhoto').onclick = () => loadLatestPhoto(doc.regCode, doc.personal?.email);
+
+  } catch(err){
+    alert('Failed to open editor: ' + err.message);
+  }
+}
 
 async function saveChanges(id, orig){
   $('save').disabled = true;
