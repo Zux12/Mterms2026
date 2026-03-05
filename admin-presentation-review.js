@@ -22,8 +22,8 @@
             <strong>v${latest.version}</strong> — ${latest.filename}<br>
             <small>${new Date(latest.uploadedAt).toLocaleString()}</small><br>
             <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
-<a class="btn" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
-</div>
+<a class="btn" style="background:#16a34a;color:#fff;" href="${API}${latest.downloadUrl}" target="_blank" rel="noopener">Open</a>
+            </div>
           </div>`
         : '<div class="help">No upload found yet.</div>';
     }catch(e){
