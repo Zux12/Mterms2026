@@ -486,6 +486,10 @@ mount.innerHTML = `
 const selRole = $('f-roleType');
 const selNat  = $('f-nationality');
 const proSubtypeWrap = $('proSubtypeWrap');
+      const studentOnly = $('studentOnly');
+const chkPresenting = $('f-presenting');
+const presentFields = $('presentFields');
+const submitBtn = $('reg-submit');
 
 function refreshOptionBUI(){
   const role = selRole.value;
@@ -500,6 +504,7 @@ function refreshOptionBUI(){
 
 selRole.addEventListener('change', refreshOptionBUI);
 selNat.addEventListener('change', refreshOptionBUI);
+      refreshOptionBUI();
       chkPresenting.addEventListener('change', () => show(presentFields, chkPresenting.checked));
 
       function setSubmitBusy(busy) {
