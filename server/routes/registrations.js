@@ -19,17 +19,8 @@ async function nextRegCode() {
   return `MTERM2026-${pad(c.seq)}`;
 }
 
-function phaseFor(date, start) {
-  const earlyEnd   = addDays(start, -90);
-  const regularBeg = addDays(start, -89);
-  const regularEnd = addDays(start, -14);
-  const lateBeg    = addDays(start, -13);
-  const lateEnd    = addDays(start, 0);
-
-  if (date <= earlyEnd) return 'Early-bird';
-  if (date >= regularBeg && date <= regularEnd) return 'Regular';
-  if (date >= lateBeg && date <= lateEnd) return 'Late/On-site';
-  return 'Closed';
+function phaseFor(date, earlyBirdDeadline) {
+  return date <= earlyBirdDeadline ? 'Early Bird' : 'Normal';
 }
 
 function siteBaseUrl() {
@@ -119,9 +110,41 @@ router.post('/', async (req, res) => {
   const student = body.student || {};
   const studentProof = body.studentProof || {};
 
-  if (!category || !['student','academia','industry'].includes(category)) {
-    return res.status(400).json({ error: 'Valid category required' });
+const roleType = body.roleType;
+const nationality = body.nationality;
+const professionalSubtype = body.professionalSubtype;
+
+if (!roleType || !['Student','Professional','Industrial Booth'].includes(roleType)) {
+  return res.status(400).json({ error: 'Valid roleType required' });
+}
+if (!nationality || !['Malaysian','Non-Malaysian'].includes(nationality)) {
+  return res.status(400).json({ error: 'Valid nationality required' });
+}
+
+
+let finalCategory = '';
+if (roleType === 'Student' && nationality === 'Malaysian') finalCategory = 'Local Student';
+if (roleType === 'Student' && nationality === 'Non-Malaysian') finalCategory = 'International Student';
+if (roleType === 'Professional' && nationality === 'Malaysian') finalCategory = 'Local Professional';
+if (roleType === 'Professional' && nationality === 'Non-Malaysian') finalCategory = 'International Professional';
+if (roleType === 'Industrial Booth') finalCategory = 'Industrial Booth';
+
+if (!finalCategory) {
+  return res.status(400).json({ error: 'Unable to map category from roleType/nationality' });
+}
+
+// subtype required only for Local Professional
+let profType = 'Standard';
+if (finalCategory === 'Local Professional') {
+  profType = professionalSubtype || 'Standard';
+  const allowed = ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'];
+  if (!allowed.includes(profType)) {
+    return res.status(400).json({ error: 'Valid professionalSubtype required for Local Professional' });
   }
+}
+
+
+  
   if (!personal.firstName || !personal.lastName || !personal.email) {
     return res.status(400).json({ error: 'firstName, lastName, email are required' });
   }
@@ -148,8 +171,8 @@ const passwordHash = await bcrypt.hash(password, 12);
   // ---- 2) Category-specific checks
   let studentBlock = {};
   let studentProofBlock = {};
-  if (category === 'student') {
-    if (!student.university) {
+if (finalCategory === 'Local Student' || finalCategory === 'International Student') {
+  if (!student.university) {
       return res.status(400).json({ error: 'university is required for student category' });
     }
     const deferred = !!studentProof.deferred; // chosen "upload later"
@@ -166,26 +189,41 @@ const passwordHash = await bcrypt.hash(password, 12);
     };
   }
 
-  // ---- 3) Price calc snapshot
-  const pricing = await Pricing.findOne({ key: 'pricing-2026' }).lean();
-  if (!pricing) return res.status(500).json({ error: 'Pricing not configured' });
+// ---- 3) Price calc snapshot (official table)
+const pricing = await Pricing.findOne({ key: 'pricing-2026' }).lean();
+if (!pricing) return res.status(500).json({ error: 'Pricing not configured' });
 
-  const start = new Date(pricing.eventStartDate);
-  const now = new Date();
-  const phase = phaseFor(now, start);
+const now = new Date();
+const phase = phaseFor(now, new Date(pricing.earlyBirdDeadline));
+const phaseKey = (phase === 'Early Bird') ? 'early' : 'normal';
 
-  const baseMap = {
-    student:  pricing.base.student,
-    academia: pricing.base.academia,
-    industry: pricing.base.industry
+let fee;
+if (finalCategory === 'Local Student') {
+  fee = pricing.fees.localStudent[phaseKey];
+} else if (finalCategory === 'International Student') {
+  fee = pricing.fees.internationalStudent[phaseKey];
+} else if (finalCategory === 'International Professional') {
+  fee = pricing.fees.internationalProfessional[phaseKey];
+} else if (finalCategory === 'Industrial Booth') {
+  fee = pricing.fees.industrialBooth[phaseKey];
+} else if (finalCategory === 'Local Professional') {
+  const map = {
+    'Standard': 'standard',
+    'Committee': 'committee',
+    'Member': 'member',
+    'Symposia Speaker': 'symposia',
+    'Keynote': 'keynote',
+    'Plenary': 'plenary'
   };
-  let base = baseMap[category];
+  const key = map[profType];
+  fee = pricing.fees.localProfessional[key][phaseKey];
+} else {
+  return res.status(400).json({ error: 'Unknown category for pricing' });
+}
 
-  if (phase === 'Early-bird') base += pricing.adjustments.early[category];
-  else if (phase === 'Late/On-site') base += pricing.adjustments.late[category];
-
-  const addonsTotal = addons.dinner ? (pricing.dinnerAddon || 0) : 0;
-  const total = base + addonsTotal;
+// no dinner
+const addonsTotal = 0;
+const total = Number(fee.amount) + addonsTotal;
 
   // ---- 4) Persist
   const regCode = await nextRegCode();
@@ -194,7 +232,10 @@ const passwordHash = await bcrypt.hash(password, 12);
 try {
   doc = await Registration.create({
     regCode,
-    category,
+category: finalCategory,
+nationality,
+roleType,
+professionalSubtype: (finalCategory === 'Local Professional') ? profType : 'Standard',
 
     auth: {
       passwordHash,
@@ -250,10 +291,13 @@ try {
       codeOfConduct: !!consents.codeOfConduct,
       marketingOptIn: !!consents.marketingOptIn
     },
-    pricingSnapshot: {
-      currency: pricing.currency || 'MYR',
-      phase, base, addons: addonsTotal, total
-    },
+pricingSnapshot: {
+  currency: fee.currency,
+  phase,
+  base: Number(fee.amount),
+  addons: addonsTotal,
+  total
+},
     payment: { method: 'manual', status: 'pending' }
   });
 
