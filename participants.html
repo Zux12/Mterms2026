@@ -1589,8 +1589,24 @@ logoutBtn.addEventListener('click', async () => {
 
   // Abstract upload (latest only)
  document.getElementById('absUploadBtn').addEventListener('click', ()=>uploadDoc('abstract','absFile','absMsg','absLatest'));
-document.getElementById('absRefreshBtn').addEventListener('click', ()=>loadLatest('abstract','absLatest'));
+document.getElementById('absRefreshBtn').addEventListener('click', async () => {
+  // 1) refresh latest abstract upload
+  await loadLatest('abstract','absLatest');
 
+  // 2) refresh profile so reviewer comment updates immediately
+  try {
+    const sess = getSession();
+    if (sess?.regCode && sess?.personal?.email) {
+      const full = await fetchFullProfile(sess.regCode, sess.personal.email);
+      saveSession(full);
+      prefill(full);         // <-- this updates #reviewComment
+      fillBadgeText(full);
+    }
+  } catch (e) {
+    // ignore: keep old comment if refresh fails
+  }
+});
+  
   // Bank receipt upload (latest only)
 document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadDoc('bankReceipt','payFile','payMsg','payLatest'));
 document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatest('bankReceipt','payLatest'));
