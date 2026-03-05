@@ -1171,6 +1171,17 @@ showStudent(isStudent);
 // show subtype only if Professional + Malaysian
 const showSubtype = (user?.roleType === 'Professional' && user?.nationality === 'Malaysian');
 document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+
+$('p-firstName').value = user?.personal?.firstName || '';
+$('p-lastName').value  = user?.personal?.lastName  || '';
+$('p-email').value     = user?.personal?.email     || '';
+$('p-phone').value     = user?.personal?.phone     || '';
+$('p-country').value   = user?.personal?.country   || '';
+
+$('pro-affiliation').value = user?.professional?.affiliation || '';
+$('pro-dept').value        = user?.professional?.department  || '';
+$('pro-role').value        = user?.professional?.roleTitle   || '';
+    
     $('s-university').value = user?.student?.university || '';
     $('s-level').value      = user?.student?.level || '';
     $('s-grad').value       = user?.student?.expectedGradYear || '';
