@@ -1203,10 +1203,14 @@ $('c-mkt').checked  = !!user?.consents?.marketingOptIn;
     const prTypeEl = document.getElementById('pr-type');
     if (prTypeEl && !prTypeEl.dataset.presBound){
       prTypeEl.dataset.presBound = '1';
-      prTypeEl.addEventListener('change', () => {
-        // re-render the presentation card when programme type changes
-        ensurePresentationPartialLoaded();
-      });
+prTypeEl.addEventListener('change', () => {
+  // re-render immediately if the partial is already loaded
+  if (typeof window.mountPresentationSubmission === 'function') {
+    window.mountPresentationSubmission();
+  } else {
+    ensurePresentationPartialLoaded();
+  }
+});
     }
 
   function requireSessionOrThrow(){
@@ -1774,8 +1778,14 @@ window.addEventListener('load', updatePaymentTagColor);
       if (!mount) return;
 
       // Avoid double-load
-      if (mount.dataset.loaded === '1') return;
-      mount.dataset.loaded = '1';
+// If already loaded, just re-render (don’t refetch)
+if (mount.dataset.loaded === '1') {
+  if (typeof window.mountPresentationSubmission === 'function') {
+    window.mountPresentationSubmission();
+  }
+  return;
+}
+mount.dataset.loaded = '1';
 
       try{
         const html = await fetch('presentation-submission.html', { cache: 'no-store' }).then(r=>r.text());
