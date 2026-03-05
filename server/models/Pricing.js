@@ -22,14 +22,16 @@ const PricingSchema = new mongoose.Schema({
       early:  { type: FeeSchema, required: true },
       normal: { type: FeeSchema, required: true }
     },
+
     localProfessional: {
       standard:  { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
-      committee:{ early: FeeSchema, normal: FeeSchema },
-      member:   { early: FeeSchema, normal: FeeSchema },
-      symposia: { early: FeeSchema, normal: FeeSchema },
-      keynote:  { early: FeeSchema, normal: FeeSchema },
-      plenary:  { early: FeeSchema, normal: FeeSchema }
+      committee: { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
+      member:    { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
+      symposia:  { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
+      keynote:   { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } },
+      plenary:   { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } }
     },
+
     internationalProfessional: {
       early:  { type: FeeSchema, required: true },
       normal: { type: FeeSchema, required: true }
