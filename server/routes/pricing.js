@@ -3,63 +3,56 @@ const express = require('express');
 const router = express.Router();
 const Pricing = require('../models/Pricing');
 
-function addDays(date, days) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
+function phaseFor(now, earlyBirdDeadline) {
+  return now <= earlyBirdDeadline ? 'Early Bird' : 'Normal';
 }
 
 router.get('/table', async (req, res) => {
   const doc = await Pricing.findOne({ key: 'pricing-2026' }).lean();
   if (!doc) return res.status(404).json({ error: 'Pricing not seeded yet' });
 
-  const start = new Date(doc.eventStartDate);
-  const earlyEnd   = addDays(start, -90);
-  const regularBeg = addDays(start, -89);
-  const regularEnd = addDays(start, -14);
-  const lateBeg    = addDays(start, -13);
-  const lateEnd    = addDays(start, 0);
+  const now = new Date();
+  const nowPhase = phaseFor(now, new Date(doc.earlyBirdDeadline));
 
-  const base = doc.base;
-  const adj  = doc.adjustments;
-
+  // Build a display table that matches the image exactly
   const rows = [
     {
-      phase: 'Early-bird',
-      window: { start: null, end: earlyEnd },
-      prices: {
-        student: base.student + adj.early.student,
-        academia: base.academia + adj.early.academia,
-        industry: base.industry + adj.early.industry
+      category: 'Local Student',
+      early:  doc.fees.localStudent.early,
+      normal: doc.fees.localStudent.normal
+    },
+    {
+      category: 'International Student',
+      early:  doc.fees.internationalStudent.early,
+      normal: doc.fees.internationalStudent.normal
+    },
+    {
+      category: 'Local Professional',
+      early:  doc.fees.localProfessional.standard.early,
+      normal: doc.fees.localProfessional.standard.normal,
+      notes: {
+        committee: doc.fees.localProfessional.committee.early.amount,
+        member: doc.fees.localProfessional.member.early.amount,
+        symposiaSpeaker: doc.fees.localProfessional.symposia.early.amount,
+        keynoteFree: true,
+        plenaryFree: true
       }
     },
     {
-      phase: 'Regular',
-      window: { start: regularBeg, end: regularEnd },
-      prices: { ...base }
+      category: 'International Professional',
+      early:  doc.fees.internationalProfessional.early,
+      normal: doc.fees.internationalProfessional.normal
     },
     {
-      phase: 'Late/On-site',
-      window: { start: lateBeg, end: lateEnd },
-      prices: {
-        student: base.student + adj.late.student,
-        academia: base.academia + adj.late.academia,
-        industry: base.industry + adj.late.industry
-      }
+      category: 'Industrial Booth',
+      early:  doc.fees.industrialBooth.early,
+      normal: doc.fees.industrialBooth.normal
     }
   ];
 
-  const today = new Date();
-  let nowPhase = 'Pre-registration';
-  if (today <= earlyEnd) nowPhase = 'Early-bird';
-  else if (today >= regularBeg && today <= regularEnd) nowPhase = 'Regular';
-  else if (today >= lateBeg && today <= lateEnd) nowPhase = 'Late/On-site';
-  else if (today > lateEnd) nowPhase = 'Closed';
-
   res.json({
-    currency: doc.currency,
-    dinnerAddon: doc.dinnerAddon,
-    eventStartDate: doc.eventStartDate,
+    ok: true,
+    earlyBirdDeadline: doc.earlyBirdDeadline,
     nowPhase,
     rows
   });
