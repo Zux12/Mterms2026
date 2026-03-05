@@ -734,11 +734,41 @@ table thead th{
   
           <label style="flex:1 1 600px;margin:0;min-width:280px">Category
     <select id="f-category" style="width:100%">
-      <option value="student">Student</option>
-      <option value="academia">Academia</option>
-      <option value="industry">Industry</option>
+<option value="Local Student">Local Student</option>
+<option value="International Student">International Student</option>
+<option value="Local Professional">Local Professional</option>
+<option value="International Professional">International Professional</option>
+<option value="Industrial Booth">Industrial Booth</option>
     </select>
   </label>
+
+ <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+  <label style="flex:1 1 220px;margin:0">Role
+    <select id="f-roleType" style="width:100%">
+      <option value="Student">Student</option>
+      <option value="Professional">Professional</option>
+      <option value="Industrial Booth">Industrial Booth</option>
+    </select>
+  </label>
+
+  <label style="flex:1 1 220px;margin:0">Nationality
+    <select id="f-nationality" style="width:100%">
+      <option value="Malaysian">Malaysian</option>
+      <option value="Non-Malaysian">Non-Malaysian</option>
+    </select>
+  </label>
+
+  <label id="proSubtypeWrap" style="flex:1 1 320px;margin:0;display:none">Professional Category
+    <select id="f-profSubtype" style="width:100%">
+      <option value="Standard">Standard</option>
+      <option value="Committee">TESMA/MTERM Committee</option>
+      <option value="Member">Member</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+      <option value="Keynote">Keynote Speaker</option>
+      <option value="Plenary">Plenary Speaker</option>
+    </select>
+  </label>
+</div>         
 </div>
 
 
@@ -923,7 +953,7 @@ table thead th{
             <option value="paid">Paid</option>
            <!-- <option value="verified">verified</option> -->
           </select>
-          <input id="pay-amount" type="number" placeholder="Amount (MYR)">
+          <input id="pay-amount" type="number" placeholder="Amount">
         </div>
   
 
@@ -1389,20 +1419,20 @@ document.getElementById('btnCert').addEventListener('click', () => {
         $('badgePhoto').removeAttribute('src');
         $('photoMsg').textContent = '';
         
-        $('f-category').value = doc.category || 'academia';
+       $('f-category').value = doc.category || 'Local Professional';
 
-        $('p-firstName').value = doc.personal?.firstName||'';
-        $('p-lastName').value  = doc.personal?.lastName||'';
-        $('p-email').value     = doc.personal?.email||'';
-        $('p-phone').value     = doc.personal?.phone||'';
-        $('p-country').value   = doc.personal?.country||'';
+$('f-roleType').value = doc.roleType || 'Professional';
+$('f-nationality').value = doc.nationality || 'Malaysian';
+$('f-profSubtype').value = doc.professionalSubtype || 'Standard';
 
-        $('pro-affiliation').value = doc.professional?.affiliation||'';
-        $('pro-dept').value        = doc.professional?.department||'';
-        $('pro-role').value        = doc.professional?.roleTitle||'';
+// Student-only block: based on roleType
+const isStudent = (doc.roleType === 'Student');
+$('studentOnly').style.display = isStudent ? 'block' : 'none';
 
-        const isStudent = (doc.category==='student');
-        $('studentOnly').style.display = isStudent ? 'block' : 'none';
+// Show subtype only for Malaysian Professional
+const showSubtype = (doc.roleType === 'Professional' && doc.nationality === 'Malaysian');
+document.getElementById('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
+        
         $('s-university').value = doc.student?.university||'';
         $('s-level').value      = doc.student?.level||'';
         $('s-grad').value       = doc.student?.expectedGradYear||'';
@@ -1463,41 +1493,103 @@ $('c-mkt').checked  = !!doc.consents?.marketingOptIn;
       }
     }
 
-    async function saveChanges(id, orig){
-      $('save').disabled = true; $('saveMsg').textContent = 'Saving…';
-      const updates = {
-        category: $('f-category').value,
-        personal: {
-          firstName:$('p-firstName').value.trim(), lastName:$('p-lastName').value.trim(),
-          email:$('p-email').value.trim(), phone:$('p-phone').value.trim(), country:$('p-country').value.trim()
-        },
-        professional: {
-          affiliation:$('pro-affiliation').value.trim(), department:$('pro-dept').value.trim(), roleTitle:$('pro-role').value.trim()
-        },
-        student: ($('f-category').value==='student') ? {
-          university:$('s-university').value.trim(), level:$('s-level').value, expectedGradYear:$('s-grad').value?Number($('s-grad').value):undefined
-        } : undefined,
-        program: {
-          presenting: $('pr-presenting').checked,
-          type: $('pr-type').value,
-          // program.title is repurposed for reviewer comment (visible to participant)
-          title: $('pr-title').value.trim(),
-          // program.topicArea is repurposed for Poster-only lock marker
-          topicArea: $('pr-posterOnly').checked ? POSTER_LOCK_MARKER : ''
-        },
+async function saveChanges(id, orig){
+  $('save').disabled = true;
+  $('saveMsg').textContent = 'Saving…';
 
-                submission: readAdminSubmissionFromForm(),
+  const updates = {
+    category: $('f-category').value,
 
-        
-        billing: { billTo:$('b-billTo').value.trim(), taxNo:$('b-taxNo').value.trim(), poNumber:$('b-po').value.trim() },
-        address: { line1:$('a-line1').value.trim(), line2:$('a-line2').value.trim(), city:$('a-city').value.trim(), state:$('a-state').value.trim(), postcode:$('a-postcode').value.trim(), country:$('a-country').value.trim() },
-consents: {
-  pdpa:$('c-pdpa').checked,
-  codeOfConduct:$('c-coc').checked,
-  marketingOptIn:$('c-mkt').checked
-},
-        payment: { status:$('pay-status').value, amount:$('pay-amount').value?Number($('pay-amount').value):undefined }
-      };
+    // ✅ Option B fields
+    roleType: $('f-roleType').value,
+    nationality: $('f-nationality').value,
+    professionalSubtype: $('f-profSubtype').value,
+
+    personal: {
+      firstName: $('p-firstName').value.trim(),
+      lastName:  $('p-lastName').value.trim(),
+      email:     $('p-email').value.trim(),
+      phone:     $('p-phone').value.trim(),
+      country:   $('p-country').value.trim()
+    },
+
+    professional: {
+      affiliation: $('pro-affiliation').value.trim(),
+      department:  $('pro-dept').value.trim(),
+      roleTitle:   $('pro-role').value.trim()
+    },
+
+    // ✅ Student details only when roleType = Student
+    student: ($('f-roleType').value === 'Student') ? {
+      university: $('s-university').value.trim(),
+      level:      $('s-level').value,
+      expectedGradYear: $('s-grad').value ? Number($('s-grad').value) : undefined
+    } : undefined,
+
+    program: {
+      presenting: $('pr-presenting').checked,
+      type: $('pr-type').value,
+      // program.title is repurposed for reviewer comment (visible to participant)
+      title: $('pr-title').value.trim(),
+      // program.topicArea is repurposed for Poster-only lock marker
+      topicArea: $('pr-posterOnly').checked ? POSTER_LOCK_MARKER : ''
+    },
+
+    submission: readAdminSubmissionFromForm(),
+
+    billing: {
+      billTo: $('b-billTo').value.trim(),
+      taxNo: $('b-taxNo').value.trim(),
+      poNumber: $('b-po').value.trim()
+    },
+
+    address: {
+      line1: $('a-line1').value.trim(),
+      line2: $('a-line2').value.trim(),
+      city: $('a-city').value.trim(),
+      state: $('a-state').value.trim(),
+      postcode: $('a-postcode').value.trim(),
+      country: $('a-country').value.trim()
+    },
+
+    consents: {
+      pdpa: $('c-pdpa').checked,
+      codeOfConduct: $('c-coc').checked,
+      marketingOptIn: $('c-mkt').checked
+    },
+
+    payment: {
+      status: $('pay-status').value,
+      amount: $('pay-amount').value ? Number($('pay-amount').value) : undefined
+    }
+  };
+
+  if (updates.student === undefined) delete updates.student;
+
+  const v = validateAdminSubmissionIfPresenter();
+  if (!v.ok) {
+    $('saveMsg').textContent = v.msg;
+    $('save').disabled = false;
+    return;
+  }
+
+  try{
+    const r = await fetch(`${API}/api/admin/registrations/${id}`, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json', ...authHeader() },
+      body: JSON.stringify({ updates })
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.error||'Update failed');
+
+    $('saveMsg').textContent='✅ Saved';
+    loadPage(page);
+  }catch(err){
+    $('saveMsg').textContent='❌ '+err.message;
+  }finally{
+    $('save').disabled = false;
+  }
+}
       if (updates.student===undefined) delete updates.student;
 
             const v = validateAdminSubmissionIfPresenter();
