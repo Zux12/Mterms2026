@@ -670,73 +670,7 @@ table thead th{
 }
 
 
-/* ===== FINAL header button overrides (must be last) ===== */
-header.brand-header .brand-right{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;
-}
-
-header.brand-header #adminNav.admin-nav{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:nowrap;
-}
-
-/* uniform button sizing in header only */
-header.brand-header .btn,
-header.brand-header .admin-tools > summary.btn{
-  height:40px;
-  padding:0 14px;
-  border-radius:12px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-}
-
-/* Admin tools dropdown look */
-header.brand-header .admin-tools{ position:relative; }
-header.brand-header .admin-tools > summary{ list-style:none; }
-header.brand-header .admin-tools > summary::-webkit-details-marker{ display:none; }
-
-header.brand-header .admin-tools-menu{
-  position:absolute;
-  right:0;
-  top:calc(100% + 10px);
-  min-width:300px;
-  padding:10px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 24px 70px rgba(0,0,0,.18);
-  display:grid;
-  gap:8px;
-  z-index:100;
-}
-
-header.brand-header .admin-tools-menu .btn{
-  width:100%;
-  justify-content:flex-start;
-  border-radius:10px;
-}
-
-/* mobile */
-@media (max-width:720px){
-  header.brand-header .brand-right,
-  header.brand-header #adminNav.admin-nav{ flex-wrap:wrap; }
-
-  header.brand-header .admin-tools-menu{
-    position:static;
-    min-width:unset;
-    box-shadow:none;
-    padding:8px 0 0;
-    border:none;
-    background:transparent;
-  }
-}    
+  
   </style>
 </head>
 <body>
@@ -2048,6 +1982,76 @@ if (nav) nav.style.display = 'block';
 
 /* 5) Make tiny “Edit” labels readable even when disabled */
 .admin-wrap .actions .btn:disabled { font-weight: 700 !important; }
+
+
+
+/* ===== FINAL header button overrides (must be last) ===== */
+header.brand-header .brand-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:nowrap;
+}
+
+header.brand-header #adminNav.admin-nav{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:nowrap;
+}
+
+/* uniform button sizing in header only */
+header.brand-header .btn,
+header.brand-header .admin-tools > summary.btn{
+  height:40px;
+  padding:0 14px;
+  border-radius:12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+
+/* Admin tools dropdown look */
+header.brand-header .admin-tools{ position:relative; }
+header.brand-header .admin-tools > summary{ list-style:none; }
+header.brand-header .admin-tools > summary::-webkit-details-marker{ display:none; }
+
+header.brand-header .admin-tools-menu{
+  position:absolute;
+  right:0;
+  top:calc(100% + 10px);
+  min-width:300px;
+  padding:10px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 24px 70px rgba(0,0,0,.18);
+  display:grid;
+  gap:8px;
+  z-index:100;
+}
+
+header.brand-header .admin-tools-menu .btn{
+  width:100%;
+  justify-content:flex-start;
+  border-radius:10px;
+}
+
+/* mobile */
+@media (max-width:720px){
+  header.brand-header .brand-right,
+  header.brand-header #adminNav.admin-nav{ flex-wrap:wrap; }
+
+  header.brand-header .admin-tools-menu{
+    position:static;
+    min-width:unset;
+    box-shadow:none;
+    padding:8px 0 0;
+    border:none;
+    background:transparent;
+  }
+}  
 </style>
 
 
