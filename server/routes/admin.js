@@ -54,15 +54,65 @@ router.get('/registrations/:id', adminAuth, async (req,res)=>{
 // PUT /api/admin/registrations/:id
 router.put('/registrations/:id', adminAuth, async (req,res)=>{
   const { updates = {} } = req.body || {};
-  // sanitize: avoid overwriting regCode by mistake
-  delete updates._id; delete updates.regCode; delete updates.createdAt; delete updates.updatedAt;
+
+  // sanitize: avoid overwriting critical fields by mistake
+  delete updates._id;
+  delete updates.regCode;
+  delete updates.createdAt;
+  delete updates.updatedAt;
+
+  // Optional safety: block changing auth + pricingSnapshot from admin editor UI
+  // (admin page doesn’t intentionally edit these)
+  delete updates.auth;
+  delete updates.pricingSnapshot;
+
+  // ---- Validate Option B fields if provided
+  const roleSet = ['Student','Professional','Industrial Booth'];
+  const natSet  = ['Malaysian','Non-Malaysian'];
+  const subSet  = ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'];
+
+  if (typeof updates.roleType !== 'undefined' && !roleSet.includes(updates.roleType)) {
+    return res.status(400).json({ error: 'Invalid roleType' });
+  }
+  if (typeof updates.nationality !== 'undefined' && !natSet.includes(updates.nationality)) {
+    return res.status(400).json({ error: 'Invalid nationality' });
+  }
+  if (typeof updates.professionalSubtype !== 'undefined' && !subSet.includes(updates.professionalSubtype)) {
+    return res.status(400).json({ error: 'Invalid professionalSubtype' });
+  }
+
+  // ---- Derive category from roleType + nationality (keeps DB consistent)
+  // Only do this if roleType/nationality exist in updates OR already exist in DB.
+  const existing = await Registration.findById(req.params.id).select('roleType nationality').lean();
+  if (!existing) return res.status(404).json({ error: 'Not found' });
+
+  const role = (typeof updates.roleType !== 'undefined') ? updates.roleType : existing.roleType;
+  const nat  = (typeof updates.nationality !== 'undefined') ? updates.nationality : existing.nationality;
+
+  if (role && nat) {
+    let finalCategory = '';
+    if (role === 'Student' && nat === 'Malaysian') finalCategory = 'Local Student';
+    if (role === 'Student' && nat === 'Non-Malaysian') finalCategory = 'International Student';
+    if (role === 'Professional' && nat === 'Malaysian') finalCategory = 'Local Professional';
+    if (role === 'Professional' && nat === 'Non-Malaysian') finalCategory = 'International Professional';
+    if (role === 'Industrial Booth') finalCategory = 'Industrial Booth';
+
+    if (finalCategory) updates.category = finalCategory;
+
+    // Normalize professionalSubtype: only meaningful for Malaysian Professional
+    if (!(role === 'Professional' && nat === 'Malaysian')) {
+      updates.professionalSubtype = 'Standard';
+    } else if (!updates.professionalSubtype) {
+      updates.professionalSubtype = 'Standard';
+    }
+  }
 
   const doc = await Registration.findByIdAndUpdate(
     req.params.id,
     { $set: updates },
     { new: true }
   );
-  if (!doc) return res.status(404).json({ error: 'Not found' });
+
   res.json({ ok: true, doc });
 });
 
