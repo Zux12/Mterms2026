@@ -14,8 +14,28 @@ const UploadSchema = new mongoose.Schema({
 const RegistrationSchema = new mongoose.Schema({
   regCode: { type: String, unique: true },
 
-  category: { type: String, enum: ['student', 'academia', 'industry'], required: true },
+category: {
+  type: String,
+  enum: [
+    'Local Student',
+    'International Student',
+    'Local Professional',
+    'International Professional',
+    'Industrial Booth'
+  ],
+  required: true
+},
 
+// New fields to support Option B UI
+nationality: { type: String, enum: ['Malaysian','Non-Malaysian'], required: true },
+roleType: { type: String, enum: ['Student','Professional','Industrial Booth'], required: true },
+
+// Only relevant when roleType === 'Professional' and nationality === 'Malaysian'
+professionalSubtype: {
+  type: String,
+  enum: ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'],
+  default: 'Standard'
+},
   personal: {
     firstName: { type: String, required: true },
     lastName:  { type: String, required: true },
