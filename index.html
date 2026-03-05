@@ -968,7 +968,27 @@
     margin-bottom: 50px;
   }
 }
-    
+
+
+/* Desktop: align welcoming remark photos to the left */
+@media (min-width: 768px){
+
+  .remarks-person{
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+
+  .remarks-photo{
+    text-align: left;
+  }
+
+  .remarks-photo img{
+    margin: 0;
+  }
+
+}    
 </style>
 <script src="lunr.min.js"></script>
 </head>
