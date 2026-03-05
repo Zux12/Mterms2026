@@ -52,6 +52,88 @@ input[type="radio"]{
   flex-wrap:wrap;
 }
 
+/* Header right toolbar alignment */
+.brand-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:nowrap;                 /* keep in one row on desktop */
+}
+
+/* The nav container should not force wrapping */
+.admin-nav{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:nowrap;                 /* keep in one row */
+}
+
+/* Make all header buttons same height */
+.brand-right .btn,
+.admin-nav .btn,
+.admin-tools > summary.btn{
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;              /* pill-ish */
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+
+/* Mobile: allow wrap */
+@media (max-width: 720px){
+  .brand-right,
+  .admin-nav{ flex-wrap:wrap; }
+}
+
+/* Admin Tools dropdown - make it look like a proper menu */
+.admin-tools{ position:relative; }
+
+/* Remove the default triangle marker */
+.admin-tools > summary{
+  list-style:none;
+}
+.admin-tools > summary::-webkit-details-marker{ display:none; }
+
+/* Give the summary a cleaner, premium button feel */
+.admin-tools > summary.btn{
+  background:#fff;
+  border:1px solid var(--border);
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+.admin-tools[open] > summary.btn{
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+}
+
+/* Dropdown panel */
+.admin-tools-menu{
+  position:absolute;
+  right:0;
+  top: calc(100% + 10px);
+  min-width: 300px;
+  padding: 10px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.18);
+  display:grid;
+  gap:8px;
+  z-index: 100;
+}
+
+/* Items inside menu should look like menu rows, not chunky buttons */
+.admin-tools-menu .btn{
+  height: 40px;
+  width:100%;
+  justify-content:flex-start;
+  border-radius: 10px;
+  background:#fff;
+}
+.admin-tools-menu .btn:hover{
+  background: rgba(11,42,107,0.04);
+}
+
 /* Admin Tools dropdown */
 .admin-tools{ position:relative; }
 .admin-tools > summary{ list-style:none; }
@@ -195,10 +277,12 @@ input[type="radio"]{
     
 /* Cancel + Logout = red */
 .btn-danger{
-  background: #dc2626;   /* red */
+  background: #dc2626;
   border-color: #dc2626;
   color: #fff;
+  box-shadow: 0 10px 22px rgba(220,38,38,.22);
 }
+.btn-danger:hover{ filter: brightness(.95); }
 
 /* Secondary = normal white button */
 .btn-secondary{
@@ -614,7 +698,7 @@ table thead th{
 
   <!-- Admin Tools dropdown -->
   <details class="admin-tools">
-    <summary class="btn btn-secondary">Admin Tools ▾</summary>
+    <summary class="btn btn-secondary">Admin Tools</summary>
 
     <div class="admin-tools-menu">
       <button data-auth="1"
