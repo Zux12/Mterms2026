@@ -298,7 +298,12 @@ pricingSnapshot: {
   addons: addonsTotal,
   total
 },
-    payment: { method: 'manual', status: 'pending' }
+payment: {
+  method: 'manual',
+  status: 'pending',
+  amount: total
+}
+  
   });
 
 // Fire registration confirmation email (do NOT block registration if email fails)
