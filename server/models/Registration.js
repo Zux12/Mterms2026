@@ -130,10 +130,11 @@ email: { type: String, required: true, unique: true, index: true, lowercase: tru
     total:    { type: Number }
   },
 
-  payment: {
-    method: { type: String, default: 'manual' },
-    status: { type: String, default: 'pending' }
-  },
+payment: {
+  method: { type: String, default: 'manual' },
+  status: { type: String, default: 'pending' },
+  amount: { type: Number }
+},
 
   uploads: [UploadSchema]
 }, { timestamps: true });
