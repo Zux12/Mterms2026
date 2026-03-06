@@ -423,6 +423,22 @@ const need = [
     }
 
     ready(() => {
+
+      // Password show/hide toggle
+const pw = $('pw');
+const pwToggle = $('pwToggle');
+
+if (pw && pwToggle) {
+  pwToggle.addEventListener('click', () => {
+    if (pw.type === 'password') {
+      pw.type = 'text';
+      pwToggle.textContent = 'Hide';
+    } else {
+      pw.type = 'password';
+      pwToggle.textContent = 'Show';
+    }
+  });
+}
       /* ===================== Pricing ===================== */
       (async () => {
         const mount = $('pricingMount');
