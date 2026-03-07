@@ -3,133 +3,902 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Under Construction — MTERMS 2026</title>
+  <title>Must-Visit Destinations — MTERMS 2026</title>
+  <meta name="description" content="Leisure and things to do in Shah Alam for MTERMS 2026 participants." />
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* Clean, modern styling for the under construction page */
-    :root {
-      --bg: #f9fafb;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --brand: #1e5aa8;
+    :root{
+      --bg:#091014;
+      --bg2:#101a20;
+      --panel:#162127;
+      --panel2:#1b2a31;
+      --text:#f3f7f8;
+      --muted:#c3d0d5;
+      --line:rgba(255,255,255,.10);
+      --gold:#d8b271;
+      --gold2:#f0d6a5;
+      --teal:#5da9a0;
+      --forest:#7aa27a;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:28px;
+      --max:1180px;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 20px;
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 420px at 10% 0%, rgba(93,169,160,.12), transparent 55%),
+        radial-gradient(700px 340px at 90% 0%, rgba(216,178,113,.12), transparent 52%),
+        linear-gradient(180deg, #081015 0%, #0d171d 38%, #091115 100%);
     }
 
-    .construction-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px 30px;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    a{ color:inherit; text-decoration:none; }
+    img{ max-width:100%; display:block; }
+
+    .container{
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
     }
 
-    /* Logo Styling */
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(10px);
+      background:rgba(6,11,14,.74);
+      border-bottom:1px solid rgba(255,255,255,.08);
     }
 
-    .logo-container img {
-      height: 70px;
-      width: auto;
-      object-fit: contain;
+    .topbar-inner{
+      width:min(var(--max), calc(100% - 28px));
+      margin:0 auto;
+      min-height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
     }
 
-    .main-logo {
-      height: 90px !important; /* Make the MTERMS logo slightly larger */
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
     }
 
-    .divider {
-      height: 40px;
-      width: 1px;
-      background-color: var(--border);
-      margin: 0 10px;
+    .brand img{
+      height:44px;
+      width:auto;
+      object-fit:contain;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.25));
     }
 
-    /* Text Styling */
-    h1 {
-      font-size: 28px;
-      margin: 0 0 15px 0;
-      font-weight: 700;
-      color: var(--text);
+    .brand-copy{ min-width:0; }
+
+    .brand-kicker{
+      color:var(--gold2);
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-weight:800;
+      margin-bottom:4px;
     }
 
-    p {
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.6;
-      margin: 0 0 25px 0;
+    .brand-title{
+      font-family:"Playfair Display", serif;
+      font-size:1.12rem;
+      font-weight:700;
+      line-height:1.1;
+      color:#fff;
     }
 
-    .btn {
-      display: inline-block;
-      background: var(--brand);
-      color: #ffffff;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      transition: opacity 0.2s;
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
-    .btn:hover {
-      opacity: 0.9;
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      font-weight:700;
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
     }
 
-    /* Responsive adjustment for mobile devices */
-    @media (max-width: 500px) {
-      .divider {
-        display: none;
+    .btn:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.22);
+      box-shadow:0 10px 26px rgba(0,0,0,.24);
+    }
+
+    .btn.gold{
+      background:linear-gradient(180deg, var(--gold2), var(--gold));
+      color:#16120b;
+      border-color:rgba(0,0,0,0);
+      font-weight:800;
+    }
+
+    .btn.ghost{
+      background:transparent;
+    }
+
+    .hero{
+      position:relative;
+      min-height:82vh;
+      display:flex;
+      align-items:flex-end;
+      overflow:hidden;
+      background:
+        linear-gradient(to bottom, rgba(4,8,10,.24), rgba(4,8,10,.76)),
+        linear-gradient(to top, rgba(4,8,10,.90), rgba(4,8,10,.15)),
+        url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:120px;
+      background:linear-gradient(to top, rgba(9,16,20,1), rgba(9,16,20,0));
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+      padding:120px 0 92px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--gold2);
+      font-size:.78rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight:800;
+      backdrop-filter:blur(6px);
+    }
+
+    .hero h1{
+      margin:18px 0 14px;
+      max-width:940px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(2.4rem, 5vw, 4.8rem);
+      line-height:.98;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      max-width:760px;
+      margin:0;
+      color:#e8f0f2;
+      font-size:clamp(1rem, 1.5vw, 1.16rem);
+      line-height:1.75;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:28px;
+    }
+
+    .hero-note{
+      margin-top:18px;
+      color:rgba(255,255,255,.74);
+      font-size:.95rem;
+    }
+
+    .overview{
+      margin-top:-42px;
+      position:relative;
+      z-index:5;
+    }
+
+    .overview-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+      overflow:hidden;
+      padding:24px;
+    }
+
+    .overview-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:16px;
+    }
+
+    .overview-item{
+      padding:18px;
+      border-radius:20px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      transition:transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .overview-item:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+    }
+
+    .overview-icon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(216,178,113,.18), rgba(93,169,160,.16));
+      border:1px solid rgba(255,255,255,.10);
+      font-size:1.2rem;
+      margin-bottom:12px;
+    }
+
+    .overview-title{
+      font-weight:800;
+      color:#fff;
+      margin-bottom:8px;
+    }
+
+    .overview-copy{
+      color:var(--muted);
+      line-height:1.65;
+      font-size:.95rem;
+    }
+
+    .section{
+      padding:78px 0 22px;
+    }
+
+    .section-head{
+      margin-bottom:28px;
+    }
+
+    .section-kicker{
+      color:var(--gold2);
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-size:.76rem;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .section-head h2,
+    .itinerary-card h2{
+      margin:0 0 12px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(2rem, 2.8vw, 3rem);
+      line-height:1.02;
+    }
+
+    .section-head p,
+    .itinerary-card p{
+      margin:0;
+      max-width:840px;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:1rem;
+    }
+
+    .destination-grid{
+      display:grid;
+      gap:28px;
+    }
+
+    .destination-card{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      border-radius:30px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .destination-media{
+      position:relative;
+      min-height:330px;
+      overflow:hidden;
+    }
+
+    .destination-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 1.1s ease;
+    }
+
+    .destination-card:hover .destination-media img{
+      transform:scale(1.04);
+    }
+
+    .destination-media::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.46), rgba(0,0,0,.10));
+    }
+
+    .destination-tag{
+      position:absolute;
+      left:20px;
+      top:20px;
+      z-index:2;
+      display:inline-flex;
+      align-items:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(10,14,16,.68);
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .destination-content{
+      padding:34px 32px 30px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .destination-name{
+      margin:0 0 10px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(1.65rem, 2vw, 2.35rem);
+      line-height:1.08;
+    }
+
+    .destination-sub{
+      margin:0 0 18px;
+      color:var(--gold2);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.76rem;
+    }
+
+    .destination-desc{
+      margin:0 0 20px;
+      color:var(--muted);
+      line-height:1.85;
+      font-size:1rem;
+    }
+
+    .meta-list{
+      display:grid;
+      gap:10px;
+      margin-bottom:22px;
+    }
+
+    .meta-item{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      color:#eef4f5;
+      line-height:1.7;
+      font-size:.96rem;
+    }
+
+    .meta-dot{
+      flex:0 0 8px;
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:linear-gradient(180deg, var(--gold2), var(--gold));
+      margin-top:.65em;
+      box-shadow:0 0 0 6px rgba(216,178,113,.08);
+    }
+
+    .destination-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:auto;
+    }
+
+    .itinerary{
+      padding:42px 0 76px;
+    }
+
+    .itinerary-card{
+      border-radius:30px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      padding:30px;
+    }
+
+    .itinerary-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+
+    .itinerary-item{
+      padding:20px;
+      border-radius:22px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .itinerary-time{
+      color:var(--gold2);
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .itinerary-title{
+      color:#fff;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .itinerary-copy{
+      color:var(--muted);
+      line-height:1.7;
+      font-size:.95rem;
+    }
+
+    .footer{
+      padding:26px 0 38px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.02);
+    }
+
+    .footer-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer-copy{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    @media (max-width:1100px){
+      .overview-grid,
+      .itinerary-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
       }
-      .logo-container {
-        flex-direction: column;
-        gap: 15px;
+
+      .destination-card{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:760px){
+      .topbar-inner{
+        padding:12px 0;
+        min-height:auto;
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .brand img{ height:36px; }
+
+      .hero{
+        min-height:72vh;
+      }
+
+      .hero-content{
+        padding:100px 0 72px;
+        width:min(var(--max), calc(100% - 24px));
+      }
+
+      .container{
+        width:min(var(--max), calc(100% - 24px));
+      }
+
+      .overview-grid,
+      .itinerary-grid{
+        grid-template-columns:1fr;
+      }
+
+      .actions,
+      .hero-actions,
+      .destination-actions{
+        width:100%;
+      }
+
+      .actions .btn,
+      .hero-actions .btn,
+      .destination-actions .btn{
+        width:100%;
+      }
+
+      .overview-card,
+      .destination-content,
+      .itinerary-card{
+        padding-left:20px;
+        padding-right:20px;
+      }
+
+      .destination-content{
+        padding-top:24px;
+        padding-bottom:24px;
+      }
+
+      .destination-media{
+        min-height:240px;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="construction-card">
-    
-    <div class="logo-container">
-      <img src="public/mterm.jpg" alt="MTERMS Logo" class="main-logo">
-      <div class="divider"></div>
-      <img src="public/uitm.png" alt="UITM Logo">
-      <img src="public/tesma.png" alt="TESMA Logo">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="tesma.png" alt="TESMA logo">
+        <img src="uitm.png" alt="UiTM logo">
+        <img src="public/mterm.jpg" alt="MTERMS 2026 logo">
+        <div class="brand-copy">
+          <div class="brand-kicker">MTERMS 2026</div>
+          <div class="brand-title">Must-Visit Destinations</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn ghost" href="#destinations">Explore Shah Alam</a>
+        <a class="btn gold" href="index.html">Return Home</a>
+      </div>
     </div>
+  </header>
 
-    <h1>Page Under Construction</h1>
-    
-    <p>
-      We are currently updating this section for the <strong>Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting (MTERMS 2026)</strong>. 
-      Please check back later for new information and updates.
-    </p>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">Leisure & things to do in Shah Alam</div>
+      <h1>Explore culture, parks, family fun, and local lifestyle during your stay for MTERMS 2026.</h1>
+      <p>
+        A curated Shah Alam leisure page for conference delegates who want to see more of the city beyond the venue, whether you have a free afternoon, an evening out, or an extra day to explore.
+      </p>
 
-    <a href="index.html" class="btn">Return to Homepage</a>
+      <div class="hero-actions">
+        <a class="btn gold" href="#destinations">View Destinations</a>
+        <a class="btn" href="restaurants.html">Food & Dining</a>
+      </div>
 
-  </div>
+      <div class="hero-note">
+        Culture • nature • family attractions • shopping • evening leisure
+      </div>
+    </div>
+  </section>
+
+  <section class="overview">
+    <div class="container">
+      <div class="overview-card">
+        <div class="overview-grid">
+          <a class="overview-item" href="#culture">
+            <div class="overview-icon">🕌</div>
+            <div class="overview-title">Culture & Landmarks</div>
+            <div class="overview-copy">Signature places that define Shah Alam’s identity.</div>
+          </a>
+
+          <a class="overview-item" href="#nature">
+            <div class="overview-icon">🌿</div>
+            <div class="overview-title">Nature & Relaxation</div>
+            <div class="overview-copy">Parks, gardens, and slower moments around the city.</div>
+          </a>
+
+          <a class="overview-item" href="#fun">
+            <div class="overview-icon">🎡</div>
+            <div class="overview-title">Family Fun</div>
+            <div class="overview-copy">Theme-park and water-based leisure options.</div>
+          </a>
+
+          <a class="overview-item" href="#lifestyle">
+            <div class="overview-icon">🛍️</div>
+            <div class="overview-title">Lifestyle & Evenings</div>
+            <div class="overview-copy">Shopping, light walks, and easy after-hours plans.</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="destinations" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-kicker">City guide</div>
+        <h2>Recommended leisure spots in Shah Alam</h2>
+        <p>
+          These picks are designed to work well for conference visitors: recognizable, easy to explain, and varied enough for solo delegates, families, and evening group plans.
+        </p>
+      </div>
+
+      <div class="destination-grid">
+
+        <article id="culture" class="destination-card">
+          <div class="destination-media">
+            <span class="destination-tag">Iconic landmark</span>
+            <img src="https://images.unsplash.com/photo-1512632578888-169bbbc64f33?auto=format&fit=crop&w=1400&q=80" alt="Majestic mosque at sunset">
+          </div>
+          <div class="destination-content">
+            <h3 class="destination-name">Sultan Salahuddin Abdul Aziz Shah Mosque</h3>
+            <div class="destination-sub">The Blue Mosque • Shah Alam landmark</div>
+            <p class="destination-desc">
+              One of Shah Alam’s defining landmarks and a strong first recommendation for visitors who want to experience the city’s architectural identity and most recognizable skyline feature.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for first-time visitors who want a classic Shah Alam stop.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works well for light sightseeing, photography, and a calm city visit.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good anchor destination if you only have a short leisure window.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://mssaas.gov.my/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Sultan+Salahuddin+Abdul+Aziz+Shah+Mosque" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="destination-card">
+          <div class="destination-content">
+            <h3 class="destination-name">Muzium Sultan Alam Shah</h3>
+            <div class="destination-sub">Selangor state museum</div>
+            <p class="destination-desc">
+              A strong cultural stop for delegates who want local history and heritage rather than purely recreational attractions. It adds depth to the page and pairs well with nearby city sightseeing.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for visitors interested in Selangor history, artifacts, and museum-style exploration.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful indoor option if you want a more structured and educational visit.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Fits well into a half-day city itinerary with nearby park or landmark stops.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://www.jmm.gov.my/ms/sultan-alam-shah-museum" target="_blank" rel="noopener">Museum Page</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Muzium+Sultan+Alam+Shah" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="destination-media">
+            <span class="destination-tag">Culture & heritage</span>
+            <img src="https://images.unsplash.com/photo-1566127992631-137a642a90f4?auto=format&fit=crop&w=1400&q=80" alt="Museum gallery interior">
+          </div>
+        </article>
+
+        <article id="nature" class="destination-card">
+          <div class="destination-media">
+            <span class="destination-tag">Quiet green escape</span>
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80" alt="Japanese garden with pond">
+          </div>
+          <div class="destination-content">
+            <h3 class="destination-name">Selangor–Japan Friendship Garden</h3>
+            <div class="destination-sub">Peaceful landscaped garden</div>
+            <p class="destination-desc">
+              A calm and photogenic stop for visitors who want a lighter, slower leisure experience. This is a very good recommendation for delegates who do not want a long, intense outing.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for couples, relaxed walks, and short scenic breaks.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works nicely before dinner or as part of an easy afternoon loop.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Pairs naturally with the nearby lake-garden area.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://selangor.travel/listing/selangor-japan-friendship-garden/" target="_blank" rel="noopener">Tourism Page</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Selangor+Japan+Friendship+Garden" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="destination-card">
+          <div class="destination-content">
+            <h3 class="destination-name">Taman Tasik Shah Alam</h3>
+            <div class="destination-sub">Lake gardens & easy outdoor leisure</div>
+            <p class="destination-desc">
+              A reliable open-air option for delegates who want greenery, light walking, and a more local city-park atmosphere without committing to a full attraction visit.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Great for morning walks, short breaks, and family-friendly outdoor time.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good choice if you want a relaxed outing rather than a ticketed attraction.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Easy to combine with nearby museum or garden stops.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://www.visitselangor.com/taman-tasik-shah-alam/" target="_blank" rel="noopener">Visit Selangor Page</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Taman+Tasik+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="destination-media">
+            <span class="destination-tag">City park</span>
+            <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1400&q=80" alt="Lakeside park scenery">
+          </div>
+        </article>
+
+        <article id="fun" class="destination-card">
+          <div class="destination-media">
+            <span class="destination-tag">Evening entertainment</span>
+            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=80" alt="Bright city lights at night">
+          </div>
+          <div class="destination-content">
+            <h3 class="destination-name">i-City</h3>
+            <div class="destination-sub">Lights, attractions, and night-time leisure</div>
+            <p class="destination-desc">
+              A very useful recommendation for delegates who want something more energetic in the evening. It works especially well for families, groups, and visitors who want a recognizable Shah Alam leisure stop after sessions.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for after-dark outings, casual fun, and family-friendly plans.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works well if you want a stronger entertainment feel rather than culture or park time.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Often an easy choice for visitors with limited planning time.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://corp.i-city.my/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=i-City+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="destination-card">
+          <div class="destination-content">
+            <h3 class="destination-name">Wet World Shah Alam</h3>
+            <div class="destination-sub">Waterpark option for families</div>
+            <p class="destination-desc">
+              A more playful, family-focused stop that is best for delegates traveling with children or anyone turning the conference trip into a short leisure stay.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for family visitors and lighter day-time recreation.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>More suitable for extended stays than for a tight conference schedule.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful as an optional leisure add-on rather than a core city landmark stop.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://wetworld.my/wet-world-shah-alam/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Wet+World+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="destination-media">
+            <span class="destination-tag">Family leisure</span>
+            <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1400&q=80" alt="Waterpark and splash activity">
+          </div>
+        </article>
+
+        <article id="lifestyle" class="destination-card">
+          <div class="destination-media">
+            <span class="destination-tag">Shopping & dining</span>
+            <img src="https://images.unsplash.com/photo-1481437156560-3205f6a55735?auto=format&fit=crop&w=1400&q=80" alt="Modern shopping mall interior">
+          </div>
+          <div class="destination-content">
+            <h3 class="destination-name">Setia City Mall</h3>
+            <div class="destination-sub">Lifestyle, shopping, and easy evening plans</div>
+            <p class="destination-desc">
+              A simple and practical recommendation for delegates who want an easy combination of shopping, dining, indoor comfort, and low-effort evening activity.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Very useful for casual shopping, errands, coffee, and low-stress evening time.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good fallback option if weather is poor or you want something straightforward.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works especially well for delegates staying around Setia Alam.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://setiacitymall.com/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Setia+City+Mall" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="destination-card">
+          <div class="destination-content">
+            <h3 class="destination-name">Laman Seni 7</h3>
+            <div class="destination-sub">Street art & casual photo stop</div>
+            <p class="destination-desc">
+              A lighter creative stop that adds personality to the page. It is best for visitors who enjoy local art, short photo walks, and slightly less formal city exploration.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for short visits, casual photos, and combining with nearby food or shopping.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful as a flexible add-on rather than a full half-day destination.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Pairs naturally with i-City or a simple city outing.</span></div>
+            </div>
+
+            <div class="destination-actions">
+              <a class="btn gold" href="https://www.visitselangor.com/laman-seni-7/" target="_blank" rel="noopener">Visit Selangor Page</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Laman+Seni+7+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="destination-media">
+            <span class="destination-tag">Creative stop</span>
+            <img src="https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1400&q=80" alt="Street art wall and alley">
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="itinerary">
+    <div class="container">
+      <div class="itinerary-card">
+        <div class="section-kicker">Suggested flow</div>
+        <h2>If you have half a day in Shah Alam</h2>
+        <p>
+          This simple sequence gives visiting delegates a balanced Shah Alam experience without overloading the schedule.
+        </p>
+
+        <div class="itinerary-grid">
+          <div class="itinerary-item">
+            <div class="itinerary-time">Afternoon</div>
+            <div class="itinerary-title">Start with a landmark</div>
+            <div class="itinerary-copy">Visit the Blue Mosque or the state museum for a stronger sense of Shah Alam’s identity and history.</div>
+          </div>
+
+          <div class="itinerary-item">
+            <div class="itinerary-time">Late Afternoon</div>
+            <div class="itinerary-title">Slow the pace outdoors</div>
+            <div class="itinerary-copy">Choose the Japan Friendship Garden or Taman Tasik Shah Alam for a relaxed scenic stop.</div>
+          </div>
+
+          <div class="itinerary-item">
+            <div class="itinerary-time">Evening</div>
+            <div class="itinerary-title">Finish with easy leisure</div>
+            <div class="itinerary-copy">Head to i-City, Setia City Mall, or a nearby dinner plan for an uncomplicated end to the day.</div>
+          </div>
+        </div>
+
+        <div class="hero-actions" style="margin-top:22px;">
+          <a class="btn gold" href="restaurants.html">Where to Eat</a>
+          <a class="btn" href="gettingthere.html">Getting There</a>
+          <a class="btn" href="index.html">Return Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-copy">MTERMS 2026 • Shah Alam Leisure Guide</div>
+      <a class="btn gold" href="index.html">Return Home</a>
+    </div>
+  </footer>
 
 </body>
 </html>
