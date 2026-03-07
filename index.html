@@ -989,6 +989,174 @@
   }
 
 }    
+
+
+
+
+/* =========================
+   Registration cinematic thin banner
+   ========================= */
+.reg-cine-banner{
+  position: relative;
+  min-height: 132px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px 22px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #050b18 0%, #000000 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0,0,0,.22);
+}
+
+.reg-highlight-line{
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0));
+  opacity: .45;
+  animation: regHighlightSweep 4.8s linear infinite;
+}
+
+@keyframes regHighlightSweep{
+  0%   { left: -30%; opacity: 0; }
+  10%  { opacity: .28; }
+  50%  { opacity: .48; }
+  90%  { opacity: .22; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.reg-cine-stage{
+  position: absolute;
+  inset: 0;
+  padding: 14px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s ease;
+}
+
+.reg-cine-stage.active{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.reg-stage-title{
+  color: #ffffff;
+  font-size: 1.7rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.reg-stage-message{
+  color: #ffffff;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  font-weight: 500;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.reg-stage-cats{
+  color: rgba(255,255,255,.92);
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.reg-stage-btn-wrap{
+  margin-top: 2px;
+}
+
+.reg-stage-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  min-width: 150px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: .96rem;
+  border: 1px solid rgba(255,255,255,0);
+  box-shadow: 0 0 0 rgba(255,255,255,0);
+  transform: translateY(0);
+  transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+  animation: regBtnGlow 2.6s ease-in-out infinite;
+}
+
+.reg-stage-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255,255,255,.16);
+}
+
+@keyframes regBtnGlow{
+  0%,100%{
+    box-shadow: 0 0 0 rgba(255,255,255,0);
+  }
+  50%{
+    box-shadow: 0 0 18px rgba(255,255,255,.18);
+  }
+}
+
+.reg-stage-note{
+  color: rgba(255,255,255,.76);
+  font-size: .85rem;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+@media (max-width: 768px){
+  .reg-cine-banner{
+    min-height: 118px;
+    padding: 12px 16px;
+    border-radius: 16px;
+  }
+
+  .reg-cine-stage{
+    padding: 12px 16px;
+    gap: 7px;
+  }
+
+  .reg-stage-title{
+    font-size: 1.28rem;
+    letter-spacing: .06em;
+  }
+
+  .reg-stage-message{
+    font-size: .88rem;
+    line-height: 1.35;
+    max-width: 94%;
+  }
+
+  .reg-stage-cats{
+    font-size: .88rem;
+  }
+
+  .reg-stage-btn{
+    padding: 8px 16px;
+    min-width: 132px;
+    font-size: .88rem;
+  }
+
+  .reg-stage-note{
+    font-size: .75rem;
+  }
+}    
 </style>
 <script src="lunr.min.js"></script>
 </head>
@@ -1517,58 +1685,30 @@
   
   
   
-  <!-- Registration -->
+    <!-- Registration -->
   <section id="registration" class="section section-alt">
     <div class="container">
-      <h2>Registration</h2>
-      <p>Online registration opens soon. Indicative categories:</p>
-      <div class="pricing">
-        <div class="price-card">
-          <h3>Students</h3>
-          <p class="price">REGISTRATION OPEN</p>
-          <ul>
-            <li>Full access to scientific program</li>
-            <li>Poster eligibility</li>
-            <li>Coffee breaks</li>
-          </ul>
- 
-          <a class="btn primary" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register</a>  
+      <div class="reg-cine-banner" aria-label="Registration announcement banner">
 
+        <div class="reg-highlight-line" aria-hidden="true"></div>
+
+        <div class="reg-cine-stage reg-stage-1 active" id="regStage1">
+          <div class="reg-stage-title">REGISTRATION OPEN</div>
         </div>
-        <div class="price-card">
-          <h3>Academia</h3>
-          <p class="price">REGISTRATION OPEN</p>
-          <ul>
-            <li>Talk/poster eligibility</li>
-            <li>Industry access</li>
-            <li>Networking events</li>
-          </ul>
-         <a class="btn primary" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register</a>  
 
+        <div class="reg-cine-stage reg-stage-2" id="regStage2">
+          <div class="reg-stage-message">
+            Registration for the 10th Malaysian Tissue Engineering &amp; Regenerative Medicine Scientific Meeting (MTERMS 2026) is now open.
+          </div>
         </div>
-        <div class="price-card">
-          <h3>Industry</h3>
-          <p class="price">REGISTRATION OPEN</p>
-          <ul>
-            <li>Exhibition access</li>
-            <li>B2B meetings</li>
-            <li>Industry sessions</li>
-          </ul>
-       <a class="btn primary" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register</a>  
 
+        <div class="reg-cine-stage reg-stage-3" id="regStage3">
+          <div class="reg-stage-cats">Student • Academia • Industry</div>
+          <div class="reg-stage-btn-wrap">
+            <a class="reg-stage-btn" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">Register Now</a>
+          </div>
+          <div class="reg-stage-note">Secure online registration portal</div>
         </div>
-      </div>
-
-
-
-
-
-
-     
-
-
-<!-- MTERM2026 — Portal & Invoice buttons placeholder -->
-      <div class="cta-row">
 
       </div>
     </div>
@@ -1898,6 +2038,50 @@ introVideo.addEventListener('ended', () => {
   mqDesktop.addEventListener('change', closeAll);
 })();
 </script>
+
+
+
+
+
+<script>
+(function(){
+  const stage1 = document.getElementById('regStage1');
+  const stage2 = document.getElementById('regStage2');
+  const stage3 = document.getElementById('regStage3');
+
+  if (!stage1 || !stage2 || !stage3) return;
+
+  const stages = [stage1, stage2, stage3];
+  const timings = [
+    3000, // stage 1: fade in/out handled by CSS transition, visible duration
+    3900, // stage 2
+    5200  // stage 3 (longer so users can click)
+  ];
+
+  let current = 0;
+
+  function showStage(index){
+    stages.forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+  }
+
+  function loopStages(){
+    showStage(current);
+
+    setTimeout(() => {
+      current = (current + 1) % stages.length;
+      loopStages();
+    }, timings[current]);
+  }
+
+  window.addEventListener('load', () => {
+    showStage(0);
+    setTimeout(loopStages, 200);
+  });
+})();
+</script>
+
   
 </body>
 </html>
