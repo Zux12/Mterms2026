@@ -466,11 +466,9 @@ mount.innerHTML = `
           ? `<div style="margin-top:8px;font-size:.88em;opacity:.9;line-height:1.35;text-align:left">
                <div style="font-weight:800;margin-bottom:4px">Early Bird notes</div>
                <ul style="margin:0;padding-left:18px">
-                 <li>Committee: ${row.notes.committeeEarly.currency} ${Number(row.notes.committeeEarly.amount).toFixed(0)}</li>
                  <li>Member: ${row.notes.memberEarly.currency} ${Number(row.notes.memberEarly.amount).toFixed(0)}</li>
                  <li>Symposia Speaker: ${row.notes.symposiaEarly.currency} ${Number(row.notes.symposiaEarly.amount).toFixed(0)}</li>
-                 <li>Keynote: Free</li>
-                 <li>Plenary: Free</li>
+
                </ul>
              </div>`
           : '';
