@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Popular Restaurants — MTERMS 2026</title>
-  <meta name="description" content="Curated dining guide for MTERMS 2026 participants staying in and around Shah Alam." />
+  <title>Popular & Viral Eats — MTERMS 2026</title>
+  <meta name="description" content="Popular and viral restaurants in Shah Alam for MTERMS 2026 participants." />
   <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,17 +12,17 @@
 
   <style>
     :root{
-      --bg:#0e0c0b;
-      --bg2:#161210;
-      --panel:#1b1715;
-      --panel2:#241d1a;
-      --text:#f7f1ea;
-      --muted:#d0c3b7;
+      --bg:#0f0d0c;
+      --bg2:#171311;
+      --panel:#1d1816;
+      --panel2:#261f1b;
+      --text:#f8f2eb;
+      --muted:#d2c4b8;
       --line:rgba(255,255,255,.10);
-      --gold:#d0ab6f;
-      --gold2:#efd2a0;
-      --wine:#8a5b4f;
-      --olive:#7f8a66;
+      --gold:#d3ad70;
+      --gold2:#f0d4a4;
+      --coffee:#8a624d;
+      --olive:#6f7a60;
       --shadow:0 18px 50px rgba(0,0,0,.35);
       --radius:28px;
       --max:1180px;
@@ -36,9 +36,9 @@
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 420px at 10% 0%, rgba(208,171,111,.10), transparent 55%),
-        radial-gradient(700px 340px at 90% 0%, rgba(138,91,79,.10), transparent 52%),
-        linear-gradient(180deg, #0d0b0a 0%, #13100f 38%, #0f0d0c 100%);
+        radial-gradient(900px 420px at 10% 0%, rgba(211,173,112,.10), transparent 55%),
+        radial-gradient(700px 340px at 90% 0%, rgba(138,98,77,.10), transparent 52%),
+        linear-gradient(180deg, #0d0b0a 0%, #13100f 38%, #100d0c 100%);
     }
 
     a{ color:inherit; text-decoration:none; }
@@ -150,7 +150,7 @@
       background:
         linear-gradient(to bottom, rgba(6,4,4,.28), rgba(6,4,4,.78)),
         linear-gradient(to top, rgba(6,4,4,.90), rgba(6,4,4,.16)),
-        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+        url('https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
       border-bottom:1px solid rgba(255,255,255,.08);
     }
 
@@ -159,7 +159,7 @@
       position:absolute;
       inset:auto 0 0 0;
       height:120px;
-      background:linear-gradient(to top, rgba(14,12,11,1), rgba(14,12,11,0));
+      background:linear-gradient(to top, rgba(15,13,12,1), rgba(15,13,12,0));
     }
 
     .hero-content{
@@ -259,7 +259,7 @@
       border-radius:14px;
       display:grid;
       place-items:center;
-      background:linear-gradient(180deg, rgba(208,171,111,.18), rgba(138,91,79,.16));
+      background:linear-gradient(180deg, rgba(211,173,112,.18), rgba(138,98,77,.16));
       border:1px solid rgba(255,255,255,.10);
       font-size:1.2rem;
       margin-bottom:12px;
@@ -295,7 +295,6 @@
     }
 
     .section-head h2,
-    .venue-card h2,
     .tips-card h2{
       margin:0 0 12px;
       font-family:"Playfair Display", serif;
@@ -304,7 +303,6 @@
     }
 
     .section-head p,
-    .venue-card p,
     .tips-card p{
       margin:0;
       max-width:840px;
@@ -424,7 +422,7 @@
       border-radius:999px;
       background:linear-gradient(180deg, var(--gold2), var(--gold));
       margin-top:.65em;
-      box-shadow:0 0 0 6px rgba(208,171,111,.08);
+      box-shadow:0 0 0 6px rgba(211,173,112,.08);
     }
 
     .restaurant-actions{
@@ -434,70 +432,22 @@
       margin-top:auto;
     }
 
-    .venue{
+    .tips{
       padding:42px 0 76px;
     }
 
-    .venue-grid{
-      display:grid;
-      grid-template-columns:.94fr 1.06fr;
-      gap:26px;
-      align-items:stretch;
-    }
-
-    .venue-card,
-    .map-card,
     .tips-card{
       border-radius:30px;
       overflow:hidden;
       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.08);
       box-shadow:var(--shadow);
-    }
-
-    .venue-card{
       padding:30px;
-    }
-
-    .address-card{
-      margin-top:18px;
-      padding:18px;
-      border-radius:20px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .address-title{
-      color:var(--gold2);
-      font-size:.76rem;
-      text-transform:uppercase;
-      letter-spacing:.15em;
-      font-weight:800;
-      margin-bottom:8px;
-    }
-
-    .address-text{
-      color:#fff;
-      line-height:1.75;
-      font-weight:600;
-    }
-
-    .map-card iframe{
-      display:block;
-      width:100%;
-      height:100%;
-      min-height:440px;
-      border:0;
-    }
-
-    .tips-card{
-      margin-top:26px;
-      padding:28px;
     }
 
     .tips-grid{
       display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
+      grid-template-columns:repeat(3, minmax(0,1fr));
       gap:16px;
       margin-top:18px;
     }
@@ -546,8 +496,7 @@
         grid-template-columns:repeat(2, minmax(0,1fr));
       }
 
-      .restaurant-card,
-      .venue-grid{
+      .restaurant-card{
         grid-template-columns:1fr;
       }
     }
@@ -594,7 +543,6 @@
 
       .overview-card,
       .restaurant-content,
-      .venue-card,
       .tips-card{
         padding-left:20px;
         padding-right:20px;
@@ -621,12 +569,12 @@
         <img src="public/mterm.jpg" alt="MTERMS 2026 logo">
         <div class="brand-copy">
           <div class="brand-kicker">MTERMS 2026</div>
-          <div class="brand-title">Popular Restaurants</div>
+          <div class="brand-title">Popular & Viral Eats</div>
         </div>
       </div>
 
       <div class="actions">
-        <a class="btn ghost" href="#restaurants">View Dining Picks</a>
+        <a class="btn ghost" href="#restaurants">View Food Picks</a>
         <a class="btn gold" href="index.html">Return Home</a>
       </div>
     </div>
@@ -634,19 +582,19 @@
 
   <section class="hero">
     <div class="hero-content">
-      <div class="eyebrow">Dining guide for conference guests</div>
-      <h1>Popular restaurants for MTERMS 2026 participants in and around Shah Alam.</h1>
+      <div class="eyebrow">Popular & viral food guide</div>
+      <h1>Trending cafés, local favourites, and group dinner spots around Shah Alam.</h1>
       <p>
-        A curated dining page for delegates who want relaxed hotel dining, premium dinner options, and warm group-friendly places after conference hours.
+        A curated food page for MTERMS 2026 participants who want a mix of viral café vibes, popular Shah Alam names, and places that are practical and enjoyable for visitors.
       </p>
 
       <div class="hero-actions">
         <a class="btn gold" href="#restaurants">Explore Restaurants</a>
-        <a class="btn" href="accomodation.html">Nearby Accommodations</a>
+        <a class="btn" href="destinations.html">Things to Do</a>
       </div>
 
       <div class="hero-note">
-        Curated for convenience, atmosphere, and easy after-session dining
+        Mixed shortlist: social buzz • strong local following • visitor-friendly spots
       </div>
     </div>
   </section>
@@ -655,28 +603,28 @@
     <div class="container">
       <div class="overview-card">
         <div class="overview-grid">
-          <a class="overview-item" href="#hotel-dining">
+          <a class="overview-item" href="#viral-cafes">
+            <div class="overview-icon">☕</div>
+            <div class="overview-title">Viral Café Picks</div>
+            <div class="overview-copy">Aesthetic, social, and easy for casual meetups.</div>
+          </a>
+
+          <a class="overview-item" href="#local-favourites">
+            <div class="overview-icon">🍛</div>
+            <div class="overview-title">Local Favourites</div>
+            <div class="overview-copy">Well-known places with strong Shah Alam followings.</div>
+          </a>
+
+          <a class="overview-item" href="#group-dinners">
             <div class="overview-icon">🍽️</div>
-            <div class="overview-title">Conference-Hotel Dining</div>
-            <div class="overview-copy">Easy dining inside Concorde Hotel Shah Alam.</div>
+            <div class="overview-title">Group Dinner Spots</div>
+            <div class="overview-copy">Good for delegates going out together after sessions.</div>
           </a>
 
-          <a class="overview-item" href="#city-dining">
-            <div class="overview-icon">🌆</div>
-            <div class="overview-title">Shah Alam Picks</div>
-            <div class="overview-copy">Comfortable city dining for group meals and evening plans.</div>
-          </a>
-
-          <a class="overview-item" href="#international">
-            <div class="overview-icon">🥘</div>
-            <div class="overview-title">International Flavours</div>
-            <div class="overview-copy">Italian, Arabian, Yemeni, and broad Malaysian choices.</div>
-          </a>
-
-          <a class="overview-item" href="#venue">
+          <a class="overview-item" href="#tips">
             <div class="overview-icon">📍</div>
-            <div class="overview-title">Venue Area</div>
-            <div class="overview-copy">Keep the conference location and map easy to open.</div>
+            <div class="overview-title">Food Tips</div>
+            <div class="overview-copy">Simple ways to plan meals around your conference schedule.</div>
           </a>
         </div>
       </div>
@@ -686,131 +634,152 @@
   <section id="restaurants" class="section">
     <div class="container">
       <div class="section-head">
-        <div class="section-kicker">Food & dining</div>
+        <div class="section-kicker">Shah Alam food guide</div>
         <h2>Recommended places to eat during MTERMS 2026</h2>
         <p>
-          This page mixes on-site convenience with nearby restaurant options, so delegates can choose between hotel dining, group-friendly dinner spots, and more relaxed evening meals after conference sessions.
+          This page intentionally mixes trending café-type spots, popular crowd favourites, and stronger dinner choices so delegates can pick based on mood, schedule, and group size.
         </p>
       </div>
 
       <div class="restaurant-grid">
 
-        <article id="hotel-dining" class="restaurant-card">
+        <article id="viral-cafes" class="restaurant-card">
           <div class="restaurant-media">
-            <span class="restaurant-tag">Inside the venue hotel</span>
-            <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80" alt="Elegant buffet dining">
+            <span class="restaurant-tag">Viral café pick</span>
+            <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1400&q=80" alt="Aesthetic cafe coffee table">
           </div>
           <div class="restaurant-content">
-            <h3 class="restaurant-name">Melting Pot Cafe</h3>
-            <div class="restaurant-sub">Concorde Hotel Shah Alam</div>
+            <h3 class="restaurant-name">2Bloc Cafe</h3>
+            <div class="restaurant-sub">Seksyen 7 • port lepak vibe</div>
             <p class="restaurant-desc">
-              A very convenient option if you want to dine without leaving the conference hotel. It works well for breakfast, casual lunch, and easy dinner scheduling around your sessions.
+              A strong choice if you want the more social, youthful Shah Alam café vibe. This is the type of place that works well for late chats, coffee, desserts, and a more casual post-conference hangout.
             </p>
 
             <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>Best for delegates who want the easiest possible dining option at the venue itself.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Suitable for buffet-style meals, casual meetings, and quick group coordination.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Good first choice if you want comfort and convenience over extra travel.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for delegates who want something more relaxed and social rather than formal dining.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for evening café hopping, casual meetups, and lighter group plans.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Fits well if you want a spot with more modern Shah Alam café energy.</span></div>
             </div>
 
             <div class="restaurant-actions">
-              <a class="btn gold" href="https://shahalam.concordehotelsresorts.com/dining/melting-pot-cafe" target="_blank" rel="noopener">Official Page</a>
-              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Concorde+Hotel+Shah+Alam" target="_blank" rel="noopener">Open Venue Map</a>
+              <a class="btn gold" href="https://www.instagram.com/2bloc.cafe/" target="_blank" rel="noopener">Instagram</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=2Bloc+Cafe+Seksyen+7+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
             </div>
           </div>
         </article>
 
         <article class="restaurant-card">
           <div class="restaurant-content">
-            <h3 class="restaurant-name">Pavilion Terrace</h3>
-            <div class="restaurant-sub">Concorde Hotel Shah Alam</div>
+            <h3 class="restaurant-name">The Komunal Cafe</h3>
+            <div class="restaurant-sub">Bukit Jelutong / Bukit Rimau • aesthetic café</div>
             <p class="restaurant-desc">
-              A softer, more relaxed hotel dining choice if you want to stay close to the venue but enjoy a slightly more distinctive setting for a calm meal or light social catch-up.
+              A very suitable pick for delegates who want an aesthetic café feel with pastries, coffee, and a more polished social setting. It works well for smaller meetups and quieter downtime.
             </p>
 
             <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>Great for delegates who prefer staying within the hotel environment after a long conference day.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Works nicely for more relaxed meals and smaller social meetups.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>A useful choice if you want a venue-adjacent dining plan with minimal movement.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for coffee, pastries, casual catch-ups, and low-pressure work or conversation time.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good if you want a clean, modern café atmosphere that feels visitor-friendly.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Strong choice for delegates who like aesthetic café spots over heavier dinner places.</span></div>
             </div>
 
             <div class="restaurant-actions">
-              <a class="btn gold" href="https://shahalam.concordehotelsresorts.com/dining/pavilion-terrace" target="_blank" rel="noopener">Official Page</a>
-              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Concorde+Hotel+Shah+Alam" target="_blank" rel="noopener">Open Venue Map</a>
+              <a class="btn gold" href="https://www.instagram.com/thekomunalcafe/" target="_blank" rel="noopener">Instagram</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=The+Komunal+Cafe+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
             </div>
           </div>
           <div class="restaurant-media">
-            <span class="restaurant-tag">Hotel terrace dining</span>
-            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80" alt="Stylish terrace restaurant">
-          </div>
-        </article>
-
-        <article id="city-dining" class="restaurant-card">
-          <div class="restaurant-media">
-            <span class="restaurant-tag">Modern hotel dining</span>
-            <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1400&q=80" alt="Modern restaurant interior">
-          </div>
-          <div class="restaurant-content">
-            <h3 class="restaurant-name">Makan Kitchen</h3>
-            <div class="restaurant-sub">DoubleTree by Hilton Shah Alam i-City</div>
-            <p class="restaurant-desc">
-              A polished hotel-dining option for delegates who like a broader Malaysian dining feel in a more contemporary hotel environment. It suits both business travel and group dinners well.
-            </p>
-
-            <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>A strong choice for guests staying in i-City or nearby modern hotel zones.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Works well for buffet-style dining and comfortable professional meetups.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Useful if you want a recognizable international-hotel dining atmosphere.</span></div>
-            </div>
-
-            <div class="restaurant-actions">
-              <a class="btn gold" href="https://www.hilton.com/en/hotels/szbsadi-doubletree-shah-alam-i-city/dining/" target="_blank" rel="noopener">Official Page</a>
-              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=DoubleTree+by+Hilton+Shah+Alam+i-City" target="_blank" rel="noopener">View on Map</a>
-            </div>
-          </div>
-        </article>
-
-        <article id="international" class="restaurant-card">
-          <div class="restaurant-content">
-            <h3 class="restaurant-name">Tosca Italian Trattoria</h3>
-            <div class="restaurant-sub">DoubleTree by Hilton Shah Alam i-City</div>
-            <p class="restaurant-desc">
-              One of the more polished dinner-style picks on this page. It is suited to participants who want a more elevated evening meal, especially for smaller networking dinners or personal downtime.
-            </p>
-
-            <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>Good for evening dining with a more refined, restaurant-led atmosphere.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Nice option for delegates who want something beyond buffet or lounge dining.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Works especially well for pairs, small groups, or post-conference dinner plans.</span></div>
-            </div>
-
-            <div class="restaurant-actions">
-              <a class="btn gold" href="https://www.hilton.com/en/hotels/szbsadi-doubletree-shah-alam-i-city/dining/" target="_blank" rel="noopener">Official Page</a>
-              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=DoubleTree+by+Hilton+Shah+Alam+i-City" target="_blank" rel="noopener">View on Map</a>
-            </div>
-          </div>
-          <div class="restaurant-media">
-            <span class="restaurant-tag">Italian dinner pick</span>
-            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80" alt="Warm Italian dining atmosphere">
+            <span class="restaurant-tag">Aesthetic café</span>
+            <img src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=1400&q=80" alt="Modern cafe interior">
           </div>
         </article>
 
         <article class="restaurant-card">
           <div class="restaurant-media">
-            <span class="restaurant-tag">Arabian cuisine</span>
-            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1400&q=80" alt="Middle Eastern sharing platter">
+            <span class="restaurant-tag">Stylish brunch pick</span>
+            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=80" alt="Brunch table and cafe interior">
           </div>
           <div class="restaurant-content">
-            <h3 class="restaurant-name">Sahara Tent Shah Alam</h3>
-            <div class="restaurant-sub">Section 9, Shah Alam</div>
+            <h3 class="restaurant-name">NOTA</h3>
+            <div class="restaurant-sub">Setia Alam / Shah Alam side • contemporary café-restaurant</div>
             <p class="restaurant-desc">
-              A warm and recognizable group-dining choice if you want something more social and generous in style. It suits participants who prefer a richer dinner setting for conversations and longer meals.
+              A polished choice for delegates who want something more refined than a basic café but still stylish and relaxed. This is a strong brunch, coffee, or early dinner option.
             </p>
 
             <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>Great for delegates dining in groups after sessions or sponsor-side meetups.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>A good fit if you want a more themed and memorable dinner experience.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Useful alternative to hotel dining if you want a change of atmosphere.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for delegates who like contemporary café-restaurants with a more premium feel.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful for brunch plans, smaller meetings, or a more polished casual meal.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works well if you want something that feels stylish without being too formal.</span></div>
+            </div>
+
+            <div class="restaurant-actions">
+              <a class="btn gold" href="https://www.notakl.com/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=NOTA+Setia+Alam+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article id="local-favourites" class="restaurant-card">
+          <div class="restaurant-content">
+            <h3 class="restaurant-name">Hayaki Cafe</h3>
+            <div class="restaurant-sub">Seksyen 13 • strong local following</div>
+            <p class="restaurant-desc">
+              A popular Shah Alam favourite with a stronger local-food identity. This is a practical recommendation for delegates who want something more rooted in the local crowd rather than a purely aesthetic café stop.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for delegates who want a more recognizably local makan experience.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works well for lunch, casual dinner, and group meals without too much planning.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>A strong option if you want to try a place with a very real Shah Alam following.</span></div>
+            </div>
+
+            <div class="restaurant-actions">
+              <a class="btn gold" href="https://www.facebook.com/hayakicafe/?locale=ms_MY" target="_blank" rel="noopener">Facebook Page</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Hayaki+Cafe+Seksyen+13+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="restaurant-media">
+            <span class="restaurant-tag">Local favourite</span>
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1400&q=80" alt="Local food spread on dining table">
+          </div>
+        </article>
+
+        <article class="restaurant-card">
+          <div class="restaurant-media">
+            <span class="restaurant-tag">Well-known name</span>
+            <img src="https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=1400&q=80" alt="Middle Eastern wrap and dinner table">
+          </div>
+          <div class="restaurant-content">
+            <h3 class="restaurant-name">Mozer’s Syrian Cuisine</h3>
+            <div class="restaurant-sub">Bukit Jelutong • long-running crowd favourite</div>
+            <p class="restaurant-desc">
+              One of the stronger established names in Shah Alam for Middle Eastern food. This is a solid recommendation when you want something popular, recognizable, and comfortable for visitors.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for delegates who want a proven crowd favourite rather than chasing newer social-buzz places.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works for lunch or dinner and suits guests who prefer fuller sit-down meals.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Strong option if your group wants something widely known and easy to recommend.</span></div>
+            </div>
+
+            <div class="restaurant-actions">
+              <a class="btn gold" href="https://www.instagram.com/mozersrestaurant/" target="_blank" rel="noopener">Instagram</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Mozer's+Bukit+Jelutong+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <article id="group-dinners" class="restaurant-card">
+          <div class="restaurant-content">
+            <h3 class="restaurant-name">Sahara Tent</h3>
+            <div class="restaurant-sub">Shah Alam • group dinner friendly</div>
+            <p class="restaurant-desc">
+              A very good pick for delegates going out together. It has a stronger group-meal feel and is useful when you want a more memorable dinner atmosphere instead of a quick café stop.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for sponsor dinners, delegate groups, and shared evening meals.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good if you want a dinner setting that feels more substantial and social.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Strong alternative to café-hopping when your group wants a proper sit-down dinner.</span></div>
             </div>
 
             <div class="restaurant-actions">
@@ -818,30 +787,34 @@
               <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Sahara+Tent+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
             </div>
           </div>
+          <div class="restaurant-media">
+            <span class="restaurant-tag">Group dinner spot</span>
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=80" alt="Warm restaurant dinner setup">
+          </div>
         </article>
 
         <article class="restaurant-card">
+          <div class="restaurant-media">
+            <span class="restaurant-tag">Mixed cuisine hangout</span>
+            <img src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=1400&q=80" alt="Shared dinner table with friends">
+          </div>
           <div class="restaurant-content">
-            <h3 class="restaurant-name">Hadramawt Kitchen</h3>
-            <div class="restaurant-sub">Shah Alam</div>
+            <h3 class="restaurant-name">Craveat</h3>
+            <div class="restaurant-sub">Alam Impian • social buzz + mixed menu</div>
             <p class="restaurant-desc">
-              A comfortable choice for guests who want hearty Middle Eastern dining in a setting that works well for family-style sharing, bigger appetites, and relaxed evening conversations.
+              A useful mixed pick for this page because it bridges social-media appeal and practical group dining. It feels more current and casual, while still being flexible for different food preferences.
             </p>
 
             <div class="meta-list">
-              <div class="meta-item"><span class="meta-dot"></span><span>Suitable for delegates who enjoy generous sharing-style meals.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>Works well for group dinners and more casual post-conference gatherings.</span></div>
-              <div class="meta-item"><span class="meta-dot"></span><span>A practical option if you want a non-hotel dinner choice with a warm, welcoming feel.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good for delegates who want a modern hangout-type place with broader appeal.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Works well for evening meetups, smaller groups, and visitors exploring Alam Impian side.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful as a middle-ground option between aesthetic café and heavier dinner restaurant.</span></div>
             </div>
 
             <div class="restaurant-actions">
-              <a class="btn gold" href="https://www.hadramawtkitchen.com/" target="_blank" rel="noopener">Official Website</a>
-              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Hadramawt+Kitchen+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+              <a class="btn gold" href="https://www.instagram.com/craveat.official/" target="_blank" rel="noopener">Instagram</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Craveat+Alam+Impian+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
             </div>
-          </div>
-          <div class="restaurant-media">
-            <span class="restaurant-tag">Group-friendly dining</span>
-            <img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80" alt="Group dining table">
           </div>
         </article>
 
@@ -849,68 +822,36 @@
     </div>
   </section>
 
-  <section id="venue" class="venue">
+  <section id="tips" class="tips">
     <div class="container">
-      <div class="venue-grid">
-        <div class="venue-card">
-          <div class="section-kicker">Conference venue</div>
-          <h2>Concorde Hotel Shah Alam</h2>
-          <p>
-            Use the official conference venue as your main dining anchor during MTERMS 2026. This makes it easy to decide between eating inside the hotel, returning after off-site meals, or planning a simple post-session dinner nearby.
-          </p>
-
-          <div class="address-card">
-            <div class="address-title">Venue address</div>
-            <div class="address-text">
-              3 Jalan Tengku Ampuan Zabedah C9/C,<br>
-              40100 Shah Alam, Selangor Darul Ehsan,<br>
-              Malaysia
-            </div>
-          </div>
-
-          <div class="hero-actions" style="margin-top:22px;">
-            <a class="btn gold" href="https://shahalam.concordehotelsresorts.com/" target="_blank" rel="noopener">Venue Website</a>
-            <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Concorde+Hotel+Shah+Alam" target="_blank" rel="noopener">Open Venue Map</a>
-          </div>
-        </div>
-
-        <div class="map-card">
-          <iframe
-            src="https://www.google.com/maps?q=Concorde%20Hotel%20Shah%20Alam&z=14&output=embed"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Map showing Concorde Hotel Shah Alam">
-          </iframe>
-        </div>
-      </div>
-
       <div class="tips-card">
-        <div class="section-kicker">Helpful notes</div>
-        <h2>Simple dining tips for conference days</h2>
+        <div class="section-kicker">Food planning tips</div>
+        <h2>How to use this page during your conference stay</h2>
         <p>
-          A few small planning decisions can make meals much smoother, especially if you are moving between sessions, sponsor engagements, and evening networking.
+          The easiest way to use this shortlist is to match your restaurant choice to your energy level, group size, and time available after sessions.
         </p>
 
         <div class="tips-grid">
           <div class="tip">
-            <div class="tip-title">Keep one easy fallback</div>
-            <div class="tip-copy">Venue-hotel dining is useful when your schedule changes or sessions end later than planned.</div>
+            <div class="tip-title">For a quick café catch-up</div>
+            <div class="tip-copy">Pick 2Bloc, The Komunal, or NOTA if you want lighter social plans with coffee and a more relaxed pace.</div>
           </div>
 
           <div class="tip">
-            <div class="tip-title">Group dinner plan</div>
-            <div class="tip-copy">For larger dinner groups, choose places with a more social dining setup and book ahead where possible.</div>
+            <div class="tip-title">For local-food energy</div>
+            <div class="tip-copy">Choose Hayaki if you want something that feels more rooted in Shah Alam’s everyday crowd-favourite scene.</div>
           </div>
 
           <div class="tip">
-            <div class="tip-title">Mix convenience and experience</div>
-            <div class="tip-copy">Use hotel dining for speed, then explore off-site options for one or two more memorable evening meals.</div>
+            <div class="tip-title">For bigger dinners</div>
+            <div class="tip-copy">Sahara Tent, Craveat, and Mozer’s are better picks when several delegates want a fuller sit-down meal together.</div>
           </div>
+        </div>
 
-          <div class="tip">
-            <div class="tip-title">Map-first approach</div>
-            <div class="tip-copy">Save the conference venue in your map app so returning after dinner stays simple and stress-free.</div>
-          </div>
+        <div class="hero-actions" style="margin-top:22px;">
+          <a class="btn gold" href="destinations.html">Things to Do</a>
+          <a class="btn" href="accomodation.html">Nearby Accommodations</a>
+          <a class="btn" href="index.html">Return Home</a>
         </div>
       </div>
     </div>
@@ -918,7 +859,7 @@
 
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-copy">MTERMS 2026 • Restaurant Guide</div>
+      <div class="footer-copy">MTERMS 2026 • Popular & Viral Eats Guide</div>
       <a class="btn gold" href="index.html">Return Home</a>
     </div>
   </footer>
