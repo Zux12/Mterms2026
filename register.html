@@ -458,8 +458,8 @@ mount.innerHTML = `
       </tr>
     </thead>
     <tbody>
-      ${Array.isArray(data.rows) ? data.rows.map(row => {
-        const early = row.earlyBird ? `${row.earlyBird.currency} ${Number(row.earlyBird.amount).toFixed(0)}` : '—';
+${Array.isArray(data.rows) ? data.rows.filter(row => row.category !== 'Industrial Booth').map(row => {
+  const early = row.earlyBird ? `${row.earlyBird.currency} ${Number(row.earlyBird.amount).toFixed(0)}` : '—';
         const normal = row.normal ? `${row.normal.currency} ${Number(row.normal.amount).toFixed(0)}` : '—';
 
         const notes = (row.category === 'Local Professional' && row.notes)
