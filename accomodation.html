@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nearby Accommodations — MTERMS 2026</title>
+  <meta name="description" content="Premium nearby accommodations for MTERMS 2026 participants staying outside the conference hotel." />
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0c0c0d;
+      --bg-2:#121214;
+      --panel:#17181b;
+      --panel-2:#1f2024;
+      --soft:#f4efe7;
+      --text:#f7f4ef;
+      --muted:#c8bfb2;
+      --line:rgba(255,255,255,.10);
+      --gold:#c9a76a;
+      --gold-2:#e3c590;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:24px;
+      --max:1180px;
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 460px at 10% 0%, rgba(201,167,106,.10), transparent 55%),
+        radial-gradient(700px 380px at 90% 0%, rgba(255,255,255,.05), transparent 52%),
+        linear-gradient(180deg, #0a0a0b 0%, #101113 30%, #0d0d0f 100%);
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    img{ max-width:100%; display:block; }
+
+    .container{
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+    }
+
+    /* Top bar */
+    .hotel-topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(10px);
+      background:rgba(8,8,10,.72);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .hotel-topbar-inner{
+      width:min(var(--max), calc(100% - 28px));
+      margin:0 auto;
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand-cluster{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-cluster img{
+      height:44px;
+      width:auto;
+      object-fit:contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.25));
+    }
+
+    .brand-copy{
+      min-width:0;
+    }
+
+    .brand-kicker{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:var(--gold-2);
+      margin-bottom:4px;
+      font-weight:700;
+    }
+
+    .brand-title{
+      font-family:"Playfair Display", serif;
+      font-size:1.1rem;
+      font-weight:700;
+      line-height:1.1;
+      color:#fff;
+    }
+
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      font-weight:700;
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
+      box-shadow:none;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.22);
+      box-shadow:0 10px 26px rgba(0,0,0,.24);
+    }
+
+    .btn.gold{
+      background:linear-gradient(180deg, var(--gold-2), var(--gold));
+      color:#17120b;
+      border-color:rgba(0,0,0,0);
+      font-weight:800;
+    }
+
+    .btn.ghost{
+      background:transparent;
+    }
+
+    /* Hero */
+    .hero{
+      position:relative;
+      min-height:82vh;
+      display:flex;
+      align-items:flex-end;
+      overflow:hidden;
+      background:
+        linear-gradient(to bottom, rgba(4,4,6,.22), rgba(4,4,6,.72)),
+        linear-gradient(to top, rgba(4,4,6,.88), rgba(4,4,6,.18)),
+        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:120px;
+      background:linear-gradient(to top, rgba(12,12,13,1), rgba(12,12,13,0));
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      width:min(var(--max), calc(100% - 40px));
+      margin:0 auto;
+      padding:120px 0 92px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--gold-2);
+      font-size:.78rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight:800;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero h1{
+      margin:18px 0 14px;
+      max-width:900px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(2.3rem, 5vw, 4.7rem);
+      line-height:.98;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      max-width:760px;
+      margin:0;
+      color:#efe8dd;
+      font-size:clamp(1rem, 1.5vw, 1.16rem);
+      line-height:1.75;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:28px;
+    }
+
+    .hero-note{
+      margin-top:18px;
+      color:rgba(255,255,255,.74);
+      font-size:.95rem;
+    }
+
+    /* Intro panel */
+    .intro-panel{
+      margin-top:-44px;
+      position:relative;
+      z-index:5;
+    }
+
+    .intro-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .intro-grid{
+      display:grid;
+      grid-template-columns:1.2fr .85fr;
+      gap:0;
+    }
+
+    .intro-main{
+      padding:30px 30px 28px;
+      border-right:1px solid rgba(255,255,255,.08);
+    }
+
+    .intro-side{
+      padding:30px 30px 28px;
+      background:linear-gradient(180deg, rgba(201,167,106,.07), rgba(255,255,255,.02));
+    }
+
+    .section-kicker{
+      color:var(--gold-2);
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-size:.76rem;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .intro-main h2,
+    .venue-wrap h2,
+    .quick-links h2{
+      margin:0 0 12px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(1.7rem, 2vw, 2.3rem);
+      line-height:1.05;
+    }
+
+    .intro-main p,
+    .intro-side p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:1rem;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      min-height:36px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      font-size:.88rem;
+      font-weight:700;
+    }
+
+    .mini-card{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      margin-top:18px;
+    }
+
+    .mini-label{
+      font-size:.74rem;
+      color:var(--gold-2);
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .mini-value{
+      font-size:1rem;
+      line-height:1.65;
+      color:#fff;
+      font-weight:600;
+    }
+
+    /* Hotels */
+    .hotels{
+      padding:84px 0 42px;
+    }
+
+    .section-head{
+      margin-bottom:30px;
+    }
+
+    .section-head h2{
+      margin:0 0 12px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(2rem, 2.8vw, 3rem);
+      line-height:1.02;
+    }
+
+    .section-head p{
+      margin:0;
+      max-width:820px;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:1rem;
+    }
+
+    .hotel-list{
+      display:grid;
+      gap:32px;
+    }
+
+    .hotel-card{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      border-radius:30px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .hotel-card.reverse{
+      grid-template-columns:.98fr 1.02fr;
+    }
+
+    .hotel-media{
+      position:relative;
+      min-height:360px;
+      overflow:hidden;
+    }
+
+    .hotel-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform 1.1s ease;
+    }
+
+    .hotel-card:hover .hotel-media img{
+      transform:scale(1.04);
+    }
+
+    .hotel-media::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.42), rgba(0,0,0,.08));
+    }
+
+    .hotel-tag{
+      position:absolute;
+      left:20px;
+      top:20px;
+      z-index:2;
+      display:inline-flex;
+      align-items:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      background:rgba(15,15,18,.65);
+      backdrop-filter: blur(8px);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-size:.82rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .hotel-content{
+      padding:34px 32px 30px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .hotel-name{
+      margin:0 0 10px;
+      font-family:"Playfair Display", serif;
+      font-size:clamp(1.6rem, 2vw, 2.35rem);
+      line-height:1.08;
+    }
+
+    .hotel-sub{
+      margin:0 0 18px;
+      color:var(--gold-2);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.76rem;
+    }
+
+    .hotel-desc{
+      margin:0 0 22px;
+      color:var(--muted);
+      line-height:1.85;
+      font-size:1rem;
+    }
+
+    .meta-list{
+      display:grid;
+      gap:10px;
+      margin-bottom:24px;
+    }
+
+    .meta-item{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      color:#f4eee5;
+      line-height:1.65;
+      font-size:.96rem;
+    }
+
+    .meta-dot{
+      flex:0 0 8px;
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:linear-gradient(180deg, var(--gold-2), var(--gold));
+      margin-top:.65em;
+      box-shadow:0 0 0 6px rgba(201,167,106,.08);
+    }
+
+    .hotel-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:auto;
+    }
+
+    /* Venue block */
+    .venue{
+      padding:38px 0 76px;
+    }
+
+    .venue-wrap{
+      display:grid;
+      grid-template-columns:.95fr 1.05fr;
+      gap:26px;
+      align-items:stretch;
+    }
+
+    .venue-card,
+    .map-card,
+    .quick-links{
+      border-radius:30px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .venue-card{
+      padding:30px;
+    }
+
+    .venue-card p{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.8;
+    }
+
+    .address-card{
+      margin-top:18px;
+      padding:18px 18px;
+      border-radius:20px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .address-title{
+      color:var(--gold-2);
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .address-text{
+      color:#fff;
+      line-height:1.75;
+      font-weight:600;
+    }
+
+    .map-card iframe{
+      display:block;
+      width:100%;
+      height:100%;
+      min-height:420px;
+      border:0;
+      filter:saturate(.95) contrast(1.02);
+    }
+
+    .quick-links{
+      margin-top:26px;
+      padding:28px 28px 24px;
+    }
+
+    .quick-links-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:16px;
+      margin-top:18px;
+    }
+
+    .quick-link{
+      padding:18px 18px;
+      border-radius:20px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      transition:transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .quick-link:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+    }
+
+    .quick-link-title{
+      color:#fff;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .quick-link-copy{
+      color:var(--muted);
+      line-height:1.65;
+      font-size:.94rem;
+    }
+
+    /* Footer */
+    .footer{
+      padding:26px 0 38px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.02);
+    }
+
+    .footer-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer-copy{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px){
+      .hotel-card,
+      .hotel-card.reverse,
+      .venue-wrap,
+      .intro-grid{
+        grid-template-columns:1fr;
+      }
+
+      .intro-main{
+        border-right:0;
+        border-bottom:1px solid rgba(255,255,255,.08);
+      }
+    }
+
+    @media (max-width: 760px){
+      .hotel-topbar-inner{
+        padding:12px 0;
+        min-height:auto;
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .brand-cluster img{
+        height:36px;
+      }
+
+      .hero{
+        min-height:72vh;
+      }
+
+      .hero-content{
+        padding:100px 0 72px;
+      }
+
+      .hero-actions,
+      .hotel-actions,
+      .topbar-actions{
+        width:100%;
+      }
+
+      .topbar-actions .btn,
+      .hero-actions .btn,
+      .hotel-actions .btn{
+        width:100%;
+      }
+
+      .hotel-content,
+      .venue-card,
+      .quick-links,
+      .intro-main,
+      .intro-side{
+        padding:24px 20px;
+      }
+
+      .hotel-media{
+        min-height:260px;
+      }
+
+      .quick-links-grid{
+        grid-template-columns:1fr;
+      }
+
+      .container{
+        width:min(var(--max), calc(100% - 24px));
+      }
+
+      .hero-content{
+        width:min(var(--max), calc(100% - 24px));
+      }
+
+      .eyebrow{
+        font-size:.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hotel-topbar">
+    <div class="hotel-topbar-inner">
+      <div class="brand-cluster">
+        <img src="tesma.png" alt="TESMA logo">
+        <img src="uitm.png" alt="UiTM logo">
+        <img src="public/mterm.jpg" alt="MTERMS 2026 logo">
+        <div class="brand-copy">
+          <div class="brand-kicker">MTERMS 2026</div>
+          <div class="brand-title">Nearby Accommodations</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a class="btn ghost" href="#hotels">View Hotels</a>
+        <a class="btn gold" href="index.html">Return Home</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">Premium stay guide for conference guests</div>
+      <h1>Nearby accommodations for participants who prefer to stay outside the conference hotel.</h1>
+      <p>
+        A curated hospitality page for MTERMS 2026 guests, featuring premium hotel and hotel-residence options near Concorde Hotel Shah Alam.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn gold" href="#hotels">Explore Nearby Hotels</a>
+        <a class="btn" href="https://shahalam.concordehotelsresorts.com/" target="_blank" rel="noopener">Conference Hotel Website</a>
+      </div>
+
+      <div class="hero-note">
+        4★ / 5★ style alternatives • curated for convenience, comfort, and professional travel
+      </div>
+    </div>
+  </section>
+
+  <section class="intro-panel">
+    <div class="container">
+      <div class="intro-card">
+        <div class="intro-grid">
+          <div class="intro-main">
+            <div class="section-kicker">Stay outside the venue</div>
+            <h2>Elegant alternatives near Concorde Hotel Shah Alam</h2>
+            <p>
+              If you plan to attend MTERMS 2026 but would rather stay outside the conference hotel, the options below offer a more curated choice of city, suite-style, resort, and business-travel experiences.
+            </p>
+
+            <div class="badge-row">
+              <span class="pill">Official hotel links included</span>
+              <span class="pill">Suitable for conference travel</span>
+              <span class="pill">Hotel & hotel residence mix</span>
+            </div>
+          </div>
+
+          <div class="intro-side">
+            <div class="section-kicker">Conference venue</div>
+            <p>
+              Concorde Hotel Shah Alam is the official MTERMS 2026 venue. Use the list below if you prefer a different stay style while remaining within the wider Shah Alam area.
+            </p>
+
+            <div class="mini-card">
+              <div class="mini-label">Venue address</div>
+              <div class="mini-value">
+                Concorde Hotel Shah Alam<br>
+                3 Jalan Tengku Ampuan Zabedah C9/C,<br>
+                40100 Shah Alam, Selangor
+              </div>
+            </div>
+
+            <div class="mini-card">
+              <div class="mini-label">Helpful note</div>
+              <div class="mini-value">
+                We recommend booking early if you plan to stay near the venue during the conference period.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hotels" class="hotels">
+    <div class="container">
+      <div class="section-head">
+        <h2>Recommended nearby stays</h2>
+        <p>
+          The list below focuses on premium properties that fit the tone of an international scientific meeting while still giving participants flexibility in location and style.
+        </p>
+      </div>
+
+      <div class="hotel-list">
+
+        <!-- 1 -->
+        <article class="hotel-card">
+          <div class="hotel-media">
+            <span class="hotel-tag">City luxury</span>
+            <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400&q=80" alt="Luxury city hotel">
+          </div>
+          <div class="hotel-content">
+            <h3 class="hotel-name">Mardhiyyah Hotel &amp; Suites</h3>
+            <div class="hotel-sub">Elegant city stay • Shah Alam</div>
+            <p class="hotel-desc">
+              A refined Shah Alam option for guests who want a polished city-hotel atmosphere with suites, meeting-friendly surroundings, and a more classic hospitality feel.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Good fit for delegates who prefer a more traditional full-service hotel stay.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Address: Lot P5.5 Persiaran Perbandaran Seksyen 14, 40000 Shah Alam, Selangor.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Suitable for professional travel, meetings, and extended comfort.</span></div>
+            </div>
+
+            <div class="hotel-actions">
+              <a class="btn gold" href="https://mardhiyyahhotel.com/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Mardhiyyah+Hotel+%26+Suites+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2 -->
+        <article class="hotel-card reverse">
+          <div class="hotel-content">
+            <h3 class="hotel-name">DoubleTree by Hilton Shah Alam i-City</h3>
+            <div class="hotel-sub">Contemporary business stay • i-City</div>
+            <p class="hotel-desc">
+              A modern international-brand option with a more contemporary feel, suited to participants who want sleek rooms, strong business-travel amenities, and a polished urban setting.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for delegates who prefer a newer hospitality style and Hilton brand experience.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Address: i-City Finance Avenue, 40000 Shah Alam, Selangor.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Good choice if you want to pair conference travel with dining and retail access nearby.</span></div>
+            </div>
+
+            <div class="hotel-actions">
+              <a class="btn gold" href="https://www.hilton.com/en/hotels/szbsadi-doubletree-shah-alam-i-city/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=DoubleTree+by+Hilton+Shah+Alam+i-City" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="hotel-media">
+            <span class="hotel-tag">Modern business hotel</span>
+            <img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1400&q=80" alt="Modern upscale hotel interior">
+          </div>
+        </article>
+
+        <!-- 3 -->
+        <article class="hotel-card">
+          <div class="hotel-media">
+            <span class="hotel-tag">Hotel residence</span>
+            <img src="https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?auto=format&fit=crop&w=1400&q=80" alt="Suite style residence hotel">
+          </div>
+          <div class="hotel-content">
+            <h3 class="hotel-name">Acappella Suite Hotel</h3>
+            <div class="hotel-sub">Suite-style comfort • Seksyen 13</div>
+            <p class="hotel-desc">
+              A hotel-residence style option for participants who like a more spacious suite setup, especially useful for longer stays, shared stays, or a quieter business-travel rhythm.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Excellent for guests who prefer suite-style layouts over standard hotel rooms.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Address: No. 8, Persiaran Sukan, Seksyen 13, 40100 Shah Alam, Selangor.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Comfortable balance of residence feel and hotel convenience.</span></div>
+            </div>
+
+            <div class="hotel-actions">
+              <a class="btn gold" href="https://acappellasuitehotel.com/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Acappella+Suite+Hotel+Shah+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4 -->
+        <article class="hotel-card reverse">
+          <div class="hotel-content">
+            <h3 class="hotel-name">Hilton Shah Alam Glenmarie</h3>
+            <div class="hotel-sub">Resort-style premium stay • Glenmarie</div>
+            <p class="hotel-desc">
+              A stronger resort-style choice for delegates who want a more elevated leisure-business blend, especially if you prefer greener surroundings and a more exclusive atmosphere after conference hours.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Ideal for guests who want a premium stay experience beyond a standard city hotel.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Address: 1, Jalan Usahawan U1/8, Seksyen U1, 40250 Shah Alam, Selangor.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Suitable for delegates extending their trip with a more relaxed hospitality setting.</span></div>
+            </div>
+
+            <div class="hotel-actions">
+              <a class="btn gold" href="https://www.hilton.com/en/hotels/kulsahi-hilton-shah-alam-glenmarie/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Hilton+Shah+Alam+Glenmarie" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+          <div class="hotel-media">
+            <span class="hotel-tag">Resort atmosphere</span>
+            <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1400&q=80" alt="Resort style hotel pool area">
+          </div>
+        </article>
+
+        <!-- 5 -->
+        <article class="hotel-card">
+          <div class="hotel-media">
+            <span class="hotel-tag">Setia Alam option</span>
+            <img src="https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=1400&q=80" alt="Modern hotel room and city view">
+          </div>
+          <div class="hotel-content">
+            <h3 class="hotel-name">Courtyard by Marriott Setia Alam</h3>
+            <div class="hotel-sub">Smart modern stay • Setia Alam</div>
+            <p class="hotel-desc">
+              A clean and modern Marriott option for participants who want a well-recognized international brand, straightforward comfort, and easy access to the Setia Alam area.
+            </p>
+
+            <div class="meta-list">
+              <div class="meta-item"><span class="meta-dot"></span><span>Useful for guests combining conference attendance with meetings or activities in Setia Alam.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Directly linked to Setia City Mall, with strong convenience for dining and errands.</span></div>
+              <div class="meta-item"><span class="meta-dot"></span><span>Best for delegates who prefer a modern, efficient, international-brand stay.</span></div>
+            </div>
+
+            <div class="hotel-actions">
+              <a class="btn gold" href="https://www.marriott.com/en-us/hotels/kulsc-courtyard-setia-alam/overview/" target="_blank" rel="noopener">Official Website</a>
+              <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Courtyard+by+Marriott+Setia+Alam" target="_blank" rel="noopener">View on Map</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="venue">
+    <div class="container">
+      <div class="venue-wrap">
+        <div class="venue-card">
+          <div class="section-kicker">Conference venue</div>
+          <h2>Concorde Hotel Shah Alam</h2>
+          <p>
+            MTERMS 2026 will be held at Concorde Hotel Shah Alam. If you choose to stay elsewhere, the hotels on this page are intended to give you a premium set of alternatives within the wider Shah Alam area.
+          </p>
+
+          <div class="address-card">
+            <div class="address-title">Venue address</div>
+            <div class="address-text">
+              3 Jalan Tengku Ampuan Zabedah C9/C,<br>
+              40100 Shah Alam, Selangor Darul Ehsan,<br>
+              Malaysia
+            </div>
+          </div>
+
+          <div class="hero-actions" style="margin-top:22px;">
+            <a class="btn gold" href="https://shahalam.concordehotelsresorts.com/" target="_blank" rel="noopener">Visit Venue Website</a>
+            <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Concorde+Hotel+Shah+Alam" target="_blank" rel="noopener">Open Venue Map</a>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <iframe
+            src="https://www.google.com/maps?q=Concorde%20Hotel%20Shah%20Alam&z=14&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Map showing Concorde Hotel Shah Alam">
+          </iframe>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <div class="section-kicker">Quick links</div>
+        <h2>Helpful actions before you book</h2>
+
+        <div class="quick-links-grid">
+          <a class="quick-link" href="index.html">
+            <div class="quick-link-title">Return Home</div>
+            <div class="quick-link-copy">Go back to the main MTERMS 2026 website.</div>
+          </a>
+
+          <a class="quick-link" href="https://www.mterms2026.com/register.html" target="_blank" rel="noopener">
+            <div class="quick-link-title">Register for MTERMS 2026</div>
+            <div class="quick-link-copy">Complete your participant registration through the official portal.</div>
+          </a>
+
+          <a class="quick-link" href="contact.html">
+            <div class="quick-link-title">Contact the Organiser</div>
+            <div class="quick-link-copy">Reach the organising team if you need accommodation-related guidance.</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-copy">MTERMS 2026 • Nearby Accommodation Guide</div>
+      <a class="btn gold" href="index.html">Return Home</a>
+    </div>
+  </footer>
+
+</body>
+</html>
