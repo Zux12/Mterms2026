@@ -801,6 +801,126 @@
 
 @media (max-width: 980px){
   .nav-dd-btn{ touch-action: manipulation; width: 100%; justify-content: space-between; }
+} 
+
+
+
+
+/* =========================
+   Cinematic credits banner
+   ========================= */
+.credit-banner-shell{
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background: #000000;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.credit-banner{
+  width: 100%;
+  background: #000000;
+}
+
+.credit-banner__viewport{
+  position: relative;
+  height: 120px; /* thin banner height */
+  overflow: hidden;
+  background: #000000;
+}
+
+.credit-banner__viewport::before,
+.credit-banner__viewport::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 26px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.credit-banner__viewport::before{
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+.credit-banner__viewport::after{
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+.credit-banner__track{
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: committeeCreditsUp 22s linear infinite;
+  will-change: transform;
+}
+
+.credit-banner:hover .credit-banner__track{
+  animation-play-state: paused;
+}
+
+.credit-banner__set{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120px 20px 24px;
+  box-sizing: border-box;
+}
+
+.credit-line{
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: .82rem;
+  line-height: 1.45;
+  margin: 5px 0;
+  white-space: nowrap;
+}
+
+.credit-line--title{
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: .28em;
+  margin-bottom: 10px;
+}
+
+@keyframes committeeCreditsUp{
+  0%{
+    transform: translateY(0);
+  }
+  100%{
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 768px){
+  .credit-banner__viewport{
+    height: 100px;
+  }
+
+  .credit-banner__set{
+    padding: 100px 16px 22px;
+  }
+
+  .credit-line{
+    font-size: .72rem;
+    letter-spacing: .14em;
+  }
+
+  .credit-line--title{
+    font-size: .88rem;
+    letter-spacing: .22em;
+  }
 }    
 </style>
 <script src="lunr.min.js"></script>
@@ -886,16 +1006,9 @@
     </div>
   </header>
 
+  <div id="committeeCreditBannerMount" class="credit-banner-shell"></div>
 
-
-
-
-
-
-
-  
   <!-- Committee -->
-<!-- Committee -->
 <section id="committee" class="section">
   <div class="container">
 
@@ -1431,5 +1544,27 @@
 <link rel="stylesheet" href="assets/ai-widget.css">
 <script src="assets/ai-widget.js"></script>
 
+
+
+<script>
+(function () {
+  const mount = document.getElementById('committeeCreditBannerMount');
+  if (!mount) return;
+
+  fetch('committee-credit-banner.html')
+    .then(res => {
+      if (!res.ok) throw new Error('Banner file not found');
+      return res.text();
+    })
+    .then(html => {
+      mount.innerHTML = html;
+    })
+    .catch(err => {
+      console.error('Committee credit banner failed to load:', err);
+    });
+})();
+</script>
+
+  
 </body>
 </html>
