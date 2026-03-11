@@ -36,6 +36,9 @@ professionalSubtype: {
   enum: ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'],
   default: 'Standard'
 },
+
+tesmaMember: { type: Boolean, default: false },
+  
   personal: {
     firstName: { type: String, required: true },
     lastName:  { type: String, required: true },
