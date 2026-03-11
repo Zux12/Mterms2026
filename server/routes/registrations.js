@@ -113,6 +113,7 @@ router.post('/', async (req, res) => {
 const roleType = body.roleType;
 const nationality = body.nationality;
 const professionalSubtype = body.professionalSubtype;
+let tesmaMember = !!body.tesmaMember;
 
 if (!roleType || !['Student','Professional','Industrial Booth'].includes(roleType)) {
   return res.status(400).json({ error: 'Valid roleType required' });
