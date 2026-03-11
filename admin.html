@@ -758,16 +758,23 @@ table thead th{
     </select>
   </label>
 
-  <label id="proSubtypeWrap" style="flex:1 1 320px;margin:0;display:none">Professional Category
-    <select id="f-profSubtype" style="width:100%">
-      <option value="Standard">Standard</option>
-      <option value="Committee">TESMA/MTERM Committee</option>
-      <option value="Member">Member</option>
-      <option value="Symposia Speaker">Symposia Speaker</option>
-      <option value="Keynote">Keynote Speaker</option>
-      <option value="Plenary">Plenary Speaker</option>
-    </select>
+<label id="proSubtypeWrap" style="flex:1 1 320px;margin:0;display:none">Professional Category
+  <select id="f-profSubtype" style="width:100%">
+    <option value="Standard">Standard</option>
+    <option value="Committee">TESMA/MTERM Committee</option>
+    <option value="Symposia Speaker">Symposia Speaker</option>
+    <option value="Keynote">Keynote Speaker</option>
+    <option value="Plenary">Plenary Speaker</option>
+  </select>
+</label>
+
+<label id="tesmaMemberWrap" style="flex:1 1 220px;margin:0;display:none;align-self:end">
+  <span style="display:block;font-weight:600;margin-bottom:8px">TESMA Member</span>
+  <label style="display:flex;align-items:center;gap:8px;margin:0">
+    <input type="checkbox" id="f-tesmaMember">
+    <span>I am a TESMA Member</span>
   </label>
+</label>
 </div>         
 </div>
 
@@ -1052,6 +1059,33 @@ table thead th{
 function isAdminAuthed(){
   return !!localStorage.getItem(ADMIN_KEY);
 }
+
+function refreshAdminOptionBUI(){
+  const role = $('f-roleType')?.value || '';
+  const nat = $('f-nationality')?.value || '';
+  const prof = $('f-profSubtype')?.value || 'Standard';
+
+  const isStudent = (role === 'Student');
+  $('studentOnly').style.display = isStudent ? 'block' : 'none';
+
+  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
+  $('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
+
+  const showTesmaForStudent =
+    role === 'Student' && nat === 'Malaysian';
+
+  const showTesmaForProfessional =
+    role === 'Professional' &&
+    nat === 'Malaysian' &&
+    (prof === 'Standard' || prof === 'Symposia Speaker');
+
+  const showTesma = showTesmaForStudent || showTesmaForProfessional;
+  $('tesmaMemberWrap').style.display = showTesma ? 'block' : 'none';
+
+  if (!showTesma && $('f-tesmaMember')) {
+    $('f-tesmaMember').checked = false;
+  }
+}    
 
 // Block protected nav buttons if not logged in (extra safety)
 document.addEventListener('click', (e) => {
@@ -1389,6 +1423,10 @@ if (nav) nav.style.display = 'block';
     });
 
 
+$('f-roleType')?.addEventListener('change', refreshAdminOptionBUI);
+$('f-nationality')?.addEventListener('change', refreshAdminOptionBUI);
+$('f-profSubtype')?.addEventListener('change', refreshAdminOptionBUI);    
+
 
 document.getElementById('btnCert').addEventListener('click', () => {
   // Try to gather selected participants from the admin list.
@@ -1425,18 +1463,12 @@ document.getElementById('btnCert').addEventListener('click', () => {
     $('photoMsg').textContent = '';
     
     $('f-category').value = doc.category || 'Local Professional';
+$('f-roleType').value = doc.roleType || 'Professional';
+$('f-nationality').value = doc.nationality || 'Malaysian';
+$('f-profSubtype').value = (doc.professionalSubtype === 'Member') ? 'Standard' : (doc.professionalSubtype || 'Standard');
+$('f-tesmaMember').checked = !!doc.tesmaMember || (doc.professionalSubtype === 'Member');
 
-    $('f-roleType').value = doc.roleType || 'Professional';
-    $('f-nationality').value = doc.nationality || 'Malaysian';
-    $('f-profSubtype').value = doc.professionalSubtype || 'Standard';
-
-    // Student-only block: based on roleType
-    const isStudent = (doc.roleType === 'Student');
-    $('studentOnly').style.display = isStudent ? 'block' : 'none';
-
-    // Show subtype only for Malaysian Professional
-    const showSubtype = (doc.roleType === 'Professional' && doc.nationality === 'Malaysian');
-    document.getElementById('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
+refreshAdminOptionBUI();
 
     $('p-firstName').value = doc?.personal?.firstName || '';
     $('p-lastName').value  = doc?.personal?.lastName  || '';
@@ -1515,13 +1547,14 @@ async function saveChanges(id, orig){
   $('save').disabled = true;
   $('saveMsg').textContent = 'Saving…';
 
-  const updates = {
-    category: $('f-category').value,
+const updates = {
+  category: $('f-category').value,
 
-    // ✅ Option B fields
-    roleType: $('f-roleType').value,
-    nationality: $('f-nationality').value,
-    professionalSubtype: $('f-profSubtype').value,
+  // ✅ Option B fields
+  roleType: $('f-roleType').value,
+  nationality: $('f-nationality').value,
+  professionalSubtype: $('f-profSubtype').value,
+  tesmaMember: $('f-tesmaMember').checked,
 
     personal: {
       firstName: $('p-firstName').value.trim(),
