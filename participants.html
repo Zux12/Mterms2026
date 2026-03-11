@@ -387,16 +387,25 @@
 
   <div id="proSubtypeWrap" class="hidden" style="margin-top:8px">
     <label>Professional Category
-      <select id="f-profSubtype">
-        <option value="Standard">Standard</option>
-        <option value="Committee">TESMA/MTERM Committee</option>
-        <option value="Member">Member</option>
-        <option value="Symposia Speaker">Symposia Speaker</option>
-        <option value="Keynote">Keynote Speaker</option>
-        <option value="Plenary">Plenary Speaker</option>
-      </select>
+<select id="f-profSubtype">
+  <option value="Standard">Standard</option>
+  <option value="Committee">TESMA/MTERM Committee</option>
+  <option value="Symposia Speaker">Symposia Speaker</option>
+  <option value="Keynote">Keynote Speaker</option>
+  <option value="Plenary">Plenary Speaker</option>
+</select>
     </label>
   </div>
+
+
+  <div id="tesmaMemberWrap" class="hidden" style="margin-top:8px">
+  <label class="field-inline">
+    <input type="checkbox" id="f-tesmaMember">
+    I am a TESMA Member
+  </label>
+</div>
+  
+  
 </fieldset>
 <fieldset style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
   <legend>Personal</legend>
@@ -659,6 +668,33 @@
       <p class="help">
         Please make payment using the details below and upload your <strong>Bank Receipt</strong> after payment.
       </p>
+
+
+<div id="paymentSummaryBox" style="margin:12px 0 14px;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(135deg,#fff7ed 0%,#fffbeb 100%);box-shadow:0 10px 24px rgba(0,0,0,.06)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a3412;margin-bottom:6px">
+        Payment Summary
+      </div>
+      <div id="payCategoryLine" style="font-size:1rem;font-weight:700;color:#111827">Category: —</div>
+      <div id="payPhaseLine" style="font-size:.95rem;color:#374151;margin-top:4px">Phase: —</div>
+    </div>
+
+    <div style="text-align:right">
+      <div style="font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a3412;margin-bottom:6px">
+        Amount Due
+      </div>
+      <div id="payAmountLine" style="font-size:1.75rem;font-weight:800;line-height:1;color:#111827">—</div>
+      <div style="margin-top:8px">
+        <span id="paymentTagDuplicate" class="tag">
+          Payment: <span id="userPaymentDuplicate"></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
 
       <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-bottom:12px">
         <div style="font-weight:800;margin-bottom:6px">Bank transfer details</div>
@@ -1157,9 +1193,20 @@ function deepMerge(base, patch) {
     lastLoadedUser = JSON.parse(JSON.stringify(user || {}));
     $('userName').textContent = [user?.personal?.firstName||'', user?.personal?.lastName||''].join(' ').trim();
     $('userCode').textContent = user?.regCode || '';
-    $('userCategory').textContent = user?.category || '';
-    $('userPayment').textContent = user?.payment?.status || 'pending';
-    updatePaymentTagColor();
+$('userCategory').textContent = user?.category || '';
+$('userPayment').textContent = user?.payment?.status || 'pending';
+$('userPaymentDuplicate').textContent = user?.payment?.status || 'pending';
+
+const currency = user?.pricingSnapshot?.currency || 'MYR';
+const total = Number(user?.pricingSnapshot?.total || 0);
+const phase = user?.pricingSnapshot?.phase || '—';
+const category = user?.category || '—';
+
+$('payCategoryLine').textContent = `Category: ${category}`;
+$('payPhaseLine').textContent = `Phase: ${phase}`;
+$('payAmountLine').textContent = `${currency} ${total.toFixed(0)}`;
+
+updatePaymentTagColor();
 
  $('f-roleType').value = user?.roleType || 'Professional';
 $('f-nationality').value = user?.nationality || 'Malaysian';
@@ -1506,8 +1553,8 @@ const updates = {
   // ✅ Option B fields (replace old category-based selection)
   roleType: $('f-roleType').value,
   nationality: $('f-nationality').value,
-  professionalSubtype: $('f-profSubtype').value,
-
+professionalSubtype: $('f-profSubtype').value,
+tesmaMember: $('f-tesmaMember').checked,
   personal: {
     firstName: $('p-firstName').value.trim(),
     lastName:  $('p-lastName').value.trim(),
@@ -1657,17 +1704,31 @@ document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLates
   showSubmission(on);
 });
 
-  function refreshOptionBUI(){
+function refreshOptionBUI(){
   const role = $('f-roleType').value;
   const nat  = $('f-nationality').value;
+  const prof = $('f-profSubtype').value;
 
   showStudent(role === 'Student');
 
   const showSubtype = (role === 'Professional' && nat === 'Malaysian');
-  document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+  $('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
 
-  // If not applicable, force Standard (keeps UI clean)
   if (!showSubtype) $('f-profSubtype').value = 'Standard';
+
+  const showTesmaForStudent =
+    role === 'Student' && nat === 'Malaysian';
+
+  const showTesmaForProfessional =
+    role === 'Professional' &&
+    nat === 'Malaysian' &&
+    (prof === 'Standard' || prof === 'Symposia Speaker');
+
+  const showTesma = showTesmaForStudent || showTesmaForProfessional;
+
+  $('tesmaMemberWrap').classList.toggle('hidden', !showTesma);
+
+  if (!showTesma) $('f-tesmaMember').checked = false;
 }
 
 $('f-roleType').addEventListener('change', refreshOptionBUI);
@@ -1824,20 +1885,26 @@ if (sess?.regCode && sess?.personal?.email) {
 
 // Payment bubble color logic (design only)
 function updatePaymentTagColor() {
-  const tag = document.getElementById('paymentTag');
-  const payment = document.getElementById('userPayment');
+  const pairs = [
+    { tag: document.getElementById('paymentTag'), payment: document.getElementById('userPayment') },
+    { tag: document.getElementById('paymentTagDuplicate'), payment: document.getElementById('userPaymentDuplicate') }
+  ];
 
-  if (!tag || !payment) return;
+  pairs.forEach(({ tag, payment }) => {
+    if (!tag || !payment) return;
 
-  const value = payment.textContent.trim().toLowerCase();
+    const value = payment.textContent.trim().toLowerCase();
 
-  if (value === 'paid') {
-    tag.style.backgroundColor = '#16a34a'; // green
-    tag.style.color = '#ffffff';
-  } else {
-    tag.style.backgroundColor = '#f97316'; // orange
-    tag.style.color = '#ffffff';
-  }
+    if (value === 'paid') {
+      tag.style.backgroundColor = '#16a34a';
+      tag.style.color = '#ffffff';
+      tag.style.borderColor = '#16a34a';
+    } else {
+      tag.style.backgroundColor = '#f97316';
+      tag.style.color = '#ffffff';
+      tag.style.borderColor = '#f97316';
+    }
+  });
 }
 
 // Run after page fully loads
