@@ -230,11 +230,17 @@
     <select name="professionalSubtype" id="f-profSubtype">
       <option value="Standard">Standard</option>
       <option value="Committee">TESMA/MTERM Committee</option>
-      <option value="Member">Member</option>
       <option value="Symposia Speaker">Symposia Speaker</option>
       <option value="Keynote">Keynote Speaker</option>
       <option value="Plenary">Plenary Speaker</option>
     </select>
+  </label>
+</div>
+
+<div id="tesmaMemberWrap" style="display:none;margin-bottom:12px">
+  <label style="display:flex;align-items:center;gap:8px">
+    <input type="checkbox" id="f-tesmaMember" name="tesmaMember" />
+    I am a TESMA Member
   </label>
 </div>
 
@@ -413,7 +419,7 @@
     function ready(fn, tries = 0) {
 const need = [
   'pricingMount','fullRegForm','fullRegResult',
-  'f-roleType','f-nationality','f-profSubtype','proSubtypeWrap',
+  'f-roleType','f-nationality','f-profSubtype','proSubtypeWrap','tesmaMemberWrap','f-tesmaMember',
   'studentOnly','f-presenting','presentFields','reg-submit'
 ];
       const allOk = need.every(id => $(id));
@@ -449,40 +455,36 @@ if (pw && pwToggle) {
 mount.innerHTML = `
   <div style="font-weight:700;margin-bottom:8px">Registration Fees</div>
 
-  <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
-    <thead>
-      <tr>
-        <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Category</th>
-        <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Early Bird</th>
-        <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Normal</th>
-      </tr>
-    </thead>
-    <tbody>
-${Array.isArray(data.rows) ? data.rows.filter(row => row.category !== 'Industrial Booth').map(row => {
-  const early = row.earlyBird ? `${row.earlyBird.currency} ${Number(row.earlyBird.amount).toFixed(0)}` : '—';
-        const normal = row.normal ? `${row.normal.currency} ${Number(row.normal.amount).toFixed(0)}` : '—';
+<table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+  <thead>
+    <tr>
+      <th style="text-align:left;padding:8px;border-bottom:1px solid #333">Category</th>
+      <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Early Bird</th>
+      <th style="text-align:right;padding:8px;border-bottom:1px solid #333">Normal</th>
+      <th style="text-align:right;padding:8px;border-bottom:1px solid #333">TESMA Member</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${Array.isArray(data.rows)
+      ? data.rows
+          .filter(row => row.category !== 'Industrial Booth')
+          .map(row => {
+            const early = row.earlyBird ? `${row.earlyBird.currency} ${Number(row.earlyBird.amount).toFixed(0)}` : '—';
+            const normal = row.normal ? `${row.normal.currency} ${Number(row.normal.amount).toFixed(0)}` : '—';
+            const member = row.member ? `${row.member.currency} ${Number(row.member.amount).toFixed(0)}` : '—';
 
-        const notes = (row.category === 'Local Professional' && row.notes)
-          ? `<div style="margin-top:8px;font-size:.88em;opacity:.9;line-height:1.35;text-align:left">
-               <div style="font-weight:800;margin-bottom:4px">Early Bird notes</div>
-               <ul style="margin:0;padding-left:18px">
-                 <li>Member: ${row.notes.memberEarly.currency} ${Number(row.notes.memberEarly.amount).toFixed(0)}</li>
-                 <li>Symposia Speaker: ${row.notes.symposiaEarly.currency} ${Number(row.notes.symposiaEarly.amount).toFixed(0)}</li>
-
-               </ul>
-             </div>`
-          : '';
-
-        return `
-          <tr>
-            <td style="padding:8px;vertical-align:top">${row.category}${notes}</td>
-            <td style="padding:8px;text-align:right;vertical-align:top">${early}</td>
-            <td style="padding:8px;text-align:right;vertical-align:top">${normal}</td>
-          </tr>
-        `;
-      }).join('') : ''}
-    </tbody>
-  </table>
+            return `
+              <tr>
+                <td style="padding:8px;vertical-align:top">${row.category}</td>
+                <td style="padding:8px;text-align:right;vertical-align:top">${early}</td>
+                <td style="padding:8px;text-align:right;vertical-align:top">${normal}</td>
+                <td style="padding:8px;text-align:right;vertical-align:top">${member}</td>
+              </tr>
+            `;
+          }).join('')
+      : ''}
+  </tbody>
+</table>
 
   <div style="margin-top:4px;opacity:0.75">
     Current phase: <strong>${data.nowPhase || '—'}</strong>.
@@ -499,8 +501,11 @@ ${Array.isArray(data.rows) ? data.rows.filter(row => row.category !== 'Industria
       const out  = $('fullRegResult');
 const selRole = $('f-roleType');
 const selNat  = $('f-nationality');
+const selProf = $('f-profSubtype');
 const proSubtypeWrap = $('proSubtypeWrap');
-      const studentOnly = $('studentOnly');
+const tesmaMemberWrap = $('tesmaMemberWrap');
+const tesmaMemberChk = $('f-tesmaMember');
+const studentOnly = $('studentOnly');
 const chkPresenting = $('f-presenting');
 const presentFields = $('presentFields');
 const submitBtn = $('reg-submit');
@@ -508,13 +513,27 @@ const submitBtn = $('reg-submit');
 function refreshOptionBUI(){
   const role = selRole.value;
   const nat  = selNat.value;
+  const prof = selProf ? selProf.value : 'Standard';
 
-  // Student section shows for ANY Student (local or international)
   show(studentOnly, role === 'Student');
-
-  // Professional subtype only for Malaysian + Professional
   show(proSubtypeWrap, role === 'Professional' && nat === 'Malaysian');
+
+  const showTesmaForStudent =
+    role === 'Student' && nat === 'Malaysian';
+
+  const showTesmaForProfessional =
+    role === 'Professional' &&
+    nat === 'Malaysian' &&
+    (prof === 'Standard' || prof === 'Symposia Speaker');
+
+  show(tesmaMemberWrap, showTesmaForStudent || showTesmaForProfessional);
+
+  if (!(showTesmaForStudent || showTesmaForProfessional) && tesmaMemberChk) {
+    tesmaMemberChk.checked = false;
+  }
 }
+
+      selProf.addEventListener('change', refreshOptionBUI);
 
 selRole.addEventListener('change', refreshOptionBUI);
 selNat.addEventListener('change', refreshOptionBUI);
@@ -554,11 +573,12 @@ selNat.addEventListener('change', refreshOptionBUI);
           return;
         }
 
-        const payload = {
+const payload = {
 roleType: fd.get('roleType'),
 nationality: fd.get('nationality'),
 professionalSubtype: fd.get('professionalSubtype'),
-          password: pw,
+tesmaMember: !!fd.get('tesmaMember'),
+  password: pw,
           addons: { dinner: false },
           personal: {
             firstName: fd.get('personal.firstName'),
