@@ -14,32 +14,33 @@ const Pricing = require('../server/models/Pricing');
       key: 'pricing-2026',
       earlyBirdDeadline: EARLY_BIRD_DEADLINE,
 
-      fees: {
-        localStudent: {
-          early:  { amount: 450, currency: 'MYR' },
-          normal: { amount: 550, currency: 'MYR' }
-        },
-        internationalStudent: {
-          early:  { amount: 140, currency: 'USD' },
-          normal: { amount: 180, currency: 'USD' }
-        },
-        localProfessional: {
-          standard:  { early: { amount: 750, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
-          committee: { early: { amount: 450, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
-          member:    { early: { amount: 650, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
-          symposia:  { early: { amount: 650, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
-          keynote:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } },
-          plenary:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } }
-        },
-        internationalProfessional: {
-          early:  { amount: 200, currency: 'USD' },
-          normal: { amount: 250, currency: 'USD' }
-        },
-        industrialBooth: {
-          early:  { amount: 1000, currency: 'MYR' },
-          normal: { amount: 1500, currency: 'MYR' }
-        }
-      },
+fees: {
+  localStudent: {
+    early:  { amount: 500, currency: 'MYR' },
+    normal: { amount: 550, currency: 'MYR' },
+    member: { amount: 450, currency: 'MYR' }
+  },
+  internationalStudent: {
+    early:  { amount: 140, currency: 'USD' },
+    normal: { amount: 180, currency: 'USD' }
+  },
+  localProfessional: {
+    standard:  { early: { amount: 750, currency: 'MYR' }, normal: { amount: 850, currency: 'MYR' } },
+    committee: { early: { amount: 450, currency: 'MYR' }, normal: { amount: 450, currency: 'MYR' } },
+    member:    { early: { amount: 650, currency: 'MYR' }, normal: { amount: 650, currency: 'MYR' } },
+    symposia:  { early: { amount: 450, currency: 'MYR' }, normal: { amount: 650, currency: 'MYR' } },
+    keynote:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } },
+    plenary:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } }
+  },
+  internationalProfessional: {
+    early:  { amount: 200, currency: 'USD' },
+    normal: { amount: 250, currency: 'USD' }
+  },
+  industrialBooth: {
+    early:  { amount: 1000, currency: 'MYR' },
+    normal: { amount: 1500, currency: 'MYR' }
+  }
+},
 
       dinnerAddon: 0
     };
