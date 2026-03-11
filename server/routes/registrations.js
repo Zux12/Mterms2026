@@ -259,6 +259,11 @@ if (finalCategory === 'Local Student') {
 }
 
 // no dinner
+// no dinner
+if (!fee || typeof fee.amount === 'undefined') {
+  return res.status(500).json({ error: 'Pricing configuration is incomplete. Please re-seed pricing.' });
+}
+
 const addonsTotal = 0;
 const total = Number(fee.amount) + addonsTotal;
 
