@@ -14,10 +14,11 @@ const PricingSchema = new mongoose.Schema({
 
   // Official fee table (strictly from image + your confirmations)
   fees: {
-    localStudent: {
-      early:  { type: FeeSchema, required: true },
-      normal: { type: FeeSchema, required: true }
-    },
+localStudent: {
+  early:  { type: FeeSchema, required: true },
+  normal: { type: FeeSchema, required: true },
+  member: { type: FeeSchema, required: true }
+},
     internationalStudent: {
       early:  { type: FeeSchema, required: true },
       normal: { type: FeeSchema, required: true }
