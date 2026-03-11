@@ -142,6 +142,22 @@ if (finalCategory === 'Local Professional') {
   if (!allowed.includes(profType)) {
     return res.status(400).json({ error: 'Valid professionalSubtype required for Local Professional' });
   }
+
+  // backward compatibility: old frontend may still send Member as subtype
+  if (profType === 'Member') {
+    profType = 'Standard';
+    tesmaMember = true;
+  }
+
+  // TESMA member option only applies to Local Professional Standard/Symposia
+  if (!['Standard', 'Symposia Speaker'].includes(profType)) {
+    tesmaMember = false;
+  }
+}
+
+// TESMA member option also applies to Local Student only
+if (finalCategory !== 'Local Student' && finalCategory !== 'Local Professional') {
+  tesmaMember = false;
 }
 
 
@@ -199,25 +215,45 @@ const phase = phaseFor(now, new Date(pricing.earlyBirdDeadline));
 const phaseKey = (phase === 'Early Bird') ? 'early' : 'normal';
 
 let fee;
+
 if (finalCategory === 'Local Student') {
-  fee = pricing.fees.localStudent[phaseKey];
+  fee = tesmaMember
+    ? pricing.fees.localStudent.member
+    : pricing.fees.localStudent[phaseKey];
+
 } else if (finalCategory === 'International Student') {
   fee = pricing.fees.internationalStudent[phaseKey];
+
 } else if (finalCategory === 'International Professional') {
   fee = pricing.fees.internationalProfessional[phaseKey];
+
 } else if (finalCategory === 'Industrial Booth') {
   fee = pricing.fees.industrialBooth[phaseKey];
+
 } else if (finalCategory === 'Local Professional') {
-  const map = {
-    'Standard': 'standard',
-    'Committee': 'committee',
-    'Member': 'member',
-    'Symposia Speaker': 'symposia',
-    'Keynote': 'keynote',
-    'Plenary': 'plenary'
-  };
-  const key = map[profType];
-  fee = pricing.fees.localProfessional[key][phaseKey];
+  if (profType === 'Standard') {
+    fee = tesmaMember
+      ? pricing.fees.localProfessional.member.normal
+      : pricing.fees.localProfessional.standard[phaseKey];
+
+  } else if (profType === 'Committee') {
+    fee = pricing.fees.localProfessional.committee.normal;
+
+  } else if (profType === 'Symposia Speaker') {
+    fee = tesmaMember
+      ? pricing.fees.localProfessional.symposia.early
+      : pricing.fees.localProfessional.symposia.normal;
+
+  } else if (profType === 'Keynote') {
+    fee = pricing.fees.localProfessional.keynote[phaseKey];
+
+  } else if (profType === 'Plenary') {
+    fee = pricing.fees.localProfessional.plenary[phaseKey];
+
+  } else {
+    return res.status(400).json({ error: 'Unknown professional subtype for pricing' });
+  }
+
 } else {
   return res.status(400).json({ error: 'Unknown category for pricing' });
 }
@@ -237,6 +273,7 @@ category: finalCategory,
 nationality,
 roleType,
 professionalSubtype: (finalCategory === 'Local Professional') ? profType : 'Standard',
+tesmaMember,
 
     auth: {
       passwordHash,
@@ -381,9 +418,10 @@ router.put('/update', async (req, res) => {
 
 const safe = {
   // ✅ Option B fields (participant may update)
-  roleType: updates.roleType,
-  nationality: updates.nationality,
-  professionalSubtype: updates.professionalSubtype,
+roleType: updates.roleType,
+nationality: updates.nationality,
+professionalSubtype: updates.professionalSubtype,
+tesmaMember: !!updates.tesmaMember,
 
   // ❌ Do NOT allow direct category editing by participants anymore
   // category: updates.category,
@@ -430,9 +468,23 @@ if (safe.nationality && !natOk) return res.status(400).json({ error: 'Invalid na
 // subtype only meaningful for Malaysian + Professional
 if (safe.roleType === 'Professional' && safe.nationality === 'Malaysian') {
   if (!subOk) return res.status(400).json({ error: 'Invalid professionalSubtype' });
+
+  if (safe.professionalSubtype === 'Member') {
+    safe.professionalSubtype = 'Standard';
+    safe.tesmaMember = true;
+  }
+
+  if (!['Standard', 'Symposia Speaker'].includes(safe.professionalSubtype || 'Standard')) {
+    safe.tesmaMember = false;
+  }
 } else {
   // force Standard when not Local Professional
   safe.professionalSubtype = 'Standard';
+}
+
+if (!(safe.roleType === 'Student' && safe.nationality === 'Malaysian') &&
+    !(safe.roleType === 'Professional' && safe.nationality === 'Malaysian')) {
+  safe.tesmaMember = false;
 }
 
 
