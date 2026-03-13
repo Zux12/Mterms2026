@@ -840,6 +840,20 @@ table thead th{
     placeholder="Reviewer comment to participant (visible in participant portal)"
     rows="3"
     style="min-height:72px"></textarea>
+
+  <div id="reviewEmailStats"
+       style="margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:10px;background:#f9fafb">
+    <div style="font-weight:800;margin-bottom:4px">Email History</div>
+    <div>Sent count: <span id="reviewEmailCount">0</span></div>
+    <div>Last sent: <span id="reviewEmailLastSent">—</span></div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <button id="previewReviewEmail" class="btn btn-primary" type="button">Preview Email</button>
+    <button id="saveReviewEmail" class="btn btn-primary" type="button">Save Comment &amp; Email</button>
+  </div>
+
+  <div id="reviewEmailMsg" style="margin-top:10px;font-size:.98rem"></div>
 </div>
 
         <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;margin-top:12px">
@@ -1037,6 +1051,29 @@ table thead th{
       
       </div>
 
+
+<div id="reviewEmailPreviewModal"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="width:min(760px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;padding:18px;border:1px solid var(--border);box-shadow:0 18px 50px rgba(0,0,0,.22)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="font-size:1.1rem;font-weight:800">Preview Email</div>
+      <button type="button" class="btn btn-danger" onclick="closeReviewEmailPreview()">Close</button>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <div><strong>To:</strong> <span id="previewTo"></span></div>
+      <div><strong>CC:</strong> <span id="previewCc"></span></div>
+      <div><strong>Subject:</strong> <span id="previewSubject"></span></div>
+
+      <div style="margin-top:6px">
+        <strong>Email Body:</strong>
+        <pre id="previewBody"
+             style="white-space:pre-wrap;background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;font-family:inherit"></pre>
+      </div>
+    </div>
+  </div>
+</div>      
+      
       <!-- Hidden print layout for selected badges -->
       <div id="printArea" class="print-grid" style="display:none"></div>
     </div>
@@ -1055,6 +1092,7 @@ table thead th{
     const API='https://mterm2026-559f9bf571b5.herokuapp.com';
     const POSTER_LOCK_MARKER = '__POSTER_ONLY__';
     const $=id=>document.getElementById(id);
+    let currentEditorDoc = null;
 
 function isAdminAuthed(){
   return !!localStorage.getItem(ADMIN_KEY);
@@ -1458,6 +1496,7 @@ document.getElementById('btnCert').addEventListener('click', () => {
     // Fill
     $('editCard').style.display='block';
     $('editCode').textContent = doc.regCode;
+    currentEditorDoc = doc;
 
     $('badgePhoto').removeAttribute('src');
     $('photoMsg').textContent = '';
@@ -1487,6 +1526,12 @@ refreshAdminOptionBUI();
     $('pr-presenting').checked = !!doc.program?.presenting;
     $('pr-type').value   = doc.program?.type || 'none';
     $('pr-title').value  = doc.program?.title || '';
+    const reviewHistory = Array.isArray(doc.reviewEmailHistory) ? doc.reviewEmailHistory : [];
+$('reviewEmailCount').textContent = String(reviewHistory.length || 0);
+$('reviewEmailLastSent').textContent = reviewHistory.length
+  ? new Date(reviewHistory[reviewHistory.length - 1].sentAt).toLocaleString()
+  : '—';
+$('reviewEmailMsg').textContent = '';
     $('pr-posterOnly').checked = (doc.program?.topicArea === POSTER_LOCK_MARKER);
 
     // Latest abstract preview
@@ -1526,14 +1571,18 @@ $('pay-phase').value = doc.pricingSnapshot?.phase || '';
 
     // Bind save
     $('save').onclick = () => saveChanges(id, doc);
+    $('previewReviewEmail').onclick = () => openReviewEmailPreview();
+$('saveReviewEmail').onclick = () => saveCommentAndEmail();
 
     // Cancel button: hide editor + clear messages
-    $('cancelEdit').onclick = () => {
-      $('editCard').style.display = 'none';
-      $('saveMsg').textContent = '';
-      $('photoMsg').textContent = '';
-      document.getElementById('auditMount').style.display = 'none';
-    };
+$('cancelEdit').onclick = () => {
+  $('editCard').style.display = 'none';
+  $('saveMsg').textContent = '';
+  $('reviewEmailMsg').textContent = '';
+  $('photoMsg').textContent = '';
+  currentEditorDoc = null;
+  document.getElementById('auditMount').style.display = 'none';
+};
 
     $('printBadge').onclick = () => { window.print(); };
     $('loadPhoto').onclick = () => loadLatestPhoto(doc.regCode, doc.personal?.email);
@@ -1639,6 +1688,133 @@ const updates = {
     $('saveMsg').textContent='❌ '+err.message;
   }finally{
     $('save').disabled = false;
+  }
+}
+
+function buildReviewEmailPreviewData(){
+  const doc = currentEditorDoc || {};
+  const firstName = $('p-firstName').value.trim() || doc?.personal?.firstName || '';
+  const lastName  = $('p-lastName').value.trim() || doc?.personal?.lastName || '';
+  const email     = $('p-email').value.trim() || doc?.personal?.email || '';
+  const regCode   = $('editCode').textContent.trim() || doc?.regCode || '';
+  const comment   = $('pr-title').value.trim();
+
+  const participantName = `${firstName} ${lastName}`.trim();
+  const subject = `MTERMS 2026 Reviewer Comment – ${participantName} – ${regCode}`;
+
+  const body =
+`Dear ${participantName},
+
+A reviewer comment has been added to your submission for MTERMS 2026.
+
+Registration Code: ${regCode}
+
+Reviewer Comment:
+-----------------------------------
+${comment}
+-----------------------------------
+
+Please visit the MTERMS 2026 website and log in to your participant account for further action.
+
+Important reminder:
+Only after you receive the official invitation or notification from the Secretariat confirming your presentation outcome:
+• If you are assigned for Oral Presentation, please upload your slides in PDF format only.
+• If you are assigned for Poster Presentation, please upload your poster image only.
+
+The invitation letter will be issued by the Secretariat upon confirmation of the presentation outcome, or may already have been issued in earlier communication.
+
+Regards,
+MTERMS 2026 Secretariat`;
+
+  return {
+    to: email,
+    cc: 'admin@mterms2026.com',
+    subject,
+    body
+  };
+}
+
+function openReviewEmailPreview(){
+  const comment = $('pr-title').value.trim();
+  if (!comment){
+    $('reviewEmailMsg').textContent = '❌ Please enter Reviewer Comment first.';
+    return;
+  }
+
+  const data = buildReviewEmailPreviewData();
+
+  $('previewTo').textContent = data.to || '—';
+  $('previewCc').textContent = data.cc || '—';
+  $('previewSubject').textContent = data.subject || '—';
+  $('previewBody').textContent = data.body || '';
+
+  $('reviewEmailPreviewModal').style.display = 'flex';
+}
+
+function closeReviewEmailPreview(){
+  $('reviewEmailPreviewModal').style.display = 'none';
+}
+
+async function saveCommentAndEmail(){
+  const doc = currentEditorDoc || {};
+  const regCode = $('editCode').textContent.trim() || doc?.regCode || '';
+  const email = $('p-email').value.trim() || doc?.personal?.email || '';
+  const reviewerComment = $('pr-title').value.trim();
+
+  if (!regCode || !email){
+    $('reviewEmailMsg').textContent = '❌ Missing registration code or participant email.';
+    return;
+  }
+
+  if (!reviewerComment){
+    $('reviewEmailMsg').textContent = '❌ Please enter Reviewer Comment first.';
+    return;
+  }
+
+  $('saveReviewEmail').disabled = true;
+  $('reviewEmailMsg').textContent = 'Saving comment and sending email…';
+
+  try{
+    const r = await fetch(`${API}/api/registrations/admin/send-review-comment`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeader() },
+      body: JSON.stringify({
+        regCode,
+        email,
+        reviewerComment
+      })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(data.error || 'Send failed');
+
+    $('reviewEmailCount').textContent = String(data.sentCount ?? 0);
+    $('reviewEmailLastSent').textContent = data.lastSent
+      ? new Date(data.lastSent).toLocaleString()
+      : '—';
+
+    $('reviewEmailMsg').textContent =
+      `✅ Comment saved and email sent successfully. Total sent: ${data.sentCount ?? 0}`;
+
+    if (currentEditorDoc){
+      currentEditorDoc.program = currentEditorDoc.program || {};
+      currentEditorDoc.program.title = reviewerComment;
+      currentEditorDoc.reviewEmailHistory = Array.isArray(currentEditorDoc.reviewEmailHistory)
+        ? currentEditorDoc.reviewEmailHistory
+        : [];
+      currentEditorDoc.reviewEmailHistory.push({
+        sentAt: data.lastSent || new Date().toISOString(),
+        sentBy: 'admin',
+        subject: data.subject || '',
+        commentSnapshot: reviewerComment
+      });
+    }
+
+    loadPage(page);
+  }catch(err){
+    $('reviewEmailMsg').textContent = '❌ ' + err.message;
+  }finally{
+    $('saveReviewEmail').disabled = false;
   }
 }
 
