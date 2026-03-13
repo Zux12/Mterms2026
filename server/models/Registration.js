@@ -139,7 +139,15 @@ payment: {
   amount: { type: Number }
 },
 
+reviewEmailHistory: [{
+  sentAt: { type: Date, default: Date.now },
+  sentBy: { type: String, default: 'admin' },
+  subject: { type: String },
+  commentSnapshot: { type: String }
+}],
+
   uploads: [UploadSchema]
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model('Registration', RegistrationSchema);
