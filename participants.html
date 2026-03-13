@@ -1211,6 +1211,7 @@ updatePaymentTagColor();
  $('f-roleType').value = user?.roleType || 'Professional';
 $('f-nationality').value = user?.nationality || 'Malaysian';
 $('f-profSubtype').value = user?.professionalSubtype || 'Standard';
+    $('f-tesmaMember').checked = !!user?.tesmaMember;
 
 const isStudent = (user?.roleType === 'Student');
 showStudent(isStudent);
@@ -1733,6 +1734,7 @@ function refreshOptionBUI(){
 
 $('f-roleType').addEventListener('change', refreshOptionBUI);
 $('f-nationality').addEventListener('change', refreshOptionBUI);
+$('f-profSubtype').addEventListener('change', refreshOptionBUI);
   
   saveBtn.addEventListener('click', saveChanges);
   document.getElementById('cancelBtn').addEventListener('click', () => {
