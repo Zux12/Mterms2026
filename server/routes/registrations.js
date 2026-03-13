@@ -90,6 +90,96 @@ ${from}`;
   await t.sendMail({ from: `"MTERMS 2026" <${from}>`, to, subject, text, html });
 }
 
+async function sendReviewerCommentEmail({
+  to,
+  cc,
+  participantName,
+  regCode,
+  reviewerComment
+}) {
+  const base = siteBaseUrl();
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+
+  const safeName = String(participantName || '').trim();
+  const safeCode = String(regCode || '').trim();
+  const safeComment = String(reviewerComment || '').trim();
+
+  const subject = `MTERMS 2026 Reviewer Comment – ${safeName} – ${safeCode}`;
+
+  const text =
+`Dear ${safeName},
+
+A reviewer comment has been added to your submission for MTERMS 2026.
+
+Registration Code: ${safeCode}
+
+Reviewer Comment:
+-----------------------------------
+${safeComment}
+-----------------------------------
+
+Please visit the MTERMS 2026 website at ${base} and log in to your participant account for further action.
+
+Important reminder:
+Only after you receive the official invitation or notification from the Secretariat confirming your presentation outcome:
+• If you are assigned for Oral Presentation, please upload your slides in PDF format only.
+• If you are assigned for Poster Presentation, please upload your poster image only.
+
+The invitation letter will be issued by the Secretariat upon confirmation of the presentation outcome, or may already have been issued in earlier communication.
+
+Regards,
+MTERMS 2026 Secretariat
+${from}`;
+
+  const html =
+`<p>Dear ${safeName},</p>
+
+<p>A reviewer comment has been added to your submission for <b>MTERMS 2026</b>.</p>
+
+<p><b>Registration Code:</b> ${safeCode}</p>
+
+<p><b>Reviewer Comment:</b></p>
+<div style="border:1px solid #d0d5dd;border-radius:8px;padding:12px;background:#f9fafb;white-space:pre-wrap;">${safeComment
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')}</div>
+
+<p style="margin-top:16px">
+Please visit the <b>MTERMS 2026 website</b> at
+<a href="${base}">${base}</a>
+and log in to your participant account for further action.
+</p>
+
+<p><b>Important reminder:</b><br>
+Only after you receive the official invitation or notification from the Secretariat confirming your presentation outcome:</p>
+
+<ul>
+  <li>If you are assigned for <b>Oral Presentation</b>, please upload your <b>slides in PDF format only</b>.</li>
+  <li>If you are assigned for <b>Poster Presentation</b>, please upload your <b>poster image only</b>.</li>
+</ul>
+
+<p>
+The invitation letter will be issued by the Secretariat upon confirmation of the presentation outcome,
+or may already have been issued in earlier communication.
+</p>
+
+<p>Regards,<br>
+MTERMS 2026 Secretariat<br>
+${from}</p>`;
+
+  const t = makeTransport();
+  await t.sendMail({
+    from: `"MTERMS 2026" <${from}>`,
+    to,
+    cc,
+    subject,
+    text,
+    html
+  });
+
+  return { subject };
+}
+
 // Friendly GET message so /api/registrations isn't a 404
 router.get('/', (req, res) => {
   res.type('text/plain').send('POST /api/registrations to create; GET /api/registrations/lookup?email=you@domain.com to search.');
@@ -520,6 +610,78 @@ if (finalCategory) safe.category = finalCategory;
   } catch (err) {
     console.error('Update failed:', err);
     res.status(500).json({ error: 'Server error: ' + err.message });
+  }
+});
+
+
+router.post('/admin/send-review-comment', async (req, res) => {
+  try {
+    const { regCode, email, reviewerComment } = req.body || {};
+
+    if (!regCode || !email) {
+      return res.status(400).json({ error: 'Missing regCode or email' });
+    }
+
+    const safeComment = String(reviewerComment || '').trim();
+    if (!safeComment) {
+      return res.status(400).json({ error: 'Reviewer comment is required' });
+    }
+
+    const doc = await Registration.findOne({
+      regCode: String(regCode).trim(),
+      'personal.email': String(email).trim().toLowerCase()
+    });
+
+    if (!doc) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    const participantName =
+      `${doc.personal?.firstName || ''} ${doc.personal?.lastName || ''}`.trim();
+
+    // 1) Save reviewer comment first
+    doc.program = doc.program || {};
+    doc.program.title = safeComment;
+    await doc.save();
+
+    // 2) Send email
+    const sendResult = await sendReviewerCommentEmail({
+      to: doc.personal.email,
+      cc: 'admin@mterms2026.com',
+      participantName,
+      regCode: doc.regCode,
+      reviewerComment: safeComment
+    });
+
+    // 3) Append history only after successful email send
+    doc.reviewEmailHistory = Array.isArray(doc.reviewEmailHistory)
+      ? doc.reviewEmailHistory
+      : [];
+
+    doc.reviewEmailHistory.push({
+      sentAt: new Date(),
+      sentBy: 'admin',
+      subject: sendResult.subject,
+      commentSnapshot: safeComment
+    });
+
+    await doc.save();
+
+    const sentCount = doc.reviewEmailHistory.length;
+    const lastSent = doc.reviewEmailHistory[sentCount - 1]?.sentAt || null;
+
+    return res.json({
+      ok: true,
+      message: 'Comment saved and email sent successfully',
+      sentCount,
+      lastSent,
+      subject: sendResult.subject
+    });
+  } catch (err) {
+    console.error('send-review-comment failed:', err);
+    return res.status(500).json({
+      error: 'Comment may have been saved, but email sending failed: ' + err.message
+    });
   }
 });
 
