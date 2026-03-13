@@ -44,8 +44,8 @@
     const banner = $('presBanner');
     if (banner){
       banner.innerHTML = (type === 'poster')
-        ? 'You have been selected for <strong>Poster Presentation</strong>. Please upload your poster file only after you have received the confirmation email titled “MTERMS 2026 Acceptance Letter” from admin@mterms2026.com.'
-        : 'You have been selected for <strong>Oral Presentation</strong>. Please upload your presentation file only after you have received the confirmation email titled “MTERMS 2026 Acceptance Letter” from admin@mterms2026.com.';
+        ? 'You have been selected for <strong>Poster Presentation</strong>. Please upload your poster file only after you have received the confirmation email titled “MTERMS 2026 Acceptance Letter” from <strong>admin@mterms2026.com</strong>.'
+        : 'You have been selected for <strong>Oral Presentation</strong>. Please upload your presentation file only after you have received the confirmation email titled “MTERMS 2026 Acceptance Letter” from <strong>admin@mterms2026.com</strong>.';
     }
 
     const slidesPane = $('slidesPane');
