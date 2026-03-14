@@ -1359,8 +1359,12 @@ async function uploadDoc(type, fileInputId, msgId, latestBoxId){
     const data = await r.json().catch(()=> ({}));
     if (!r.ok) throw new Error(data.error || 'Upload failed');
 
-    document.getElementById(msgId).textContent = `✅ Submitted version ${data.version || ''}`.trim();
-    input.value = '';
+let successMsg = `✅ Submitted version ${data.version || ''}`.trim();
+if (type === 'abstract' && data.emailSent === true) {
+  successMsg += '\n📧 The MTERMS 2026 Secretariat has been notified of your submission.';
+}
+document.getElementById(msgId).textContent = successMsg;
+document.getElementById(msgId).style.whiteSpace = 'pre-line';    input.value = '';
 
     await loadLatest(type, latestBoxId);
   }catch(err){
