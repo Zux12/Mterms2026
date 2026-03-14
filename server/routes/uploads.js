@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 const Registration = require('../models/Registration');
 const { getBucket, ObjectId } = require('../lib/gridfs');
 
@@ -29,6 +30,120 @@ const MAX_BYTES_BY_TYPE = {
 };
 function safeName(name='file') {
   return String(name).replace(/[^\w\-.]+/g, '_').slice(0, 120);
+}
+
+
+function siteBaseUrl() {
+  return (process.env.SITE_BASE_URL || 'https://mterms2026.com').replace(/\/+$/, '');
+}
+
+function makeTransport() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !port || !user || !pass) {
+    throw new Error('SMTP env vars missing (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS)');
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass }
+  });
+}
+
+async function sendAbstractAdminEmail({ reg, version }) {
+  const base = siteBaseUrl();
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const to = 'admin@mterms2026.com';
+
+  const firstName = String(reg.personal?.firstName || '').trim();
+  const lastName = String(reg.personal?.lastName || '').trim();
+  const participantName = `${firstName} ${lastName}`.trim() || 'Participant';
+  const regCode = String(reg.regCode || '').trim();
+  const participantEmail = String(reg.personal?.email || '').trim();
+  const institution = String(reg.professional?.institution || reg.student?.institution || '').trim();
+  const title = String(reg.program?.title || '').trim() || '(No abstract title provided)';
+  const preference =
+    String(reg.program?.preference || reg.program?.type || reg.program?.presentationType || '').trim() || 'Not specified';
+
+  const isNew = Number(version) === 1;
+  const subject = isNew
+    ? `📥 New Abstract Submission – MTERMS 2026 – ${participantName} – ${regCode}`
+    : `🔁 Abstract Updated – MTERMS 2026 – ${participantName} – ${regCode}`;
+
+  const submittedAt = new Date().toLocaleString('en-MY', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  const text =
+`${isNew ? 'New Abstract Submission Received' : 'Abstract Update Received'}
+
+A participant has submitted an abstract through the MTERMS 2026 submission system.
+
+Participant Details
+Name: ${participantName}
+Registration Code: ${regCode}
+Email: ${participantEmail}
+Institution: ${institution || 'Not provided'}
+
+Submission Details
+Presentation Preference: ${preference}
+Abstract Title: ${title}
+Submission Version: ${version}
+Submission Time: ${submittedAt}
+
+You may review this submission in the MTERMS 2026 Admin Portal:
+${base}/admin.html
+
+MTERMS 2026 Secretariat
+${from}`;
+
+  const esc = (s='') => String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const html =
+`<p><strong>${isNew ? 'New Abstract Submission Received' : 'Abstract Update Received'}</strong></p>
+
+<p>A participant has submitted an abstract through the <strong>MTERMS 2026 submission system</strong>.</p>
+
+<p><strong>Participant Details</strong><br>
+Name: ${esc(participantName)}<br>
+Registration Code: ${esc(regCode)}<br>
+Email: ${esc(participantEmail)}<br>
+Institution: ${esc(institution || 'Not provided')}</p>
+
+<p><strong>Submission Details</strong><br>
+Presentation Preference: ${esc(preference)}<br>
+Abstract Title: ${esc(title)}<br>
+Submission Version: ${esc(version)}<br>
+Submission Time: ${esc(submittedAt)}</p>
+
+<p>You may review this submission in the <strong>MTERMS 2026 Admin Portal</strong>:<br>
+<a href="${base}/admin.html">${base}/admin.html</a></p>
+
+<p>MTERMS 2026 Secretariat<br>
+${esc(from)}</p>`;
+
+  const t = makeTransport();
+  await t.sendMail({
+    from: `"MTERMS 2026" <${from}>`,
+    to,
+    subject,
+    text,
+    html
+  });
 }
 
 async function loadReg(regCode, email) {
@@ -109,14 +224,26 @@ if (!allowed.includes(file.mimetype)) {
       reg.studentProof.provided = true;
     }
 
-    await reg.save();
+await reg.save();
 
-    res.json({
-      ok: true,
-      id: String(fileId),
-      version,
-      filename: safeName(file.originalname)
-    });
+let emailSent = false;
+
+if (type === 'abstract') {
+  try {
+    await sendAbstractAdminEmail({ reg, version });
+    emailSent = true;
+  } catch (mailErr) {
+    console.error('Abstract admin email failed:', mailErr);
+  }
+}
+
+res.json({
+  ok: true,
+  id: String(fileId),
+  version,
+  filename: safeName(file.originalname),
+  emailSent
+});
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
