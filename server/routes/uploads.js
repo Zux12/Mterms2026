@@ -65,8 +65,16 @@ async function sendAbstractAdminEmail({ reg, version }) {
   const participantName = `${firstName} ${lastName}`.trim() || 'Participant';
   const regCode = String(reg.regCode || '').trim();
   const participantEmail = String(reg.personal?.email || '').trim();
-  const institution = String(reg.professional?.institution || reg.student?.institution || '').trim();
-  const title = String(reg.program?.title || '').trim() || '(No abstract title provided)';
+const institution = String(
+  reg.professional?.affiliation ||
+  reg.student?.university ||
+  ''
+).trim();
+
+const title = String(
+  reg.submission?.title ||
+  ''
+).trim() || '(No abstract title provided)';
   const preference =
     String(reg.program?.preference || reg.program?.type || reg.program?.presentationType || '').trim() || 'Not specified';
 
