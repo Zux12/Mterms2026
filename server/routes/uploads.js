@@ -154,6 +154,108 @@ ${esc(from)}</p>`;
   });
 }
 
+
+async function sendBankReceiptAdminEmail({ reg, version }) {
+  const base = siteBaseUrl();
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const to = 'admin@mterms2026.com';
+
+  const firstName = String(reg.personal?.firstName || '').trim();
+  const lastName = String(reg.personal?.lastName || '').trim();
+  const participantName = `${firstName} ${lastName}`.trim() || 'Participant';
+  const regCode = String(reg.regCode || '').trim();
+  const participantEmail = String(reg.personal?.email || '').trim();
+
+  const affiliation = String(
+    reg.professional?.affiliation ||
+    reg.student?.university ||
+    ''
+  ).trim();
+
+  const category = String(reg.category || '').trim() || 'Not specified';
+
+  const amount = (
+    reg.payment?.amount ??
+    reg.pricingSnapshot?.total ??
+    ''
+  );
+
+  const isNew = Number(version) === 1;
+  const subject = isNew
+    ? `💳 New Bank Receipt Upload – MTERMS 2026 – ${participantName} – ${regCode}`
+    : `🔁 Bank Receipt Updated – MTERMS 2026 – ${participantName} – ${regCode}`;
+
+  const submittedAt = new Date().toLocaleString('en-MY', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  const text =
+`${isNew ? 'New Bank Receipt Upload Received' : 'Bank Receipt Update Received'}
+
+A participant has uploaded a bank receipt through the MTERMS 2026 payment submission system.
+
+Participant Details
+Name: ${participantName}
+Registration Code: ${regCode}
+Email: ${participantEmail}
+Affiliation: ${affiliation || 'Not provided'}
+Category: ${category}
+
+Payment Details
+Amount: ${amount !== '' ? amount : 'Not provided'}
+Submission Version: ${version}
+Submission Time: ${submittedAt}
+
+You may review this submission in the MTERMS 2026 Admin Portal:
+${base}/admin.html
+
+MTERMS 2026 Secretariat
+${from}`;
+
+  const esc = (s='') => String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const html =
+`<p><strong>${isNew ? 'New Bank Receipt Upload Received' : 'Bank Receipt Update Received'}</strong></p>
+
+<p>A participant has uploaded a bank receipt through the <strong>MTERMS 2026 payment submission system</strong>.</p>
+
+<p><strong>Participant Details</strong><br>
+Name: ${esc(participantName)}<br>
+Registration Code: ${esc(regCode)}<br>
+Email: ${esc(participantEmail)}<br>
+Affiliation: ${esc(affiliation || 'Not provided')}<br>
+Category: ${esc(category)}</p>
+
+<p><strong>Payment Details</strong><br>
+Amount: ${esc(amount !== '' ? amount : 'Not provided')}<br>
+Submission Version: ${esc(version)}<br>
+Submission Time: ${esc(submittedAt)}</p>
+
+<p>You may review this submission in the <strong>MTERMS 2026 Admin Portal</strong>:<br>
+<a href="${base}/admin.html">${base}/admin.html</a></p>
+
+<p>MTERMS 2026 Secretariat<br>
+${esc(from)}</p>`;
+
+  const t = makeTransport();
+  await t.sendMail({
+    from: `"MTERMS 2026" <${from}>`,
+    to,
+    subject,
+    text,
+    html
+  });
+}
+
 async function loadReg(regCode, email) {
   return Registration.findOne({ regCode, 'personal.email': email });
 }
@@ -242,6 +344,15 @@ if (type === 'abstract') {
     emailSent = true;
   } catch (mailErr) {
     console.error('Abstract admin email failed:', mailErr);
+  }
+}
+
+if (type === 'bankReceipt') {
+  try {
+    await sendBankReceiptAdminEmail({ reg, version });
+    emailSent = true;
+  } catch (mailErr) {
+    console.error('Bank receipt admin email failed:', mailErr);
   }
 }
 
