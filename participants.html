@@ -1360,11 +1360,19 @@ async function uploadDoc(type, fileInputId, msgId, latestBoxId){
     if (!r.ok) throw new Error(data.error || 'Upload failed');
 
 let successMsg = `✅ Submitted version ${data.version || ''}`.trim();
+
 if (type === 'abstract' && data.emailSent === true) {
   successMsg += '\n📧 The MTERMS 2026 Secretariat has been notified of your submission.';
 }
+
+if (type === 'bankReceipt' && data.emailSent === true) {
+  successMsg += '\n📧 The MTERMS 2026 Secretariat has been notified of your payment receipt submission.';
+}
+
 document.getElementById(msgId).textContent = successMsg;
-document.getElementById(msgId).style.whiteSpace = 'pre-line';    input.value = '';
+document.getElementById(msgId).style.whiteSpace = 'pre-line';  
+    
+    input.value = '';
 
     await loadLatest(type, latestBoxId);
   }catch(err){
