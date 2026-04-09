@@ -1396,21 +1396,54 @@ document.getElementById('adminLoginShell').style.display = 'flex';
       toggleAdminSubmission($('pr-presenting').checked);
     });
     // Login flow
-    $('aLogin').addEventListener('click',()=>{
-      const u=$('aUser').value.trim(), p=$('aPass').value;
-      if(!u||!p){$('aMsg').textContent='❌ Enter username & password';return;}
-      const token=btoa(u+':'+p);
-      localStorage.setItem(ADMIN_KEY, token);
-      $('aMsg').textContent='✅ Logged in';
-const shell = document.getElementById('adminLoginShell');
-if (shell) shell.style.display = 'none';
-      const topHeader = document.getElementById('adminTopHeader');
-if (topHeader) topHeader.style.display = 'flex';
-      $('dash').style.display='block';
-const nav = document.getElementById('adminNav');
-if (nav) nav.style.display = 'block';
-      loadPage(1);
-    });
+$('aLogin').addEventListener('click', () => {
+  const u = $('aUser').value.trim();
+  const p = $('aPass').value;
+
+  // 1. Check empty
+  if (!u || !p) {
+    $('aMsg').textContent = '❌ Enter username & password';
+    return;
+  }
+
+  // 2. VALIDATE credentials (CHANGE THESE)
+  const VALID_USER = 'admin';
+  const VALID_PASS = 'admin123';
+
+  if (u !== VALID_USER || p !== VALID_PASS) {
+    // ❌ WRONG → reset + stay on login
+    $('aMsg').textContent = '❌ Invalid credentials';
+
+    // OPTIONAL: clear password
+    $('aPass').value = '';
+
+    // OPTIONAL: small delay then refresh login UI
+    setTimeout(() => {
+      $('aMsg').textContent = '';
+    }, 2000);
+
+    return;
+  }
+
+  // ✅ CORRECT → proceed login
+  const token = btoa(u + ':' + p);
+  localStorage.setItem(ADMIN_KEY, token);
+
+  $('aMsg').textContent = '✅ Logged in';
+
+  const shell = document.getElementById('adminLoginShell');
+  if (shell) shell.style.display = 'none';
+
+  const topHeader = document.getElementById('adminTopHeader');
+  if (topHeader) topHeader.style.display = 'flex';
+
+  $('dash').style.display = 'block';
+
+  const nav = document.getElementById('adminNav');
+  if (nav) nav.style.display = 'block';
+
+  loadPage(1);
+});
     $('logoutBtn').addEventListener('click',()=>{
       localStorage.removeItem(ADMIN_KEY); location.reload();
     });
