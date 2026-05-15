@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MTERMS 2026 — Registered Participants</title>
+
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --border:#e5e7eb;
+      --muted:#667085;
+      --uitm-navy:#0B2A6B;
+      --tesma-teal:#0EA5A6;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(900px 300px at 10% 0%, rgba(14,165,166,.06), transparent 60%),
+        radial-gradient(900px 300px at 90% 0%, rgba(11,42,107,.06), transparent 60%),
+        #ffffff;
+      color:var(--text);
+    }
+
+    .wrap{
+      width:min(1400px,94vw);
+      margin:24px auto;
+    }
+
+    .brand-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:10px 4px 18px;
+      margin-bottom:16px;
+      border-bottom:2px solid rgba(14,165,166,.18);
+    }
+
+    .brand-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      width:88px;
+      height:88px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.06);
+    }
+
+    .brand-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+    }
+
+    h1{
+      margin:0;
+      font-size:1.35rem;
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:#475467;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:16px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:1.4fr .8fr .8fr auto auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    @media(max-width:900px){
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+      .brand-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+
+    label{
+      font-weight:800;
+      font-size:.9rem;
+    }
+
+    input,select{
+      width:100%;
+      margin-top:6px;
+      padding:9px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      color:#111827;
+      box-sizing:border-box;
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:9px 13px;
+      font-size:.94rem;
+      font-weight:800;
+      background:#fff;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:#16a34a;
+      border-color:#16a34a;
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#fff;
+      color:#111827;
+    }
+
+    .btn-danger{
+      background:#dc2626;
+      border-color:#dc2626;
+      color:#fff;
+    }
+
+    .summary{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      background:#f9fafb;
+      font-size:.9rem;
+      font-weight:700;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+      min-width:1500px;
+    }
+
+    th,td{
+      padding:9px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      text-align:left;
+    }
+
+    th{
+      background:rgba(11,42,107,.05);
+      color:#111827;
+      font-weight:900;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tr:hover td{
+      background:#f9fafb;
+    }
+
+    .status-paid{
+      color:#15803d;
+      font-weight:900;
+    }
+
+    .status-pending{
+      color:#ea580c;
+      font-weight:900;
+    }
+
+    .small{
+      color:#667085;
+      font-size:.82rem;
+    }
+
+    #msg{
+      margin-top:10px;
+      font-weight:700;
+    }
+
+    @media print{
+      .no-print{display:none!important}
+      body{background:#fff}
+      .wrap{width:100%;margin:0}
+      .card{box-shadow:none;border:none}
+      th{position:static}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header class="brand-header">
+      <div class="brand-left">
+        <div class="brand-logo">
+          <img src="public/mterm.jpg" alt="MTERMS 2026">
+        </div>
+        <div>
+          <h1>MTERMS 2026 — Registered Participants</h1>
+          <p class="subtitle">Full admin view of registered participants and submitted details.</p>
+        </div>
+      </div>
+
+      <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="window.print()">Print</button>
+        <button class="btn btn-danger" onclick="window.close()">Close Tab</button>
+      </div>
+    </header>
+
+    <div class="card no-print">
+      <div class="toolbar">
+        <label>
+          Search
+          <input id="searchBox" placeholder="Search name, email, code, affiliation, country">
+        </label>
+
+        <label>
+          Category
+          <select id="categoryFilter">
+            <option value="">All Categories</option>
+          </select>
+        </label>
+
+        <label>
+          Payment
+          <select id="paymentFilter">
+            <option value="">All Payment Status</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+          </select>
+        </label>
+
+        <button id="reloadBtn" class="btn btn-primary">Reload</button>
+        <button id="exportBtn" class="btn btn-secondary">Export CSV</button>
+      </div>
+
+      <div class="summary">
+        <span class="pill">Total loaded: <span id="totalLoaded">0</span></span>
+        <span class="pill">Showing: <span id="totalShowing">0</span></span>
+        <span class="pill">Paid: <span id="totalPaid">0</span></span>
+        <span class="pill">Pending: <span id="totalPending">0</span></span>
+        <span class="pill">Presenters: <span id="totalPresenters">0</span></span>
+      </div>
+
+      <div id="msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Registration Code</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Category</th>
+              <th>Role</th>
+              <th>Nationality</th>
+              <th>Professional Type</th>
+              <th>TESMA Member</th>
+              <th>Affiliation</th>
+              <th>Department</th>
+              <th>Role / Title</th>
+              <th>Country</th>
+              <th>Presenter</th>
+              <th>Presentation Type</th>
+              <th>Abstract Title</th>
+              <th>Theme</th>
+              <th>Field</th>
+              <th>Payment</th>
+              <th>Amount</th>
+              <th>Phase</th>
+              <th>Registered At</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr>
+              <td colspan="23">Loading participants...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+  const ADMIN_KEY = 'mterms-admin-basic';
+
+  let allRows = [];
+  let filteredRows = [];
+
+  const $ = (id) => document.getElementById(id);
+
+  function authHeader(){
+    const token = localStorage.getItem(ADMIN_KEY);
+    return token ? { 'Authorization':'Basic ' + token } : {};
+  }
+
+  function escapeHtml(s){
+    return String(s ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  function fullName(doc){
+    return [
+      doc?.personal?.firstName || '',
+      doc?.personal?.lastName || ''
+    ].join(' ').trim();
+  }
+
+  function money(doc){
+    const currency = doc?.pricingSnapshot?.currency || '';
+    const total = doc?.payment?.amount ?? doc?.pricingSnapshot?.total ?? '';
+    if (total === '') return '';
+    return `${currency} ${total}`;
+  }
+
+  function fmtDate(value){
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleString();
+  }
+
+  async function fetchPage(page){
+    const r = await fetch(`${API}/api/admin/registrations?page=${page}&limit=100&q=`, {
+      headers: authHeader()
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    return data;
+  }
+
+  async function loadAllParticipants(){
+    $('rows').innerHTML = `<tr><td colspan="23">Loading participants...</td></tr>`;
+    $('msg').textContent = 'Loading all registered participants...';
+
+    try{
+      if (!localStorage.getItem(ADMIN_KEY)){
+        throw new Error('Admin login token not found. Please login in admin.html first, then open this page again.');
+      }
+
+      allRows = [];
+
+      let page = 1;
+      let total = 0;
+
+      while (true){
+        const data = await fetchPage(page);
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+
+        total = Number(data.total || 0);
+        allRows.push(...rows);
+
+        $('msg').textContent = `Loading... ${allRows.length} / ${total}`;
+
+        if (!rows.length || allRows.length >= total) break;
+        page += 1;
+      }
+
+      populateCategoryFilter();
+      applyFilters();
+
+      $('msg').textContent = `✅ Loaded ${allRows.length} participant(s).`;
+    }catch(err){
+      $('rows').innerHTML = `<tr><td colspan="23" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
+      $('msg').textContent = '❌ ' + err.message;
+    }
+  }
+
+  function populateCategoryFilter(){
+    const cats = [...new Set(allRows.map(x => x.category || '').filter(Boolean))].sort();
+    $('categoryFilter').innerHTML =
+      `<option value="">All Categories</option>` +
+      cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  }
+
+  function applyFilters(){
+    const q = $('searchBox').value.trim().toLowerCase();
+    const cat = $('categoryFilter').value;
+    const pay = $('paymentFilter').value;
+
+    filteredRows = allRows.filter(doc => {
+      const haystack = [
+        doc.regCode,
+        fullName(doc),
+        doc?.personal?.email,
+        doc?.personal?.phone,
+        doc?.personal?.country,
+        doc?.category,
+        doc?.roleType,
+        doc?.nationality,
+        doc?.professionalSubtype,
+        doc?.professional?.affiliation,
+        doc?.professional?.department,
+        doc?.professional?.roleTitle,
+        doc?.submission?.title,
+        doc?.submission?.theme,
+        doc?.submission?.field,
+        doc?.payment?.status
+      ].join(' ').toLowerCase();
+
+      const okSearch = !q || haystack.includes(q);
+      const okCat = !cat || doc.category === cat;
+      const okPay = !pay || String(doc?.payment?.status || 'pending').toLowerCase() === pay;
+
+      return okSearch && okCat && okPay;
+    });
+
+    renderRows();
+    updateSummary();
+  }
+
+  function renderRows(){
+    if (!filteredRows.length){
+      $('rows').innerHTML = `<tr><td colspan="23"><em>No matching participants found.</em></td></tr>`;
+      return;
+    }
+
+    $('rows').innerHTML = filteredRows.map((doc, index) => {
+      const payment = String(doc?.payment?.status || 'pending').toLowerCase();
+      const paymentClass = payment === 'paid' ? 'status-paid' : 'status-pending';
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>${escapeHtml(doc.regCode || '')}</strong></td>
+          <td>${escapeHtml(fullName(doc))}</td>
+          <td>${escapeHtml(doc?.personal?.email || '')}</td>
+          <td>${escapeHtml(doc?.personal?.phone || '')}</td>
+          <td>${escapeHtml(doc.category || '')}</td>
+          <td>${escapeHtml(doc.roleType || '')}</td>
+          <td>${escapeHtml(doc.nationality || '')}</td>
+          <td>${escapeHtml(doc.professionalSubtype || '')}</td>
+          <td>${doc.tesmaMember ? 'Yes' : 'No'}</td>
+          <td>${escapeHtml(doc?.professional?.affiliation || '')}</td>
+          <td>${escapeHtml(doc?.professional?.department || '')}</td>
+          <td>${escapeHtml(doc?.professional?.roleTitle || '')}</td>
+          <td>${escapeHtml(doc?.personal?.country || '')}</td>
+          <td>${doc?.program?.presenting ? 'Yes' : 'No'}</td>
+          <td>${escapeHtml(doc?.program?.type || '')}</td>
+          <td>${escapeHtml(doc?.submission?.title || '')}</td>
+          <td>${escapeHtml(doc?.submission?.theme || '')}</td>
+          <td>${escapeHtml(doc?.submission?.field || '')}</td>
+          <td class="${paymentClass}">${escapeHtml(payment)}</td>
+          <td>${escapeHtml(money(doc))}</td>
+          <td>${escapeHtml(doc?.pricingSnapshot?.phase || '')}</td>
+          <td><span class="small">${escapeHtml(fmtDate(doc.createdAt))}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateSummary(){
+    const paid = filteredRows.filter(x => String(x?.payment?.status || '').toLowerCase() === 'paid').length;
+    const pending = filteredRows.filter(x => String(x?.payment?.status || 'pending').toLowerCase() !== 'paid').length;
+    const presenters = filteredRows.filter(x => !!x?.program?.presenting).length;
+
+    $('totalLoaded').textContent = allRows.length;
+    $('totalShowing').textContent = filteredRows.length;
+    $('totalPaid').textContent = paid;
+    $('totalPending').textContent = pending;
+    $('totalPresenters').textContent = presenters;
+  }
+
+  function csvCell(value){
+    const s = String(value ?? '');
+    return `"${s.replaceAll('"','""')}"`;
+  }
+
+  function exportCSV(){
+    const headers = [
+      'No',
+      'Registration Code',
+      'Name',
+      'Email',
+      'Phone',
+      'Category',
+      'Role',
+      'Nationality',
+      'Professional Type',
+      'TESMA Member',
+      'Affiliation',
+      'Department',
+      'Role / Title',
+      'Country',
+      'Presenter',
+      'Presentation Type',
+      'Abstract Title',
+      'Theme',
+      'Field',
+      'Payment',
+      'Amount',
+      'Phase',
+      'Registered At'
+    ];
+
+    const lines = [headers.map(csvCell).join(',')];
+
+    filteredRows.forEach((doc, index) => {
+      lines.push([
+        index + 1,
+        doc.regCode || '',
+        fullName(doc),
+        doc?.personal?.email || '',
+        doc?.personal?.phone || '',
+        doc.category || '',
+        doc.roleType || '',
+        doc.nationality || '',
+        doc.professionalSubtype || '',
+        doc.tesmaMember ? 'Yes' : 'No',
+        doc?.professional?.affiliation || '',
+        doc?.professional?.department || '',
+        doc?.professional?.roleTitle || '',
+        doc?.personal?.country || '',
+        doc?.program?.presenting ? 'Yes' : 'No',
+        doc?.program?.type || '',
+        doc?.submission?.title || '',
+        doc?.submission?.theme || '',
+        doc?.submission?.field || '',
+        doc?.payment?.status || 'pending',
+        money(doc),
+        doc?.pricingSnapshot?.phase || '',
+        fmtDate(doc.createdAt)
+      ].map(csvCell).join(','));
+    });
+
+    const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'MTERMS-2026-registered-participants.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  $('reloadBtn').addEventListener('click', loadAllParticipants);
+  $('exportBtn').addEventListener('click', exportCSV);
+  $('searchBox').addEventListener('input', applyFilters);
+  $('categoryFilter').addEventListener('change', applyFilters);
+  $('paymentFilter').addEventListener('change', applyFilters);
+
+  loadAllParticipants();
+</script>
+
+</body>
+</html>
