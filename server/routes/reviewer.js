@@ -2,6 +2,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const crypto = require('crypto');
 
 const Reviewer = require('../models/Reviewer');
 const Registration = require('../models/Registration');
@@ -54,10 +55,58 @@ async function ensureDefaultReviewers() {
   }
 }
 
+function reviewerSecret() {
+  return process.env.SESSION_SECRET || process.env.MTERM2026_SESSION_SECRET || 'mterms2026-reviewer-secret';
+}
+
+function createReviewerToken(reviewer) {
+  const payload = {
+    id: String(reviewer._id),
+    username: reviewer.username,
+    displayName: reviewer.displayName || reviewer.username
+  };
+
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto
+    .createHmac('sha256', reviewerSecret())
+    .update(body)
+    .digest('base64url');
+
+  return `${body}.${sig}`;
+}
+
+function verifyReviewerToken(token) {
+  if (!token || !token.includes('.')) return null;
+
+  const [body, sig] = token.split('.');
+  const expected = crypto
+    .createHmac('sha256', reviewerSecret())
+    .update(body)
+    .digest('base64url');
+
+  if (sig !== expected) return null;
+
+  return JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+}
+
 function requireReviewer(req, res, next) {
-  if (!req.session?.reviewerId || !req.session?.reviewerUsername) {
+  if (req.session?.reviewerId && req.session?.reviewerUsername) {
+    return next();
+  }
+
+  const auth = String(req.headers.authorization || '');
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+
+  const payload = verifyReviewerToken(token);
+
+  if (!payload?.id || !payload?.username) {
     return res.status(401).json({ error: 'Reviewer login required' });
   }
+
+  req.session.reviewerId = payload.id;
+  req.session.reviewerUsername = payload.username;
+  req.session.reviewerDisplayName = payload.displayName || payload.username;
+
   next();
 }
 
@@ -89,13 +138,16 @@ router.post('/login', async (req, res) => {
     req.session.reviewerUsername = reviewer.username;
     req.session.reviewerDisplayName = reviewer.displayName || reviewer.username;
 
-    res.json({
-      ok: true,
-      reviewer: {
-        username: reviewer.username,
-        displayName: reviewer.displayName || reviewer.username
-      }
-    });
+res.json({
+  ok: true,
+  reviewerToken: createReviewerToken(reviewer),
+  reviewer: {
+    username: reviewer.username,
+    displayName: reviewer.displayName || reviewer.username
+  }
+});
+
+    
   } catch (err) {
     console.error('Reviewer login error:', err);
     res.status(500).json({ error: 'Reviewer login failed' });
