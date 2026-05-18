@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MTERMS 2026 — Panel Reviewer Login</title>
+
+  <style>
+    :root{
+      --uitm:#7a0026;
+      --uitm2:#a10a39;
+      --tesma:#0a4fb3;
+      --ink:#0b1220;
+      --muted:#526079;
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --line:rgba(15,23,42,.10);
+      --shadow:0 22px 60px rgba(2,8,23,.14);
+      --shadow2:0 10px 22px rgba(2,8,23,.10);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 15% 12%, rgba(122,0,38,.16), transparent 60%),
+        radial-gradient(900px 520px at 85% 18%, rgba(10,79,179,.14), transparent 60%),
+        linear-gradient(180deg,#fbfcff,#eef2ff 60%,#f7f8fc);
+      min-height:100vh;
+    }
+
+    .back-btn{
+      position:absolute;
+      top:28px;
+      left:28px;
+      display:inline-flex;
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:800;
+      font-size:.9rem;
+      text-decoration:none;
+      color:#fff;
+      background:linear-gradient(135deg,var(--uitm),var(--uitm2));
+      box-shadow:0 12px 26px rgba(122,0,38,.22);
+      z-index:10;
+    }
+
+    .page{
+      max-width:980px;
+      margin:0 auto;
+      padding:42px 18px 26px;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .hero{
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
+
+    .main-logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px 14px;
+      border-radius:22px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow:var(--shadow2);
+      backdrop-filter:blur(10px);
+    }
+
+    .main-logo img{
+      height:92px;
+      width:auto;
+      object-fit:contain;
+      display:block;
+      border-radius:14px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(1.35rem,2.2vw,1.75rem);
+      letter-spacing:-.02em;
+      line-height:1.15;
+    }
+
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:1.02rem;
+    }
+
+    .card-wrap{
+      display:flex;
+      justify-content:center;
+    }
+
+    .card{
+      width:min(560px,100%);
+      background:rgba(255,255,255,.88);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      overflow:hidden;
+    }
+
+    .card-topline{
+      height:6px;
+      background:linear-gradient(90deg,var(--uitm),var(--uitm2),var(--tesma));
+    }
+
+    .card-body{
+      padding:20px;
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+
+    label{
+      display:block;
+      font-weight:850;
+      font-size:.95rem;
+      margin-bottom:6px;
+      color:rgba(11,18,32,.92);
+    }
+
+    .input{
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.14);
+      background:rgba(255,255,255,.96);
+      outline:none;
+      font-size:1rem;
+      box-shadow:0 1px 0 rgba(2,8,23,.04);
+    }
+
+    .pwwrap{position:relative}
+    .pwwrap .input{padding-right:88px}
+
+    .toggle{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      border-radius:12px;
+      padding:7px 10px;
+      font-weight:850;
+      font-size:.85rem;
+      cursor:pointer;
+      border:1px solid rgba(15,23,42,.14);
+      background:rgba(255,255,255,.92);
+      color:rgba(11,18,32,.86);
+    }
+
+    .row-actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:4px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:900;
+      cursor:pointer;
+      color:#fff;
+      background:linear-gradient(135deg,var(--uitm),var(--uitm2));
+      box-shadow:0 14px 30px rgba(122,0,38,.22);
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .msg{
+      display:none;
+      margin-top:6px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background:rgba(255,255,255,.70);
+      font-weight:800;
+    }
+
+    .msg.show{display:block}
+    .msg.err{
+      color:#8a1f17;
+      border-color:rgba(180,35,24,.25);
+      background:rgba(180,35,24,.06);
+    }
+    .msg.ok{
+      color:#0b6b3a;
+      border-color:rgba(6,118,71,.22);
+      background:rgba(6,118,71,.06);
+    }
+
+    .footer{
+      margin-top:auto;
+      padding-top:12px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .org-label{
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      margin-bottom:10px;
+    }
+
+    .org-logos{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .logo-chip{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(15,23,42,.10);
+      background:rgba(255,255,255,.80);
+      box-shadow:0 10px 22px rgba(2,8,23,.08);
+      backdrop-filter:blur(10px);
+    }
+
+    .logo-chip img{
+      height:40px;
+      width:auto;
+      object-fit:contain;
+      display:block;
+      border-radius:10px;
+    }
+
+    @media(max-width:520px){
+      .back-btn{
+        top:18px;
+        left:16px;
+        padding:8px 12px;
+        font-size:.85rem;
+      }
+      .page{padding-top:68px}
+      .main-logo img{height:78px}
+      .card-body{padding:16px}
+    }
+  </style>
+</head>
+
+<body>
+  <a href="index.html" class="back-btn">← Back to Website</a>
+
+  <main class="page">
+    <header class="hero">
+      <div class="main-logo">
+        <img src="public/mterm.jpg" alt="MTERMS 2026 Logo">
+      </div>
+
+      <div>
+        <h1>MTERMS 2026 — Panel Reviewer Login</h1>
+        <p class="subtitle">Log in using your assigned panel username and password.</p>
+      </div>
+    </header>
+
+    <section class="card-wrap">
+      <div class="card">
+        <div class="card-topline"></div>
+
+        <div class="card-body">
+          <div class="grid">
+            <div>
+              <label for="username">Panel Username</label>
+              <input id="username" class="input" placeholder="panel1" autocomplete="username">
+            </div>
+
+            <div>
+              <label for="password">Password</label>
+              <div class="pwwrap">
+                <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password">
+                <button type="button" id="toggle" class="toggle">Show</button>
+              </div>
+            </div>
+
+            <div class="row-actions">
+              <button class="btn" id="loginBtn">Login</button>
+            </div>
+
+            <div id="msg" class="msg"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="org-label">Organized by</div>
+      <div class="org-logos">
+        <div class="logo-chip"><img src="public/uitm.png" alt="UiTM"></div>
+        <div class="logo-chip"><img src="public/tesma.png" alt="TESMA"></div>
+      </div>
+    </footer>
+  </main>
+
+<script>
+const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+const usernameEl = document.getElementById('username');
+const pwEl = document.getElementById('password');
+const toggle = document.getElementById('toggle');
+const btn = document.getElementById('loginBtn');
+const msg = document.getElementById('msg');
+
+function showMsg(type, text){
+  msg.className = 'msg show ' + (type || '');
+  msg.textContent = text || '';
+}
+
+toggle.addEventListener('click', () => {
+  const isPw = pwEl.type === 'password';
+  pwEl.type = isPw ? 'text' : 'password';
+  toggle.textContent = isPw ? 'Hide' : 'Show';
+});
+
+async function doLogin(){
+  msg.className = 'msg';
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+
+  try{
+    const username = String(usernameEl.value || '').trim().toLowerCase();
+    const password = String(pwEl.value || '');
+
+    const r = await fetch(`${API}/api/reviewer/login`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      credentials:'include',
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    localStorage.setItem('mtermsReviewer', JSON.stringify(data.reviewer || { username }));
+
+    showMsg('ok', '✅ Logged in. Redirecting...');
+
+    setTimeout(() => {
+      window.location.href = 'reviewer.html';
+    }, 500);
+
+  }catch(err){
+    showMsg('err', '❌ ' + (err.message || 'Login failed'));
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Login';
+  }
+}
+
+btn.addEventListener('click', doLogin);
+usernameEl.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+pwEl.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>
