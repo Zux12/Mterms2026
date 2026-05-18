@@ -704,9 +704,11 @@ table thead th{
               <th>Name</th>
               <th>Category</th>
               <th>Email</th>
-              <th>Payment</th>
-              <th>Affiliation</th>
-              <th style="width:160px">Actions</th>
+<th>Payment</th>
+<th>Affiliation</th>
+<th>Panel Review</th>
+<th style="width:160px">Actions</th>
+              
             </tr>
           </thead>
           <tbody id="rows">
@@ -735,6 +737,32 @@ table thead th{
         Participant Registration Code: <div id="editCode" style="opacity:.8;margin-bottom:6px"></div>
     </div>
 
+
+        <div class="card" id="panelReviewAdminCard">
+  <h4>Panel Abstract Review</h4>
+
+  <div class="row">
+    <label>Assign Panel Reviewer
+      <select id="panelReviewerSelect">
+        <option value="">Select panel reviewer</option>
+      </select>
+    </label>
+
+    <label>Current Review Status
+      <input id="panelReviewStatus" readonly placeholder="Not assigned">
+    </label>
+  </div>
+
+  <div id="panelReviewDetails" style="margin-top:10px;font-size:.95rem"></div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <button id="assignPanelReviewerBtn" type="button" class="btn btn-primary">Assign Reviewer</button>
+    <button id="refreshPanelReviewBtn" type="button" class="btn btn-secondary">Refresh Review Status</button>
+  </div>
+
+  <div id="panelReviewMsg" style="margin-top:10px;font-weight:700"></div>
+</div>
+        
         
     <div class="card">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -1475,17 +1503,65 @@ $('aLogin').addEventListener('click', () => {
             <td>${doc.category||''}</td>
             <td>${doc.personal?.email||''}</td>
             <td>${doc.payment?.status||'pending'}</td>
-            <td>${doc.professional?.affiliation||''}</td>
-            <td class="actions">
+<td>${doc.professional?.affiliation||''}</td>
+<td id="reviewStatus-${doc._id}">Loading…</td>
+<td class="actions">
 <button class="btn btn-primary" data-act="edit" data-id="${doc._id}">View</button>
 </td>
           </tr>`;
         }).join('') || '<tr><td colspan="8"><em>No results</em></td></tr>';
         $('pageInfo').textContent = `Page ${page} • ${Math.min(page*limit, total)} / ${total}`;
+        await loadReviewStatusesForCurrentRows();
       }catch(err){
         $('rows').innerHTML = `<tr><td colspan="8" style="color:#c00">❌ ${err.message}</td></tr>`;
       }
     }
+
+
+    async function loadReviewStatusesForCurrentRows(){
+  try{
+    const ids = rows.map(x => x._id).filter(Boolean);
+    if (!ids.length) return;
+
+    const r = await fetch(`${API}/api/admin/reviews/statuses`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeader() },
+      body: JSON.stringify({ registrationIds: ids })
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed');
+
+    const map = data.map || {};
+
+    rows.forEach(doc => {
+      const el = document.getElementById(`reviewStatus-${doc._id}`);
+      if (!el) return;
+
+      const rev = map[doc._id];
+
+      if (!rev) {
+        el.innerHTML = `<span style="color:#b45309;font-weight:800">Not assigned</span>`;
+        return;
+      }
+
+      if (rev.status === 'submitted') {
+        el.innerHTML = `<span style="color:#15803d;font-weight:900">Reviewed</span><br><small>${rev.assignedReviewerUsername}</small>`;
+        return;
+      }
+
+      if (rev.status === 'draft') {
+        el.innerHTML = `<span style="color:#2563eb;font-weight:900">Draft saved</span><br><small>${rev.assignedReviewerUsername}</small>`;
+        return;
+      }
+
+      el.innerHTML = `<span style="color:#7c2d12;font-weight:900">Assigned</span><br><small>${rev.assignedReviewerUsername}</small>`;
+    });
+
+  }catch(err){
+    console.warn('Review status load failed:', err);
+  }
+}
 
     $('refresh').addEventListener('click',()=>loadPage(1));
     $('prev').addEventListener('click',()=>{if(page>1) loadPage(page-1);});
@@ -1524,7 +1600,122 @@ document.getElementById('btnCert').addEventListener('click', () => {
   // Go to certificate generator
   window.location.href = 'certificate.html';
 });
-    
+
+
+    let panelReviewersLoaded = false;
+
+async function loadPanelReviewers(){
+  if (panelReviewersLoaded) return;
+
+  const sel = $('panelReviewerSelect');
+  if (!sel) return;
+
+  sel.innerHTML = `<option value="">Loading panel reviewers...</option>`;
+
+  try{
+    const r = await fetch(`${API}/api/admin/reviewers`, { headers: authHeader() });
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed to load reviewers');
+
+    const reviewers = Array.isArray(data.rows) ? data.rows : [];
+
+    sel.innerHTML =
+      `<option value="">Select panel reviewer</option>` +
+      reviewers.map(x => `<option value="${escapeHtml(x.username)}">${escapeHtml(x.displayName || x.username)} (${escapeHtml(x.username)})</option>`).join('');
+
+    panelReviewersLoaded = true;
+  }catch(err){
+    sel.innerHTML = `<option value="">Failed to load reviewers</option>`;
+    $('panelReviewMsg').textContent = '❌ ' + err.message;
+  }
+}
+
+async function loadPanelReviewForCurrent(){
+  if (!currentEditorDoc?._id) return;
+
+  $('panelReviewStatus').value = 'Loading...';
+  $('panelReviewDetails').innerHTML = '';
+
+  try{
+    const r = await fetch(`${API}/api/admin/reviews/by-registration/${currentEditorDoc._id}`, {
+      headers: authHeader()
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed to load review');
+
+    const review = data.review;
+
+    if (!review) {
+      $('panelReviewStatus').value = 'Not assigned';
+      $('panelReviewerSelect').value = '';
+      $('panelReviewDetails').innerHTML = `<em>No panel reviewer assigned yet.</em>`;
+      return;
+    }
+
+    $('panelReviewerSelect').value = review.assignedReviewerUsername || '';
+    $('panelReviewStatus').value = review.status || 'assigned';
+
+    const total = review?.scores?.total ?? 0;
+    const submitted = review?.submittedAt ? new Date(review.submittedAt).toLocaleString() : '—';
+
+    let fileHtml = '';
+    if (review?.reviewerFile?.gridFsId) {
+      fileHtml = `<br><a class="btn btn-primary" href="${API}/api/admin/reviews/commented-file/${review._id}" target="_blank" rel="noopener">Download Panel Commented File</a>`;
+    }
+
+    $('panelReviewDetails').innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:10px;background:#f9fafb">
+        <strong>Assigned reviewer:</strong> ${escapeHtml(review.assignedReviewerUsername || '—')}<br>
+        <strong>Status:</strong> ${escapeHtml(review.status || '—')}<br>
+        <strong>Total score:</strong> ${escapeHtml(total)} / 35<br>
+        <strong>Require correction:</strong> ${escapeHtml(review.requireCorrection || '—')}<br>
+        <strong>Recommended category:</strong> ${escapeHtml(review.recommendedCategory || '—')}<br>
+        <strong>Submitted at:</strong> ${escapeHtml(submitted)}
+        ${fileHtml}
+      </div>
+    `;
+  }catch(err){
+    $('panelReviewStatus').value = 'Error';
+    $('panelReviewDetails').innerHTML = `<span style="color:#b42318">❌ ${escapeHtml(err.message)}</span>`;
+  }
+}
+
+async function assignPanelReviewerForCurrent(){
+  if (!currentEditorDoc?._id) return;
+
+  const reviewerUsername = $('panelReviewerSelect').value;
+
+  if (!reviewerUsername) {
+    $('panelReviewMsg').textContent = '❌ Please select a panel reviewer.';
+    return;
+  }
+
+  $('assignPanelReviewerBtn').disabled = true;
+  $('panelReviewMsg').textContent = 'Assigning reviewer...';
+
+  try{
+    const r = await fetch(`${API}/api/admin/reviews/assign`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeader() },
+      body: JSON.stringify({
+        registrationId: currentEditorDoc._id,
+        reviewerUsername
+      })
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed to assign reviewer');
+
+    $('panelReviewMsg').textContent = `✅ Assigned to ${reviewerUsername}`;
+    await loadPanelReviewForCurrent();
+    await loadReviewStatusesForCurrentRows();
+  }catch(err){
+    $('panelReviewMsg').textContent = '❌ ' + err.message;
+  }finally{
+    $('assignPanelReviewerBtn').disabled = false;
+  }
+}
     
     // Load one doc and fill editor
  async function openEditor(id){
@@ -1537,6 +1728,13 @@ document.getElementById('btnCert').addEventListener('click', () => {
     $('editCard').style.display='block';
     $('editCode').textContent = doc.regCode;
     currentEditorDoc = doc;
+
+    $('panelReviewMsg').textContent = '';
+await loadPanelReviewers();
+await loadPanelReviewForCurrent();
+
+$('assignPanelReviewerBtn').onclick = assignPanelReviewerForCurrent;
+$('refreshPanelReviewBtn').onclick = loadPanelReviewForCurrent;
 
     $('badgePhoto').removeAttribute('src');
     $('photoMsg').textContent = '';
