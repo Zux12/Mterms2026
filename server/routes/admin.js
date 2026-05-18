@@ -4,11 +4,36 @@ const router = express.Router();
 // ✅ Allow CORS preflight to pass through admin routes
 router.options('*', (req, res) => res.sendStatus(204));
 const Registration = require('../models/Registration');
+const Reviewer = require('../models/Reviewer');
+const AbstractReview = require('../models/AbstractReview');
+const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const { getBucket, ObjectId } = require('../lib/gridfs');
 
 // super-basic Basic-Auth (dev only). Change later to real auth/JWT.
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin';
+
+async function ensureDefaultReviewers() {
+  for (let i = 1; i <= 10; i++) {
+    const username = `panel${i}`;
+    const exists = await Reviewer.findOne({ username }).select('_id').lean();
+    if (exists) continue;
+
+    const passwordHash = await bcrypt.hash(username, 10);
+
+    await Reviewer.create({
+      username,
+      displayName: `Panel Reviewer ${i}`,
+      passwordHash,
+      role: 'reviewer',
+      status: 'active'
+    });
+  }
+}
+
+
+
 function adminAuth(req, res, next){
   // ✅ Allow preflight OPTIONS requests through without Basic Auth
   if (req.method === 'OPTIONS') return next();
@@ -19,6 +44,132 @@ function adminAuth(req, res, next){
   if (user === ADMIN_USER && pass === ADMIN_PASS) return next();
   return res.status(401).json({ error: 'Invalid credentials' });
 }
+
+
+// GET /api/admin/reviewers
+router.get('/reviewers', adminAuth, async (req, res) => {
+  try {
+    await ensureDefaultReviewers();
+
+    const rows = await Reviewer.find({ status: 'active' })
+      .select('username displayName status')
+      .sort({ username: 1 })
+      .lean();
+
+    res.json({ ok: true, rows });
+  } catch (err) {
+    console.error('Admin reviewers error:', err);
+    res.status(500).json({ error: 'Failed to load reviewers' });
+  }
+});
+
+// POST /api/admin/reviews/assign
+router.post('/reviews/assign', adminAuth, async (req, res) => {
+  try {
+    await ensureDefaultReviewers();
+
+    const registrationId = String(req.body?.registrationId || '').trim();
+    const reviewerUsername = String(req.body?.reviewerUsername || '').trim().toLowerCase();
+
+    if (!registrationId) return res.status(400).json({ error: 'registrationId is required' });
+    if (!reviewerUsername) return res.status(400).json({ error: 'reviewerUsername is required' });
+
+    const reg = await Registration.findById(registrationId).select('regCode').lean();
+    if (!reg) return res.status(404).json({ error: 'Registration not found' });
+
+    const reviewer = await Reviewer.findOne({ username: reviewerUsername, status: 'active' }).lean();
+    if (!reviewer) return res.status(404).json({ error: 'Reviewer not found' });
+
+    let review = await AbstractReview.findOne({ registrationId });
+
+    if (review && review.status === 'submitted') {
+      return res.status(400).json({ error: 'Review already submitted. Cannot reassign.' });
+    }
+
+    if (!review) {
+      review = await AbstractReview.create({
+        registrationId,
+        regCode: reg.regCode,
+        assignedReviewerUsername: reviewerUsername,
+        assignedBy: 'admin',
+        assignedAt: new Date(),
+        status: 'assigned'
+      });
+    } else {
+      review.assignedReviewerUsername = reviewerUsername;
+      review.assignedAt = new Date();
+      review.assignedBy = 'admin';
+      if (!review.status || review.status === 'assigned') review.status = 'assigned';
+      await review.save();
+    }
+
+    res.json({ ok: true, review });
+  } catch (err) {
+    console.error('Admin assign review error:', err);
+    res.status(500).json({ error: 'Failed to assign reviewer' });
+  }
+});
+
+// POST /api/admin/reviews/statuses
+router.post('/reviews/statuses', adminAuth, async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.registrationIds) ? req.body.registrationIds : [];
+
+    const reviews = await AbstractReview.find({ registrationId: { $in: ids } })
+      .select('registrationId assignedReviewerUsername status submittedAt updatedAt')
+      .lean();
+
+    const map = {};
+    reviews.forEach(r => {
+      map[String(r.registrationId)] = {
+        assignedReviewerUsername: r.assignedReviewerUsername || '',
+        status: r.status || '',
+        submittedAt: r.submittedAt || null,
+        updatedAt: r.updatedAt || null
+      };
+    });
+
+    res.json({ ok: true, map });
+  } catch (err) {
+    console.error('Admin review statuses error:', err);
+    res.status(500).json({ error: 'Failed to load review statuses' });
+  }
+});
+
+// GET /api/admin/reviews/by-registration/:registrationId
+router.get('/reviews/by-registration/:registrationId', adminAuth, async (req, res) => {
+  try {
+    const review = await AbstractReview.findOne({
+      registrationId: req.params.registrationId
+    }).lean();
+
+    res.json({ ok: true, review: review || null });
+  } catch (err) {
+    console.error('Admin review load error:', err);
+    res.status(500).json({ error: 'Failed to load review' });
+  }
+});
+
+// GET /api/admin/reviews/commented-file/:reviewId
+router.get('/reviews/commented-file/:reviewId', adminAuth, async (req, res) => {
+  try {
+    const review = await AbstractReview.findById(req.params.reviewId).lean();
+    if (!review?.reviewerFile?.gridFsId) {
+      return res.status(404).send('No reviewer file uploaded');
+    }
+
+    const bucket = getBucket();
+
+    res.set('Content-Type', review.reviewerFile.contentType || 'application/octet-stream');
+    res.set('Content-Disposition', `attachment; filename="${review.reviewerFile.filename || 'reviewer-commented-abstract.docx'}"`);
+
+    bucket.openDownloadStream(new ObjectId(review.reviewerFile.gridFsId)).pipe(res);
+  } catch (err) {
+    console.error('Admin reviewer file download error:', err);
+    res.status(500).send('Download failed');
+  }
+});
+
 
 // GET /api/admin/registrations?q=&page=&limit=
 router.get('/registrations', adminAuth, async (req,res)=>{
