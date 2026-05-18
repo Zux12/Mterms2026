@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MTERMS 2026 — Panel Reviewer Dashboard</title>
+
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --border:#e5e7eb;
+      --muted:#667085;
+      --uitm-navy:#0B2A6B;
+      --tesma-teal:#0EA5A6;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(900px 300px at 10% 0%, rgba(14,165,166,.06), transparent 60%),
+        radial-gradient(900px 300px at 90% 0%, rgba(11,42,107,.06), transparent 60%),
+        #ffffff;
+      color:var(--text);
+    }
+
+    .wrap{
+      width:min(1250px,94vw);
+      margin:24px auto;
+    }
+
+    .brand-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:10px 4px 18px;
+      margin-bottom:16px;
+      border-bottom:2px solid rgba(14,165,166,.18);
+    }
+
+    .brand-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      width:88px;
+      height:88px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.06);
+    }
+
+    .brand-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+    }
+
+    h1{
+      margin:0;
+      font-size:1.35rem;
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:#475467;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:16px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:9px 13px;
+      font-size:.94rem;
+      font-weight:800;
+      background:#fff;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:#16a34a;
+      border-color:#16a34a;
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#fff;
+      color:#111827;
+    }
+
+    .btn-danger{
+      background:#dc2626;
+      border-color:#dc2626;
+      color:#fff;
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+
+    .summary{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      background:#f9fafb;
+      font-size:.9rem;
+      font-weight:700;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+      min-width:1000px;
+    }
+
+    th,td{
+      padding:9px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      text-align:left;
+    }
+
+    th{
+      background:rgba(11,42,107,.05);
+      color:#111827;
+      font-weight:900;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tr:hover td{background:#f9fafb}
+
+    input,select,textarea{
+      width:100%;
+      padding:8px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+      color:#111827;
+      box-sizing:border-box;
+    }
+
+    textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    label{
+      font-weight:800;
+      font-size:.92rem;
+      display:block;
+      margin-bottom:8px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    @media(max-width:900px){
+      .brand-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .grid-2,.grid-3{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .status-assigned{color:#7c2d12;font-weight:900}
+    .status-draft{color:#2563eb;font-weight:900}
+    .status-submitted{color:#15803d;font-weight:900}
+
+    .help{
+      color:#667085;
+      font-size:.9rem;
+    }
+
+    .review-layout{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+
+    .score-table{
+      min-width:unset;
+    }
+
+    .score-table input{
+      max-width:110px;
+    }
+
+    .reason-row{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      margin:8px 0;
+      font-weight:600;
+    }
+
+    .reason-row input{
+      width:auto;
+      margin-top:3px;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .readonly-box{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+      background:#f9fafb;
+      white-space:pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="brand-header">
+    <div class="brand-left">
+      <div class="brand-logo">
+        <img src="public/mterm.jpg" alt="MTERMS 2026">
+      </div>
+      <div>
+        <h1>MTERMS 2026 — Panel Reviewer Dashboard</h1>
+        <p class="subtitle">Review assigned abstracts and submit scoring rubric.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Main Page</button>
+      <button id="logoutBtn" class="btn btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div id="loginWarning" class="card hidden">
+    <h3>Reviewer Login Required</h3>
+    <p class="help">Please log in as a panel reviewer to access assigned abstracts.</p>
+    <button class="btn btn-primary" onclick="window.location.href='reviewer-login.html'">Go to Reviewer Login</button>
+  </div>
+
+  <div id="dash" class="hidden">
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <strong>Logged in as:</strong> <span id="reviewerName">—</span>
+          <div class="help">Only abstracts assigned to this panel reviewer will be shown.</div>
+        </div>
+
+        <button id="reloadBtn" class="btn btn-primary">Reload Assigned Abstracts</button>
+      </div>
+
+      <div class="summary">
+        <span class="pill">Total assigned: <span id="sumTotal">0</span></span>
+        <span class="pill">Not started: <span id="sumAssigned">0</span></span>
+        <span class="pill">Draft: <span id="sumDraft">0</span></span>
+        <span class="pill">Submitted: <span id="sumSubmitted">0</span></span>
+      </div>
+
+      <div id="msg" style="margin-top:10px;font-weight:700"></div>
+    </div>
+
+    <div class="card">
+      <h3>Assigned Abstracts</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Registration Code</th>
+              <th>Participant</th>
+              <th>Affiliation</th>
+              <th>Abstract Title</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Abstract File</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="reviewCard" class="card hidden">
+      <h3>Abstract Scoring Rubric Form</h3>
+
+      <div class="review-layout">
+        <div class="card" style="box-shadow:none">
+          <h4>Participant / Abstract Details</h4>
+          <div class="grid-2">
+            <div>
+              <strong>Registration Code:</strong>
+              <div id="rRegCode" class="readonly-box"></div>
+            </div>
+            <div>
+              <strong>Participant:</strong>
+              <div id="rName" class="readonly-box"></div>
+            </div>
+            <div>
+              <strong>Affiliation:</strong>
+              <div id="rAffiliation" class="readonly-box"></div>
+            </div>
+            <div>
+              <strong>Presentation Preference:</strong>
+              <div id="rPresentationType" class="readonly-box"></div>
+            </div>
+            <div>
+              <strong>Theme:</strong>
+              <div id="rTheme" class="readonly-box"></div>
+            </div>
+            <div>
+              <strong>Field:</strong>
+              <div id="rField" class="readonly-box"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <strong>Abstract Title:</strong>
+            <div id="rTitle" class="readonly-box"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <a id="rAbstractFile" class="btn btn-primary" target="_blank" rel="noopener">Open Participant Abstract</a>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none">
+          <h4>Scores</h4>
+          <div class="table-wrap">
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th>Criteria</th>
+                  <th>Maximum Score</th>
+                  <th>Assigned Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Introduction & Objective</td>
+                  <td>5</td>
+                  <td><input id="scoreIntro" type="number" min="0" max="5" step="1"></td>
+                </tr>
+                <tr>
+                  <td>Materials and Methods</td>
+                  <td>5</td>
+                  <td><input id="scoreMethods" type="number" min="0" max="5" step="1"></td>
+                </tr>
+                <tr>
+                  <td>Results</td>
+                  <td>10</td>
+                  <td><input id="scoreResults" type="number" min="0" max="10" step="1"></td>
+                </tr>
+                <tr>
+                  <td>Conclusion</td>
+                  <td>5</td>
+                  <td><input id="scoreConclusion" type="number" min="0" max="5" step="1"></td>
+                </tr>
+                <tr>
+                  <td>Significance / Implication</td>
+                  <td>10</td>
+                  <td><input id="scoreSignificance" type="number" min="0" max="10" step="1"></td>
+                </tr>
+                <tr>
+                  <td><strong>Total</strong></td>
+                  <td><strong>35</strong></td>
+                  <td><strong><span id="scoreTotal">0</span></strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none">
+          <h4>Require Correction</h4>
+
+          <label>Require Correction</label>
+          <select id="requireCorrection">
+            <option value="">Select</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+
+          <div style="margin-top:12px">
+            <strong>If YES, please mark the relevant reasons:</strong>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonTooLong">
+              <span>The abstract is too long (more than one page in length / 250 words).</span>
+            </label>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonPoorlyWritten">
+              <span>The abstract is poorly written.</span>
+            </label>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonWeakHypothesis">
+              <span>There is a poorly supported research hypothesis / objective.</span>
+            </label>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonVaguePlan">
+              <span>The experimental plan is vague or not well described.</span>
+            </label>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonInsufficientData">
+              <span>The data presented is insufficient, or the analysis of the data is inadequate, to justify the presentation.</span>
+            </label>
+
+            <label class="reason-row">
+              <input type="checkbox" id="reasonOthers">
+              <span>Others</span>
+            </label>
+
+            <textarea id="reasonOthersText" placeholder="Please specify other correction reason, if any."></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none">
+          <h4>Recommended Category</h4>
+
+          <label>Please recommend the appropriate category for this abstract.</label>
+          <select id="recommendedCategory">
+            <option value="">Select category</option>
+            <option value="Oral presentation">Oral presentation</option>
+            <option value="Poster presentation">Poster presentation</option>
+          </select>
+
+          <p class="help">
+            This recommendation is visible to admin only. It will not be shown in the participant portal.
+          </p>
+        </div>
+
+        <div class="card" style="box-shadow:none">
+          <h4>Upload Commented Abstract File</h4>
+
+          <p class="help">
+            Upload the DOC/DOCX file containing panel comments. This file is visible to admin only and will not be shown to the participant.
+          </p>
+
+          <input type="file" id="commentedFile" accept=".doc,.docx">
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+            <button id="uploadCommentedFileBtn" class="btn btn-primary" type="button">Upload Commented File</button>
+          </div>
+
+          <div id="commentedFileInfo" style="margin-top:10px;font-weight:700"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <button id="saveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
+          <button id="submitFinalBtn" class="btn btn-primary" type="button">Submit Final Review</button>
+          <button id="closeReviewBtn" class="btn btn-danger" type="button">Close</button>
+        </div>
+
+        <div id="reviewMsg" style="text-align:center;font-weight:800"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+const $ = id => document.getElementById(id);
+
+let currentReviewer = null;
+let assignedRows = [];
+let currentRegistrationId = null;
+let currentReview = null;
+
+function escapeHtml(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function statusHtml(status){
+  if (status === 'submitted') return `<span class="status-submitted">Submitted</span>`;
+  if (status === 'draft') return `<span class="status-draft">Draft saved</span>`;
+  return `<span class="status-assigned">Assigned</span>`;
+}
+
+async function checkReviewerSession(){
+  try{
+    const r = await fetch(`${API}/api/reviewer/me`, { credentials:'include' });
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok) throw new Error(data.error || 'Not logged in');
+
+    currentReviewer = data.reviewer;
+    localStorage.setItem('mtermsReviewer', JSON.stringify(currentReviewer));
+
+    $('reviewerName').textContent = currentReviewer.displayName || currentReviewer.username;
+    $('loginWarning').classList.add('hidden');
+    $('dash').classList.remove('hidden');
+
+    await loadAssignedAbstracts();
+  }catch(err){
+    $('dash').classList.add('hidden');
+    $('loginWarning').classList.remove('hidden');
+  }
+}
+
+async function loadAssignedAbstracts(){
+  $('rows').innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
+  $('msg').textContent = 'Loading assigned abstracts...';
+
+  try{
+    const r = await fetch(`${API}/api/reviewer/abstracts`, { credentials:'include' });
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok) throw new Error(data.error || 'Failed to load abstracts');
+
+    assignedRows = Array.isArray(data.rows) ? data.rows : [];
+
+    renderRows();
+    updateSummary();
+
+    $('msg').textContent = `✅ Loaded ${assignedRows.length} assigned abstract(s).`;
+  }catch(err){
+    $('rows').innerHTML = `<tr><td colspan="8" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
+    $('msg').textContent = '❌ ' + err.message;
+  }
+}
+
+function renderRows(){
+  if (!assignedRows.length){
+    $('rows').innerHTML = `<tr><td colspan="8"><em>No abstracts assigned to this reviewer yet.</em></td></tr>`;
+    return;
+  }
+
+  $('rows').innerHTML = assignedRows.map(row => {
+    const p = row.participant || {};
+
+    const fileLink = row.latestAbstract
+      ? `<a href="${API}${row.latestAbstract.downloadUrl}" target="_blank" rel="noopener">Open v${escapeHtml(row.latestAbstract.version || '')}</a>`
+      : `<em>No abstract uploaded</em>`;
+
+    const disabled = row.status === 'submitted'
+      ? ''
+      : '';
+
+    return `
+      <tr>
+        <td><strong>${escapeHtml(row.regCode || '')}</strong></td>
+        <td>${escapeHtml(p.name || '')}<br><small>${escapeHtml(p.email || '')}</small></td>
+        <td>${escapeHtml(p.affiliation || '')}</td>
+        <td>${escapeHtml(p.abstractTitle || '')}</td>
+        <td>${escapeHtml(p.presentationType || '')}</td>
+        <td>${statusHtml(row.status)}</td>
+        <td>${fileLink}</td>
+        <td>
+          <button class="btn btn-primary" type="button" ${disabled} onclick="openReview('${escapeHtml(row.registrationId)}')">
+            ${row.status === 'submitted' ? 'View' : 'Review'}
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateSummary(){
+  $('sumTotal').textContent = assignedRows.length;
+  $('sumAssigned').textContent = assignedRows.filter(x => x.status === 'assigned').length;
+  $('sumDraft').textContent = assignedRows.filter(x => x.status === 'draft').length;
+  $('sumSubmitted').textContent = assignedRows.filter(x => x.status === 'submitted').length;
+}
+
+function num(id){
+  return Number($(id).value || 0);
+}
+
+function clampScore(id, max){
+  let v = num(id);
+  if (v < 0) v = 0;
+  if (v > max) v = max;
+  $(id).value = v;
+  return v;
+}
+
+function updateTotal(){
+  const total =
+    clampScore('scoreIntro', 5) +
+    clampScore('scoreMethods', 5) +
+    clampScore('scoreResults', 10) +
+    clampScore('scoreConclusion', 5) +
+    clampScore('scoreSignificance', 10);
+
+  $('scoreTotal').textContent = String(total);
+  return total;
+}
+
+['scoreIntro','scoreMethods','scoreResults','scoreConclusion','scoreSignificance'].forEach(id => {
+  $(id).addEventListener('input', updateTotal);
+});
+
+function fillReviewForm(review, registration){
+  currentReview = review;
+
+  $('rRegCode').textContent = registration.regCode || '';
+  $('rName').textContent = `${registration.personal?.firstName || ''} ${registration.personal?.lastName || ''}`.trim();
+  $('rAffiliation').textContent = registration.professional?.affiliation || registration.student?.university || '';
+  $('rPresentationType').textContent = registration.program?.type || '';
+  $('rTheme').textContent = registration.submission?.theme || '';
+  $('rField').textContent = registration.submission?.field || '';
+  $('rTitle').textContent = registration.submission?.title || '';
+
+  $('rAbstractFile').href = `${API}/api/reviewer/abstracts/${registration._id}/abstract-file`;
+
+  const scores = review.scores || {};
+  $('scoreIntro').value = scores.introductionObjective ?? 0;
+  $('scoreMethods').value = scores.materialsMethods ?? 0;
+  $('scoreResults').value = scores.results ?? 0;
+  $('scoreConclusion').value = scores.conclusion ?? 0;
+  $('scoreSignificance').value = scores.significanceImplication ?? 0;
+
+  $('requireCorrection').value = review.requireCorrection || '';
+
+  const cr = review.correctionReasons || {};
+  $('reasonTooLong').checked = !!cr.tooLong;
+  $('reasonPoorlyWritten').checked = !!cr.poorlyWritten;
+  $('reasonWeakHypothesis').checked = !!cr.weakHypothesis;
+  $('reasonVaguePlan').checked = !!cr.vagueExperimentalPlan;
+  $('reasonInsufficientData').checked = !!cr.insufficientData;
+  $('reasonOthers').checked = !!cr.others;
+  $('reasonOthersText').value = cr.othersText || '';
+
+  $('recommendedCategory').value = review.recommendedCategory || '';
+
+  if (review.reviewerFile?.filename) {
+    $('commentedFileInfo').textContent = `Uploaded: ${review.reviewerFile.filename}`;
+  } else {
+    $('commentedFileInfo').textContent = 'No commented file uploaded yet.';
+  }
+
+  const locked = review.status === 'submitted';
+
+  [
+    'scoreIntro','scoreMethods','scoreResults','scoreConclusion','scoreSignificance',
+    'requireCorrection','reasonTooLong','reasonPoorlyWritten','reasonWeakHypothesis',
+    'reasonVaguePlan','reasonInsufficientData','reasonOthers','reasonOthersText',
+    'recommendedCategory','commentedFile'
+  ].forEach(id => {
+    const el = $(id);
+    if (el) el.disabled = locked;
+  });
+
+  $('saveDraftBtn').disabled = locked;
+  $('submitFinalBtn').disabled = locked;
+  $('uploadCommentedFileBtn').disabled = locked;
+
+  if (locked) {
+    $('reviewMsg').textContent = 'This review has been submitted and is locked.';
+  } else {
+    $('reviewMsg').textContent = '';
+  }
+
+  updateTotal();
+}
+
+async function openReview(registrationId){
+  currentRegistrationId = registrationId;
+  $('reviewCard').classList.remove('hidden');
+  $('reviewMsg').textContent = 'Loading review...';
+
+  try{
+    const r = await fetch(`${API}/api/reviewer/reviews/${registrationId}`, {
+      credentials:'include'
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed to load review');
+
+    fillReviewForm(data.review, data.registration);
+
+    $('reviewCard').scrollIntoView({ behavior:'smooth', block:'start' });
+  }catch(err){
+    $('reviewMsg').textContent = '❌ ' + err.message;
+  }
+}
+
+function buildReviewPayload(mode){
+  const total = updateTotal();
+
+  return {
+    mode,
+    scores: {
+      introductionObjective: num('scoreIntro'),
+      materialsMethods: num('scoreMethods'),
+      results: num('scoreResults'),
+      conclusion: num('scoreConclusion'),
+      significanceImplication: num('scoreSignificance'),
+      total
+    },
+    requireCorrection: $('requireCorrection').value,
+    correctionReasons: {
+      tooLong: $('reasonTooLong').checked,
+      poorlyWritten: $('reasonPoorlyWritten').checked,
+      weakHypothesis: $('reasonWeakHypothesis').checked,
+      vagueExperimentalPlan: $('reasonVaguePlan').checked,
+      insufficientData: $('reasonInsufficientData').checked,
+      others: $('reasonOthers').checked,
+      othersText: $('reasonOthersText').value.trim()
+    },
+    recommendedCategory: $('recommendedCategory').value
+  };
+}
+
+function validateFinal(){
+  if (!$('requireCorrection').value) return 'Please select Require Correction: Yes or No.';
+  if (!$('recommendedCategory').value) return 'Please select recommended category.';
+
+  if ($('requireCorrection').value === 'yes') {
+    const anyReason =
+      $('reasonTooLong').checked ||
+      $('reasonPoorlyWritten').checked ||
+      $('reasonWeakHypothesis').checked ||
+      $('reasonVaguePlan').checked ||
+      $('reasonInsufficientData').checked ||
+      $('reasonOthers').checked;
+
+    if (!anyReason) return 'Please select at least one correction reason.';
+  }
+
+  if ($('reasonOthers').checked && !$('reasonOthersText').value.trim()) {
+    return 'Please specify the Others correction reason.';
+  }
+
+  return '';
+}
+
+async function saveReview(mode){
+  if (!currentRegistrationId) return;
+
+  if (mode === 'submitted') {
+    const err = validateFinal();
+    if (err) {
+      $('reviewMsg').textContent = '❌ ' + err;
+      return;
+    }
+
+    const ok = confirm('Submit final review? After submission, this review will be locked.');
+    if (!ok) return;
+  }
+
+  $('saveDraftBtn').disabled = true;
+  $('submitFinalBtn').disabled = true;
+  $('reviewMsg').textContent = mode === 'submitted' ? 'Submitting final review...' : 'Saving draft...';
+
+  try{
+    const r = await fetch(`${API}/api/reviewer/reviews/${currentRegistrationId}`, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json' },
+      credentials:'include',
+      body: JSON.stringify(buildReviewPayload(mode))
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Failed to save review');
+
+    currentReview = data.review;
+
+    $('reviewMsg').textContent = mode === 'submitted'
+      ? '✅ Final review submitted successfully.'
+      : '✅ Draft saved successfully.';
+
+    await loadAssignedAbstracts();
+
+    if (mode === 'submitted') {
+      await openReview(currentRegistrationId);
+    }
+  }catch(err){
+    $('reviewMsg').textContent = '❌ ' + err.message;
+  }finally{
+    if (currentReview?.status !== 'submitted') {
+      $('saveDraftBtn').disabled = false;
+      $('submitFinalBtn').disabled = false;
+    }
+  }
+}
+
+async function uploadCommentedFile(){
+  if (!currentRegistrationId) return;
+
+  const file = $('commentedFile').files?.[0];
+  if (!file) {
+    $('commentedFileInfo').textContent = '❌ Please choose a DOC or DOCX file.';
+    return;
+  }
+
+  const name = file.name.toLowerCase();
+  if (!name.endsWith('.doc') && !name.endsWith('.docx')) {
+    $('commentedFileInfo').textContent = '❌ Only DOC or DOCX files are allowed.';
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+
+  $('uploadCommentedFileBtn').disabled = true;
+  $('commentedFileInfo').textContent = 'Uploading...';
+
+  try{
+    const r = await fetch(`${API}/api/reviewer/reviews/${currentRegistrationId}/commented-file`, {
+      method:'POST',
+      credentials:'include',
+      body: fd
+    });
+
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error || 'Upload failed');
+
+    $('commentedFile').value = '';
+    $('commentedFileInfo').textContent = `✅ Uploaded: ${data.file?.filename || file.name}`;
+    await openReview(currentRegistrationId);
+    await loadAssignedAbstracts();
+  }catch(err){
+    $('commentedFileInfo').textContent = '❌ ' + err.message;
+  }finally{
+    $('uploadCommentedFileBtn').disabled = false;
+  }
+}
+
+async function logout(){
+  try{
+    await fetch(`${API}/api/reviewer/logout`, {
+      method:'POST',
+      credentials:'include'
+    });
+  }catch(e){}
+
+  localStorage.removeItem('mtermsReviewer');
+  window.location.href = 'reviewer-login.html';
+}
+
+$('reloadBtn').addEventListener('click', loadAssignedAbstracts);
+$('logoutBtn').addEventListener('click', logout);
+$('saveDraftBtn').addEventListener('click', () => saveReview('draft'));
+$('submitFinalBtn').addEventListener('click', () => saveReview('submitted'));
+$('uploadCommentedFileBtn').addEventListener('click', uploadCommentedFile);
+$('closeReviewBtn').addEventListener('click', () => {
+  $('reviewCard').classList.add('hidden');
+  currentRegistrationId = null;
+  currentReview = null;
+});
+
+checkReviewerSession();
+</script>
+</body>
+</html>
