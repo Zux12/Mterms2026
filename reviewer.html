@@ -531,6 +531,10 @@ const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
 const $ = id => document.getElementById(id);
 
 let currentReviewer = null;
+  function reviewerAuthHeader(){
+  const token = localStorage.getItem('mtermsReviewerToken');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
 let assignedRows = [];
 let currentRegistrationId = null;
 let currentReview = null;
@@ -552,7 +556,11 @@ function statusHtml(status){
 
 async function checkReviewerSession(){
   try{
-    const r = await fetch(`${API}/api/reviewer/me`, { credentials:'include' });
+
+    const r = await fetch(`${API}/api/reviewer/me`, {
+  credentials:'include',
+  headers: reviewerAuthHeader()
+});
     const data = await r.json().catch(()=>({}));
 
     if(!r.ok) throw new Error(data.error || 'Not logged in');
@@ -576,7 +584,10 @@ async function loadAssignedAbstracts(){
   $('msg').textContent = 'Loading assigned abstracts...';
 
   try{
-    const r = await fetch(`${API}/api/reviewer/abstracts`, { credentials:'include' });
+const r = await fetch(`${API}/api/reviewer/abstracts`, {
+  credentials:'include',
+  headers: reviewerAuthHeader()
+});
     const data = await r.json().catch(()=>({}));
 
     if(!r.ok) throw new Error(data.error || 'Failed to load abstracts');
@@ -734,9 +745,10 @@ async function openReview(registrationId){
   $('reviewMsg').textContent = 'Loading review...';
 
   try{
-    const r = await fetch(`${API}/api/reviewer/reviews/${registrationId}`, {
-      credentials:'include'
-    });
+const r = await fetch(`${API}/api/reviewer/reviews/${registrationId}`, {
+  credentials:'include',
+  headers: reviewerAuthHeader()
+});
 
     const data = await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(data.error || 'Failed to load review');
@@ -820,7 +832,7 @@ async function saveReview(mode){
   try{
     const r = await fetch(`${API}/api/reviewer/reviews/${currentRegistrationId}`, {
       method:'PUT',
-      headers:{ 'Content-Type':'application/json' },
+headers:{ 'Content-Type':'application/json', ...reviewerAuthHeader() },
       credentials:'include',
       body: JSON.stringify(buildReviewPayload(mode))
     });
@@ -872,9 +884,10 @@ async function uploadCommentedFile(){
 
   try{
     const r = await fetch(`${API}/api/reviewer/reviews/${currentRegistrationId}/commented-file`, {
-      method:'POST',
-      credentials:'include',
-      body: fd
+method:'POST',
+credentials:'include',
+headers: reviewerAuthHeader(),
+body: fd
     });
 
     const data = await r.json().catch(()=>({}));
@@ -899,7 +912,8 @@ async function logout(){
     });
   }catch(e){}
 
-  localStorage.removeItem('mtermsReviewer');
+localStorage.removeItem('mtermsReviewer');
+localStorage.removeItem('mtermsReviewerToken');
   window.location.href = 'reviewer-login.html';
 }
 
