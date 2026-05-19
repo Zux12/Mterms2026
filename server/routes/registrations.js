@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Pricing = require('../models/Pricing');
 const Registration = require('../models/Registration');
+const AbstractReview = require('../models/AbstractReview');
 const Counter = require('../models/Counter');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -684,5 +685,70 @@ router.post('/admin/send-review-comment', async (req, res) => {
     });
   }
 });
+
+// GET /api/registrations/panel-review-result?regCode=&email=
+// Participant-safe view only.
+// Does NOT expose scores, reviewer name, recommended category, or reviewer uploaded file.
+router.get('/panel-review-result', async (req, res) => {
+  try {
+    const regCode = String(req.query.regCode || '').trim();
+    const email = String(req.query.email || '').trim().toLowerCase();
+
+    if (!regCode || !email) {
+      return res.status(400).json({ error: 'regCode and email are required' });
+    }
+
+    const reg = await Registration.findOne({
+      regCode,
+      'personal.email': email
+    }).select('_id regCode personal.email').lean();
+
+    if (!reg) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    const review = await AbstractReview.findOne({
+      registrationId: reg._id
+    }).select('status requireCorrection correctionReasons submittedAt updatedAt').lean();
+
+    if (!review) {
+      return res.json({
+        ok: true,
+        hasReview: false,
+        status: 'not_assigned'
+      });
+    }
+
+    if (review.status !== 'submitted') {
+      return res.json({
+        ok: true,
+        hasReview: true,
+        status: review.status || 'assigned'
+      });
+    }
+
+    return res.json({
+      ok: true,
+      hasReview: true,
+      status: 'submitted',
+      submittedAt: review.submittedAt || null,
+      requireCorrection: review.requireCorrection || '',
+      correctionReasons: {
+        tooLong: !!review.correctionReasons?.tooLong,
+        poorlyWritten: !!review.correctionReasons?.poorlyWritten,
+        weakHypothesis: !!review.correctionReasons?.weakHypothesis,
+        vagueExperimentalPlan: !!review.correctionReasons?.vagueExperimentalPlan,
+        insufficientData: !!review.correctionReasons?.insufficientData,
+        others: !!review.correctionReasons?.others,
+        othersText: review.correctionReasons?.othersText || ''
+      }
+    });
+
+  } catch (err) {
+    console.error('Participant panel review result error:', err);
+    res.status(500).json({ error: 'Failed to load panel review result' });
+  }
+});
+
 
 module.exports = router;
