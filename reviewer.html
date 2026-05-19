@@ -271,6 +271,71 @@
       background:#f9fafb;
       white-space:pre-wrap;
     }
+
+
+.rubric-guide{
+  margin:10px 0 14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f9fafb;
+  overflow:hidden;
+}
+
+.rubric-guide summary{
+  cursor:pointer;
+  padding:12px 14px;
+  font-weight:900;
+  color:#0B2A6B;
+  background:#eef6ff;
+  border-bottom:1px solid var(--border);
+}
+
+.rubric-inner{
+  padding:12px;
+  display:grid;
+  gap:10px;
+}
+
+.rubric-section{
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:#fff;
+  overflow:hidden;
+}
+
+.rubric-section summary{
+  background:#fff;
+  color:#111827;
+  font-weight:900;
+  padding:10px 12px;
+}
+
+.rubric-content{
+  padding:0 12px 12px;
+}
+
+.rubric-score{
+  margin:10px 0;
+  padding:10px;
+  border-left:4px solid #0EA5A6;
+  background:#f9fafb;
+  border-radius:8px;
+}
+
+.rubric-score strong{
+  color:#0B2A6B;
+}
+
+.rubric-score ul{
+  margin:6px 0 0 18px;
+  padding:0;
+}
+
+.rubric-score li{
+  margin:3px 0;
+}
+
+    
   </style>
 </head>
 
@@ -407,10 +472,169 @@
         </div>
 
         
+<div class="card" style="box-shadow:none">
+  <h4>Scores</h4>
 
-        <div class="card" style="box-shadow:none">
-          <h4>Scores</h4>
-          <div class="table-wrap">
+  <details class="rubric-guide">
+    <summary>View Scoring Guideline</summary>
+
+    <div class="rubric-inner">
+
+      <details class="rubric-section">
+        <summary>Introduction & Objective — 5 points</summary>
+        <div class="rubric-content">
+          <div class="rubric-score">
+            <strong>5 — Exemplary</strong>
+            <ul>
+              <li>The introduction strongly demonstrates that the literature has been adequately reviewed.</li>
+              <li>The introduction is a strong, clear, and thorough, yet concise, overview to the problem.</li>
+              <li>Based on the presented background and knowledge gap, a specific, clear, and testable research objective is stated.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>4 — Outstanding</strong>
+            <ul>
+              <li>The introduction demonstrates that the literature has been reviewed.</li>
+              <li>The introduction is a clear, and somewhat thorough background to the problem.</li>
+              <li>Based on the presented background and knowledge gap, a clear and testable research objective is stated.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>3 — Strong</strong>
+            <ul>
+              <li>The introduction partially demonstrates that the literature has been reviewed.</li>
+              <li>The introduction provides a clear, and somewhat thorough background to the problem.</li>
+              <li>Based on presented background and knowledge gap, a testable research objective is stated.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>2 — Adequate</strong>
+            <ul>
+              <li>The introduction very weakly demonstrates that the literature has been reviewed.</li>
+              <li>The introduction provides a background that is not informed by aims.</li>
+              <li>A clear, but untestable research objective is stated.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>1 — Weak</strong>
+            <ul>
+              <li>The introduction does not demonstrate that the literature has been reviewed.</li>
+              <li>The introduction provides a background that is not informed by aims.</li>
+              <li>A vague, untestable research objective is stated.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>0 — Poor</strong>
+            <ul>
+              <li>The introduction and research objective are not provided.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="rubric-section">
+        <summary>Materials and Methods — 5 points</summary>
+        <div class="rubric-content">
+          <div class="rubric-score"><strong>5 — Exemplary</strong><ul><li>The methods provide a strong and clear explanation of the proposed experimental methods.</li></ul></div>
+          <div class="rubric-score"><strong>4 — Outstanding</strong><ul><li>The methods provide a clear explanation of the proposed experimental methods.</li></ul></div>
+          <div class="rubric-score"><strong>3 — Strong</strong><ul><li>The methods provide an adequate explanation of proposed experimental methods.</li></ul></div>
+          <div class="rubric-score"><strong>2 — Adequate</strong><ul><li>The methods provide an unorganized explanation of experimental methods.</li></ul></div>
+          <div class="rubric-score"><strong>1 — Weak</strong><ul><li>The methods provide an unclear and unorganized explanation of experimental methods.</li></ul></div>
+          <div class="rubric-score"><strong>0 — Poor</strong><ul><li>The methods are not provided.</li></ul></div>
+        </div>
+      </details>
+
+      <details class="rubric-section">
+        <summary>Results — 10 points</summary>
+        <div class="rubric-content">
+          <div class="rubric-score">
+            <strong>10 — Exemplary</strong>
+            <ul>
+              <li>The results are clear and connected to the purpose of the study.</li>
+              <li>The results strictly follow the presentation of the methods.</li>
+              <li>The results provide findings without interpretation of the results.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>8 — Outstanding</strong>
+            <ul>
+              <li>The results are clear and connected to the purpose of study.</li>
+              <li>The results mainly follow the presentation of the methods.</li>
+              <li>The results provide findings with some interpretation of the results.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>6 — Strong</strong>
+            <ul>
+              <li>The results attempt to present findings but might be unclear OR some information is missing from the results.</li>
+              <li>The results follow the presentation of the methods.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>4 — Adequate</strong>
+            <ul>
+              <li>The results attempt to present findings but might be unclear AND some information is missing from the results.</li>
+              <li>Results loosely follow the presentation of the methods.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>2 — Weak</strong>
+            <ul>
+              <li>The results do not present concrete data, they are unclear findings, and/or do not relate to the study purpose.</li>
+              <li>Results do not follow the presentation of the methods.</li>
+            </ul>
+          </div>
+
+          <div class="rubric-score">
+            <strong>0 — Poor</strong>
+            <ul>
+              <li>The results are missing, no data is provided, or it states that results will be reported in the future.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="rubric-section">
+        <summary>Conclusion — 5 points</summary>
+        <div class="rubric-content">
+          <div class="rubric-score"><strong>5 — Exemplary</strong><ul><li>The conclusion is fully supported by the study results.</li></ul></div>
+          <div class="rubric-score"><strong>4 — Outstanding</strong><ul><li>The conclusion is mostly supported by the study results.</li></ul></div>
+          <div class="rubric-score"><strong>3 — Strong</strong><ul><li>The conclusion is only partially supported by the study results.</li></ul></div>
+          <div class="rubric-score"><strong>2 — Adequate</strong><ul><li>The conclusion is weakly supported by the study results.</li></ul></div>
+          <div class="rubric-score"><strong>1 — Weak</strong><ul><li>The conclusion is not supported by the study results.</li></ul></div>
+          <div class="rubric-score"><strong>0 — Poor</strong><ul><li>The conclusion is missing.</li></ul></div>
+        </div>
+      </details>
+
+      <details class="rubric-section">
+        <summary>Significance / Implication — 10 points</summary>
+        <div class="rubric-content">
+          <div class="rubric-score"><strong>10 — Exemplary</strong><ul><li>The significance section presents rationale and the importance of proposed work in the form of a well-structured, logical argument.</li></ul></div>
+          <div class="rubric-score"><strong>8 — Outstanding</strong><ul><li>The significance section presents rationale and importance of the proposed work in the form of a partially well-structured argument.</li></ul></div>
+          <div class="rubric-score"><strong>6 — Strong</strong><ul><li>The significance section presents rationale and importance of the proposed work in the form of a structured argument.</li></ul></div>
+          <div class="rubric-score"><strong>4 — Adequate</strong><ul><li>The significance section weakly presents rationale and importance of the proposed work in the form of a structured argument.</li></ul></div>
+          <div class="rubric-score"><strong>2 — Weak</strong><ul><li>The significance section shows some effort to present the rationale and significance of proposed work.</li></ul></div>
+          <div class="rubric-score"><strong>0 — Poor</strong><ul><li>The rationale and importance of the proposed work in the significance section are not articulated.</li></ul></div>
+        </div>
+      </details>
+
+      <div class="help">
+        Maximum total score: <strong>35 points</strong>.
+      </div>
+
+    </div>
+  </details>
+
+  <div class="table-wrap">
             <table class="score-table">
               <thead>
                 <tr>
