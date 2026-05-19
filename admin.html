@@ -1656,10 +1656,24 @@ async function loadPanelReviewForCurrent(){
     $('panelReviewerSelect').value = review.assignedReviewerUsername || '';
     $('panelReviewStatus').value = review.status || 'assigned';
 
-    const total = review?.scores?.total ?? 0;
-    const submitted = review?.submittedAt ? new Date(review.submittedAt).toLocaleString() : '—';
+const total = review?.scores?.total ?? 0;
+const submitted = review?.submittedAt ? new Date(review.submittedAt).toLocaleString() : '—';
 
-    let fileHtml = '';
+const cr = review?.correctionReasons || {};
+const correctionReasons = [];
+
+if (cr.tooLong) correctionReasons.push('• The abstract is too long (more than one page in length / 250 words).');
+if (cr.poorlyWritten) correctionReasons.push('• The abstract is poorly written.');
+if (cr.weakHypothesis) correctionReasons.push('• There is a poorly supported research hypothesis / objective.');
+if (cr.vagueExperimentalPlan) correctionReasons.push('• The experimental plan is vague or not well described.');
+if (cr.insufficientData) correctionReasons.push('• The data presented is insufficient, or the analysis of the data is inadequate, to justify the presentation.');
+if (cr.others) correctionReasons.push(`• Others: ${escapeHtml(cr.othersText || '')}`);
+
+const correctionReasonsHtml = correctionReasons.length
+  ? correctionReasons.join('<br>')
+  : '<em>No correction reason provided.</em>';
+
+let fileHtml = '';
     if (review?.reviewerFile?.gridFsId) {
 fileHtml = `<br><button class="btn btn-primary" type="button" onclick="downloadPanelCommentedFile('${review._id}')">Download Panel Commented File</button>`;
     }
@@ -1669,9 +1683,13 @@ fileHtml = `<br><button class="btn btn-primary" type="button" onclick="downloadP
         <strong>Assigned reviewer:</strong> ${escapeHtml(review.assignedReviewerUsername || '—')}<br>
         <strong>Status:</strong> ${escapeHtml(review.status || '—')}<br>
         <strong>Total score:</strong> ${escapeHtml(total)} / 35<br>
-        <strong>Require correction:</strong> ${escapeHtml(review.requireCorrection || '—')}<br>
-        <strong>Recommended category:</strong> ${escapeHtml(review.recommendedCategory || '—')}<br>
-        <strong>Submitted at:</strong> ${escapeHtml(submitted)}
+<strong>Require correction:</strong> ${escapeHtml(review.requireCorrection || '—')}<br>
+<strong>Correction reason(s):</strong><br>
+<div style="margin:6px 0 8px;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff">
+  ${correctionReasonsHtml}
+</div>
+<strong>Recommended category:</strong> ${escapeHtml(review.recommendedCategory || '—')}<br>
+<strong>Submitted at:</strong> ${escapeHtml(submitted)}
         ${fileHtml}
       </div>
     `;
