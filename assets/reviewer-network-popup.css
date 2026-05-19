@@ -7,19 +7,12 @@
   z-index:9998;
   display:flex;
   align-items:center;
-  gap:10px;
+  justify-content:center;
   border:none;
   border-radius:999px;
-  padding:10px 14px 10px 10px;
-  background:#ffffff;
-  color:#0b1220;
-  box-shadow:0 18px 45px rgba(2,8,23,.22);
-  border:1px solid rgba(15,23,42,.12);
-  cursor:pointer;
-  font-weight:900;
-  font-size:.9rem;
-  transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
-}
+  width:62px;
+  height:62px;
+  padding:0;
 
 .rn-float-btn:hover{
   transform:translateY(-2px);
