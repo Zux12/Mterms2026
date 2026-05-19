@@ -6,7 +6,7 @@
 /* Floating Button - same style as AI */
 .rn-float-btn{
   position: fixed;
-  bottom: 100px;       /* sits directly above AI button */
+  bottom: 125px;       /* sits directly above AI button */
   right: 30px;
   width: 60px;
   height: 60px;
@@ -209,7 +209,7 @@
 /* Mobile */
 @media(max-width:700px){
   .rn-float-btn{
-    bottom: 92px;
+    bottom: 125px;
     right: 30px;
     width: 60px;
     height: 60px;
