@@ -11,8 +11,8 @@ const registrationsRouter = require('./routes/registrations');
 const uploadsRouter = require('./routes/uploads');
 const authRouter = require('./routes/auth');
 const adminRouter = require('./routes/admin');
-
 const reviewerRouter = require('./routes/reviewer');
+const igniteRouter = require('./routes/ignite');
 
 const app = express();
 
@@ -75,6 +75,7 @@ app.use('/api/registrations', registrationsRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/ignite', igniteRouter);
 app.use('/api/reviewer', reviewerRouter);
 
 /* Friendly root */
