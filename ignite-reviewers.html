@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IgniteInno Ventures — Reviewer Network</title>
+
+  <style>
+    :root{
+      --blue:#1e5aa8;
+      --teal:#0ea5a6;
+      --ink:#0b1220;
+      --muted:#667085;
+      --line:#e5e7eb;
+      --bg:#f6fbff;
+      --card:#ffffff;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+      background:
+        radial-gradient(800px 320px at 10% 0%, rgba(30,90,168,.10), transparent 60%),
+        radial-gradient(800px 320px at 90% 0%, rgba(14,165,166,.10), transparent 60%),
+        #fff;
+      color:var(--ink);
+    }
+
+    .wrap{
+      width:min(1400px,94vw);
+      margin:26px auto;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      border-bottom:2px solid rgba(14,165,166,.18);
+      padding-bottom:16px;
+      margin-bottom:18px;
+    }
+
+    h1{margin:0;font-size:1.45rem}
+    .sub{color:var(--muted);margin-top:4px}
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:16px;
+      box-shadow:0 12px 30px rgba(2,8,23,.07);
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:9px 13px;
+      font-weight:800;
+      cursor:pointer;
+      background:#fff;
+      color:#111827;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+
+    .btn-primary{
+      background:#16a34a;
+      border-color:#16a34a;
+      color:#fff;
+    }
+
+    .btn-danger{
+      background:#dc2626;
+      border-color:#dc2626;
+      color:#fff;
+    }
+
+    input{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      font:inherit;
+    }
+
+    label{
+      font-weight:800;
+      font-size:.92rem;
+    }
+
+    .grid-login{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    @media(max-width:800px){
+      .grid-login,.toolbar{
+        grid-template-columns:1fr;
+      }
+
+      .header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+    }
+
+    table{
+      border-collapse:collapse;
+      width:100%;
+      min-width:1600px;
+      font-size:.88rem;
+    }
+
+    th,td{
+      padding:9px 10px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      text-align:left;
+    }
+
+    th{
+      background:#f1f7ff;
+      font-weight:900;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tr:hover td{background:#f9fafb}
+
+    .small{
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    .hidden{display:none!important}
+
+    #msg,#loginMsg{
+      margin-top:10px;
+      font-weight:800;
+    }
+
+    .pill{
+      display:inline-flex;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      background:#f9fafb;
+      font-weight:800;
+      margin-right:8px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="header">
+    <div>
+      <h1>IgniteInno Ventures — Reviewer Network Submissions</h1>
+      <div class="sub">Private viewer for reviewer interest registrations.</div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="index.html">← Back to Website</a>
+      <button id="logoutBtn" class="btn btn-danger hidden" type="button">Logout</button>
+    </div>
+  </header>
+
+  <div id="loginCard" class="card">
+    <h3>Ignite Login</h3>
+
+    <div class="grid-login">
+      <label>
+        Username
+        <input id="username" placeholder="ignite">
+      </label>
+
+      <label>
+        Password
+        <input id="password" type="password" placeholder="ignite">
+      </label>
+
+      <button id="loginBtn" class="btn btn-primary" type="button">Login</button>
+    </div>
+
+    <div id="loginMsg"></div>
+  </div>
+
+  <div id="dash" class="hidden">
+
+    <div class="card">
+      <div class="toolbar">
+        <label>
+          Search
+          <input id="searchBox" placeholder="Search name, email, institution, country, expertise">
+        </label>
+
+        <button id="reloadBtn" class="btn btn-primary" type="button">Reload</button>
+        <button id="exportBtn" class="btn" type="button">Export CSV</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <span class="pill">Total loaded: <span id="totalLoaded">0</span></span>
+      </div>
+
+      <div id="msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Submitted At</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Institution / Company</th>
+              <th>Position</th>
+              <th>Country</th>
+              <th>Expertise</th>
+              <th>Highest Qualification</th>
+              <th>Scholar Profile</th>
+              <th>Professional Profile</th>
+              <th>Uploaded File</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="14">Please login first.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+const IGNITE_KEY = 'ignite-reviewer-basic';
+
+let rows = [];
+
+const $ = id => document.getElementById(id);
+
+function escapeHtml(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function fmtDate(v){
+  if(!v) return '';
+  const d = new Date(v);
+  if(Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString();
+}
+
+function authHeader(){
+  const token = localStorage.getItem(IGNITE_KEY);
+  return token ? { Authorization:'Basic ' + token } : {};
+}
+
+function login(){
+  const u = $('username').value.trim();
+  const p = $('password').value;
+
+  if(!u || !p){
+    $('loginMsg').textContent = '❌ Please enter username and password.';
+    return;
+  }
+
+  const token = btoa(`${u}:${p}`);
+  localStorage.setItem(IGNITE_KEY, token);
+
+  $('loginMsg').textContent = 'Checking login...';
+  loadRows(true);
+}
+
+function showDash(){
+  $('loginCard').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  $('logoutBtn').classList.remove('hidden');
+}
+
+function logout(){
+  localStorage.removeItem(IGNITE_KEY);
+  rows = [];
+  $('dash').classList.add('hidden');
+  $('logoutBtn').classList.add('hidden');
+  $('loginCard').classList.remove('hidden');
+  $('rows').innerHTML = '<tr><td colspan="14">Please login first.</td></tr>';
+}
+
+async function loadRows(fromLogin=false){
+  $('msg').textContent = 'Loading reviewer interests...';
+
+  try{
+    const q = $('searchBox')?.value?.trim() || '';
+
+    const r = await fetch(`${API}/api/ignite/reviewer-interests?q=${encodeURIComponent(q)}&page=1&limit=100`, {
+      headers: authHeader()
+    });
+
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    rows = Array.isArray(data.rows) ? data.rows : [];
+
+    showDash();
+    renderRows();
+
+    $('totalLoaded').textContent = rows.length;
+    $('msg').textContent = `✅ Loaded ${rows.length} record(s).`;
+
+  }catch(err){
+    if(fromLogin){
+      localStorage.removeItem(IGNITE_KEY);
+      $('loginMsg').textContent = '❌ Login failed. Please check username/password.';
+    }else{
+      $('msg').textContent = '❌ ' + err.message;
+      $('rows').innerHTML = `<tr><td colspan="14" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+}
+
+function renderRows(){
+  if(!rows.length){
+    $('rows').innerHTML = '<tr><td colspan="14"><em>No reviewer interest submissions found.</em></td></tr>';
+    return;
+  }
+
+  $('rows').innerHTML = rows.map((r, i) => {
+    const fileLink = r.profileFile?.gridFsId
+      ? `<button class="btn" type="button" onclick="downloadProfileFile('${r._id}')">Download</button><br><span class="small">${escapeHtml(r.profileFile.filename || '')}</span>`
+      : '<em>No file</em>';
+
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td><span class="small">${escapeHtml(fmtDate(r.createdAt))}</span></td>
+        <td><strong>${escapeHtml(r.fullName || '')}</strong></td>
+        <td>${escapeHtml(r.email || '')}</td>
+        <td>${escapeHtml(r.phone || '')}</td>
+        <td>${escapeHtml(r.institution || '')}</td>
+        <td>${escapeHtml(r.position || '')}</td>
+        <td>${escapeHtml(r.country || '')}</td>
+        <td>${escapeHtml(r.expertise || '')}</td>
+        <td>${escapeHtml(r.highestQualification || '')}</td>
+        <td>${r.scholarProfile ? `<a href="${escapeHtml(r.scholarProfile)}" target="_blank" rel="noopener">${escapeHtml(r.scholarProfile)}</a>` : ''}</td>
+        <td>${escapeHtml(r.professionalProfileText || '')}</td>
+        <td>${fileLink}</td>
+        <td>${escapeHtml(r.status || '')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function downloadProfileFile(id){
+  try{
+    const r = await fetch(`${API}/api/ignite/reviewer-interests/${id}/profile-file`, {
+      headers: authHeader()
+    });
+
+    if(!r.ok){
+      const txt = await r.text().catch(()=>'');
+      throw new Error(txt || `HTTP ${r.status}`);
+    }
+
+    const blob = await r.blob();
+
+    let filename = 'reviewer-profile-file';
+    const cd = r.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="([^"]+)"/);
+    if(match && match[1]) filename = match[1];
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  }catch(err){
+    alert('❌ ' + err.message);
+  }
+}
+
+async function exportCSV(){
+  try{
+    const r = await fetch(`${API}/api/ignite/reviewer-interests/export`, {
+      headers: authHeader()
+    });
+
+    if(!r.ok){
+      const txt = await r.text().catch(()=>'');
+      throw new Error(txt || `HTTP ${r.status}`);
+    }
+
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ignite-reviewer-interests.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+  }catch(err){
+    alert('❌ ' + err.message);
+  }
+}
+
+$('loginBtn').addEventListener('click', login);
+$('password').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+$('username').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+$('reloadBtn').addEventListener('click', () => loadRows(false));
+$('exportBtn').addEventListener('click', exportCSV);
+$('logoutBtn').addEventListener('click', logout);
+$('searchBox').addEventListener('keydown', e => { if(e.key === 'Enter') loadRows(false); });
+
+if(localStorage.getItem(IGNITE_KEY)){
+  loadRows(false);
+}
+</script>
+
+</body>
+</html>
