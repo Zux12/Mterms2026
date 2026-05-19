@@ -611,7 +611,7 @@
 
 
    
-        <div class="card-program">
+<div class="card-program" id="abstractUploadCard">
       <h3>Upload and Submit Abstract</h3>
       <p class="help">
         Upload and submit your <strong>Abstract</strong> (.doc or docx only).<br>
@@ -668,6 +668,43 @@
 
     
     <div id="presentationMount"></div>
+
+    <div class="card-program hidden" id="symposiumSpeakerMaterialCard">
+  <h3>Presentation Material Submission for Symposium Speaker</h3>
+
+  <p class="help">
+    As a Symposium Speaker, you do not need to submit an abstract through the participant portal.
+    Please upload your symposium presentation material in <strong>PDF format only</strong>.
+  </p>
+
+  <p class="help">
+    If your presentation contains video files, large images, or other supporting files, please contact the MTERMS 2026 Secretariat directly.
+  </p>
+
+  <div class="grid-2">
+    <label>Type
+      <select disabled>
+        <option>Symposium Speaker Presentation Material</option>
+      </select>
+    </label>
+
+    <label>File Upload (PDF only, max 10 MB)
+      <input type="file" id="symposiumSlidesFile" accept="application/pdf,.pdf">
+    </label>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="symposiumSlidesUploadBtn" class="btn" type="button">Submit Symposium Material</button>
+    <button id="symposiumSlidesRefreshBtn" class="btn ghost" type="button">Refresh latest</button>
+  </div>
+
+  <div id="symposiumSlidesMsg" style="margin-top:8px;font-size:.9rem;"></div>
+
+  <div style="margin-top:12px;">
+    <div class="tag">Latest Submitted Symposium Material is Shown Below</div>
+    <div id="symposiumSlidesLatest" style="margin-top:8px;"></div>
+  </div>
+</div>
 
 <div class="card-orange">
       <h3>My Payments</h3>
@@ -1240,8 +1277,14 @@ $('pro-role').value        = user?.professional?.roleTitle   || '';
     $('s-level').value      = user?.student?.level || '';
     $('s-grad').value       = user?.student?.expectedGradYear || '';
 
-    $('pr-presenting').checked = !!user?.program?.presenting;
-    showPresent(!!user?.program?.presenting);
+$('pr-presenting').checked = !!user?.program?.presenting;
+showPresent(!!user?.program?.presenting);
+
+const sympSpeaker = applySymposiumSpeakerRules(user);
+if (sympSpeaker) {
+  bindSymposiumSpeakerUpload();
+  loadLatest('slides', 'symposiumSlidesLatest');
+}
     // Program
     const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
     $('pr-type').value = (posterLocked ? 'poster' : (user?.program?.type || 'talk'));
@@ -1661,7 +1704,7 @@ tesmaMember: $('f-tesmaMember').checked,
   } : undefined,
 
   program: {
-    presenting: $('pr-presenting').checked,
+    presenting: isSymposiumSpeaker(user) ? false : $('pr-presenting').checked,
     type: (function(){
       const presenting = $('pr-presenting').checked;
       const posterLocked = (user?.program?.topicArea === POSTER_LOCK_MARKER);
@@ -1783,12 +1826,77 @@ document.getElementById('absRefreshBtn').addEventListener('click', async () => {
 document.getElementById('payUploadBtn').addEventListener('click', ()=>uploadDoc('bankReceipt','payFile','payMsg','payLatest'));
 document.getElementById('payRefreshBtn').addEventListener('click', ()=>loadLatest('bankReceipt','payLatest'));
 
-  $('pr-presenting').addEventListener('change', () => {
+$('pr-presenting').addEventListener('change', () => {
+  const user = getSession();
+
+  if (isSymposiumSpeaker(user) && $('pr-presenting').checked) {
+    alert('Symposium speakers do not need to submit an abstract. Please upload your presentation material in the Symposium Speaker section below.');
+    $('pr-presenting').checked = false;
+    showPresent(false);
+    showSubmission(false);
+    applySymposiumSpeakerRules(user);
+    return;
+  }
+
   const on = $('pr-presenting').checked;
   showPresent(on);
   showSubmission(on);
 });
 
+
+function isSymposiumSpeaker(user){
+  return String(user?.professionalSubtype || '').trim().toLowerCase() === 'symposia speaker';
+}
+
+function applySymposiumSpeakerRules(user){
+  const isSymp = isSymposiumSpeaker(user);
+
+  const abstractUploadCard = $('abstractUploadCard');
+  const presentationMount = $('presentationMount');
+  const symposiumCard = $('symposiumSpeakerMaterialCard');
+
+  if (abstractUploadCard) abstractUploadCard.classList.toggle('hidden', isSymp);
+  if (presentationMount) presentationMount.classList.toggle('hidden', isSymp);
+  if (symposiumCard) symposiumCard.classList.toggle('hidden', !isSymp);
+
+  if (isSymp) {
+    $('pr-presenting').checked = false;
+    showPresent(false);
+    showSubmission(false);
+  }
+
+  return isSymp;
+}
+
+function bindSymposiumSpeakerUpload(){
+  const up = $('symposiumSlidesUploadBtn');
+  const rf = $('symposiumSlidesRefreshBtn');
+
+  if (up && !up.dataset.bound){
+    up.dataset.bound = '1';
+    up.addEventListener('click', () => {
+      const file = $('symposiumSlidesFile')?.files?.[0];
+      if (!file) {
+        $('symposiumSlidesMsg').textContent = '❌ Please select a PDF file.';
+        return;
+      }
+
+      const name = file.name.toLowerCase();
+      if (!name.endsWith('.pdf')) {
+        $('symposiumSlidesMsg').textContent = '❌ Symposium material must be uploaded in PDF format only.';
+        return;
+      }
+
+      uploadDoc('slides', 'symposiumSlidesFile', 'symposiumSlidesMsg', 'symposiumSlidesLatest');
+    });
+  }
+
+  if (rf && !rf.dataset.bound){
+    rf.dataset.bound = '1';
+    rf.addEventListener('click', () => loadLatest('slides', 'symposiumSlidesLatest'));
+  }
+}
+  
 function refreshOptionBUI(){
   const role = $('f-roleType').value;
   const nat  = $('f-nationality').value;
