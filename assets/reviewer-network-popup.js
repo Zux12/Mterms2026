@@ -41,10 +41,9 @@
     floatBtn.className = 'rn-float-btn';
     floatBtn.type = 'button';
     floatBtn.setAttribute('aria-label', 'Open Reviewer Network invitation');
-    floatBtn.innerHTML = `
-      <img src="public/reviewer.png" alt="">
-      <span>Reviewer Network</span>
-    `;
+floatBtn.innerHTML = `
+  <img src="public/reviewer.png" alt="Reviewer Network">
+`;
 
     const backdrop = document.createElement('div');
     backdrop.id = 'rnBackdrop';
