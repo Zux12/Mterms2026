@@ -388,6 +388,26 @@
           </div>
         </div>
 
+
+
+        <div class="card" style="box-shadow:none">
+          <h4>Upload Commented Abstract File</h4>
+
+          <p class="help">
+            Upload the DOC/DOCX file containing panel comments. This file is visible to admin only and will not be shown to the participant.
+          </p>
+
+          <input type="file" id="commentedFile" accept=".doc,.docx">
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+            <button id="uploadCommentedFileBtn" class="btn btn-primary" type="button">Upload Commented File</button>
+          </div>
+
+          <div id="commentedFileInfo" style="margin-top:10px;font-weight:700"></div>
+        </div>
+
+        
+
         <div class="card" style="box-shadow:none">
           <h4>Scores</h4>
           <div class="table-wrap">
@@ -497,21 +517,7 @@
           </p>
         </div>
 
-        <div class="card" style="box-shadow:none">
-          <h4>Upload Commented Abstract File</h4>
 
-          <p class="help">
-            Upload the DOC/DOCX file containing panel comments. This file is visible to admin only and will not be shown to the participant.
-          </p>
-
-          <input type="file" id="commentedFile" accept=".doc,.docx">
-
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <button id="uploadCommentedFileBtn" class="btn btn-primary" type="button">Upload Commented File</button>
-          </div>
-
-          <div id="commentedFileInfo" style="margin-top:10px;font-weight:700"></div>
-        </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
           <button id="saveDraftBtn" class="btn btn-secondary" type="button">Save Draft</button>
