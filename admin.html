@@ -1956,11 +1956,11 @@ const updates = {
   if (updates.student === undefined) delete updates.student;
 
   const v = validateAdminSubmissionIfPresenter();
-  if (!v.ok) {
-    $('saveMsg').textContent = v.msg;
-    $('save').disabled = false;
-    return;
-  }
+if (!v.ok) {
+  $('saveMsg').textContent = v.msg;
+  $('save').disabled = false;
+  return false;
+}
 
   try{
     const r = await fetch(`${API}/api/admin/registrations/${id}`, {
@@ -1971,13 +1971,15 @@ const updates = {
     const data = await r.json();
     if(!r.ok) throw new Error(data.error||'Update failed');
 
-    $('saveMsg').textContent='✅ Saved';
-    loadPage(page);
-  }catch(err){
-    $('saveMsg').textContent='❌ '+err.message;
-  }finally{
-    $('save').disabled = false;
-  }
+$('saveMsg').textContent='✅ Saved';
+loadPage(page);
+return true;
+}catch(err){
+  $('saveMsg').textContent='❌ '+err.message;
+  return false;
+}finally{
+  $('save').disabled = false;
+}
 }
 
 function buildReviewEmailPreviewData(){
@@ -2060,10 +2062,20 @@ async function saveCommentAndEmail(){
     return;
   }
 
-  $('saveReviewEmail').disabled = true;
-  $('reviewEmailMsg').textContent = 'Saving comment and sending email…';
+$('saveReviewEmail').disabled = true;
+$('reviewEmailMsg').textContent = 'Saving full participant details first…';
 
-  try{
+const fullSaveOk = await saveChanges(currentEditorDoc._id, currentEditorDoc);
+
+if (!fullSaveOk) {
+  $('reviewEmailMsg').textContent = '❌ Full save failed. Email was not sent. Please check the Save changes error message below.';
+  $('saveReviewEmail').disabled = false;
+  return;
+}
+
+$('reviewEmailMsg').textContent = 'Full save completed. Sending email…';
+
+try{
     const r = await fetch(`${API}/api/registrations/admin/send-review-comment`, {
       method:'POST',
       headers:{ 'Content-Type':'application/json', ...authHeader() },
