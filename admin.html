@@ -1661,7 +1661,7 @@ async function loadPanelReviewForCurrent(){
 
     let fileHtml = '';
     if (review?.reviewerFile?.gridFsId) {
-      fileHtml = `<br><a class="btn btn-primary" href="${API}/api/admin/reviews/commented-file/${review._id}" target="_blank" rel="noopener">Download Panel Commented File</a>`;
+fileHtml = `<br><button class="btn btn-primary" type="button" onclick="downloadPanelCommentedFile('${review._id}')">Download Panel Commented File</button>`;
     }
 
     $('panelReviewDetails').innerHTML = `
@@ -1681,6 +1681,39 @@ async function loadPanelReviewForCurrent(){
   }
 }
 
+async function downloadPanelCommentedFile(reviewId){
+  try{
+    const r = await fetch(`${API}/api/admin/reviews/commented-file/${reviewId}`, {
+      headers: authHeader()
+    });
+
+    if(!r.ok){
+      const text = await r.text().catch(() => '');
+      throw new Error(text || `Download failed: HTTP ${r.status}`);
+    }
+
+    const blob = await r.blob();
+
+    let filename = 'panel-commented-abstract.docx';
+    const cd = r.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="([^"]+)"/);
+    if (match && match[1]) filename = match[1];
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  }catch(err){
+    alert('❌ ' + err.message);
+  }
+}
+
+    
 async function assignPanelReviewerForCurrent(){
   if (!currentEditorDoc?._id) return;
 
