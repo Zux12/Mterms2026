@@ -648,6 +648,12 @@
         <div class="tag">Reviewer Comment Section</div>
         <div id="reviewComment" class="help" style="margin-top:8px;white-space:pre-wrap;"></div>
       </div>
+
+<div style="margin-top:12px;">
+  <div class="tag">Panel Abstract Review Result</div>
+  <div id="panelReviewResultBox" class="help" style="margin-top:8px;white-space:pre-wrap;"></div>
+</div>
+          
     </div>
 
 
@@ -1427,6 +1433,71 @@ async function loadLatest(type, latestBoxId){
   }
 }
 
+
+async function loadPanelReviewResult(){
+  let user;
+  try { user = requireSessionOrThrow(); }
+  catch(e){
+    $('panelReviewResultBox').innerHTML = '<em>Please login to view panel review result.</em>';
+    return;
+  }
+
+  const box = $('panelReviewResultBox');
+  if (!box) return;
+
+  box.innerHTML = 'Loading panel review result...';
+
+  try{
+    const r = await fetch(
+      `${API}/api/registrations/panel-review-result?regCode=${encodeURIComponent(user.regCode)}&email=${encodeURIComponent(user.personal.email)}`
+    );
+
+    const data = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(data.error || 'Failed to load panel review result');
+
+    if (!data.hasReview || data.status === 'not_assigned') {
+      box.innerHTML = '<em>Your abstract has not been reviewed by the panel yet.</em>';
+      return;
+    }
+
+    if (data.status !== 'submitted') {
+      box.innerHTML = `<em>Panel review status: ${escapeHtml(data.status)}. Final review result is not available yet.</em>`;
+      return;
+    }
+
+    const cr = data.correctionReasons || {};
+    const reasons = [];
+
+    if (cr.tooLong) reasons.push('• The abstract is too long (more than one page in length / 250 words).');
+    if (cr.poorlyWritten) reasons.push('• The abstract is poorly written.');
+    if (cr.weakHypothesis) reasons.push('• There is a poorly supported research hypothesis / objective.');
+    if (cr.vagueExperimentalPlan) reasons.push('• The experimental plan is vague or not well described.');
+    if (cr.insufficientData) reasons.push('• The data presented is insufficient, or the analysis of the data is inadequate, to justify the presentation.');
+    if (cr.others) reasons.push(`• Others: ${escapeHtml(cr.othersText || '')}`);
+
+    const correctionText = data.requireCorrection === 'yes'
+      ? 'Yes'
+      : data.requireCorrection === 'no'
+        ? 'No'
+        : '—';
+
+    box.innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f9fafb;color:#111827">
+        <strong>Require Correction:</strong> ${correctionText}<br>
+        <strong>Panel Review Status:</strong> Submitted<br>
+        ${data.submittedAt ? `<strong>Reviewed At:</strong> ${new Date(data.submittedAt).toLocaleString()}<br>` : ''}
+        <br>
+        <strong>Correction Reason(s):</strong><br>
+        ${reasons.length ? reasons.join('<br>') : '<em>No correction reason provided.</em>'}
+      </div>
+    `;
+
+  }catch(err){
+    box.innerHTML = `<span style="color:#b42318">❌ ${escapeHtml(err.message)}</span>`;
+  }
+}
+
+  
   // --- ID photo helpers ---
   function fitCoverToCanvas(imgW, imgH, canW, canH){
     const imgR = imgW / imgH, canR = canW / canH;
@@ -1701,6 +1772,7 @@ document.getElementById('absRefreshBtn').addEventListener('click', async () => {
       saveSession(full);
       prefill(full);         // <-- this updates #reviewComment
       fillBadgeText(full);
+      loadPanelReviewResult();
     }
   } catch (e) {
     // ignore: keep old comment if refresh fails
@@ -1776,6 +1848,7 @@ loadLatest('bankReceipt','payLatest');
     refreshIDPhoto();
 loadLatest('abstract','absLatest');
 loadLatest('bankReceipt','payLatest');
+    loadPanelReviewResult();
   }
 
   function showInlineLogin(reasonText){
@@ -1877,6 +1950,7 @@ if (sess?.regCode && sess?.personal?.email) {
   }
   loadLatest('abstract','absLatest');
   loadLatest('bankReceipt','payLatest');
+  loadPanelReviewResult();
   return;
 }
 
@@ -1888,6 +1962,7 @@ if (sess?.regCode && sess?.personal?.email) {
       showDashboard(me.user);
       loadLatest('abstract','absLatest');
   loadLatest('bankReceipt','payLatest');
+      loadPanelReviewResult();
       return;
     }
   } catch {}
