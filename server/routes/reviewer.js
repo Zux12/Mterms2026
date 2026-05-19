@@ -189,8 +189,12 @@ router.get('/abstracts', requireReviewer, async (req, res) => {
 
     const regMap = new Map(registrations.map(r => [String(r._id), r]));
 
-    const rows = reviews.map(review => {
-      const reg = regMap.get(String(review.registrationId));
+const rows = reviews
+  .map(review => {
+    const reg = regMap.get(String(review.registrationId));
+
+    // registration deleted from MongoDB
+    if (!reg) return null;
 
       const abstractUploads = Array.isArray(reg?.uploads)
         ? reg.uploads.filter(u => u.type === 'abstract')
@@ -227,8 +231,9 @@ router.get('/abstracts', requireReviewer, async (req, res) => {
           uploadedAt: latestAbstract.uploadedAt,
           downloadUrl: `/api/reviewer/abstracts/${review.registrationId}/abstract-file`
         } : null
-      };
-    });
+              };
+    })
+    .filter(Boolean);
 
     res.json({ ok: true, rows });
   } catch (err) {
