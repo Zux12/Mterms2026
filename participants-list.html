@@ -179,7 +179,7 @@
       width:100%;
       border-collapse:collapse;
       font-size:.9rem;
-      min-width:1500px;
+      min-width:1700px;
     }
 
     th,td{
@@ -313,8 +313,10 @@
               <th>Presentation Type</th>
               <th>Abstract Title</th>
               <th>Theme</th>
-              <th>Field</th>
-              <th>Payment</th>
+          <th>Field</th>
+<th>Panel Reviewer</th>
+<th>Panel Review Status</th>
+<th>Payment</th>
               <th>Amount</th>
               <th>Phase</th>
               <th>Registered At</th>
@@ -322,7 +324,7 @@
           </thead>
           <tbody id="rows">
             <tr>
-              <td colspan="23">Loading participants...</td>
+              <td colspan="25">Loading participants...</td>
             </tr>
           </tbody>
         </table>
@@ -335,8 +337,9 @@
   const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
   const ADMIN_KEY = 'mterms-admin-basic';
 
-  let allRows = [];
-  let filteredRows = [];
+let allRows = [];
+let filteredRows = [];
+let reviewStatusMap = {};
 
   const $ = (id) => document.getElementById(id);
 
@@ -375,6 +378,48 @@
     return d.toLocaleString();
   }
 
+  function reviewStatusText(doc){
+  const rev = reviewStatusMap[String(doc._id)] || null;
+
+  if (!rev) return {
+    reviewer: '—',
+    status: 'Not assigned'
+  };
+
+  const raw = String(rev.status || '').toLowerCase();
+
+  let status = 'Assigned';
+  if (raw === 'draft') status = 'Draft saved';
+  if (raw === 'submitted') status = 'Reviewed';
+
+  return {
+    reviewer: rev.assignedReviewerUsername || '—',
+    status
+  };
+}
+
+async function loadReviewStatuses(){
+  reviewStatusMap = {};
+
+  const ids = allRows.map(x => x._id).filter(Boolean);
+  if (!ids.length) return;
+
+  try{
+    const r = await fetch(`${API}/api/admin/reviews/statuses`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeader() },
+      body: JSON.stringify({ registrationIds: ids })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+    reviewStatusMap = data.map || {};
+  }catch(err){
+    console.warn('Failed to load panel review statuses:', err);
+  }
+}
+
   async function fetchPage(page){
     const r = await fetch(`${API}/api/admin/registrations?page=${page}&limit=100&q=`, {
       headers: authHeader()
@@ -387,7 +432,7 @@
   }
 
   async function loadAllParticipants(){
-    $('rows').innerHTML = `<tr><td colspan="23">Loading participants...</td></tr>`;
+    $('rows').innerHTML = `<tr><td colspan="25">Loading participants...</td></tr>`;
     $('msg').textContent = 'Loading all registered participants...';
 
     try{
@@ -413,12 +458,13 @@
         page += 1;
       }
 
-      populateCategoryFilter();
-      applyFilters();
+await loadReviewStatuses();
+populateCategoryFilter();
+applyFilters();
 
       $('msg').textContent = `✅ Loaded ${allRows.length} participant(s).`;
     }catch(err){
-      $('rows').innerHTML = `<tr><td colspan="23" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
+      $('rows').innerHTML = `<tr><td colspan="25" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
       $('msg').textContent = '❌ ' + err.message;
     }
   }
@@ -468,7 +514,7 @@
 
   function renderRows(){
     if (!filteredRows.length){
-      $('rows').innerHTML = `<tr><td colspan="23"><em>No matching participants found.</em></td></tr>`;
+      $('rows').innerHTML = `<tr><td colspan="25"><em>No matching participants found.</em></td></tr>`;
       return;
     }
 
@@ -495,9 +541,11 @@
           <td>${doc?.program?.presenting ? 'Yes' : 'No'}</td>
           <td>${escapeHtml(doc?.program?.type || '')}</td>
           <td>${escapeHtml(doc?.submission?.title || '')}</td>
-          <td>${escapeHtml(doc?.submission?.theme || '')}</td>
-          <td>${escapeHtml(doc?.submission?.field || '')}</td>
-          <td class="${paymentClass}">${escapeHtml(payment)}</td>
+       <td>${escapeHtml(doc?.submission?.theme || '')}</td>
+<td>${escapeHtml(doc?.submission?.field || '')}</td>
+<td>${escapeHtml(reviewStatusText(doc).reviewer)}</td>
+<td><strong>${escapeHtml(reviewStatusText(doc).status)}</strong></td>
+<td class="${paymentClass}">${escapeHtml(payment)}</td>
           <td>${escapeHtml(money(doc))}</td>
           <td>${escapeHtml(doc?.pricingSnapshot?.phase || '')}</td>
           <td><span class="small">${escapeHtml(fmtDate(doc.createdAt))}</span></td>
@@ -543,8 +591,10 @@
       'Presentation Type',
       'Abstract Title',
       'Theme',
-      'Field',
-      'Payment',
+'Field',
+'Panel Reviewer',
+'Panel Review Status',
+'Payment',
       'Amount',
       'Phase',
       'Registered At'
@@ -571,9 +621,11 @@
         doc?.program?.presenting ? 'Yes' : 'No',
         doc?.program?.type || '',
         doc?.submission?.title || '',
-        doc?.submission?.theme || '',
-        doc?.submission?.field || '',
-        doc?.payment?.status || 'pending',
+     doc?.submission?.theme || '',
+doc?.submission?.field || '',
+reviewStatusText(doc).reviewer,
+reviewStatusText(doc).status,
+doc?.payment?.status || 'pending',
         money(doc),
         doc?.pricingSnapshot?.phase || '',
         fmtDate(doc.createdAt)
