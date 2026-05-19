@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Join the MTERMS 2026 Reviewer Network</title>
+
+  <style>
+    :root{
+      --blue:#1e5aa8;
+      --blue2:#2f7bdc;
+      --teal:#0ea5a6;
+      --green:#16a34a;
+      --ink:#0b1220;
+      --muted:#526079;
+      --line:rgba(15,23,42,.12);
+      --card:#ffffff;
+      --bg:#f6fbff;
+      --shadow:0 24px 70px rgba(2,8,23,.12);
+      --shadow2:0 12px 30px rgba(2,8,23,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 12% 8%, rgba(47,123,220,.16), transparent 60%),
+        radial-gradient(900px 520px at 88% 18%, rgba(14,165,166,.14), transparent 58%),
+        linear-gradient(180deg,#f8fcff 0%,#eef8ff 52%,#ffffff 100%);
+      min-height:100vh;
+    }
+
+    .page{
+      width:min(1180px,94vw);
+      margin:0 auto;
+      padding:28px 0 34px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:22px;
+    }
+
+    .brand{
+      font-weight:900;
+      color:var(--blue);
+      letter-spacing:.02em;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:11px 16px;
+      font-weight:900;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .btn:active{transform:translateY(1px)}
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--blue),var(--teal));
+      color:#fff;
+      box-shadow:0 16px 34px rgba(30,90,168,.24);
+    }
+
+    .btn-primary:hover{filter:brightness(1.03)}
+
+    .btn-secondary{
+      background:#fff;
+      color:var(--ink);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow2);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:24px;
+      align-items:start;
+    }
+
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .hero-card{
+      background:rgba(255,255,255,.82);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      padding:28px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .hero-card::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:7px;
+      background:linear-gradient(90deg,var(--blue),var(--teal),var(--green));
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#eef6ff;
+      color:var(--blue);
+      border:1px solid rgba(30,90,168,.16);
+      border-radius:999px;
+      padding:7px 11px;
+      font-weight:900;
+      font-size:.86rem;
+      margin-bottom:16px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(2rem,4vw,3.4rem);
+      line-height:1.02;
+      letter-spacing:-.05em;
+    }
+
+    .lead{
+      margin:18px 0 0;
+      color:#334155;
+      font-size:1.08rem;
+      line-height:1.65;
+    }
+
+    .benefits{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:20px;
+    }
+
+    @media(max-width:600px){
+      .benefits{grid-template-columns:1fr}
+    }
+
+    .benefit{
+      background:#ffffff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(2,8,23,.06);
+    }
+
+    .benefit-icon{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,rgba(47,123,220,.14),rgba(14,165,166,.16));
+      margin-bottom:10px;
+      font-size:1.1rem;
+    }
+
+    .benefit strong{
+      display:block;
+      margin-bottom:5px;
+      font-size:.98rem;
+    }
+
+    .benefit span{
+      display:block;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    .form-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .form-head{
+      padding:22px 24px;
+      background:linear-gradient(135deg,#eef6ff,#effffb);
+      border-bottom:1px solid var(--line);
+    }
+
+    .form-head h2{
+      margin:0;
+      font-size:1.3rem;
+    }
+
+    .form-head p{
+      margin:7px 0 0;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    form{
+      padding:22px 24px 24px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    @media(max-width:700px){
+      .grid-2{grid-template-columns:1fr}
+    }
+
+    label{
+      display:block;
+      font-weight:900;
+      font-size:.92rem;
+      color:#111827;
+      margin-bottom:6px;
+    }
+
+    .required{
+      color:#dc2626;
+    }
+
+    input,textarea,select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 12px;
+      font:inherit;
+      background:#fff;
+      color:var(--ink);
+      outline:none;
+      box-shadow:0 1px 0 rgba(2,8,23,.03);
+    }
+
+    textarea{
+      min-height:108px;
+      resize:vertical;
+    }
+
+    input:focus,textarea:focus,select:focus{
+      border-color:rgba(30,90,168,.35);
+      box-shadow:0 0 0 4px rgba(30,90,168,.10);
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .help{
+      color:var(--muted);
+      font-size:.86rem;
+      margin-top:6px;
+      line-height:1.4;
+    }
+
+    .consent{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      background:#f9fafb;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin:12px 0 16px;
+      color:#334155;
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .consent input{
+      width:auto;
+      margin-top:4px;
+      flex:0 0 auto;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .msg{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:16px;
+      font-weight:800;
+      display:none;
+      line-height:1.5;
+    }
+
+    .msg.show{display:block}
+
+    .msg.ok{
+      color:#065f46;
+      border:1px solid rgba(6,118,71,.22);
+      background:rgba(6,118,71,.07);
+    }
+
+    .msg.err{
+      color:#8a1f17;
+      border:1px solid rgba(180,35,24,.25);
+      background:rgba(180,35,24,.06);
+    }
+
+    .small-note{
+      margin-top:20px;
+      padding:14px;
+      border-radius:18px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      color:#475467;
+      line-height:1.55;
+      box-shadow:0 10px 24px rgba(2,8,23,.05);
+    }
+
+    .footer{
+      text-align:center;
+      color:#667085;
+      margin-top:26px;
+      font-size:.92rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+
+    <div class="topbar">
+      <div class="brand">MTERMS 2026 Reviewer Network</div>
+      <a href="index.html" class="btn btn-secondary">← Back to Website</a>
+    </div>
+
+    <section class="hero">
+
+      <div class="hero-card">
+        <div class="eyebrow">Academic & Industry Reviewer Community</div>
+
+        <h1>Join the MTERMS 2026 Reviewer Network</h1>
+
+        <p class="lead">
+          MTERMS 2026 is expanding its professional network of academic and industry reviewers for future conferences,
+          scientific forums, and scholarly programmes.
+        </p>
+
+        <p class="lead">
+          We warmly invite researchers, clinicians, academicians, and professionals to register their interest by sharing
+          their details and areas of expertise.
+        </p>
+
+        <div class="benefits">
+          <div class="benefit">
+            <div class="benefit-icon">🌐</div>
+            <strong>Be Part of a Professional Network</strong>
+            <span>Connect with a growing pool of reviewers, academics, clinicians, researchers, and technical experts.</span>
+          </div>
+
+          <div class="benefit">
+            <div class="benefit-icon">📚</div>
+            <strong>Contribute to Scientific Quality</strong>
+            <span>Support future conferences and forums through meaningful scientific review and professional input.</span>
+          </div>
+
+          <div class="benefit">
+            <div class="benefit-icon">🤝</div>
+            <strong>Access Future Opportunities</strong>
+            <span>Selected reviewers may be contacted for future review panels, academic activities, and collaborations.</span>
+          </div>
+
+          <div class="benefit">
+            <div class="benefit-icon">✨</div>
+            <strong>Grow Your Visibility</strong>
+            <span>Showcase your expertise and become part of a distinguished reviewer community.</span>
+          </div>
+        </div>
+
+        <div class="small-note">
+          Selected reviewers may be contacted for future opportunities to contribute to scientific review activities,
+          conference panels, and academic collaborations. We look forward to building a strong and distinguished reviewer
+          community together.
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-head">
+          <h2>Register Your Interest</h2>
+          <p>
+            Please complete the form below. Fields marked with <span class="required">*</span> are required.
+          </p>
+        </div>
+
+        <form id="interestForm">
+          <div class="grid-2">
+            <div class="field">
+              <label>Full Name <span class="required">*</span></label>
+              <input name="fullName" id="fullName" required placeholder="e.g., Dr. Aisyah Rahman">
+            </div>
+
+            <div class="field">
+              <label>Email <span class="required">*</span></label>
+              <input name="email" id="email" type="email" required placeholder="you@example.com">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Phone</label>
+              <input name="phone" id="phone" placeholder="+60...">
+            </div>
+
+            <div class="field">
+              <label>Country <span class="required">*</span></label>
+              <input name="country" id="country" required placeholder="Malaysia">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Institution / Company <span class="required">*</span></label>
+            <input name="institution" id="institution" required placeholder="University / Hospital / Company">
+          </div>
+
+          <div class="field">
+            <label>Current Position / Designation <span class="required">*</span></label>
+            <input name="position" id="position" required placeholder="Lecturer / Researcher / Clinician / Engineer / Specialist">
+          </div>
+
+          <div class="field">
+            <label>Area(s) of Expertise <span class="required">*</span></label>
+            <textarea name="expertise" id="expertise" required placeholder="e.g., tissue engineering, biomaterials, stem cells, regenerative medicine, clinical research, biofabrication"></textarea>
+            <div class="help">You may include multiple areas of expertise.</div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Highest Qualification</label>
+              <input name="highestQualification" id="highestQualification" placeholder="PhD / MSc / MD / DDS / Professional Certification">
+            </div>
+
+            <div class="field">
+              <label>ORCID / Scopus / Google Scholar</label>
+              <input name="scholarProfile" id="scholarProfile" placeholder="Profile link or ID">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Short Professional Profile</label>
+            <textarea name="professionalProfileText" id="professionalProfileText" placeholder="Briefly describe your experience, research interest, reviewer experience, or professional background."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Upload Professional Profile File</label>
+            <input type="file" name="profileFile" id="profileFile" accept=".pdf,.doc,.docx">
+            <div class="help">Optional. Accepted file types: PDF, DOC, DOCX. Maximum file size: 10 MB.</div>
+          </div>
+
+          <label class="consent">
+            <input type="checkbox" id="consentContact" name="consentContact">
+            <span>
+              I agree to be contacted regarding future reviewer opportunities, academic activities, and related scientific programmes.
+            </span>
+          </label>
+
+          <div class="actions">
+            <button id="submitBtn" type="submit" class="btn btn-primary">Submit Interest</button>
+            <a href="index.html" class="btn btn-secondary">Cancel</a>
+          </div>
+
+          <div id="msg" class="msg"></div>
+        </form>
+      </div>
+
+    </section>
+
+    <div class="footer">
+      Your registration of interest will be stored securely and reviewed for future opportunities.
+    </div>
+
+  </main>
+
+<script>
+const API = 'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+const form = document.getElementById('interestForm');
+const msg = document.getElementById('msg');
+const submitBtn = document.getElementById('submitBtn');
+
+function showMsg(type, text){
+  msg.className = 'msg show ' + type;
+  msg.textContent = text;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  msg.className = 'msg';
+  msg.textContent = '';
+
+  const file = document.getElementById('profileFile').files?.[0];
+
+  if (file) {
+    const name = file.name.toLowerCase();
+
+    if (!name.endsWith('.pdf') && !name.endsWith('.doc') && !name.endsWith('.docx')) {
+      showMsg('err', '❌ Please upload PDF, DOC, or DOCX only.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      showMsg('err', '❌ File size must not exceed 10 MB.');
+      return;
+    }
+  }
+
+  if (!document.getElementById('consentContact').checked) {
+    showMsg('err', '❌ Please tick the consent checkbox before submitting.');
+    return;
+  }
+
+  const fd = new FormData(form);
+  fd.set('consentContact', document.getElementById('consentContact').checked ? 'true' : 'false');
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try{
+    const r = await fetch(`${API}/api/ignite/reviewer-interest`, {
+      method:'POST',
+      body: fd
+    });
+
+    const data = await r.json().catch(() => ({}));
+
+    if(!r.ok) throw new Error(data.error || `Submission failed: HTTP ${r.status}`);
+
+    showMsg('ok', data.message || '✅ Your registration of interest has been received.');
+    form.reset();
+
+    localStorage.setItem('mtermsReviewerNetworkSubmitted', '1');
+    localStorage.setItem('mtermsReviewerNetworkPopupLastSeen', new Date().toISOString().slice(0,10));
+
+  }catch(err){
+    showMsg('err', '❌ ' + (err.message || 'Submission failed.'));
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Interest';
+  }
+});
+</script>
+</body>
+</html>
