@@ -667,8 +667,36 @@ tesmaMember: !!fd.get('tesmaMember'),
             body: JSON.stringify(payload)
           });
           const data = await r.json();
-          if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+if (!r.ok) {
 
+  // Existing email already registered
+  if (r.status === 409 && data.code === 'EMAIL_EXISTS') {
+
+    out.innerHTML = `
+<div style="border:1px solid #f59e0b;background:#fff7ed;color:#92400e;
+            border-radius:12px;padding:14px;margin-top:10px">
+
+  <div style="font-weight:800;font-size:1rem;margin-bottom:8px">
+    This email has already been registered.
+  </div>
+
+  <div style="margin-bottom:12px">
+    Please login using your registered email and password.
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn" href="login.html">Login Now</a>
+    <a class="btn" href="forgot-password.html">Forgot Password</a>
+  </div>
+</div>
+    `;
+
+    setSubmitBusy(false);
+    return;
+  }
+
+  throw new Error(data.error || `HTTP ${r.status}`);
+}
           out.innerHTML = `
 ✅ Registration Successful. Your code: <strong>${data.regCode}</strong><br>
 You can now log in using your <strong>email + password</strong>.<br>
