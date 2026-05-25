@@ -1549,6 +1549,7 @@ $('aLogin').addEventListener('click', () => {
 <td id="reviewStatus-${doc._id}">Loading…</td>
 <td class="actions">
 <button class="btn btn-primary" data-act="edit" data-id="${doc._id}">View</button>
+<button class="btn btn-danger" data-act="delete" data-id="${doc._id}" data-name="${name}" data-code="${doc.regCode || ''}">Delete</button>
 </td>
           </tr>`;
         }).join('') || '<tr><td colspan="8"><em>No results</em></td></tr>';
@@ -1611,12 +1612,66 @@ $('aLogin').addEventListener('click', () => {
     $('q').addEventListener('input',()=>{clearTimeout(window._t); window._t=setTimeout(()=>loadPage(1),300);});
 
     // Row actions
-    document.getElementById('tbl').addEventListener('click',async(e)=>{
-      const btn = e.target.closest('button');
-      if(!btn) return;
-      const act = btn.dataset.act, id = btn.dataset.id;
-      if(act==='edit'){ openEditor(id); }
+document.getElementById('tbl').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+
+  const act = btn.dataset.act;
+  const id = btn.dataset.id;
+
+  if (act === 'edit') {
+    openEditor(id);
+    return;
+  }
+
+  if (act === 'delete') {
+    const name = btn.dataset.name || 'this participant';
+    const code = btn.dataset.code || '';
+
+    const confirmText =
+      `Delete registration?\n\n` +
+      `Participant: ${name}\n` +
+      `Code: ${code}\n\n` +
+      `This will delete the registration, uploaded files, and related panel review records.\n\n` +
+      `This action cannot be undone.`;
+
+    if (!confirm(confirmText)) return;
+
+    await deleteRegistration(id);
+  }
+});
+
+
+async function deleteRegistration(id) {
+  if (!id) return;
+
+  try {
+    const r = await fetch(`${API}/api/admin/registrations/${id}`, {
+      method: 'DELETE',
+      headers: authHeader()
     });
+
+    const data = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      throw new Error(data.error || `Delete failed: HTTP ${r.status}`);
+    }
+
+    alert('✅ Registration deleted successfully.');
+
+    if (currentEditorDoc && String(currentEditorDoc._id) === String(id)) {
+      currentEditorDoc = null;
+      $('editCard').style.display = 'none';
+    }
+
+    loadPage(page);
+
+  } catch (err) {
+    alert('❌ ' + err.message);
+  }
+}    
+
+
 
 $('f-roleType')?.addEventListener('change', () => refreshAdminOptionBUI({ preserveSelection:false }));
 $('f-nationality')?.addEventListener('change', () => refreshAdminOptionBUI({ preserveSelection:false }));
