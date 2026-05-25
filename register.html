@@ -516,8 +516,22 @@ function refreshOptionBUI(){
   const prof = selProf ? selProf.value : 'Standard';
 
   show(studentOnly, role === 'Student');
-  show(proSubtypeWrap, role === 'Professional' && nat === 'Malaysian');
+show(proSubtypeWrap, role === 'Professional');
 
+if (role === 'Professional' && nat === 'Non-Malaysian') {
+  selProf.innerHTML = `
+    <option value="Standard">Standard</option>
+    <option value="Symposia Speaker">Symposia Speaker</option>
+  `;
+} else {
+  selProf.innerHTML = `
+    <option value="Standard">Standard</option>
+    <option value="Committee">TESMA/MTERM Committee</option>
+    <option value="Symposia Speaker">Symposia Speaker</option>
+    <option value="Keynote">Keynote Speaker</option>
+    <option value="Plenary">Plenary Speaker</option>
+  `;
+}
   const showTesmaForStudent =
     role === 'Student' && nat === 'Malaysian';
 
