@@ -1147,16 +1147,43 @@ function isAdminAuthed(){
   return !!localStorage.getItem(ADMIN_KEY);
 }
 
-function refreshAdminOptionBUI(){
+function refreshAdminOptionBUI(options = {}){
+  const preserveSelection = options.preserveSelection !== false;
+
   const role = $('f-roleType')?.value || '';
   const nat = $('f-nationality')?.value || '';
-  const prof = $('f-profSubtype')?.value || 'Standard';
+
+  const currentProf = preserveSelection
+    ? ($('f-profSubtype')?.value || 'Standard')
+    : 'Standard';
 
   const isStudent = (role === 'Student');
   $('studentOnly').style.display = isStudent ? 'block' : 'none';
 
-  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
-  $('proSubtypeWrap').style.display = showSubtype ? 'block' : 'none';
+  const isProfessional = (role === 'Professional');
+  $('proSubtypeWrap').style.display = isProfessional ? 'block' : 'none';
+
+  const allowedOptions =
+    (isProfessional && nat === 'Non-Malaysian')
+      ? ['Standard', 'Symposia Speaker']
+      : ['Standard', 'Committee', 'Symposia Speaker', 'Keynote', 'Plenary'];
+
+  $('f-profSubtype').innerHTML = allowedOptions.map(v => {
+    const label =
+      v === 'Committee' ? 'TESMA/MTERM Committee' :
+      v === 'Keynote' ? 'Keynote Speaker' :
+      v === 'Plenary' ? 'Plenary Speaker' :
+      v;
+
+    return `<option value="${v}">${label}</option>`;
+  }).join('');
+
+  $('f-profSubtype').value =
+    allowedOptions.includes(currentProf)
+      ? currentProf
+      : 'Standard';
+
+  const prof = $('f-profSubtype').value || 'Standard';
 
   const showTesmaForStudent =
     role === 'Student' && nat === 'Malaysian';
@@ -1167,12 +1194,13 @@ function refreshAdminOptionBUI(){
     (prof === 'Standard' || prof === 'Symposia Speaker');
 
   const showTesma = showTesmaForStudent || showTesmaForProfessional;
+
   $('tesmaMemberWrap').style.display = showTesma ? 'block' : 'none';
 
   if (!showTesma && $('f-tesmaMember')) {
     $('f-tesmaMember').checked = false;
   }
-}    
+}  
 
 // Block protected nav buttons if not logged in (extra safety)
 document.addEventListener('click', (e) => {
@@ -1590,10 +1618,9 @@ $('aLogin').addEventListener('click', () => {
       if(act==='edit'){ openEditor(id); }
     });
 
-
-$('f-roleType')?.addEventListener('change', refreshAdminOptionBUI);
-$('f-nationality')?.addEventListener('change', refreshAdminOptionBUI);
-$('f-profSubtype')?.addEventListener('change', refreshAdminOptionBUI);    
+$('f-roleType')?.addEventListener('change', () => refreshAdminOptionBUI({ preserveSelection:false }));
+$('f-nationality')?.addEventListener('change', () => refreshAdminOptionBUI({ preserveSelection:false }));
+$('f-profSubtype')?.addEventListener('change', () => refreshAdminOptionBUI({ preserveSelection:true })); 
 
 
 document.getElementById('btnCert').addEventListener('click', () => {
