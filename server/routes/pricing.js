@@ -52,12 +52,12 @@ const rows = [
 {
   category: 'International Professional - Standard',
   earlyBird: null,
-  normal: formatFee(p.fees.internationalProfessional?.standard?.normal)
+  normal: doc.fees.internationalProfessional.standard.normal
 },
 {
   category: 'International Professional - Symposia Speaker',
   earlyBird: null,
-  normal: formatFee(p.fees.internationalProfessional?.symposia?.normal)
+  normal: doc.fees.internationalProfessional.symposia.normal
 },
   {
     category: 'Industrial Booth',
