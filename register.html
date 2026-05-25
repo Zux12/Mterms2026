@@ -513,25 +513,45 @@ const submitBtn = $('reg-submit');
 function refreshOptionBUI(){
   const role = selRole.value;
   const nat  = selNat.value;
-  const prof = selProf ? selProf.value : 'Standard';
+
+  const currentProf = selProf.value || 'Standard';
 
   show(studentOnly, role === 'Student');
-show(proSubtypeWrap, role === 'Professional');
 
-if (role === 'Professional' && nat === 'Non-Malaysian') {
-  selProf.innerHTML = `
-    <option value="Standard">Standard</option>
-    <option value="Symposia Speaker">Symposia Speaker</option>
-  `;
-} else {
-  selProf.innerHTML = `
-    <option value="Standard">Standard</option>
-    <option value="Committee">TESMA/MTERM Committee</option>
-    <option value="Symposia Speaker">Symposia Speaker</option>
-    <option value="Keynote">Keynote Speaker</option>
-    <option value="Plenary">Plenary Speaker</option>
-  `;
-}
+  show(proSubtypeWrap, role === 'Professional');
+
+  if (role === 'Professional' && nat === 'Non-Malaysian') {
+
+    selProf.innerHTML = `
+      <option value="Standard">Standard</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+    `;
+
+    if (currentProf === 'Symposia Speaker') {
+      selProf.value = 'Symposia Speaker';
+    } else {
+      selProf.value = 'Standard';
+    }
+
+  } else {
+
+    selProf.innerHTML = `
+      <option value="Standard">Standard</option>
+      <option value="Committee">TESMA/MTERM Committee</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+      <option value="Keynote">Keynote Speaker</option>
+      <option value="Plenary">Plenary Speaker</option>
+    `;
+
+    if (['Standard','Committee','Symposia Speaker','Keynote','Plenary'].includes(currentProf)) {
+      selProf.value = currentProf;
+    } else {
+      selProf.value = 'Standard';
+    }
+  }
+
+  const prof = selProf.value || 'Standard';
+
   const showTesmaForStudent =
     role === 'Student' && nat === 'Malaysian';
 
