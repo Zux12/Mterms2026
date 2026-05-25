@@ -49,11 +49,16 @@ const rows = [
     normal: doc.fees.localProfessional.standard.normal,
     member: doc.fees.localProfessional.member.normal
   },
-  {
-    category: 'International Professional',
-    earlyBird: doc.fees.internationalProfessional.early,
-    normal: doc.fees.internationalProfessional.normal
-  },
+{
+  category: 'International Professional - Standard',
+  earlyBird: null,
+  normal: formatFee(p.fees.internationalProfessional?.standard?.normal)
+},
+{
+  category: 'International Professional - Symposia Speaker',
+  earlyBird: null,
+  normal: formatFee(p.fees.internationalProfessional?.symposia?.normal)
+},
   {
     category: 'Industrial Booth',
     earlyBird: doc.fees.industrialBooth.early,
