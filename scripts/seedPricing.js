@@ -32,10 +32,14 @@ fees: {
     keynote:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } },
     plenary:   { early: { amount:   0, currency: 'MYR' }, normal: { amount:   0, currency: 'MYR' } }
   },
-  internationalProfessional: {
-    early:  { amount: 200, currency: 'USD' },
-    normal: { amount: 250, currency: 'USD' }
+internationalProfessional: {
+  standard: {
+    normal: { amount: 200, currency: 'USD' }
   },
+  symposia: {
+    normal: { amount: 170, currency: 'USD' }
+  }
+},
   industrialBooth: {
     early:  { amount: 1000, currency: 'MYR' },
     normal: { amount: 1500, currency: 'MYR' }
