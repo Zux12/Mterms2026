@@ -225,8 +225,20 @@ if (!finalCategory) {
   return res.status(400).json({ error: 'Unable to map category from roleType/nationality' });
 }
 
-// subtype required only for Local Professional
+// subtype required for Local Professional and International Professional
 let profType = 'Standard';
+
+if (finalCategory === 'International Professional') {
+  profType = professionalSubtype || 'Standard';
+
+  const allowedInternational = ['Standard', 'Symposia Speaker'];
+  if (!allowedInternational.includes(profType)) {
+    return res.status(400).json({ error: 'Valid professionalSubtype required for International Professional' });
+  }
+
+  tesmaMember = false;
+}
+
 if (finalCategory === 'Local Professional') {
   profType = professionalSubtype || 'Standard';
   const allowed = ['Standard','Committee','Member','Symposia Speaker','Keynote','Plenary'];
@@ -314,9 +326,14 @@ if (finalCategory === 'Local Student') {
 
 } else if (finalCategory === 'International Student') {
   fee = pricing.fees.internationalStudent[phaseKey];
-
 } else if (finalCategory === 'International Professional') {
-  fee = pricing.fees.internationalProfessional[phaseKey];
+  if (profType === 'Standard') {
+    fee = pricing.fees.internationalProfessional.standard.normal;
+  } else if (profType === 'Symposia Speaker') {
+    fee = pricing.fees.internationalProfessional.symposia.normal;
+  } else {
+    return res.status(400).json({ error: 'Unknown international professional subtype for pricing' });
+  }
 
 } else if (finalCategory === 'Industrial Booth') {
   fee = pricing.fees.industrialBooth[phaseKey];
@@ -368,8 +385,8 @@ try {
 category: finalCategory,
 nationality,
 roleType,
-professionalSubtype: (finalCategory === 'Local Professional') ? profType : 'Standard',
-tesmaMember,
+professionalSubtype: (finalCategory === 'Local Professional' || finalCategory === 'International Professional') ? profType : 'Standard',
+    tesmaMember,
 
     auth: {
       passwordHash,
@@ -561,7 +578,7 @@ const subOk  = ['Standard','Committee','Member','Symposia Speaker','Keynote','Pl
 if (safe.roleType && !roleOk) return res.status(400).json({ error: 'Invalid roleType' });
 if (safe.nationality && !natOk) return res.status(400).json({ error: 'Invalid nationality' });
 
-// subtype only meaningful for Malaysian + Professional
+// subtype meaningful for Professional
 if (safe.roleType === 'Professional' && safe.nationality === 'Malaysian') {
   if (!subOk) return res.status(400).json({ error: 'Invalid professionalSubtype' });
 
@@ -573,8 +590,14 @@ if (safe.roleType === 'Professional' && safe.nationality === 'Malaysian') {
   if (!['Standard', 'Symposia Speaker'].includes(safe.professionalSubtype || 'Standard')) {
     safe.tesmaMember = false;
   }
+
+} else if (safe.roleType === 'Professional' && safe.nationality === 'Non-Malaysian') {
+  const intlSubOk = ['Standard', 'Symposia Speaker'].includes(safe.professionalSubtype || 'Standard');
+  if (!intlSubOk) return res.status(400).json({ error: 'Invalid international professionalSubtype' });
+
+  safe.tesmaMember = false;
+
 } else {
-  // force Standard when not Local Professional
   safe.professionalSubtype = 'Standard';
 }
 
