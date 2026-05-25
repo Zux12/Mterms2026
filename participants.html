@@ -1251,17 +1251,20 @@ $('payAmountLine').textContent = `${currency} ${total.toFixed(0)}`;
 
 updatePaymentTagColor();
 
- $('f-roleType').value = user?.roleType || 'Professional';
+$('f-roleType').value = user?.roleType || 'Professional';
 $('f-nationality').value = user?.nationality || 'Malaysian';
+
+refreshOptionBUI();
+
 $('f-profSubtype').value = user?.professionalSubtype || 'Standard';
-    $('f-tesmaMember').checked = !!user?.tesmaMember;
+$('f-tesmaMember').checked = !!user?.tesmaMember;
+
+refreshOptionBUI();
 
 const isStudent = (user?.roleType === 'Student');
 showStudent(isStudent);
 
-// show subtype only if Professional + Malaysian
-const showSubtype = (user?.roleType === 'Professional' && user?.nationality === 'Malaysian');
-document.getElementById('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+
 
 $('p-firstName').value = user?.personal?.firstName || '';
 $('p-lastName').value  = user?.personal?.lastName  || '';
@@ -1900,14 +1903,28 @@ function bindSymposiumSpeakerUpload(){
 function refreshOptionBUI(){
   const role = $('f-roleType').value;
   const nat  = $('f-nationality').value;
-  const prof = $('f-profSubtype').value;
 
   showStudent(role === 'Student');
 
-  const showSubtype = (role === 'Professional' && nat === 'Malaysian');
-  $('proSubtypeWrap').classList.toggle('hidden', !showSubtype);
+  const isProfessional = role === 'Professional';
+  $('proSubtypeWrap').classList.toggle('hidden', !isProfessional);
 
-  if (!showSubtype) $('f-profSubtype').value = 'Standard';
+  if (isProfessional && nat === 'Non-Malaysian') {
+    $('f-profSubtype').innerHTML = `
+      <option value="Standard">Standard</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+    `;
+  } else {
+    $('f-profSubtype').innerHTML = `
+      <option value="Standard">Standard</option>
+      <option value="Committee">TESMA/MTERM Committee</option>
+      <option value="Symposia Speaker">Symposia Speaker</option>
+      <option value="Keynote">Keynote Speaker</option>
+      <option value="Plenary">Plenary Speaker</option>
+    `;
+  }
+
+  const prof = $('f-profSubtype').value || 'Standard';
 
   const showTesmaForStudent =
     role === 'Student' && nat === 'Malaysian';
