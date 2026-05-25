@@ -33,10 +33,14 @@ localStudent: {
       plenary:   { early: { type: FeeSchema, required:true }, normal: { type: FeeSchema, required:true } }
     },
 
-    internationalProfessional: {
-      early:  { type: FeeSchema, required: true },
-      normal: { type: FeeSchema, required: true }
-    },
+internationalProfessional: {
+  standard: {
+    normal: { type: FeeSchema, required: true }
+  },
+  symposia: {
+    normal: { type: FeeSchema, required: true }
+  }
+},
     industrialBooth: {
       early:  { type: FeeSchema, required: true },
       normal: { type: FeeSchema, required: true }
