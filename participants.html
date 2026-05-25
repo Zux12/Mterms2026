@@ -1900,29 +1900,36 @@ function bindSymposiumSpeakerUpload(){
   }
 }
   
-function refreshOptionBUI(){
+function refreshOptionBUI(options = {}){
+  const preserveSelection = options.preserveSelection !== false;
+
   const role = $('f-roleType').value;
   const nat  = $('f-nationality').value;
+
+  const currentProf = preserveSelection
+    ? ($('f-profSubtype').value || 'Standard')
+    : 'Standard';
 
   showStudent(role === 'Student');
 
   const isProfessional = role === 'Professional';
   $('proSubtypeWrap').classList.toggle('hidden', !isProfessional);
 
-  if (isProfessional && nat === 'Non-Malaysian') {
-    $('f-profSubtype').innerHTML = `
-      <option value="Standard">Standard</option>
-      <option value="Symposia Speaker">Symposia Speaker</option>
-    `;
-  } else {
-    $('f-profSubtype').innerHTML = `
-      <option value="Standard">Standard</option>
-      <option value="Committee">TESMA/MTERM Committee</option>
-      <option value="Symposia Speaker">Symposia Speaker</option>
-      <option value="Keynote">Keynote Speaker</option>
-      <option value="Plenary">Plenary Speaker</option>
-    `;
-  }
+  const allowedOptions = (isProfessional && nat === 'Non-Malaysian')
+    ? ['Standard', 'Symposia Speaker']
+    : ['Standard', 'Committee', 'Symposia Speaker', 'Keynote', 'Plenary'];
+
+  $('f-profSubtype').innerHTML = allowedOptions.map(v => {
+    const label = v === 'Committee' ? 'TESMA/MTERM Committee'
+      : v === 'Keynote' ? 'Keynote Speaker'
+      : v === 'Plenary' ? 'Plenary Speaker'
+      : v;
+    return `<option value="${v}">${label}</option>`;
+  }).join('');
+
+  $('f-profSubtype').value = allowedOptions.includes(currentProf)
+    ? currentProf
+    : 'Standard';
 
   const prof = $('f-profSubtype').value || 'Standard';
 
@@ -1941,9 +1948,9 @@ function refreshOptionBUI(){
   if (!showTesma) $('f-tesmaMember').checked = false;
 }
 
-$('f-roleType').addEventListener('change', refreshOptionBUI);
-$('f-nationality').addEventListener('change', refreshOptionBUI);
-$('f-profSubtype').addEventListener('change', refreshOptionBUI);
+$('f-roleType').addEventListener('change', () => refreshOptionBUI({ preserveSelection:false }));
+$('f-nationality').addEventListener('change', () => refreshOptionBUI({ preserveSelection:false }));
+$('f-profSubtype').addEventListener('change', () => refreshOptionBUI({ preserveSelection:true }));
   
   saveBtn.addEventListener('click', saveChanges);
   document.getElementById('cancelBtn').addEventListener('click', () => {
