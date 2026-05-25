@@ -202,6 +202,61 @@ router.get('/registrations/:id', adminAuth, async (req,res)=>{
   res.json({ doc });
 });
 
+
+// DELETE /api/admin/registrations/:id
+router.delete('/registrations/:id', adminAuth, async (req, res) => {
+  try {
+    const doc = await Registration.findById(req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Registration not found' });
+
+    const bucket = getBucket();
+
+    // 1) Delete participant uploaded files from GridFS
+    const uploadIds = (doc.uploads || [])
+      .map(u => u.gridFsId)
+      .filter(Boolean);
+
+    for (const id of uploadIds) {
+      try {
+        await bucket.delete(new ObjectId(id));
+      } catch (e) {
+        console.warn('GridFS upload delete skipped:', String(id), e.message);
+      }
+    }
+
+    // 2) Delete panel reviewer commented files from GridFS
+    const reviews = await AbstractReview.find({ registrationId: doc._id });
+
+    for (const review of reviews) {
+      const fileId = review?.reviewerFile?.gridFsId;
+      if (fileId) {
+        try {
+          await bucket.delete(new ObjectId(fileId));
+        } catch (e) {
+          console.warn('GridFS reviewer file delete skipped:', String(fileId), e.message);
+        }
+      }
+    }
+
+    // 3) Delete abstract panel reviews
+    await AbstractReview.deleteMany({ registrationId: doc._id });
+
+    // 4) Delete registration document
+    await Registration.findByIdAndDelete(doc._id);
+
+    return res.json({
+      ok: true,
+      message: 'Registration and related files/reviews deleted successfully'
+    });
+
+  } catch (err) {
+    console.error('Admin delete registration failed:', err);
+    return res.status(500).json({
+      error: err.message || 'Failed to delete registration'
+    });
+  }
+});
+
 // PUT /api/admin/registrations/:id
 router.put('/registrations/:id', adminAuth, async (req,res)=>{
   const { updates = {} } = req.body || {};
