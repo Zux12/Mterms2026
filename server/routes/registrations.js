@@ -278,6 +278,18 @@ if (password.length < 8) {
 // Normalize email to match schema (lowercase + trim)
 personal.email = String(personal.email).trim().toLowerCase();
 
+// Prevent duplicate email registration
+const existingEmail = await Registration.findOne({
+  'personal.email': personal.email
+}).lean();
+
+if (existingEmail) {
+  return res.status(409).json({
+    error: 'This email has already been registered.',
+    code: 'EMAIL_EXISTS'
+  });
+}
+
 // Hash password (store hash only)
 const passwordHash = await bcrypt.hash(password, 12);
   
