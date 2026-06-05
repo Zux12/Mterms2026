@@ -394,8 +394,8 @@
           <thead>
             <tr>
               <th>Registration Code</th>
-              <th>Participant</th>
-              <th>Affiliation</th>
+ <th>Author</th>
+<th>Institution</th>
               <th>Abstract Title</th>
               <th>Type</th>
               <th>Status</th>
@@ -858,9 +858,9 @@ function renderRows(){
     return `
       <tr>
         <td><strong>${escapeHtml(row.regCode || '')}</strong></td>
-        <td>${escapeHtml(p.name || '')}<br><small>${escapeHtml(p.email || '')}</small></td>
-        <td>${escapeHtml(p.affiliation || '')}</td>
-        <td>${escapeHtml(p.abstractTitle || '')}</td>
+<td><em>Blinded for review</em></td>
+<td><em>Blinded for review</em></td>
+<td>${escapeHtml(p.abstractTitle || '')}</td>
         <td>${escapeHtml(p.presentationType || '')}</td>
         <td>${statusHtml(row.status)}</td>
         <td>${fileLink}</td>
@@ -913,8 +913,8 @@ function fillReviewForm(review, registration){
   currentReview = review;
 
   $('rRegCode').textContent = registration.regCode || '';
-  $('rName').textContent = `${registration.personal?.firstName || ''} ${registration.personal?.lastName || ''}`.trim();
-  $('rAffiliation').textContent = registration.professional?.affiliation || registration.student?.university || '';
+$('rName').textContent = 'Blinded for review';
+$('rAffiliation').textContent = 'Blinded for review';
   $('rPresentationType').textContent = registration.program?.type || '';
   $('rTheme').textContent = registration.submission?.theme || '';
   $('rField').textContent = registration.submission?.field || '';
