@@ -87,10 +87,10 @@
       margin-bottom:16px;
       box-shadow:0 10px 26px rgba(0,0,0,.06);
     }
-
-    .toolbar{
-      display:grid;
-      grid-template-columns:1.4fr .8fr .8fr auto auto;
+    
+.toolbar{
+  display:grid;
+  grid-template-columns:1.4fr .8fr .8fr .8fr auto auto;
       gap:10px;
       align-items:end;
     }
@@ -274,6 +274,18 @@
             <option value="paid">Paid</option>
           </select>
         </label>
+
+
+        <label>
+  Panel Review Status
+  <select id="reviewStatusFilter">
+    <option value="">All Review Status</option>
+    <option value="Not assigned">Not assigned</option>
+    <option value="Assigned">Assigned</option>
+    <option value="Draft saved">Draft saved</option>
+    <option value="Reviewed">Reviewed</option>
+  </select>
+</label>
 
         <button id="reloadBtn" class="btn btn-primary">Reload</button>
         <button id="exportBtn" class="btn btn-secondary">Export CSV</button>
@@ -480,6 +492,7 @@ applyFilters();
     const q = $('searchBox').value.trim().toLowerCase();
     const cat = $('categoryFilter').value;
     const pay = $('paymentFilter').value;
+    const reviewStatus = $('reviewStatusFilter').value;
 
     filteredRows = allRows.filter(doc => {
       const haystack = [
@@ -503,9 +516,10 @@ applyFilters();
 
       const okSearch = !q || haystack.includes(q);
       const okCat = !cat || doc.category === cat;
-      const okPay = !pay || String(doc?.payment?.status || 'pending').toLowerCase() === pay;
+const okPay = !pay || String(doc?.payment?.status || 'pending').toLowerCase() === pay;
+const okReviewStatus = !reviewStatus || reviewStatusText(doc).status === reviewStatus;
 
-      return okSearch && okCat && okPay;
+return okSearch && okCat && okPay && okReviewStatus;
     });
 
     renderRows();
@@ -650,6 +664,7 @@ doc?.payment?.status || 'pending',
   $('searchBox').addEventListener('input', applyFilters);
   $('categoryFilter').addEventListener('change', applyFilters);
   $('paymentFilter').addEventListener('change', applyFilters);
+  $('reviewStatusFilter').addEventListener('change', applyFilters);
 
   loadAllParticipants();
 </script>
