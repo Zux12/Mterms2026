@@ -90,12 +90,21 @@ function verifyReviewerToken(token) {
 }
 
 function requireReviewer(req, res, next) {
+
   if (req.session?.reviewerId && req.session?.reviewerUsername) {
     return next();
   }
 
+  let token = '';
+
   const auth = String(req.headers.authorization || '');
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  if (auth.startsWith('Bearer ')) {
+    token = auth.slice(7);
+  }
+
+  if (!token && req.query.token) {
+    token = String(req.query.token);
+  }
 
   const payload = verifyReviewerToken(token);
 
