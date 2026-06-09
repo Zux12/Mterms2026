@@ -449,7 +449,12 @@
           </div>
 
           <div style="margin-top:12px">
-            <a id="rAbstractFile" class="btn btn-primary" target="_blank" rel="noopener">Open Participant Abstract</a>
+<button
+  id="rAbstractFile"
+  class="btn btn-primary"
+  type="button">
+  Open Participant Abstract
+</button>
           </div>
         </div>
 
@@ -920,8 +925,16 @@ $('rAffiliation').textContent = 'Blinded for review';
   $('rField').textContent = registration.submission?.field || '';
   $('rTitle').textContent = registration.submission?.title || '';
 
-  $('rAbstractFile').href = `${API}/api/reviewer/abstracts/${registration._id}/abstract-file`;
 
+$('rAbstractFile').onclick = () => {
+  const token = localStorage.getItem('mtermsReviewerToken');
+
+  window.open(
+    `${API}/api/reviewer/abstracts/${registration._id}/abstract-file?token=${encodeURIComponent(token)}`,
+    '_blank'
+  );
+};
+  
   const scores = review.scores || {};
   $('scoreIntro').value = scores.introductionObjective ?? 0;
   $('scoreMethods').value = scores.materialsMethods ?? 0;
