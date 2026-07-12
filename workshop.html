@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  img-src 'self' data: blob: https:;
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+  base-uri 'self';
+  form-action 'self';
+  /* allow the embedded Google Map */
+  frame-src 'self' https://www.google.com https://*.google.com;
+  child-src 'self' https://www.google.com https://*.google.com
+">
+
+  <title>MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting</title>
+  <meta name="description" content="MTERMS 2026 • Sustainability through collaboration: building resilient tissue engineering and regenerative medicine ecosystems • September 2026 • Concorde Hotel, Shah Alam" />
+<link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+
+  <!-- Open Graph (nice previews when sharing links) -->
+  <meta property="og:title" content="MTERMS 2026 — Malaysian Tissue Engineering & Regenerative Medicine Scientific Meeting" />
+  <meta property="og:description" content="Sustainability through collaboration: building resilient tissue engineering and regenerative medicine ecosystems • Nov 2026 • Concorde Hotel, Shah Alam" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1532634876-26909d0d4b6a?q=80&w=1600&auto=format&fit=crop" />
+  <meta property="og:url" content="https://<your-username>.github.io/mterms2026/" />
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style id="theme-overrides">
+  /* 1) Theme variables (light default via html.theme-light) */
+:root.theme-light{
+  --bg:#f6fbff;          /* very light blue base */
+  --surface:#ffffff;
+  --text:#0b1115;
+  --muted:#556b86;
+
+  /* UiTM-ish blues (soft, not harsh) */
+  --brand:#1e5aa8;       /* primary blue */
+  --brand-2:#2f7bdc;     /* accent blue */
+  --ring: rgba(30,90,168,.18);
+
+  --border:#d7e6f7;
+  --faint:#eef6ff;
+}
+
+
+
+  /* 2) Global swaps when light is active */
+.theme-light html, .theme-light body{
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.10), transparent 60%),
+    radial-gradient(700px 420px at 85% 18%, rgba(30,90,168,.08), transparent 55%),
+    linear-gradient(180deg, #f6fbff 0%, #ffffff 55%, #f6fbff 100%);
+}
+  .theme-light .notice{ background:#f1faf6; color:#064e3b; } /* top ribbon */
+  .theme-light .site-header{ background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); }
+  .theme-light .brand-mark{ color:#0b1115; }
+  .theme-light .nav a{ opacity:1; }
+  @media (max-width:960px){
+    .theme-light .nav.open{ background:#ffffff; border:1px solid var(--border); }
+    .theme-light .nav-toggle{ color:#0b1115; }
+  }
+
+  /* Hero */
+  .theme-light .subtitle{ color:#334155; }
+  .theme-light .theme{ color:#0f172a; }
+  .theme-light .hero-meta{ color:#1f2937; }
+  .theme-light .meta-item{
+    background:#ffffff; border:1px solid var(--border);
+  }
+
+  /* Buttons & cards */
+.theme-light .btn{
+  background:#ffffff;
+  color:#0b1115;
+  border:1px solid var(--border);
+}
+
+.theme-light .btn.primary{
+  background: var(--brand);
+  color: #ffffff;
+  border: 1px solid rgba(0,0,0,0);
+  box-shadow: 0 8px 22px rgba(30,90,168,.14);
+}
+
+.theme-light .btn.primary:hover{
+  filter: brightness(0.97);
+}
+  .theme-light .btn.ghost{ background:transparent; color:#0b1115; }
+  .theme-light .card,
+  .theme-light .img-card,
+  .theme-light .person,
+  .theme-light .price-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+  }
+  .theme-light .img-card figcaption{ color:#475569; border-top:1px solid var(--border); }
+
+  /* Pills, notes, footer, map border */
+  .theme-light .pill{ background:#f8fafc; color:#0b1115; border:1px solid var(--border); }
+  .theme-light .note{ color:#64748b; }
+  .theme-light .map-embed iframe{ border-top:1px solid var(--border); }
+  .theme-light .site-footer{ background:#ffffff; border-top:1px solid var(--border); }
+  .theme-light .foot-copy{ color:#64748b; }
+
+  /* Organizers strip (white cards already good) */
+.theme-light .org-section{
+  background: linear-gradient(180deg, rgba(47,123,220,.07), rgba(255,255,255,0));
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+/* subtle tint for section-alt blocks */
+.theme-light .section-alt{
+  background: linear-gradient(180deg, rgba(30,90,168,.06), rgba(255,255,255,0));
+}
+
+
+  /* Theme toggle button */
+  .theme-toggle{
+    margin-left:8px;
+    background:#ffffff;
+    color:#0b1115;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+  }
+  .theme-dark .theme-toggle{
+    background:#1e1f24;
+    color:#ffffff;
+    border:1px solid #333;
+  }
+
+
+    /* ---- Hero readability: fixed contrast (works in both themes) ---- */
+.hero{ position:relative; }
+.hero::before{
+  content:"";
+  position:absolute; inset:0;
+  /* soft dark veil to guarantee legibility on any image */
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.35) 40%, rgba(0,0,0,.25));
+  z-index:0;
+}
+.hero .hero-inner{ position:relative; z-index:1; }
+
+/* lock hero text colors on top of image */
+.hero h1,
+.hero .subtitle,
+.hero .theme,
+.hero .hero-meta,
+.hero .meta-item { color:#ffffff !important; text-shadow:0 2px 10px rgba(0,0,0,.45); }
+
+.hero .meta-item{
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(2px);
+}
+
+/* Make the ghost button visible on the image */
+.hero .btn.ghost{
+  background: transparent !important;
+  color: #f8fbff !important;
+  border: 2px solid rgba(255,255,255,.85) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.hero .btn.ghost:hover{
+  background: rgba(255,255,255,.10) !important;
+}
+
+/* Keep the solid buttons crisp on the image too */
+.hero .btn.primary{
+  background: #ffffff !important;
+  color: #0b1115 !important;
+  border: 1px solid rgba(255,255,255,.0);
+}
+.hero .btn{
+  border-radius: 10px;
+}
+
+
+/* Important Dates – clean UiTM-light card grid */
+.dates-card{
+  margin-top: 14px;
+  background: rgba(255,255,255,.85);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+  backdrop-filter: blur(6px);
+}
+
+.dates-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.date-item{
+  position: relative;
+  background: linear-gradient(180deg, rgba(47,123,220,.08), rgba(255,255,255,1));
+  border: 1px solid rgba(30,90,168,.12);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+}
+
+.date-title{
+  font-weight: 800;
+  letter-spacing: .1px;
+  margin-bottom: 6px;
+}
+
+.date-range{
+  color: var(--muted);
+  font-size: .98rem;
+  line-height: 1.35;
+  padding-right: 84px;
+}
+
+.date-tag{
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--brand);
+  background: rgba(30,90,168,.10);
+  border: 1px solid rgba(30,90,168,.16);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .dates-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px){
+  .dates-grid{ grid-template-columns: 1fr; }
+  .date-range{ padding-right: 0; }
+  .date-tag{ position: static; display: inline-block; margin-top: 10px; }
+}
+
+
+@media (min-width: 981px){
+  .header-inner{
+    position: relative;
+    padding-left: 90px;
+    padding-right: 120px;
+  }
+  ...
+}
+
+/* ===== FINAL HEADER OVERRIDE (forces correct layout & logo size) ===== */
+.site-header .header-inner{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+  min-height: 64px !important;
+}
+
+.site-header .header-left{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+}
+
+.site-header .header-mid{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.site-header .header-right{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Force logos to a fixed size (prevents giant TESMA) */
+.site-header img.header-logo{
+  height: 38px !important;
+  max-height: 38px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Desktop nav: single line, no clipping weirdness */
+@media (min-width: 981px){
+  .site-header .header-mid .nav{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+}
+
+/* Mobile: keep your hamburger/dropdown behavior */
+@media (max-width: 980px){
+  .site-header img.header-logo{
+    height: 30px !important;
+    max-height: 30px !important;
+  }
+
+  .site-header .header-mid{
+    justify-content: flex-end !important;
+  }
+
+  .site-header .header-mid .nav{
+    display: none !important;
+  }
+
+  .site-header .header-mid .nav.open{
+    display: flex !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 12px !important;
+    right: 12px !important;
+    margin-top: 10px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    z-index: 9999 !important;
+  }
+
+  .site-header .header-mid .nav-toggle{
+    display: inline-flex !important;
+  }
+}
+
+/* Add this to your stylesheet */
+.text-center-limit {
+  max-width: 800px; /* Optimal reading width */
+  margin: 0 auto;   /* Centers the block */
+  text-align: center; /* Optional: centers the text alignment */
+}
+    
+
+/* =========================
+   Header (2-row professional)
+   ========================= */
+.site-header .header-inner.header-2row{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-top:10px;
+  padding-bottom:10px;
+  position:relative;
+}
+
+.site-header .brand-row{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+  gap:14px;
+}
+
+.site-header .brand-logo{
+  display:flex;
+  align-items:center;
+}
+.site-header .brand-row .brand-logo:first-child{ justify-content:flex-start; }
+.site-header .brand-row .brand-logo:last-child{ justify-content:flex-end; }
+
+.site-header img.header-logo.header-logo--org{
+  height:64px !important;      /* increased */
+  max-height:64px !important;
+  width:auto !important;
+  max-width:200px !important;
+  object-fit:contain !important;
+}
+
+.site-header .brand.brand-center{
+  display:inline-flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:2px;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+/* Slightly bigger professional size */
+.site-header .brand-mark,
+.site-header .brand-year{
+  font-size: 2.1rem !important;
+  font-weight: 900 !important;
+  line-height: 1;
+}
+
+.site-header .nav-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:nowrap;
+}
+
+.site-header .nav-row .nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:1.05rem;            /* enlarge menu */
+  font-weight:600;
+}
+
+.site-header .nav-row .nav a,
+.site-header .nav-dd-btn{
+  padding:8px 10px;
+  border-radius:10px;
+}
+
+.site-header .header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+
+/* Authors dropdown */
+.nav-dd{ position:relative; }
+.nav-dd-btn{
+  background:transparent;
+  border:1px solid transparent;
+  cursor:pointer;
+  color:inherit;
+  font: inherit;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.nav-dd-btn:hover{ background: rgba(30,90,168,.06); border-color: rgba(30,90,168,.10); }
+.nav-dd-caret{ font-size:.9em; opacity:.8; }
+
+.nav-dd-menu{
+  position:absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 260px;
+  background: var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.10);
+  display:none;
+  z-index: 9999;
+}
+.nav-dd-menu a{
+  display:block;
+  padding:10px 10px;
+  border-radius:12px;
+  text-decoration:none;
+}
+.nav-dd-menu a:hover{
+  background: rgba(30,90,168,.08);
+}
+.nav-dd.open .nav-dd-menu{ display:block; }
+.nav-dd.open .nav-dd-btn{ background: rgba(30,90,168,.06); border-color: rgba(30,90,168,.10); }
+
+/* Mobile behavior: keep nav collapsible */
+@media (max-width: 980px){
+  .site-header .brand-row{
+    grid-template-columns: auto 1fr auto;
+  }
+  .site-header img.header-logo.header-logo--org{
+    height:34px !important;
+    max-height:34px !important;
+    max-width:140px !important;
+  }
+
+  .site-header .nav-row{
+    justify-content:space-between;
+  }
+
+  .site-header .nav-row .nav{
+    display:none;
+  }
+
+  .site-header .nav-row .nav.open{
+    display:flex !important;
+    position:absolute !important;
+    top:100% !important;
+    left:12px !important;
+    right:12px !important;
+    margin-top:10px !important;
+    padding:12px !important;
+    border-radius:12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10) !important;
+    flex-direction:column !important;
+    gap:10px !important;
+    z-index:9999 !important;
+  }
+
+  .nav-dd-menu{
+    position: static;
+    transform:none;
+    min-width: unset;
+    box-shadow:none;
+    border-radius:12px;
+    margin-top:6px;
+  }
+}
+
+/* =========================
+   Hero corner logo + post-video slideshow
+   ========================= */
+.hero{ position:relative; overflow:hidden; }
+.hero-corner-logo{
+  position:absolute;
+  top: 18px;
+  right: 18px;
+  height: 95px;
+  width: auto;
+  z-index: 2;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.35));
+  border-radius: 12px;
+  background: rgba(255,255,255,.14);
+  padding: 6px;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 560px){
+  .hero-corner-logo{ height: 52px; top: 12px; right: 12px; }
+}
+
+.hero-slideshow{
+  position:absolute;
+  inset:0;
+  z-index:1;        /* IMPORTANT FIX */
+  opacity:0;
+  pointer-events:none;
+}
+
+    .hero video{
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+.hero-inner{
+  position:relative;
+  z-index:3;
+}
+
+.hero-corner-logo{
+  z-index:4;
+}
+.hero-slideshow.active{ opacity:1; }
+
+.hero-slideshow img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: translateX(0);
+  transition: opacity 700ms ease, transform 900ms ease;
+  opacity:0;
+}
+.hero-slideshow img.show{
+  opacity:1;
+  transform: translateX(0);
+}
+.hero-slideshow img.slide-in{
+  transform: translateX(20px);
+}
+
+
+
+/* ===== FIX: Force 2-row header to stay on top (override earlier !important rules) ===== */
+.site-header .header-inner.header-2row{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+}
+
+/* Prevent any earlier header-left/mid/right rules from affecting layout */
+.site-header .header-inner.header-2row .header-left,
+.site-header .header-inner.header-2row .header-mid,
+.site-header .header-inner.header-2row .header-right{
+  all: unset !important;
+}
+
+/* Make sure brand row is FIRST and nav row is SECOND visually */
+.site-header .brand-row{ order: 0 !important; }
+.site-header .nav-row{ order: 1 !important; }
+
+/* Slightly bigger nav on desktop, but wraps nicely */
+@media (min-width: 981px){
+  .site-header .nav-row .nav{
+    font-size: 1.12rem !important;
+    gap: 16px !important;
+  }
+}
+
+/* Keep header always above hero */
+.site-header{ position: relative; z-index: 1000; }
+
+/* ===== Header gradient (TESMA x UiTM blend) ===== */
+.site-header{
+  background: linear-gradient(90deg,
+    rgba(22, 101, 52, 0.10) 0%,
+    rgba(30, 90, 168, 0.10) 45%,
+    rgba(47, 123, 220, 0.08) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.site-header .brand-mark,
+.site-header .brand-year{
+  background: linear-gradient(90deg, #166534, #1e5aa8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+/* New MTERMS logo in header (right side) */
+.site-header img.header-logo.header-logo--mterm{
+  height: 80px !important;
+  max-height: none !important;
+  max-width: none !important;
+  width: auto !important;
+  margin-left: 10px;
+  transform: translateY(4px); /* NEW: nudge down slightly */
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.site-header .brand-logo-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 10px;
+}
+
+
+/* =========================
+   NEW: Centered headings + justified body copy
+   ========================= */
+.center-justify{
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+    
+.center-justify h2,
+.center-justify h3{
+  text-align: center;
+}
+
+/* =========================
+   Industrial Speaker - Under Construction video
+   ========================= */
+.speaker-note{
+  max-width: 900px;
+  margin: 8px auto 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.uc-video-wrap{
+  max-width: 980px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 10px 25px rgba(30,90,168,.06);
+}
+
+.uc-video{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* =========================
+   NEW: People blocks (no cards)
+   ========================= */
+.people-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.person-plain{
+  text-align: center;
+}
+
+.person-plain img{
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.person-plain .name{
+  margin-top: 10px;
+  font-weight: 800;
+}
+
+.person-plain .role{
+  margin-top: 2px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: .98rem;
+}
+
+.person-plain .bio{
+  margin-top: 10px;
+  text-align: justify;
+  text-justify: inter-word;
+  color: var(--text);
+}
+
+/* Two photos at end of welcoming remarks */
+.remarks-photos{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.remarks-photos img{
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 0 auto;
+  display: block;
+}
+@media (max-width: 640px){
+  .remarks-photos{ grid-template-columns: 1fr; }
+  .remarks-photos img{ max-width: 320px; }
+}
+
+/* =========================
+   NEW: Logo cards (Strategic Partners + Host/Co-host)
+   ========================= */
+.logo-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.logo-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.logo-card img{
+  max-height: 58px;
+  max-width: 140px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.logo-card .logo-fallback{
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+  padding: 6px;
+}
+
+    @media (max-width: 980px){
+  .nav-dd-btn{ touch-action: manipulation; width: 100%; justify-content: space-between; }
+}
+
+</style>
+<script src="lunr.min.js"></script>
+</head>
+<body>
+
+
+
+    <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner header-2row">
+
+      <!-- Top row: logos + wordmark -->
+      <div class="brand-row">
+        <a class="brand-logo" href="#home" aria-label="TESMA">
+          <img src="tesma.png" alt="TESMA logo" class="header-logo header-logo--org">
+        </a>
+
+        <a href="#home" class="brand brand-center" aria-label="MTERMS 2026 Home">
+          <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+        </a>
+
+<div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
+  <a href="#home" aria-label="UiTM">
+    <img src="uitm.png" alt="UiTM logo" class="header-logo header-logo--org">
+  </a>
+  <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo header-logo--mterm">
+</div>
+      </div>
+
+      <!-- Second row: enlarged nav + author dropdown -->
+      <div class="nav-row">
+    <nav class="nav" id="siteNav" aria-label="Primary navigation">
+  <a href="index.html">HOME</a>
+  <a href="theme.html">THEME</a>
+  <a href="program.html">PROGRAM</a>
+  <a href="speaker.html">SPEAKERS</a>
+  <a href="venue.html">VENUE</a>
+<a href="index.html#registration">REGISTRATION</a>
+      
+  <!-- AUTHORS dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      AUTHORS <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
+
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="public/author%20guidelines.pdf" target="_blank" rel="noopener">Author Guidelines</a>
+<a role="menuitem" href="public/Abstract-template_MTERMS%202026_Final.pdf" target="_blank" rel="noopener">Abstract Guidelines and Template</a>
+<a role="menuitem" href="public/Full%20Paper%20GUIDELINES%20MTERMS2026_Final.pdf" target="_blank" rel="noopener">Full Paper Guideline and Template</a>
+
+      <a role="menuitem" href="public/ORAL%20GUIDELINES%20MTERMS2026%20edited_FINAL.pdf" target="_blank" rel="noopener">Poster and Oral Guidelines</a>
+      <a role="menuitem" href="deadlines.html" target="_blank" rel="noopener">Important Deadlines</a>
+
+    </div>
+  </div>
+
+  <a href="sponsors.html">SPONSORS</a>
+  <a href="committee.html">COMMITTEE</a>
+
+  <!-- TRAVEL dropdown -->
+  <div class="nav-dd" data-dd>
+    <button class="nav-dd-btn" type="button" aria-haspopup="true" aria-expanded="false">
+      TRAVEL <span class="nav-dd-caret" aria-hidden="true">▾</span>
+    </button>
+
+    <div class="nav-dd-menu" role="menu">
+      <a role="menuitem" href="gettingthere.html">Getting There</a>
+      <a role="menuitem" href="accomodation.html">Nearby Accommodations</a>
+      <a role="menuitem" href="destinations.html">Must Visit Destinations</a>
+      <a role="menuitem" href="restaurants.html">Popular Restaurants</a>
+    </div>
+  </div>
+
+  <a href="contact.html">CONTACT</a>
+</nav>
+
+        <div class="header-actions">
+          <button class="nav-toggle" aria-label="Open menu" aria-controls="siteNav" aria-expanded="false">☰</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+
+
+
+
+  <!-- Speakers (placeholder cards) -->
+<!-- Speakers (Under Construction video) -->
+<section id="speakers" class="section section-alt">
+  <div class="container">
+    <h2>Industrial Speaker</h2>
+    <p class="speaker-note">
+      The invited industry speaker(s) will be displayed here soon. Please check back for updates.
+    </p>
+
+    <div class="uc-video-wrap" aria-label="Industrial speaker section under construction video">
+      <video class="uc-video" autoplay loop muted playsinline preload="metadata">
+        <source src="public/underconstruction.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</section>
+  
+
+
+
+
+
+
+  
+  
+
+
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="foot-brand">MTERMS 2026</div>
+      <div class="foot-links">
+        <a href="#registration">Register</a>
+
+          <a href="login.html">Participant Portal</a>
+  <a href="admin.html">Admin Login</a>
+
+      </div>
+      <div class="foot-copy">© 2026 MTERMS.</div>
+    </div>
+  </footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <link rel="stylesheet" href="assets/agenda-popup.css">
+<script src="assets/agenda-popup.js"></script>
+
+
+
+  
+
+  <script src="assets/main.js"></script>
+
+
+<link rel="stylesheet" href="assets/ai-widget.css">
+<script src="assets/ai-widget.js"></script>
+  
+ <script>
+/* =========================
+   Dropdowns (AUTHORS/TRAVEL) — click-only on desktop + click on mobile
+   - Does NOT rely on hover
+   - Does NOT break hamburger behavior in assets/main.js
+   ========================= */
+(function () {
+  const nav = document.getElementById('siteNav');
+  const toggle = document.querySelector('.nav-toggle');
+  const dropdowns = Array.from(document.querySelectorAll('[data-dd]'));
+  const mqMobile = window.matchMedia('(max-width: 980px)');
+  const mqDesktop = window.matchMedia('(min-width: 981px)');
+
+  if (!nav || !dropdowns.length) return;
+
+  function setOpen(dd, open) {
+    dd.classList.toggle('open', open);
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function closeAll() {
+    dropdowns.forEach(dd => setOpen(dd, false));
+  }
+
+  // Bind button clicks once (works for BOTH desktop & mobile, behavior gated by media query)
+  dropdowns.forEach(dd => {
+    if (dd.__ddBound) return;
+    dd.__ddBound = true;
+
+    const btn = dd.querySelector('.nav-dd-btn');
+    const menu = dd.querySelector('.nav-dd-menu');
+    if (!btn) return;
+
+    // Button click toggles dropdown (desktop + mobile)
+    btn.addEventListener('click', (e) => {
+      // If nav is closed on mobile, do nothing (prevents weird taps)
+      if (mqMobile.matches && !nav.classList.contains('open')) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isOpen = dd.classList.contains('open');
+
+      // On mobile: allow multiple? (usually better to keep only one open)
+      // On desktop: keep only one open
+      closeAll();
+      setOpen(dd, !isOpen);
+    });
+
+    // Allow clicking inside menu without closing immediately
+    if (menu) {
+      menu.addEventListener('click', (e) => e.stopPropagation());
+
+      // Mobile UX: when a menu link is clicked, close dropdown + close nav
+      menu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          closeAll();
+          if (mqMobile.matches && nav.classList.contains('open')) {
+            nav.classList.remove('open');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+    }
+  });
+
+  // Click outside closes dropdowns:
+  // - Desktop: always close on outside click
+  // - Mobile: close dropdowns if you tap outside dropdowns (while nav is open)
+  document.addEventListener('click', (e) => {
+    const insideDropdown = !!e.target.closest('[data-dd]');
+    const onToggle = !!(toggle && e.target.closest('.nav-toggle'));
+
+    if (onToggle) return;
+    if (insideDropdown) return;
+
+    if (mqDesktop.matches) {
+      closeAll();
+      return;
+    }
+
+    if (mqMobile.matches && nav.classList.contains('open')) {
+      closeAll();
+    }
+  });
+
+  // When hamburger closes the nav, also close dropdowns (safe even if main.js also runs)
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      // Let assets/main.js toggle nav first, then react
+      setTimeout(() => {
+        if (!nav.classList.contains('open')) closeAll();
+      }, 0);
+    });
+  }
+
+  // If screen size changes, reset open states
+  mqMobile.addEventListener('change', closeAll);
+  mqDesktop.addEventListener('change', closeAll);
+})();
+</script>
+
+
+
+
+</body>
+</html>
