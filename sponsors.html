@@ -945,6 +945,7 @@
 <!-- Sponsors intro video -->
 <div class="sponsor-intro-video">
   <video
+    id="sponsorVideo"
     class="sponsor-video"
     src="public/sponsor720B.mp4"
     autoplay
@@ -1405,7 +1406,13 @@
 })();
 </script>
 
+<script>
+  const sponsorVideo = document.getElementById("sponsorVideo");
 
+  sponsorVideo.addEventListener("loadedmetadata", () => {
+    sponsorVideo.playbackRate = 1.25; // 25% faster
+  });
+</script>
 
 </body>
 </html>
