@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MTERMS 2026 — Website Analytics</title>
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/analytics-admin.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logos">
+          <img class="mterms" src="public/mterm.jpg" alt="MTERMS 2026">
+          <img class="org" src="tesma.png" alt="TESMA">
+          <img class="org" src="uitm.png" alt="UiTM">
+        </div>
+        <div>
+          <h1>MTERMS 2026 Website Analytics</h1>
+          <div class="sub">Visitor reach, devices, viewed pages and time spent.</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="admin.html">← Admin Dashboard</a>
+        <a class="btn" href="index.html">Main Website</a>
+        <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section id="loginBlock" class="card hidden">
+      <h2>Admin Login Required</h2>
+      <div class="filters" style="margin-top:0">
+        <label>Username<input id="loginUser" value="admin" autocomplete="username"></label>
+        <label>Password<input id="loginPass" type="password" autocomplete="current-password"></label>
+        <button id="loginBtn" class="btn btn-primary" type="button">Login</button>
+        <div id="loginMsg" class="status"></div>
+      </div>
+    </section>
+
+    <main id="dashboard" class="hidden">
+      <section class="filters">
+        <label>Start date<input id="startDate" type="date"></label>
+        <label>End date<input id="endDate" type="date"></label>
+        <button id="refreshBtn" class="btn btn-primary" type="button">Refresh Dashboard</button>
+        <div id="status" class="status"></div>
+      </section>
+
+      <section class="cards">
+        <div class="metric"><div class="metric-label">Unique Visitors</div><div id="mVisitors" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">Sessions</div><div id="mSessions" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">Page Views</div><div id="mViews" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">Average Session Time</div><div id="mDuration" class="metric-value">0 sec</div></div>
+        <div class="metric"><div class="metric-label">Average Pages Viewed</div><div id="mPages" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">New Visitors</div><div id="mNew" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">Returning Visitors</div><div id="mReturning" class="metric-value">0</div></div>
+        <div class="metric"><div class="metric-label">Countries Reached</div><div id="mCountries" class="metric-value">0</div></div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card"><h2>Visitors by Day</h2><div class="chart"><canvas id="trendChart"></canvas></div></div>
+        <div class="card"><h2>Visitors by Country</h2><div class="chart"><canvas id="countryChart"></canvas></div></div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card"><h2>Device Distribution</h2><div class="chart"><canvas id="deviceChart"></canvas></div></div>
+        <div class="card"><h2>Browser Distribution</h2><div class="chart"><canvas id="browserChart"></canvas></div></div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card"><h2>Operating Systems</h2><div class="chart"><canvas id="osChart"></canvas></div></div>
+        <div class="card"><h2>Most Viewed Pages</h2><div class="chart"><canvas id="pagesChart"></canvas></div></div>
+      </section>
+
+      <section class="card">
+        <h2>Page Performance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Page</th><th>Views</th><th>Average Time</th></tr></thead>
+            <tbody id="pageRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Visitor Session Records</h2>
+        <div class="filters" style="box-shadow:none;margin:0 0 14px;padding:0;border:none">
+          <label>Country<select id="countryFilter"><option value="">All countries</option></select></label>
+          <label>Device<select id="deviceFilter"><option value="">All devices</option><option>Desktop</option><option>Mobile</option><option>Tablet</option><option>Other</option></select></label>
+          <label>Viewed Page<select id="pageFilter"><option value="">All pages</option></select></label>
+          <button id="applyFilters" class="btn btn-primary" type="button">Apply Filters</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date & Time</th><th>Country</th><th>Device</th><th>Browser</th><th>OS</th><th>Pages</th><th>Time</th><th>Viewed Journey</th></tr>
+            </thead>
+            <tbody id="sessionRows"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="prevBtn" class="btn" type="button">Previous</button>
+          <span id="pageInfo"></span>
+          <button id="nextBtn" class="btn" type="button">Next</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/analytics-admin.js"></script>
+</body>
+</html>
