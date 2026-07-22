@@ -45,12 +45,14 @@ function dateParams(){
   });
 }
 
-function setDefaultDates(){
+function setDefaultDates() {
   const end = new Date();
-  const start = new Date();
-  start.setDate(end.getDate() - 29);
-  $('endDate').value = end.toISOString().slice(0,10);
-  $('startDate').value = start.toISOString().slice(0,10);
+
+  // Always start from 1 May 2026
+  $('startDate').value = '2026-05-01';
+
+  // End date is today
+  $('endDate').value = end.toISOString().slice(0, 10);
 }
 
 function requireLogin(){
