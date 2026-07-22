@@ -13,6 +13,7 @@ const authRouter = require('./routes/auth');
 const adminRouter = require('./routes/admin');
 const reviewerRouter = require('./routes/reviewer');
 const igniteRouter = require('./routes/ignite');
+const analyticsRouter = require('./routes/analytics');
 
 const app = express();
 
@@ -77,6 +78,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/ignite', igniteRouter);
 app.use('/api/reviewer', reviewerRouter);
+app.use('/api/analytics', analyticsRouter);
 
 /* Friendly root */
 app.get('/', (req, res) => {
