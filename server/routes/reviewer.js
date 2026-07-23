@@ -38,7 +38,7 @@ function calcTotal(scores = {}) {
 }
 
 async function ensureDefaultReviewers() {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 20; i++) {
     const username = `panel${i}`;
     const exists = await Reviewer.findOne({ username }).select('_id').lean();
     if (exists) continue;
