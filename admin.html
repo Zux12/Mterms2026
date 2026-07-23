@@ -1529,6 +1529,12 @@ $('aLogin').addEventListener('click', () => {
   if (nav) nav.style.display = 'block';
 
   loadPage(1);
+
+  setTimeout(() => {
+    document.getElementById('analyticsWelcomeModal').style.display = 'flex';
+}, 600);
+
+  
 });
     $('logoutBtn').addEventListener('click',()=>{
       localStorage.removeItem(ADMIN_KEY); location.reload();
@@ -2515,7 +2521,11 @@ if (topHeader) topHeader.style.display = 'flex';
         $('dash').style.display='block';
 const nav = document.getElementById('adminNav');
 if (nav) nav.style.display = 'block';
-        loadPage(1);
+loadPage(1);
+
+setTimeout(() => {
+    document.getElementById('analyticsWelcomeModal').style.display = 'flex';
+}, 600);
       }
     })();
   </script>
@@ -2647,6 +2657,91 @@ header.brand-header .admin-tools-menu .btn{
 
 
 
+
+
+<!-- ========= MTERMS Analytics Announcement ========= -->
+<div id="analyticsWelcomeModal"
+     style="display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.45);
+            z-index:99999;
+            align-items:center;
+            justify-content:center;
+            padding:20px;">
+
+  <div style="
+      width:min(720px,95vw);
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 25px 70px rgba(0,0,0,.25);
+      border:1px solid #e5e7eb;">
+
+    <div style="
+        background:#0B2A6B;
+        color:#fff;
+        padding:18px 24px;
+        font-size:1.3rem;
+        font-weight:800;">
+
+      📊 New Feature Available
+    </div>
+
+    <div style="padding:24px">
+
+      <h2 style="margin-top:0;color:#0B2A6B">
+        MTERMS 2026 Website Analytics
+      </h2>
+
+      <p style="line-height:1.7;font-size:15px">
+
+        A new Website Analytics dashboard is now available for administrators.
+
+        <br><br>
+
+        You can now monitor:
+
+      </p>
+
+      <ul style="line-height:1.8">
+        <li>🌍 Visitors by Country</li>
+        <li>📈 Daily Visitor Trends</li>
+        <li>💻 Device, Browser & Operating System</li>
+        <li>📄 Most Visited Pages</li>
+        <li>👥 New vs Returning Visitors</li>
+        <li>🕒 Session Duration & Visitor Journey</li>
+      </ul>
+
+      <p style="margin-top:18px">
+        The Analytics dashboard can also be accessed anytime from
+        <strong>Admin Tools → Website Analytics</strong>.
+      </p>
+
+      <div style="
+          display:flex;
+          gap:12px;
+          justify-content:flex-end;
+          margin-top:30px;">
+
+        <button
+          onclick="document.getElementById('analyticsWelcomeModal').style.display='none'"
+          class="btn btn-secondary">
+          Maybe Later
+        </button>
+
+        <button
+          onclick="window.location.href='analytics-admin.html'"
+          class="btn btn-primary">
+          Open Analytics →
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>  
 
 
 
