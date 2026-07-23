@@ -209,6 +209,34 @@ function renderPopularPages(rows){
 
 async function loadDashboard(){
   if(!requireLogin()) return;
+
+// ===== Secondary Analytics Access Code =====
+const analyticsCode = sessionStorage.getItem('analyticsAccessCode');
+
+if (analyticsCode !== '810304') {
+
+    const entered = prompt(
+        'MTERMS 2026 Website Analytics\n\n' +
+        'Please enter the Analytics Access Code.'
+    );
+
+    if (entered !== '810304') {
+
+        alert('Incorrect Analytics Access Code.');
+
+        localStorage.removeItem(ADMIN_KEY);
+
+        requireLogin();
+
+        return;
+    }
+
+    sessionStorage.setItem('analyticsAccessCode', '810304');
+}
+
+
+
+  
   $('status').textContent='Loading analytics…';
 
   try{
@@ -294,7 +322,19 @@ $('refreshBtn').addEventListener('click',loadDashboard);
 $('applyFilters').addEventListener('click',async()=>{currentPage=1;await loadSessions()});
 $('prevBtn').addEventListener('click',async()=>{if(currentPage>1){currentPage--;await loadSessions()}});
 $('nextBtn').addEventListener('click',async()=>{if(currentPage*pageSize<totalRows){currentPage++;await loadSessions()}});
-$('logoutBtn').addEventListener('click',()=>{localStorage.removeItem(ADMIN_KEY);location.href='admin.html'});
+
+$('logoutBtn').addEventListener('click',()=>{
+
+    localStorage.removeItem(ADMIN_KEY);
+
+    sessionStorage.removeItem('analyticsAccessCode');
+
+    location.href='admin.html';
+
+});
+
+
+
 window.addEventListener('resize',()=>{
   if(!dashboardData)return;
   drawLineChart('trendChart',dashboardData.visitorsByDay,'date','visitors');
