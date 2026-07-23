@@ -51,10 +51,11 @@ router.get('/reviewers', adminAuth, async (req, res) => {
   try {
     await ensureDefaultReviewers();
 
-    const rows = await Reviewer.find({ status: 'active' })
-      .select('username displayName status')
-      .sort({ username: 1 })
-      .lean();
+const rows = await Reviewer.find({ status: 'active' })
+  .select('username displayName status')
+  .collation({ locale: 'en', numericOrdering: true })
+  .sort({ username: 1 })
+  .lean();
 
     res.json({ ok: true, rows });
   } catch (err) {
