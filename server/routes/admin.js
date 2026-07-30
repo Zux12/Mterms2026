@@ -379,7 +379,7 @@ router.post('/acceptance-letter/send', adminAuth, async (req, res) => {
 
 Please find attached your official Letter of Acceptance for your ${kind} presentation at
 Malaysian Tissue Engineering and Regenerative Medicine Society Conference 2026 (MTERMS 2026),
-held on August 6–7, 2026.
+held on September 7–8, 2026.
 
 For inquiries, please contact admin@mterms2026.com.
 
@@ -390,7 +390,7 @@ MTERMS 2026 Secretariat`;
 `<p>Dear ${escapeHtml(fullName)},</p>
 <p>Please find attached your official <b>Letter of Acceptance</b> for your <b>${kind}</b> presentation at
 <b>Malaysian Tissue Engineering and Regenerative Medicine Society Conference 2026 (MTERMS 2026)</b>,
-held on <b>August 6–7, 2026</b>.</p>
+held on <b>September 7–8, 2026</b>.</p>
 <p>For inquiries, please contact <b>admin@mterms2026.com</b>.</p>
 <p>Sincerely,<br><b>MTERMS 2026 Secretariat</b></p>`;
 
