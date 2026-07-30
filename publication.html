@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: blob: https:;
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self' https://mterm2026-559f9bf571b5.herokuapp.com;
+    base-uri 'self';
+    form-action 'self' https://apjmbb.opussoft.io;
+    frame-src 'self' https://www.google.com https://*.google.com;
+    child-src 'self' https://www.google.com https://*.google.com
+  ">
+
+  <title>MTERMS 2026 — Call for Full Papers</title>
+  <meta name="description" content="Submit your full manuscript for the MTERMS 2026 Special Issue in the Asian Pacific Journal of Molecular Biology and Biotechnology (APJMBB).">
+
+  <link rel="icon" href="public/mterm.jpg" type="image/jpeg">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    :root{
+      --bg:#f6fbff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --muted:#556b86;
+      --brand:#1e5aa8;
+      --brand-2:#2f7bdc;
+      --border:#d7e6f7;
+      --faint:#eef6ff;
+    }
+
+    html, body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 12% 10%, rgba(47,123,220,.10), transparent 60%),
+        radial-gradient(700px 420px at 85% 18%, rgba(30,90,168,.08), transparent 55%),
+        linear-gradient(180deg, #f6fbff 0%, #ffffff 55%, #f6fbff 100%);
+      font-family:Inter, Arial, sans-serif;
+    }
+
+    .site-header{
+      position:relative;
+      z-index:1000;
+      background:linear-gradient(90deg,
+        rgba(22,101,52,.10) 0%,
+        rgba(30,90,168,.10) 45%,
+        rgba(47,123,220,.08) 100%);
+      border-bottom:1px solid var(--border);
+      backdrop-filter:blur(8px);
+    }
+
+    .header-inner.header-2row{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding-top:10px;
+      padding-bottom:10px;
+    }
+
+    .brand-row{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      display:flex;
+      align-items:center;
+    }
+
+    .brand-row .brand-logo:first-child{
+      justify-content:flex-start;
+    }
+
+    .brand-logo-right{
+      justify-content:flex-end;
+      gap:10px;
+    }
+
+    img.header-logo--org{
+      height:64px;
+      width:auto;
+      max-width:200px;
+      object-fit:contain;
+    }
+
+    img.header-logo--mterm{
+      height:80px;
+      width:auto;
+      object-fit:contain;
+    }
+
+    .brand-center{
+      display:inline-flex;
+      justify-content:center;
+      align-items:baseline;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .brand-mark,
+    .brand-year{
+      font-size:2.1rem;
+      font-weight:900;
+      line-height:1;
+      background:linear-gradient(90deg,#166534,#1e5aa8);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+
+    .nav-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:14px;
+      font-size:1.02rem;
+      font-weight:700;
+    }
+
+    .nav a{
+      color:var(--text);
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+    }
+
+    .nav a:hover,
+    .nav a.active{
+      background:rgba(30,90,168,.09);
+      color:var(--brand);
+    }
+
+    .paper-hero{
+      position:relative;
+      padding:78px 20px 66px;
+      text-align:center;
+      overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(9,43,88,.96), rgba(30,90,168,.90)),
+        url('public/herobanner1.png') center/cover no-repeat;
+      color:#fff;
+    }
+
+    .paper-hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.16), transparent 30%);
+      pointer-events:none;
+    }
+
+    .paper-hero .container{
+      position:relative;
+      z-index:1;
+      max-width:980px;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      margin-bottom:14px;
+      padding:7px 13px;
+      border:1px solid rgba(255,255,255,.35);
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      font-size:.84rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .paper-hero h1{
+      margin:0;
+      font-size:clamp(2.2rem,5vw,4.4rem);
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+
+    .paper-hero p{
+      max-width:850px;
+      margin:20px auto 0;
+      font-size:clamp(1rem,2vw,1.25rem);
+      line-height:1.6;
+      color:rgba(255,255,255,.94);
+    }
+
+    .hero-actions{
+      margin-top:28px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .hero-actions a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:180px;
+      padding:13px 20px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:800;
+    }
+
+    .submit-btn{
+      background:#fff;
+      color:#0b1115;
+    }
+
+    .guideline-btn{
+      color:#fff;
+      border:1px solid rgba(255,255,255,.55);
+      background:rgba(255,255,255,.08);
+    }
+
+    .main-content{
+      padding:54px 20px 72px;
+    }
+
+    .content-wrap{
+      max-width:1080px;
+      margin:0 auto;
+    }
+
+    .notice-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:28px;
+      box-shadow:0 16px 40px rgba(30,90,168,.08);
+    }
+
+    .notice-card h2,
+    .section-title{
+      margin-top:0;
+      text-align:center;
+    }
+
+    .notice-card p{
+      line-height:1.75;
+      text-align:justify;
+    }
+
+    .highlight-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+      margin-top:26px;
+    }
+
+    .highlight{
+      background:linear-gradient(180deg,rgba(47,123,220,.08),#fff);
+      border:1px solid rgba(30,90,168,.14);
+      border-radius:16px;
+      padding:20px;
+      text-align:center;
+    }
+
+    .highlight .label{
+      display:block;
+      color:var(--muted);
+      font-size:.9rem;
+      font-weight:700;
+      margin-bottom:7px;
+    }
+
+    .highlight strong{
+      color:var(--brand);
+      font-size:1.2rem;
+    }
+
+    .section-block{
+      margin-top:28px;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:28px;
+    }
+
+    .section-block p,
+    .section-block li{
+      line-height:1.7;
+    }
+
+    .section-block ul{
+      margin:14px 0 0;
+      padding-left:22px;
+    }
+
+    .process{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:10px;
+      margin-top:22px;
+    }
+
+    .process-step{
+      position:relative;
+      min-height:100px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px 10px;
+      background:var(--faint);
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      font-weight:800;
+      color:#17385f;
+    }
+
+    .process-step span{
+      display:block;
+      margin-bottom:6px;
+      color:var(--brand);
+      font-size:.8rem;
+    }
+
+    .final-cta{
+      margin-top:30px;
+      padding:34px 22px;
+      border-radius:20px;
+      text-align:center;
+      background:linear-gradient(135deg,#0d3e78,#1e5aa8);
+      color:#fff;
+    }
+
+    .final-cta h2{
+      margin-top:0;
+    }
+
+    .final-cta p{
+      max-width:760px;
+      margin:0 auto 20px;
+      line-height:1.6;
+    }
+
+    .final-cta a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:13px 22px;
+      border-radius:12px;
+      background:#fff;
+      color:#0b1115;
+      text-decoration:none;
+      font-weight:900;
+    }
+
+    .site-footer{
+      background:#fff;
+      border-top:1px solid var(--border);
+    }
+
+    @media(max-width:900px){
+      .highlight-grid{
+        grid-template-columns:1fr;
+      }
+
+      .process{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media(max-width:640px){
+      .brand-row{
+        grid-template-columns:auto 1fr auto;
+      }
+
+      img.header-logo--org{
+        height:34px;
+        max-width:120px;
+      }
+
+      img.header-logo--mterm{
+        height:44px;
+      }
+
+      .brand-mark,
+      .brand-year{
+        font-size:1.35rem;
+      }
+
+      .nav{
+        gap:5px;
+        font-size:.82rem;
+      }
+
+      .nav a{
+        padding:7px 6px;
+      }
+
+      .paper-hero{
+        padding:58px 18px 50px;
+      }
+
+      .notice-card,
+      .section-block{
+        padding:20px;
+      }
+
+      .process{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner header-2row">
+
+      <div class="brand-row">
+        <a class="brand-logo" href="index.html" aria-label="TESMA">
+          <img src="tesma.png" alt="TESMA logo" class="header-logo--org">
+        </a>
+
+        <a href="index.html" class="brand-center" aria-label="MTERMS 2026 Home">
+          <span class="brand-mark">MTERMS</span><span class="brand-year">2026</span>
+        </a>
+
+        <div class="brand-logo brand-logo-right" aria-label="UiTM and MTERMS">
+          <a href="index.html" aria-label="UiTM">
+            <img src="uitm.png" alt="UiTM logo" class="header-logo--org">
+          </a>
+          <img src="public/mterm.jpg" alt="MTERMS logo" class="header-logo--mterm">
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <nav class="nav" aria-label="Primary navigation">
+          <a href="index.html">HOME</a>
+          <a href="theme.html">THEME</a>
+          <a href="program.html">PROGRAM</a>
+          <a href="workshop.html">WORKSHOP</a>
+          <a href="venue.html">VENUE</a>
+          <a href="index.html#registration">REGISTRATION</a>
+          <a href="publication.html" class="active">PUBLICATION</a>
+          <a href="sponsors.html">SPONSORS</a>
+          <a href="committee.html">COMMITTEE</a>
+          <a href="contact.html">CONTACT</a>
+        </nav>
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+    <section class="paper-hero">
+      <div class="container">
+        <div class="eyebrow">MTERMS 2026 Special Issue</div>
+        <h1>Call for Full Papers</h1>
+        <p>
+          Publish your research in the MTERMS 2026 Special Issue under the
+          <strong>Asian Pacific Journal of Molecular Biology and Biotechnology (APJMBB)</strong>.
+        </p>
+
+        <div class="hero-actions">
+          <a class="submit-btn" href="https://apjmbb.opussoft.io/" target="_blank" rel="noopener">
+            Submit Manuscript
+          </a>
+          <a class="guideline-btn" href="public/Full%20Paper%20GUIDELINES%20MTERMS2026_Final.pdf" target="_blank" rel="noopener">
+            View Full Paper Guidelines
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="main-content">
+      <div class="content-wrap">
+
+        <article class="notice-card">
+          <h2>Publish Your Research with APJMBB</h2>
+          <p>
+            The MTERMS 2026 Organizing Committee is pleased to invite authors to submit
+            full manuscripts for publication consideration in the MTERMS 2026 Special Issue
+            of APJMBB. This is an excellent opportunity to elevate your research and share
+            your findings with a broader scientific community.
+          </p>
+
+          <div class="highlight-grid">
+            <div class="highlight">
+              <span class="label">Submission Deadline</span>
+              <strong>31 August 2026</strong>
+            </div>
+
+            <div class="highlight">
+              <span class="label">Processing Fee</span>
+              <strong>RM500</strong>
+              <div>Only upon acceptance</div>
+            </div>
+
+            <div class="highlight">
+              <span class="label">Expected Publication</span>
+              <strong>March 2027</strong>
+            </div>
+          </div>
+        </article>
+
+        <section class="section-block">
+          <h2 class="section-title">Submission and Author Guidelines</h2>
+          <p>
+            To support a smooth review process, all manuscripts must be prepared strictly
+            in accordance with the journal's formatting and author requirements.
+          </p>
+          <ul>
+            <li>Prepare the full manuscript according to the APJMBB formatting standards.</li>
+            <li>Submit the manuscript through the official APJMBB online submission portal.</li>
+            <li>Select <strong>“MTERM 2026 Special Issue”</strong> as the manuscript type.</li>
+            <li>Ensure that all author details, declarations, figures and references are complete.</li>
+          </ul>
+        </section>
+
+        <section class="section-block">
+          <h2 class="section-title">Publication Process</h2>
+          <p>
+            All submissions will undergo a rigorous peer-review process coordinated by the
+            MTERMS Editorial Team and appointed expert reviewers. Publication is subject to
+            successful peer review and final editorial acceptance.
+          </p>
+
+          <div class="process" aria-label="Publication process">
+            <div class="process-step"><span>STEP 1</span>Manuscript Submission</div>
+            <div class="process-step"><span>STEP 2</span>Editorial Screening</div>
+            <div class="process-step"><span>STEP 3</span>Peer Review</div>
+            <div class="process-step"><span>STEP 4</span>Author Revision</div>
+            <div class="process-step"><span>STEP 5</span>Final Acceptance</div>
+            <div class="process-step"><span>STEP 6</span>March 2027 Publication</div>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <h2 class="section-title">Publication Processing Fee</h2>
+          <p>
+            A publication processing fee of <strong>RM500</strong> applies only after the
+            manuscript has been accepted. Authors will not be invoiced at the initial
+            submission or peer-review stage.
+          </p>
+        </section>
+
+        <section class="final-cta">
+          <h2>Ready to Submit?</h2>
+          <p>
+            Visit the APJMBB submission portal and select
+            <strong>“MTERM 2026 Special Issue”</strong> under Manuscript Type.
+          </p>
+          <a href="https://apjmbb.opussoft.io/" target="_blank" rel="noopener">
+            Open APJMBB Submission Portal
+          </a>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding-top:28px;padding-bottom:28px">
+      <div style="display:flex;justify-content:center;gap:22px;flex-wrap:wrap">
+        <a href="register.html">Register</a>
+        <a href="login.html">Participant Portal</a>
+        <a href="reviewer-login.html">Panel Reviewer Login</a>
+        <a href="admin.html">Admin Login</a>
+      </div>
+
+      <div style="color:#64748b">
+        © 2026 MTERMS • Powered by IgniteInno Ventures
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/analytics.js"></script>
+</body>
+</html>
