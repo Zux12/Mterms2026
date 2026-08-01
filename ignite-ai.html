@@ -1568,16 +1568,256 @@ async function startAssessment(){
     return;
   }
 
-  let activeStep = 'participant';
+  let pollingTimer = null;
+  let pollingStartedAt = Date.now();
+
+  function stopPolling(){
+    if (pollingTimer) {
+      clearTimeout(pollingTimer);
+      pollingTimer = null;
+    }
+  }
+
+  function scheduleNextCheck(){
+    stopPolling();
+
+    pollingTimer = setTimeout(
+      checkAssessmentStatus,
+      3000
+    );
+  }
+
+  async function completeAssessment(
+    assessment
+  ){
+    stopPolling();
+
+    setAssessmentProgress(
+      'ai',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'validate',
+      'active'
+    );
+
+    $('assessmentMessage').textContent =
+      'Validating the completed assessment...';
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress(
+      'validate',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'save',
+      'active'
+    );
+
+    $('assessmentMessage').textContent =
+      'Confirming that the assessment was saved successfully...';
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress(
+      'save',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'complete',
+      'done'
+    );
+
+    hideAssessmentProgressWarning();
+
+    $('assessmentMessage').textContent =
+      `✅ Assessment completed successfully. Assessment ID: ${
+        assessment?.assessmentId || '—'
+      }`;
+
+    renderAIResult(
+      assessment
+    );
+
+    await loadComparison(
+      selectedRegistrationId
+    );
+
+    currentReadiness = {
+      ...currentReadiness,
+      ready: false,
+      currentAssessment: assessment
+    };
+
+    $('startAssessmentBtn').textContent =
+      'Assessment Completed';
+
+    $('startAssessmentBtn').disabled =
+      true;
+
+    $('readinessBanner').innerHTML = `
+      <div class="ready-banner ready-yes">
+        Ignite AI™ assessment completed successfully.<br>
+        Assessment ID:
+        ${escapeHtml(
+          assessment?.assessmentId || '—'
+        )}
+      </div>
+    `;
+
+    await loadParticipants(
+      currentPage
+    );
+
+    setAssessmentPageLocked(false);
+  }
+
+  function failAssessment(
+    message
+  ){
+    stopPolling();
+
+    setAssessmentProgress(
+      'ai',
+      'failed'
+    );
+
+    hideAssessmentProgressWarning();
+
+    const publicMessage =
+      message ||
+      'Ignite AI™ assessment failed. No assessment was saved.';
+
+    $('assessmentMessage').textContent =
+      '❌ ' + publicMessage;
+
+    $('readinessBanner').innerHTML = `
+      <div class="ready-banner ready-no">
+        Assessment failed. No result was saved or locked.<br>
+        Reason:
+        ${escapeHtml(publicMessage)}
+      </div>
+    `;
+
+    $('startAssessmentBtn').disabled =
+      false;
+
+    setAssessmentPageLocked(false);
+  }
+
+  async function checkAssessmentStatus(){
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ignite-ai/assessment-status/${selectedRegistrationId}`,
+          {
+            headers:
+              authHeader(),
+
+            cache:
+              'no-store'
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      if (
+        data.status === 'completed' &&
+        data.assessment
+      ) {
+        await completeAssessment(
+          data.assessment
+        );
+
+        return;
+      }
+
+      if (data.status === 'failed') {
+        failAssessment(
+          data.error ||
+          'Ignite AI™ assessment failed. No assessment was saved.'
+        );
+
+        return;
+      }
+
+      if (
+        data.status === 'processing'
+      ) {
+        setAssessmentProgress(
+          'ai',
+          'active'
+        );
+
+        const elapsedSeconds =
+          Math.floor(
+            (
+              Date.now() -
+              pollingStartedAt
+            ) / 1000
+          );
+
+        $('assessmentMessage').textContent =
+          `Ignite AI™ is assessing the abstract... ${elapsedSeconds} second(s) elapsed.`;
+
+        scheduleNextCheck();
+        return;
+      }
+
+      if (
+        data.status === 'not-started'
+      ) {
+        const elapsed =
+          Date.now() -
+          pollingStartedAt;
+
+        if (elapsed < 12000) {
+          scheduleNextCheck();
+          return;
+        }
+
+        throw new Error(
+          'The assessment process could not be confirmed.'
+        );
+      }
+
+      scheduleNextCheck();
+
+    } catch (err) {
+      failAssessment(
+        err?.message ||
+        'Failed to check Ignite AI™ assessment status.'
+      );
+    }
+  }
 
   setAssessmentPageLocked(true);
   showAssessmentProgress();
 
-  $('startAssessmentBtn').disabled = true;
+  $('startAssessmentBtn').disabled =
+    true;
 
   $('readinessBanner').innerHTML = `
     <div class="ready-banner processing">
-      Ignite AI™ assessment is in progress.
+      Ignite AI™ assessment is starting.
     </div>
   `;
 
@@ -1585,52 +1825,77 @@ async function startAssessment(){
     'Preparing the abstract for assessment...';
 
   try {
-    setAssessmentProgress('participant', 'active');
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 350)
+    setAssessmentProgress(
+      'participant',
+      'active'
     );
 
-    setAssessmentProgress('participant', 'done');
-
-    activeStep = 'abstract';
-    setAssessmentProgress('abstract', 'active');
-
     await new Promise(resolve =>
-      setTimeout(resolve, 350)
+      setTimeout(resolve, 300)
     );
 
-    setAssessmentProgress('abstract', 'done');
-
-    activeStep = 'extract';
-    setAssessmentProgress('extract', 'active');
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 350)
+    setAssessmentProgress(
+      'participant',
+      'done'
     );
 
-    setAssessmentProgress('extract', 'done');
-
-    activeStep = 'rubric';
-    setAssessmentProgress('rubric', 'active');
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 350)
+    setAssessmentProgress(
+      'abstract',
+      'active'
     );
 
-    setAssessmentProgress('rubric', 'done');
+    await new Promise(resolve =>
+      setTimeout(resolve, 300)
+    );
 
-    activeStep = 'ai';
-    setAssessmentProgress('ai', 'active');
+    setAssessmentProgress(
+      'abstract',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'extract',
+      'active'
+    );
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 300)
+    );
+
+    setAssessmentProgress(
+      'extract',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'rubric',
+      'active'
+    );
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 300)
+    );
+
+    setAssessmentProgress(
+      'rubric',
+      'done'
+    );
+
+    setAssessmentProgress(
+      'ai',
+      'active'
+    );
 
     $('assessmentMessage').textContent =
-      'Ignite AI™  is assessing the abstract using the official MTERMS rubric...';
+      'Ignite AI™ is assessing the abstract...';
 
     const response =
       await fetch(
         `${API}/api/ignite-ai/assess/${selectedRegistrationId}`,
         {
-          method:'POST',
+          method:
+            'POST',
+
           headers:
             authHeader()
         }
@@ -1648,104 +1913,20 @@ async function startAssessment(){
       );
     }
 
-    setAssessmentProgress('ai', 'done');
-
-    activeStep = 'validate';
-    setAssessmentProgress('validate', 'active');
+    pollingStartedAt =
+      Date.now();
 
     $('assessmentMessage').textContent =
-      'Validating the completed assessment...';
+      data.message ||
+      'Ignite AI™ assessment has started.';
 
-    await new Promise(resolve =>
-      setTimeout(resolve, 400)
-    );
-
-    setAssessmentProgress('validate', 'done');
-
-    activeStep = 'save';
-    setAssessmentProgress('save', 'active');
-
-    $('assessmentMessage').textContent =
-      'Confirming that the assessment was saved successfully...';
-
-    await new Promise(resolve =>
-      setTimeout(resolve, 400)
-    );
-
-    setAssessmentProgress('save', 'done');
-
-    activeStep = 'complete';
-    setAssessmentProgress('complete', 'done');
-
-    hideAssessmentProgressWarning();
-
-    $('assessmentMessage').textContent =
-      `✅ Assessment completed successfully. Assessment ID: ${
-        data.assessment?.assessmentId || '—'
-      }`;
-
-    renderAIResult(
-      data.assessment
-    );
-
-    await loadComparison(
-      selectedRegistrationId
-    );
-
-    await loadParticipants(
-      currentPage
-    );
-
-    currentReadiness = {
-      ...currentReadiness,
-      ready:false,
-      currentAssessment:data.assessment
-    };
-
-    $('startAssessmentBtn').textContent =
-      'Assessment Completed';
-
-    $('startAssessmentBtn').disabled =
-      true;
-
-    $('readinessBanner').innerHTML = `
-      <div class="ready-banner ready-yes">
-        Ignite AI™ assessment completed successfully.<br>
-        Assessment ID:
-        ${escapeHtml(
-          data.assessment?.assessmentId || '—'
-        )}
-      </div>
-    `;
+    scheduleNextCheck();
 
   } catch (err) {
-    markAssessmentFailed(activeStep);
-
-    $('assessmentMessage').textContent =
-      '❌ Assessment failed: ' +
-      err.message +
-      ' No assessment was saved.';
-
-    $('startAssessmentBtn').disabled =
-      false;
-
-    $('readinessBanner').innerHTML = `
-      <div class="ready-banner ready-no">
-        Assessment failed. No result was saved or locked.<br>
-        Reason:
-        ${escapeHtml(err.message)}
-      </div>
-    `;
-  } finally {
-    setAssessmentPageLocked(false);
-
-    if (
-      currentReadiness?.ready &&
-      !$('aiResultCard').classList.contains('hidden')
-    ) {
-      $('startAssessmentBtn').disabled =
-        true;
-    }
+    failAssessment(
+      err?.message ||
+      'Ignite AI™ assessment could not be started.'
+    );
   }
 }
 
