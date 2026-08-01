@@ -1,0 +1,1866 @@
+<!doctype html>
+<html lang="en" class="theme-light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>MTERMS 2026 — Ignite AI™ Assessment</title>
+
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#0b1115;
+      --border:#e5e7eb;
+      --muted:#667085;
+      --navy:#0B2A6B;
+      --teal:#0EA5A6;
+      --green:#16a34a;
+      --red:#dc2626;
+      --orange:#b45309;
+      --blue:#2563eb;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 300px at 10% 0%, rgba(14,165,166,.06), transparent 60%),
+        radial-gradient(900px 300px at 90% 0%, rgba(11,42,107,.06), transparent 60%),
+        #fff;
+    }
+
+    .wrap{
+      width:min(1250px,94vw);
+      margin:24px auto;
+    }
+
+    .brand-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:10px 4px 18px;
+      margin-bottom:16px;
+      border-bottom:2px solid rgba(14,165,166,.18);
+    }
+
+    .brand-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand-logo{
+      width:92px;
+      height:92px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.06);
+    }
+
+    .brand-logo img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+    }
+
+    h1{
+      margin:0;
+      font-size:1.4rem;
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin:6px 0 0;
+      color:#475467;
+    }
+
+    .header-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      margin-bottom:16px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:9px 13px;
+      font-size:.94rem;
+      font-weight:800;
+      background:#fff;
+      color:#111827;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      background:var(--green);
+      border-color:var(--green);
+      color:#fff;
+    }
+
+    .btn-danger{
+      background:var(--red);
+      border-color:var(--red);
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#fff;
+      color:#111827;
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      align-items:end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .search-box{
+      flex:1 1 520px;
+    }
+
+    label{
+      display:block;
+      font-weight:800;
+      font-size:.92rem;
+      margin-bottom:7px;
+    }
+
+    input{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:9px;
+      padding:10px;
+      font-size:.95rem;
+      color:#111827;
+      background:#fff;
+    }
+
+    .summary{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:7px 11px;
+      background:#f9fafb;
+      font-size:.9rem;
+      font-weight:800;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+      min-width:1080px;
+      background:#fff;
+    }
+
+    th,td{
+      padding:10px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      background:rgba(11,42,107,.05);
+      color:#111827;
+      font-weight:900;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    tr:hover td{
+      background:#f9fafb;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .status-completed{
+      color:#15803d;
+      font-weight:900;
+    }
+
+    .status-available{
+      color:#2563eb;
+      font-weight:900;
+    }
+
+    .status-none{
+      color:#b45309;
+      font-weight:900;
+    }
+
+    .status-new{
+      color:#7c3aed;
+      font-weight:900;
+    }
+
+    .help{
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.5;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    .readonly-box{
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#f9fafb;
+      padding:10px;
+      min-height:42px;
+      white-space:pre-wrap;
+    }
+
+    .checklist{
+      display:grid;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .check-row{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:9px 10px;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:#fff;
+    }
+
+    .check-icon{
+      width:24px;
+      flex:0 0 24px;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .check-ok{
+      color:#15803d;
+    }
+
+    .check-fail{
+      color:#b42318;
+    }
+
+    .ready-banner{
+      border-radius:12px;
+      padding:12px;
+      margin-top:14px;
+      font-weight:900;
+    }
+
+    .ready-yes{
+      background:#ecfdf3;
+      border:1px solid #86efac;
+      color:#166534;
+    }
+
+    .ready-no{
+      background:#fef2f2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+    }
+
+    .processing{
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      color:#1d4ed8;
+    }
+
+    .score-table{
+      min-width:760px;
+    }
+
+    .score-value{
+      font-weight:900;
+      font-size:1rem;
+    }
+
+    .difference-positive{
+      color:#15803d;
+      font-weight:900;
+    }
+
+    .difference-negative{
+      color:#b42318;
+      font-weight:900;
+    }
+
+    .difference-zero{
+      color:#475467;
+      font-weight:900;
+    }
+
+    .assessment-meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:10px 0 14px;
+    }
+
+    .assessment-meta span{
+      border:1px solid var(--border);
+      border-radius:9px;
+      padding:7px 10px;
+      background:#f9fafb;
+      font-size:.88rem;
+      font-weight:700;
+    }
+
+    .reason-list{
+      margin:8px 0 0;
+      padding-left:20px;
+    }
+
+    .reason-list li{
+      margin:5px 0;
+    }
+
+    .quality-box{
+      border:1px solid #bfdbfe;
+      border-radius:14px;
+      background:#eff6ff;
+      padding:16px;
+      text-align:center;
+      margin-top:14px;
+    }
+
+    .quality-title{
+      color:#1d4ed8;
+      font-weight:800;
+      font-size:.9rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .quality-value{
+      font-size:1.8rem;
+      font-weight:900;
+      color:#0B2A6B;
+      margin-top:5px;
+    }
+
+    .pager{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .footer{
+      margin-top:30px;
+      padding:20px 0;
+      text-align:center;
+      color:#667085;
+      font-size:.92rem;
+      font-weight:700;
+      line-height:1.6;
+    }
+
+    @media(max-width:850px){
+      .brand-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .grid-2,
+      .grid-3{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="brand-header">
+    <div class="brand-left">
+      <div class="brand-logo">
+        <img src="public/mterm.jpg" alt="MTERMS 2026">
+      </div>
+
+      <div>
+        <h1>MTERMS 2026 — Ignite AI™ Assessment</h1>
+
+        <p class="subtitle">
+          Independent AI abstract assessment using the official MTERMS reviewer rubric.
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary"
+        onclick="window.location.href='admin.html'">
+        ← Back to Admin
+      </button>
+
+      <button
+        id="logoutBtn"
+        class="btn btn-danger">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <div id="loginWarning" class="card hidden">
+    <h3>Admin Login Required</h3>
+
+    <p class="help">
+      Please log in through the MTERMS admin page before opening Ignite AI™.
+    </p>
+
+    <button
+      class="btn btn-primary"
+      onclick="window.location.href='admin.html'">
+      Go to Admin Login
+    </button>
+  </div>
+
+  <div id="dashboard" class="hidden">
+
+    <div class="card">
+      <div class="toolbar">
+
+        <div class="search-box">
+          <label for="searchInput">
+            Search participant, registration code, institution or abstract title
+          </label>
+
+          <input
+            id="searchInput"
+            placeholder="Example: MTERMS2026-001150 or abstract title">
+        </div>
+
+        <button
+          id="refreshBtn"
+          class="btn btn-primary">
+          Refresh Participants
+        </button>
+      </div>
+
+      <div class="summary">
+        <span class="pill">
+          Total:
+          <span id="sumTotal">0</span>
+        </span>
+
+        <span class="pill">
+          Ready:
+          <span id="sumAvailable">0</span>
+        </span>
+
+        <span class="pill">
+          Completed:
+          <span id="sumCompleted">0</span>
+        </span>
+
+        <span class="pill">
+          New Abstract:
+          <span id="sumNew">0</span>
+        </span>
+
+        <span class="pill">
+          No Abstract:
+          <span id="sumNoAbstract">0</span>
+        </span>
+      </div>
+
+      <div
+        id="pageMessage"
+        style="margin-top:12px;font-weight:800">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Participants and Abstracts</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Registration Code</th>
+              <th>Participant</th>
+              <th>Institution</th>
+              <th>Abstract Title</th>
+              <th>Presentation</th>
+              <th>Latest Abstract</th>
+              <th>Ignite AI™ Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="participantRows">
+            <tr>
+              <td colspan="8">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager">
+        <button
+          id="prevBtn"
+          class="btn btn-secondary">
+          Previous
+        </button>
+
+        <span id="pageInfo"></span>
+
+        <button
+          id="nextBtn"
+          class="btn btn-secondary">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <div id="assessmentPanel" class="hidden">
+
+      <div class="card">
+        <h3>Participant and Abstract Details</h3>
+
+        <div class="grid-2">
+          <div>
+            <strong>Registration Code</strong>
+            <div id="detailRegCode" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Participant</strong>
+            <div id="detailName" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Institution</strong>
+            <div id="detailAffiliation" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Presentation Preference</strong>
+            <div id="detailPresentation" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Theme</strong>
+            <div id="detailTheme" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Field</strong>
+            <div id="detailField" class="readonly-box"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Abstract Title</strong>
+          <div id="detailTitle" class="readonly-box"></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Latest Abstract</strong>
+          <div id="detailAbstract" class="readonly-box"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ignite AI™ Assessment Readiness</h3>
+
+        <p class="help">
+          The assessment button will only become available after all required information has been verified.
+        </p>
+
+        <div id="readinessChecklist" class="checklist">
+          <div class="check-row">
+            Loading readiness information...
+          </div>
+        </div>
+
+        <div id="readinessBanner"></div>
+
+        <div
+          style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+
+          <button
+            id="startAssessmentBtn"
+            class="btn btn-primary"
+            disabled>
+            Start Ignite AI™ Assessment
+          </button>
+
+          <button
+            id="closeAssessmentBtn"
+            class="btn btn-danger">
+            Close
+          </button>
+        </div>
+
+        <div
+          id="assessmentMessage"
+          style="margin-top:14px;text-align:center;font-weight:900">
+        </div>
+      </div>
+
+      <div id="aiResultCard" class="card hidden">
+        <h3>Ignite AI™ Assessment Result</h3>
+
+        <div id="assessmentMeta" class="assessment-meta"></div>
+
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Criteria</th>
+                <th>Maximum</th>
+                <th>Ignite AI™ Score</th>
+                <th>Justification</th>
+              </tr>
+            </thead>
+
+            <tbody id="aiScoreRows"></tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div>
+            <strong>Require Correction</strong>
+            <div id="aiRequireCorrection" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Recommended Category</strong>
+            <div id="aiRecommendedCategory" class="readonly-box"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <strong>Correction Reasons</strong>
+          <div id="aiCorrectionReasons" class="readonly-box"></div>
+        </div>
+      </div>
+
+      <div id="comparisonCard" class="card hidden">
+        <h3>Human Reviewer vs Ignite AI™</h3>
+
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Criteria</th>
+                <th>Human Reviewer</th>
+                <th>Ignite AI™</th>
+                <th>Difference</th>
+              </tr>
+            </thead>
+
+            <tbody id="comparisonRows"></tbody>
+          </table>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px">
+          <div>
+            <strong>Human Reviewer Total</strong>
+            <div id="humanTotal" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Ignite AI™ Total</strong>
+            <div id="igniteTotal" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Average Score</strong>
+            <div id="averageTotal" class="readonly-box"></div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div>
+            <strong>Assessment Consistency</strong>
+            <div id="consistencyValue" class="readonly-box"></div>
+          </div>
+
+          <div>
+            <strong>Score Difference</strong>
+            <div id="totalDifference" class="readonly-box"></div>
+          </div>
+        </div>
+
+        <div class="quality-box">
+          <div class="quality-title">Overall Quality</div>
+          <div id="overallQuality" class="quality-value">—</div>
+        </div>
+      </div>
+
+      <div id="comparisonUnavailable" class="card hidden">
+        <h3>Human and AI Comparison</h3>
+        <p id="comparisonUnavailableMessage" class="help"></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Powered by Ignite AI™<br>
+  Developed by IgniteInno Ventures Sdn. Bhd.
+</div>
+
+<script>
+  const API =
+    'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+  const ADMIN_KEY =
+    'mterms-admin-basic';
+
+  const $ =
+    id => document.getElementById(id);
+
+  let currentPage = 1;
+  let pageLimit = 20;
+  let totalRows = 0;
+  let participantRows = [];
+  let selectedRegistrationId = null;
+  let selectedParticipant = null;
+  let currentReadiness = null;
+
+  function authHeader(){
+    const token =
+      localStorage.getItem(ADMIN_KEY);
+
+    return token
+      ? {
+          Authorization:
+            'Basic ' + token
+        }
+      : {};
+  }
+
+  function isAdminLoggedIn(){
+    return !!localStorage.getItem(
+      ADMIN_KEY
+    );
+  }
+
+  function escapeHtml(value){
+    return String(value ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  function formatDate(value){
+    if (!value) return '—';
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+
+    return date.toLocaleString();
+  }
+
+  function statusHtml(row){
+    if (row.newAbstractDetected) {
+      return `
+        <span class="status-new">
+          New abstract detected
+        </span>
+      `;
+    }
+
+    if (row.igniteStatus === 'completed') {
+      return `
+        <span class="status-completed">
+          Assessment completed
+        </span>
+      `;
+    }
+
+    if (row.igniteStatus === 'available') {
+      return `
+        <span class="status-available">
+          Assessment available
+        </span>
+      `;
+    }
+
+    return `
+      <span class="status-none">
+        No abstract uploaded
+      </span>
+    `;
+  }
+
+  function actionLabel(row){
+    if (row.newAbstractDetected) {
+      return 'Assess New Abstract';
+    }
+
+    if (row.igniteStatus === 'completed') {
+      return 'View Assessment';
+    }
+
+    if (row.igniteStatus === 'available') {
+      return 'Open Assessment';
+    }
+
+    return 'View Details';
+  }
+
+  async function loadParticipants(page = 1){
+    currentPage = page;
+
+    $('participantRows').innerHTML = `
+      <tr>
+        <td colspan="8">
+          Loading participants...
+        </td>
+      </tr>
+    `;
+
+    $('pageMessage').textContent =
+      'Loading participants...';
+
+    const query =
+      encodeURIComponent(
+        $('searchInput').value.trim()
+      );
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ignite-ai/participants?page=${currentPage}&limit=${pageLimit}&q=${query}`,
+          {
+            headers:
+              authHeader()
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      participantRows =
+        Array.isArray(data.rows)
+          ? data.rows
+          : [];
+
+      totalRows =
+        Number(data.total || 0);
+
+      renderParticipants();
+      updateSummary();
+
+      $('pageInfo').textContent =
+        `Page ${currentPage} • ${Math.min(
+          currentPage * pageLimit,
+          totalRows
+        )} / ${totalRows}`;
+
+      $('prevBtn').disabled =
+        currentPage <= 1;
+
+      $('nextBtn').disabled =
+        currentPage * pageLimit >=
+        totalRows;
+
+      $('pageMessage').textContent =
+        `Loaded ${participantRows.length} participant(s).`;
+
+    } catch (err) {
+      $('participantRows').innerHTML = `
+        <tr>
+          <td
+            colspan="8"
+            style="color:#b42318;font-weight:900">
+            ${escapeHtml(err.message)}
+          </td>
+        </tr>
+      `;
+
+      $('pageMessage').textContent =
+        'Failed to load participants.';
+    }
+  }
+
+  function renderParticipants(){
+    if (!participantRows.length) {
+      $('participantRows').innerHTML = `
+        <tr>
+          <td colspan="8">
+            <em>No participants found.</em>
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    $('participantRows').innerHTML =
+      participantRows.map(row => {
+        const abstract =
+          row.latestAbstract;
+
+        const abstractText =
+          abstract
+            ? `v${escapeHtml(
+                abstract.version
+              )} — ${escapeHtml(
+                abstract.filename
+              )}`
+            : '<em>No abstract</em>';
+
+        return `
+          <tr>
+            <td>
+              <strong>
+                ${escapeHtml(row.regCode)}
+              </strong>
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.participantName
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.affiliation
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.title
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.presentationType
+              )}
+            </td>
+
+            <td>
+              ${abstractText}
+            </td>
+
+            <td>
+              ${statusHtml(row)}
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="openParticipant('${escapeHtml(
+                  row.registrationId
+                )}')">
+                ${actionLabel(row)}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+  }
+
+  function updateSummary(){
+    $('sumTotal').textContent =
+      participantRows.length;
+
+    $('sumAvailable').textContent =
+      participantRows.filter(
+        row =>
+          row.igniteStatus ===
+          'available' &&
+          !row.newAbstractDetected
+      ).length;
+
+    $('sumCompleted').textContent =
+      participantRows.filter(
+        row =>
+          row.igniteStatus ===
+          'completed'
+      ).length;
+
+    $('sumNew').textContent =
+      participantRows.filter(
+        row =>
+          row.newAbstractDetected
+      ).length;
+
+    $('sumNoAbstract').textContent =
+      participantRows.filter(
+        row =>
+          row.igniteStatus ===
+          'no-abstract'
+      ).length;
+  }
+
+  function fillParticipantDetails(
+    participant
+  ){
+    $('detailRegCode').textContent =
+      participant.regCode || '—';
+
+    $('detailName').textContent =
+      participant.participantName || '—';
+
+    $('detailAffiliation').textContent =
+      participant.affiliation || '—';
+
+    $('detailPresentation').textContent =
+      participant.presentationType || '—';
+
+    $('detailTheme').textContent =
+      participant.theme || '—';
+
+    $('detailField').textContent =
+      participant.field || '—';
+
+    $('detailTitle').textContent =
+      participant.title || '—';
+
+    const abstract =
+      participant.latestAbstract;
+
+    if (abstract) {
+      $('detailAbstract').textContent =
+        `Version ${abstract.version}\n` +
+        `Filename: ${abstract.filename}\n` +
+        `Uploaded: ${formatDate(
+          abstract.uploadedAt
+        )}`;
+    } else {
+      $('detailAbstract').textContent =
+        'No abstract uploaded.';
+    }
+  }
+
+  const checkLabels = {
+    participantRecordLoaded:
+      'Participant record loaded',
+
+    registrationCodeAvailable:
+      'Registration code available',
+
+    abstractTitleAvailable:
+      'Abstract title available',
+
+    themeAvailable:
+      'Theme available',
+
+    fieldAvailable:
+      'Field available',
+
+    presentationPreferenceAvailable:
+      'Presentation preference available',
+
+    latestAbstractFound:
+      'Latest abstract file found',
+
+    abstractFileIdAvailable:
+      'Abstract file ID available',
+
+    abstractTextExtracted:
+      'Abstract text extracted successfully',
+
+    reviewerRubricLoaded:
+      'MTERMS reviewer rubric loaded',
+
+    openAIKeyConfigured:
+      'AI service key configured',
+
+    igniteAIModelConfigured:
+      'Ignite AI™ model configured',
+
+    currentAbstractNotAlreadyAssessed:
+      'Current abstract has not already been assessed'
+  };
+
+  function renderReadiness(data){
+    const checks =
+      data.checks || {};
+
+    $('readinessChecklist').innerHTML =
+      Object.entries(checkLabels)
+        .map(([key,label]) => {
+          const passed =
+            !!checks[key];
+
+          return `
+            <div class="check-row">
+              <div class="check-icon ${
+                passed
+                  ? 'check-ok'
+                  : 'check-fail'
+              }">
+                ${passed ? '✓' : '✕'}
+              </div>
+
+              <div>
+                ${escapeHtml(label)}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+    if (data.ready) {
+      $('readinessBanner').innerHTML = `
+        <div class="ready-banner ready-yes">
+          Ignite AI™ is ready for assessment.
+        </div>
+      `;
+
+      $('startAssessmentBtn').disabled =
+        false;
+
+      $('startAssessmentBtn').textContent =
+        selectedParticipant
+          ?.newAbstractDetected
+            ? `Assess New Abstract v${
+                selectedParticipant
+                  ?.latestAbstract
+                  ?.version || ''
+              }`
+            : 'Start Ignite AI™ Assessment';
+
+    } else {
+      $('readinessBanner').innerHTML = `
+        <div class="ready-banner ready-no">
+          ${escapeHtml(
+            data.failureReason ||
+            'Ignite AI™ is not ready.'
+          )}
+        </div>
+      `;
+
+      $('startAssessmentBtn').disabled =
+        true;
+
+      if (
+        data.currentAssessment
+      ) {
+        $('startAssessmentBtn').textContent =
+          'Assessment Completed';
+      } else {
+        $('startAssessmentBtn').textContent =
+          'Start Ignite AI™ Assessment';
+      }
+    }
+  }
+
+  async function openParticipant(
+    registrationId
+  ){
+    selectedRegistrationId =
+      registrationId;
+
+    selectedParticipant =
+      participantRows.find(
+        row =>
+          row.registrationId ===
+          registrationId
+      ) || null;
+
+    $('assessmentPanel').classList
+      .remove('hidden');
+
+    $('aiResultCard').classList
+      .add('hidden');
+
+    $('comparisonCard').classList
+      .add('hidden');
+
+    $('comparisonUnavailable')
+      .classList.add('hidden');
+
+    $('assessmentMessage').textContent =
+      'Checking Ignite AI™ readiness...';
+
+    if (selectedParticipant) {
+      fillParticipantDetails(
+        selectedParticipant
+      );
+    }
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ignite-ai/readiness/${registrationId}`,
+          {
+            headers:
+              authHeader()
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      currentReadiness =
+        data;
+
+      selectedParticipant =
+        data.participant ||
+        selectedParticipant;
+
+      fillParticipantDetails(
+        selectedParticipant
+      );
+
+      renderReadiness(data);
+
+      $('assessmentMessage').textContent =
+        '';
+
+      if (data.currentAssessment) {
+        renderAIResult(
+          data.currentAssessment
+        );
+
+        await loadComparison(
+          registrationId
+        );
+      }
+
+      $('assessmentPanel')
+        .scrollIntoView({
+          behavior:'smooth',
+          block:'start'
+        });
+
+    } catch (err) {
+      $('assessmentMessage').textContent =
+        '❌ ' + err.message;
+
+      $('startAssessmentBtn').disabled =
+        true;
+    }
+  }
+
+  async function startAssessment(){
+    if (
+      !selectedRegistrationId ||
+      !currentReadiness?.ready
+    ) {
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        'Start the official Ignite AI™ assessment for this abstract?\n\n' +
+        'A successful assessment will be saved and locked for this abstract version.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    $('startAssessmentBtn').disabled =
+      true;
+
+    $('readinessBanner').innerHTML = `
+      <div class="ready-banner processing">
+        Ignite AI™ assessment is in progress. Please do not close this page.
+      </div>
+    `;
+
+    $('assessmentMessage').textContent =
+      'Extracting the abstract, applying the MTERMS rubric and generating the assessment...';
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ignite-ai/assess/${selectedRegistrationId}`,
+          {
+            method:'POST',
+            headers:
+              authHeader()
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      $('assessmentMessage').textContent =
+        `✅ ${data.message}`;
+
+      renderAIResult(
+        data.assessment
+      );
+
+      await loadComparison(
+        selectedRegistrationId
+      );
+
+      await loadParticipants(
+        currentPage
+      );
+
+      await openParticipant(
+        selectedRegistrationId
+      );
+
+    } catch (err) {
+      $('assessmentMessage').textContent =
+        '❌ Assessment failed: ' +
+        err.message +
+        ' No assessment was saved.';
+
+      $('startAssessmentBtn').disabled =
+        false;
+
+      $('readinessBanner').innerHTML = `
+        <div class="ready-banner ready-no">
+          Assessment failed. No result was saved or locked.
+        </div>
+      `;
+    }
+  }
+
+  function renderAIResult(
+    assessment
+  ){
+    if (!assessment) return;
+
+    $('aiResultCard').classList
+      .remove('hidden');
+
+    $('assessmentMeta').innerHTML = `
+      <span>
+        Assessment ID:
+        ${escapeHtml(
+          assessment.assessmentId
+        )}
+      </span>
+
+      <span>
+        Abstract Version:
+        v${escapeHtml(
+          assessment.abstractVersion
+        )}
+      </span>
+
+      <span>
+        Model:
+        ${escapeHtml(
+          assessment.model
+        )}
+      </span>
+
+      <span>
+        Rubric:
+        ${escapeHtml(
+          assessment.rubricVersion
+        )}
+      </span>
+
+      <span>
+        Assessed:
+        ${escapeHtml(
+          formatDate(
+            assessment.assessedAt
+          )
+        )}
+      </span>
+    `;
+
+    const scores =
+      assessment.scores || {};
+
+    const reasons =
+      assessment.scoreJustifications || {};
+
+    const rows = [
+      [
+        'Introduction & Objective',
+        5,
+        scores.introductionObjective,
+        reasons.introductionObjective
+      ],
+      [
+        'Materials and Methods',
+        5,
+        scores.materialsMethods,
+        reasons.materialsMethods
+      ],
+      [
+        'Results',
+        10,
+        scores.results,
+        reasons.results
+      ],
+      [
+        'Conclusion',
+        5,
+        scores.conclusion,
+        reasons.conclusion
+      ],
+      [
+        'Significance / Implication',
+        10,
+        scores.significanceImplication,
+        reasons.significanceImplication
+      ],
+      [
+        'Total',
+        35,
+        scores.total,
+        ''
+      ]
+    ];
+
+    $('aiScoreRows').innerHTML =
+      rows.map(row => `
+        <tr>
+          <td>
+            <strong>
+              ${escapeHtml(row[0])}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(row[1])}
+          </td>
+
+          <td class="score-value">
+            ${escapeHtml(row[2] ?? 0)}
+          </td>
+
+          <td>
+            ${escapeHtml(row[3] || '')}
+          </td>
+        </tr>
+      `).join('');
+
+    $('aiRequireCorrection').textContent =
+      assessment.requireCorrection === 'yes'
+        ? 'Yes'
+        : 'No';
+
+    $('aiRecommendedCategory').textContent =
+      assessment.recommendedCategory || '—';
+
+    const correctionReasons =
+      assessment.correctionReasons || {};
+
+    const selected = [];
+
+    if (correctionReasons.tooLong) {
+      selected.push(
+        'The abstract is too long.'
+      );
+    }
+
+    if (correctionReasons.poorlyWritten) {
+      selected.push(
+        'The abstract is poorly written.'
+      );
+    }
+
+    if (correctionReasons.weakHypothesis) {
+      selected.push(
+        'The research hypothesis or objective is poorly supported.'
+      );
+    }
+
+    if (
+      correctionReasons
+        .vagueExperimentalPlan
+    ) {
+      selected.push(
+        'The experimental plan is vague or not well described.'
+      );
+    }
+
+    if (
+      correctionReasons
+        .insufficientData
+    ) {
+      selected.push(
+        'The data or analysis is insufficient.'
+      );
+    }
+
+    if (correctionReasons.others) {
+      selected.push(
+        correctionReasons.othersText ||
+        'Other correction required.'
+      );
+    }
+
+    $('aiCorrectionReasons').innerHTML =
+      selected.length
+        ? `<ul class="reason-list">${
+            selected.map(
+              reason =>
+                `<li>${escapeHtml(reason)}</li>`
+            ).join('')
+          }</ul>`
+        : 'No correction reasons selected.';
+  }
+
+  async function loadComparison(
+    registrationId
+  ){
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ignite-ai/comparison/${registrationId}`,
+          {
+            headers:
+              authHeader()
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+          `HTTP ${response.status}`
+        );
+      }
+
+      const comparison =
+        data.comparison;
+
+      if (!comparison?.available) {
+        $('comparisonCard').classList
+          .add('hidden');
+
+        $('comparisonUnavailable')
+          .classList.remove('hidden');
+
+        $('comparisonUnavailableMessage')
+          .textContent =
+            comparison?.reason ||
+            'Comparison is not available.';
+
+        return;
+      }
+
+      $('comparisonUnavailable')
+        .classList.add('hidden');
+
+      $('comparisonCard')
+        .classList.remove('hidden');
+
+      const criteria =
+        comparison.criteria || {};
+
+      const rows = [
+        [
+          'Introduction & Objective',
+          criteria.introductionObjective
+        ],
+        [
+          'Materials and Methods',
+          criteria.materialsMethods
+        ],
+        [
+          'Results',
+          criteria.results
+        ],
+        [
+          'Conclusion',
+          criteria.conclusion
+        ],
+        [
+          'Significance / Implication',
+          criteria.significanceImplication
+        ]
+      ];
+
+      $('comparisonRows').innerHTML =
+        rows.map(([name,value]) => {
+          const difference =
+            Number(value?.difference || 0);
+
+          const differenceClass =
+            difference > 0
+              ? 'difference-positive'
+              : difference < 0
+                ? 'difference-negative'
+                : 'difference-zero';
+
+          const differenceText =
+            difference > 0
+              ? `+${difference}`
+              : String(difference);
+
+          return `
+            <tr>
+              <td>
+                <strong>
+                  ${escapeHtml(name)}
+                </strong>
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  value?.human ?? 0
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  value?.igniteAI ?? 0
+                )}
+              </td>
+
+              <td class="${differenceClass}">
+                ${escapeHtml(
+                  differenceText
+                )}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      const totals =
+        comparison.totals || {};
+
+      $('humanTotal').textContent =
+        `${totals.human ?? 0} / 35`;
+
+      $('igniteTotal').textContent =
+        `${totals.igniteAI ?? 0} / 35`;
+
+      $('averageTotal').textContent =
+        `${totals.average ?? 0} / 35`;
+
+      $('totalDifference').textContent =
+        totals.difference > 0
+          ? `+${totals.difference}`
+          : String(
+              totals.difference ?? 0
+            );
+
+      $('consistencyValue').textContent =
+        comparison.assessmentConsistency ||
+        '—';
+
+      $('overallQuality').textContent =
+        comparison.overallQuality ||
+        '—';
+
+    } catch (err) {
+      $('comparisonCard').classList
+        .add('hidden');
+
+      $('comparisonUnavailable')
+        .classList.remove('hidden');
+
+      $('comparisonUnavailableMessage')
+        .textContent =
+          err.message;
+    }
+  }
+
+  function logout(){
+    localStorage.removeItem(
+      ADMIN_KEY
+    );
+
+    window.location.href =
+      'admin.html';
+  }
+
+  $('refreshBtn')
+    .addEventListener(
+      'click',
+      () => loadParticipants(1)
+    );
+
+  $('prevBtn')
+    .addEventListener(
+      'click',
+      () => {
+        if (currentPage > 1) {
+          loadParticipants(
+            currentPage - 1
+          );
+        }
+      }
+    );
+
+  $('nextBtn')
+    .addEventListener(
+      'click',
+      () => {
+        if (
+          currentPage * pageLimit <
+          totalRows
+        ) {
+          loadParticipants(
+            currentPage + 1
+          );
+        }
+      }
+    );
+
+  $('searchInput')
+    .addEventListener(
+      'input',
+      () => {
+        clearTimeout(
+          window._igniteSearchTimer
+        );
+
+        window._igniteSearchTimer =
+          setTimeout(
+            () => loadParticipants(1),
+            350
+          );
+      }
+    );
+
+  $('startAssessmentBtn')
+    .addEventListener(
+      'click',
+      startAssessment
+    );
+
+  $('closeAssessmentBtn')
+    .addEventListener(
+      'click',
+      () => {
+        $('assessmentPanel')
+          .classList.add('hidden');
+
+        selectedRegistrationId =
+          null;
+
+        selectedParticipant =
+          null;
+
+        currentReadiness =
+          null;
+      }
+    );
+
+  $('logoutBtn')
+    .addEventListener(
+      'click',
+      logout
+    );
+
+  window.openParticipant =
+    openParticipant;
+
+  if (!isAdminLoggedIn()) {
+    $('loginWarning').classList
+      .remove('hidden');
+
+    $('dashboard').classList
+      .add('hidden');
+  } else {
+    $('loginWarning').classList
+      .add('hidden');
+
+    $('dashboard').classList
+      .remove('hidden');
+
+    loadParticipants(1);
+  }
+</script>
+</body>
+</html>
