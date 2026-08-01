@@ -963,18 +963,31 @@ router.post(
             savedAssessment
           )
       });
-    } catch (err) {
-      console.error(
-        'Ignite AI assessment error:',
-        err
-      );
+} catch (err) {
+  console.error(
+    'Ignite AI assessment error:',
+    err
+  );
 
-      return res.status(500).json({
-        error:
-          err?.message ||
-          'Ignite AI™ assessment failed. No assessment was saved.'
-      });
-    }
+  const rawMessage =
+    String(err?.message || '');
+
+  let publicMessage =
+    'Ignite AI™ assessment failed. No assessment was saved.';
+
+  if (
+    rawMessage.includes('429') ||
+    rawMessage.toLowerCase().includes('no credits remaining') ||
+    rawMessage.toLowerCase().includes('insufficient_quota')
+  ) {
+    publicMessage =
+      'Ignite AI™ is currently unavailable because the AI service account has insufficient API credits. No assessment was saved. Please contact the MTERMS administrator.';
+  }
+
+  return res.status(500).json({
+    error: publicMessage
+  });
+}
   }
 );
 
