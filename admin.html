@@ -804,6 +804,16 @@ table thead th{
       class="btn btn-secondary">
       Refresh Ignite AI™ Status
     </button>
+
+    <button
+  id="openIgniteAISummaryBtn"
+  type="button"
+  class="btn btn-secondary"
+  disabled>
+  View Human Reviewer vs Ignite AI™ Summary
+</button>
+
+    
   </div>
 
   <div
@@ -1870,6 +1880,7 @@ async function loadIgniteAIForCurrent(){
 
   details.innerHTML = 'Loading Ignite AI™ assessment...';
   message.textContent = '';
+  $('openIgniteAISummaryBtn').disabled = true;
 
   try{
     const r = await fetch(
@@ -1912,6 +1923,10 @@ async function loadIgniteAIForCurrent(){
       $('openIgniteAIPageBtn').textContent =
         'Open Ignite AI™ Assessment';
 
+
+      $('openIgniteAISummaryBtn').disabled = true;
+
+      
       return;
     }
 
@@ -2011,6 +2026,8 @@ async function loadIgniteAIForCurrent(){
 
     $('openIgniteAIPageBtn').textContent =
       'View Ignite AI™ Assessment';
+    $('openIgniteAISummaryBtn').disabled =
+  !assessment.assessmentId;
 
   }catch(err){
     details.innerHTML = `
@@ -2125,6 +2142,18 @@ $('openIgniteAIPageBtn').onclick = () => {
   window.open(
     'ignite-ai.html',
     '_blank'
+  );
+};
+
+  $('openIgniteAISummaryBtn').onclick = () => {
+  if (!currentEditorDoc?._id) return;
+
+  window.open(
+    `ignite-ai-summary.html?registrationId=${encodeURIComponent(
+      currentEditorDoc._id
+    )}`,
+    '_blank',
+    'noopener'
   );
 };
 
