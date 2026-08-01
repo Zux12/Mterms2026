@@ -90,8 +90,8 @@
     
 .toolbar{
   display:grid;
-  grid-template-columns:1.4fr .8fr .8fr .8fr auto auto;
-      gap:10px;
+grid-template-columns:1.4fr .8fr .8fr .8fr .8fr auto auto;
+  gap:10px;
       align-items:end;
     }
 
@@ -179,7 +179,7 @@
       width:100%;
       border-collapse:collapse;
       font-size:.9rem;
-      min-width:1700px;
+      min-width:1850px;
     }
 
     th,td{
@@ -275,7 +275,6 @@
           </select>
         </label>
 
-
         <label>
   Panel Review Status
   <select id="reviewStatusFilter">
@@ -284,6 +283,18 @@
     <option value="Assigned">Assigned</option>
     <option value="Draft saved">Draft saved</option>
     <option value="Reviewed">Reviewed</option>
+  </select>
+</label>
+
+<label>
+  Ignite AI™ Review Status
+  <select id="igniteAIStatusFilter">
+    <option value="">All Ignite AI™ Status</option>
+    <option value="Not applicable">Not applicable</option>
+    <option value="No abstract">No abstract</option>
+    <option value="Not assessed">Not assessed</option>
+    <option value="New abstract detected">New abstract detected</option>
+    <option value="Assessment completed">Assessment completed</option>
   </select>
 </label>
 
@@ -328,6 +339,7 @@
           <th>Field</th>
 <th>Panel Reviewer</th>
 <th>Panel Review Status</th>
+<th>Ignite AI™ Review Status</th>
 <th>Payment</th>
               <th>Amount</th>
               <th>Phase</th>
@@ -336,7 +348,7 @@
           </thead>
           <tbody id="rows">
             <tr>
-              <td colspan="25">Loading participants...</td>
+              <td colspan="26">Loading participants...</td>
             </tr>
           </tbody>
         </table>
@@ -410,6 +422,126 @@ let reviewStatusMap = {};
   };
 }
 
+
+
+function pickLatestAbstractForIgniteAI(doc){
+  const uploads = Array.isArray(doc?.uploads)
+    ? doc.uploads
+    : [];
+
+  const abstracts = uploads.filter(
+    row => row?.type === 'abstract'
+  );
+
+  if (!abstracts.length) return null;
+
+  return abstracts
+    .slice()
+    .sort((a, b) => {
+      const versionA = Number(a?.version || 0);
+      const versionB = Number(b?.version || 0);
+
+      if (versionB !== versionA) {
+        return versionB - versionA;
+      }
+
+      const timeA = new Date(
+        a?.uploadedAt || 0
+      ).getTime();
+
+      const timeB = new Date(
+        b?.uploadedAt || 0
+      ).getTime();
+
+      return timeB - timeA;
+    })[0];
+}
+
+function igniteAIStatusText(doc){
+  if (!doc?.program?.presenting) {
+    return 'Not applicable';
+  }
+
+  const latestAbstract =
+    pickLatestAbstractForIgniteAI(doc);
+
+  if (!latestAbstract) {
+    return 'No abstract';
+  }
+
+  const assessments =
+    Array.isArray(doc?.igniteAIAssessments)
+      ? doc.igniteAIAssessments
+      : [];
+
+  const latestAbstractId =
+    String(latestAbstract?.gridFsId || '');
+
+  const currentAssessment =
+    assessments.find(
+      assessment =>
+        String(
+          assessment?.abstractGridFsId || ''
+        ) === latestAbstractId
+    );
+
+  if (currentAssessment) {
+    return 'Assessment completed';
+  }
+
+  if (assessments.length) {
+    return 'New abstract detected';
+  }
+
+  return 'Not assessed';
+}
+
+function igniteAIStatusHtml(doc){
+  const status =
+    igniteAIStatusText(doc);
+
+  if (status === 'Assessment completed') {
+    return `
+      <span style="color:#15803d;font-weight:900">
+        Assessment completed
+      </span>
+    `;
+  }
+
+  if (status === 'New abstract detected') {
+    return `
+      <span style="color:#7c3aed;font-weight:900">
+        New abstract detected
+      </span>
+    `;
+  }
+
+  if (status === 'Not assessed') {
+    return `
+      <span style="color:#2563eb;font-weight:900">
+        Not assessed
+      </span>
+    `;
+  }
+
+  if (status === 'No abstract') {
+    return `
+      <span style="color:#b45309;font-weight:900">
+        No abstract
+      </span>
+    `;
+  }
+
+  return `
+    <span style="color:#667085;font-weight:800">
+      Not applicable
+    </span>
+  `;
+}
+
+  
+
+  
 async function loadReviewStatuses(){
   reviewStatusMap = {};
 
@@ -444,7 +576,7 @@ async function loadReviewStatuses(){
   }
 
   async function loadAllParticipants(){
-    $('rows').innerHTML = `<tr><td colspan="25">Loading participants...</td></tr>`;
+    $('rows').innerHTML = `<tr><td colspan="26">Loading participants...</td></tr>`;
     $('msg').textContent = 'Loading all registered participants...';
 
     try{
@@ -479,7 +611,7 @@ $('msg').innerHTML =
    🔍 Search Results: <strong>${filteredRows.length}</strong>`;
     
     }catch(err){
-      $('rows').innerHTML = `<tr><td colspan="25" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
+      $('rows').innerHTML = `<tr><td colspan="26" style="color:#b42318;font-weight:800">❌ ${escapeHtml(err.message)}</td></tr>`;
       $('msg').textContent = '❌ ' + err.message;
     }
   }
@@ -496,6 +628,8 @@ $('msg').innerHTML =
     const cat = $('categoryFilter').value;
     const pay = $('paymentFilter').value;
     const reviewStatus = $('reviewStatusFilter').value;
+    const igniteAIStatus =
+  $('igniteAIStatusFilter').value;
 
     filteredRows = allRows.filter(doc => {
       const haystack = [
@@ -520,9 +654,21 @@ $('msg').innerHTML =
       const okSearch = !q || haystack.includes(q);
       const okCat = !cat || doc.category === cat;
 const okPay = !pay || String(doc?.payment?.status || 'pending').toLowerCase() === pay;
-const okReviewStatus = !reviewStatus || reviewStatusText(doc).status === reviewStatus;
+const okReviewStatus =
+  !reviewStatus ||
+  reviewStatusText(doc).status === reviewStatus;
 
-return okSearch && okCat && okPay && okReviewStatus;
+const okIgniteAIStatus =
+  !igniteAIStatus ||
+  igniteAIStatusText(doc) === igniteAIStatus;
+
+return (
+  okSearch &&
+  okCat &&
+  okPay &&
+  okReviewStatus &&
+  okIgniteAIStatus
+);
     });
 
     renderRows();
@@ -535,7 +681,7 @@ return okSearch && okCat && okPay && okReviewStatus;
 
   function renderRows(){
     if (!filteredRows.length){
-      $('rows').innerHTML = `<tr><td colspan="25"><em>No matching participants found.</em></td></tr>`;
+      $('rows').innerHTML = `<tr><td colspan="26"><em>No matching participants found.</em></td></tr>`;
       return;
     }
 
@@ -566,6 +712,7 @@ return okSearch && okCat && okPay && okReviewStatus;
 <td>${escapeHtml(doc?.submission?.field || '')}</td>
 <td>${escapeHtml(reviewStatusText(doc).reviewer)}</td>
 <td><strong>${escapeHtml(reviewStatusText(doc).status)}</strong></td>
+<td>${igniteAIStatusHtml(doc)}</td>
 <td class="${paymentClass}">${escapeHtml(payment)}</td>
           <td>${escapeHtml(money(doc))}</td>
           <td>${escapeHtml(doc?.pricingSnapshot?.phase || '')}</td>
@@ -615,6 +762,7 @@ return okSearch && okCat && okPay && okReviewStatus;
 'Field',
 'Panel Reviewer',
 'Panel Review Status',
+'Ignite AI Review Status',
 'Payment',
       'Amount',
       'Phase',
@@ -646,6 +794,7 @@ return okSearch && okCat && okPay && okReviewStatus;
 doc?.submission?.field || '',
 reviewStatusText(doc).reviewer,
 reviewStatusText(doc).status,
+igniteAIStatusText(doc),
 doc?.payment?.status || 'pending',
         money(doc),
         doc?.pricingSnapshot?.phase || '',
@@ -672,6 +821,7 @@ doc?.payment?.status || 'pending',
   $('categoryFilter').addEventListener('change', applyFilters);
   $('paymentFilter').addEventListener('change', applyFilters);
   $('reviewStatusFilter').addEventListener('change', applyFilters);
+  $('igniteAIStatusFilter').addEventListener('change', applyFilters);
 
   loadAllParticipants();
 </script>
