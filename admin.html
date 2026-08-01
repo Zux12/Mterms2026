@@ -780,6 +780,42 @@ table thead th{
 
   <div id="panelReviewMsg" style="margin-top:10px;font-weight:700"></div>
 </div>
+
+
+
+<div class="card" id="igniteAIAdminCard">
+  <h4>Ignite AI™ Assessment</h4>
+
+  <div id="igniteAIAdminDetails" style="font-size:.95rem">
+    <em>Select a participant to load the Ignite AI™ assessment.</em>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <button
+      id="openIgniteAIPageBtn"
+      type="button"
+      class="btn btn-primary">
+      Open Ignite AI™ Assessment
+    </button>
+
+    <button
+      id="refreshIgniteAIAdminBtn"
+      type="button"
+      class="btn btn-secondary">
+      Refresh Ignite AI™ Status
+    </button>
+  </div>
+
+  <div
+    id="igniteAIAdminMsg"
+    style="margin-top:10px;font-weight:700">
+  </div>
+</div>
+        
+
+
+
+        
         
         
     <div class="card">
@@ -1822,6 +1858,172 @@ fileHtml = `<br><button class="btn btn-primary" type="button" onclick="downloadP
   }
 }
 
+
+
+async function loadIgniteAIForCurrent(){
+  if (!currentEditorDoc?._id) return;
+
+  const details = $('igniteAIAdminDetails');
+  const message = $('igniteAIAdminMsg');
+
+  if (!details || !message) return;
+
+  details.innerHTML = 'Loading Ignite AI™ assessment...';
+  message.textContent = '';
+
+  try{
+    const r = await fetch(
+      `${API}/api/ignite-ai/result/${currentEditorDoc._id}`,
+      {
+        headers: authHeader(),
+        cache: 'no-store'
+      }
+    );
+
+    const data = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      throw new Error(
+        data.error ||
+        'Failed to load Ignite AI™ assessment.'
+      );
+    }
+
+    const assessment = data.currentAssessment;
+
+    if (!assessment) {
+      details.innerHTML = `
+        <div style="border:1px solid var(--border);border-radius:10px;padding:10px;background:#f9fafb">
+          <strong>Status:</strong> Not assessed<br>
+          <strong>Total score:</strong> —<br>
+          <strong>Require correction:</strong> —<br>
+          <strong>Correction reason(s):</strong><br>
+
+          <div style="margin:6px 0 8px;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff">
+            <em>No Ignite AI™ assessment has been completed for the current abstract.</em>
+          </div>
+
+          <strong>Recommended category:</strong> —<br>
+          <strong>Assessment ID:</strong> —<br>
+          <strong>Assessed at:</strong> —
+        </div>
+      `;
+
+      $('openIgniteAIPageBtn').textContent =
+        'Open Ignite AI™ Assessment';
+
+      return;
+    }
+
+    const total =
+      assessment?.scores?.total ?? 0;
+
+    const assessedAt =
+      assessment?.assessedAt
+        ? new Date(
+            assessment.assessedAt
+          ).toLocaleString()
+        : '—';
+
+    const cr =
+      assessment?.correctionReasons || {};
+
+    const correctionReasons = [];
+
+    if (cr.tooLong) {
+      correctionReasons.push(
+        '• The abstract is too long (more than one page in length / 250 words).'
+      );
+    }
+
+    if (cr.poorlyWritten) {
+      correctionReasons.push(
+        '• The abstract is poorly written.'
+      );
+    }
+
+    if (cr.weakHypothesis) {
+      correctionReasons.push(
+        '• There is a poorly supported research hypothesis / objective.'
+      );
+    }
+
+    if (cr.vagueExperimentalPlan) {
+      correctionReasons.push(
+        '• The experimental plan is vague or not well described.'
+      );
+    }
+
+    if (cr.insufficientData) {
+      correctionReasons.push(
+        '• The data presented is insufficient, or the analysis of the data is inadequate, to justify the presentation.'
+      );
+    }
+
+    if (cr.others) {
+      correctionReasons.push(
+        `• Others: ${escapeHtml(
+          cr.othersText || ''
+        )}`
+      );
+    }
+
+    const correctionReasonsHtml =
+      correctionReasons.length
+        ? correctionReasons.join('<br>')
+        : '<em>No correction reason provided.</em>';
+
+    details.innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:10px;background:#f9fafb">
+        <strong>Status:</strong>
+        ${escapeHtml(
+          assessment.status || 'completed'
+        )}<br>
+
+        <strong>Total score:</strong>
+        ${escapeHtml(total)} / 35<br>
+
+        <strong>Require correction:</strong>
+        ${escapeHtml(
+          assessment.requireCorrection || '—'
+        )}<br>
+
+        <strong>Correction reason(s):</strong><br>
+
+        <div style="margin:6px 0 8px;padding:8px;border:1px solid var(--border);border-radius:8px;background:#fff">
+          ${correctionReasonsHtml}
+        </div>
+
+        <strong>Recommended category:</strong>
+        ${escapeHtml(
+          assessment.recommendedCategory || '—'
+        )}<br>
+
+        <strong>Assessment ID:</strong>
+        ${escapeHtml(
+          assessment.assessmentId || '—'
+        )}<br>
+
+        <strong>Assessed at:</strong>
+        ${escapeHtml(assessedAt)}
+      </div>
+    `;
+
+    $('openIgniteAIPageBtn').textContent =
+      'View Ignite AI™ Assessment';
+
+  }catch(err){
+    details.innerHTML = `
+      <span style="color:#b42318">
+        ❌ ${escapeHtml(err.message)}
+      </span>
+    `;
+  }
+}
+
+    
+    
+
 async function downloadPanelCommentedFile(reviewId){
   try{
     const r = await fetch(`${API}/api/admin/reviews/commented-file/${reviewId}`, {
@@ -1904,11 +2106,27 @@ async function assignPanelReviewerForCurrent(){
     currentEditorDoc = doc;
 
     $('panelReviewMsg').textContent = '';
-await loadPanelReviewers();
-await loadPanelReviewForCurrent();
 
-$('assignPanelReviewerBtn').onclick = assignPanelReviewerForCurrent;
-$('refreshPanelReviewBtn').onclick = loadPanelReviewForCurrent;
+
+    await loadPanelReviewers();
+await loadPanelReviewForCurrent();
+await loadIgniteAIForCurrent();
+
+$('assignPanelReviewerBtn').onclick =
+  assignPanelReviewerForCurrent;
+
+$('refreshPanelReviewBtn').onclick =
+  loadPanelReviewForCurrent;
+
+$('refreshIgniteAIAdminBtn').onclick =
+  loadIgniteAIForCurrent;
+
+$('openIgniteAIPageBtn').onclick = () => {
+  window.open(
+    'ignite-ai.html',
+    '_blank'
+  );
+};
 
     $('badgePhoto').removeAttribute('src');
     $('photoMsg').textContent = '';
