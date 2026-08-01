@@ -1215,8 +1215,9 @@ function refreshAdminOptionBUI(options = {}){
 
   const showTesma = showTesmaForStudent || showTesmaForProfessional;
 
-  $('tesmaMemberWrap').style.display = showTesma ? 'block' : 'none';
+$('tesmaMemberWrap').style.display = 'none';
 
+  
   if (!showTesma && $('f-tesmaMember')) {
     $('f-tesmaMember').checked = false;
   }
