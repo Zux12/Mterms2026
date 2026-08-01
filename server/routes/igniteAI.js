@@ -9,6 +9,7 @@ const { extractAbstractText } = require('../services/abstractText');
 const { assessAbstract } = require('../services/igniteAI');
 
 const router = express.Router();
+const assessmentJobs = new Map();
 
 /* =========================================================
    ADMIN AUTHENTICATION
@@ -202,6 +203,38 @@ function serializeAssessment(row) {
     assessedAt:
       row.assessedAt || null
   };
+}
+
+
+function getJobKey(registrationId) {
+  return String(registrationId || '');
+}
+
+function getAssessmentJob(registrationId) {
+  return assessmentJobs.get(
+    getJobKey(registrationId)
+  ) || null;
+}
+
+function setAssessmentJob(
+  registrationId,
+  job
+) {
+  assessmentJobs.set(
+    getJobKey(registrationId),
+    job
+  );
+}
+
+function clearAssessmentJobLater(
+  registrationId,
+  delayMs = 10 * 60 * 1000
+) {
+  setTimeout(() => {
+    assessmentJobs.delete(
+      getJobKey(registrationId)
+    );
+  }, delayMs);
 }
 
 function makeAssessmentId() {
@@ -832,10 +865,32 @@ router.post(
   '/assess/:registrationId',
   adminAuth,
   async (req, res) => {
+    const registrationId =
+      String(
+        req.params.registrationId || ''
+      );
+
     try {
+      const existingJob =
+        getAssessmentJob(
+          registrationId
+        );
+
+      if (
+        existingJob &&
+        existingJob.status === 'processing'
+      ) {
+        return res.status(202).json({
+          ok: true,
+          status: 'processing',
+          message:
+            'Ignite AI™ assessment is already in progress.'
+        });
+      }
+
       const registration =
         await Registration.findById(
-          req.params.registrationId
+          registrationId
         );
 
       if (!registration) {
@@ -861,90 +916,260 @@ router.post(
         });
       }
 
-      const latestAbstract =
-        readiness.latestAbstract;
+      setAssessmentJob(
+        registrationId,
+        {
+          status: 'processing',
+          startedAt: new Date(),
+          completedAt: null,
+          assessmentId: '',
+          error: ''
+        }
+      );
 
-      const extracted =
-        readiness.extracted;
+      res.status(202).json({
+        ok: true,
+        status: 'processing',
+        message:
+          'Ignite AI™ assessment has started.'
+      });
 
-      const aiResult =
-        await assessAbstract({
-          title:
-            registration
-              ?.submission?.title || '',
+      setImmediate(async () => {
+        try {
+          const freshRegistration =
+            await Registration.findById(
+              registrationId
+            );
 
-          theme:
-            registration
-              ?.submission?.theme || '',
+          if (!freshRegistration) {
+            throw new Error(
+              'Participant registration no longer exists.'
+            );
+          }
 
-          field:
-            registration
-              ?.submission?.field || '',
+          const freshReadiness =
+            await checkReadiness(
+              freshRegistration
+            );
 
-          presentationType:
-            registration
-              ?.program?.type || '',
+          if (!freshReadiness.ready) {
+            throw new Error(
+              freshReadiness.failureReason ||
+              'Ignite AI™ is no longer ready for assessment.'
+            );
+          }
 
-          abstractText:
-            extracted.text
-        });
+          const latestAbstract =
+            freshReadiness.latestAbstract;
 
-      const assessment = {
-        assessmentId:
-          makeAssessmentId(),
+          const extracted =
+            freshReadiness.extracted;
 
-        status:
-          'completed',
+          const aiResult =
+            await assessAbstract({
+              title:
+                freshRegistration
+                  ?.submission?.title || '',
 
-        abstractVersion:
-          Number(
-            latestAbstract.version || 0
-          ),
+              theme:
+                freshRegistration
+                  ?.submission?.theme || '',
 
-        abstractGridFsId:
-          latestAbstract.gridFsId,
+              field:
+                freshRegistration
+                  ?.submission?.field || '',
 
-        abstractFilename:
-          latestAbstract.filename || '',
+              presentationType:
+                freshRegistration
+                  ?.program?.type || '',
 
-        abstractContentType:
-          latestAbstract.contentType || '',
+              abstractText:
+                extracted.text
+            });
 
-        abstractUploadedAt:
-          latestAbstract.uploadedAt ||
-          null,
+          const assessment = {
+            assessmentId:
+              makeAssessmentId(),
 
-        scores:
-          aiResult.scores,
+            status:
+              'completed',
 
-        scoreJustifications:
-          aiResult.scoreJustifications,
+            abstractVersion:
+              Number(
+                latestAbstract.version || 0
+              ),
 
-        requireCorrection:
-          aiResult.requireCorrection,
+            abstractGridFsId:
+              latestAbstract.gridFsId,
 
-        correctionReasons:
-          aiResult.correctionReasons,
+            abstractFilename:
+              latestAbstract.filename || '',
 
-        recommendedCategory:
-          aiResult.recommendedCategory,
+            abstractContentType:
+              latestAbstract.contentType || '',
 
-        model:
-          aiResult.model,
+            abstractUploadedAt:
+              latestAbstract.uploadedAt || null,
 
-        rubricVersion:
-          aiResult.rubricVersion,
+            scores:
+              aiResult.scores,
 
-        assessedAt:
-          new Date()
-      };
+            scoreJustifications:
+              aiResult.scoreJustifications,
 
-      registration
-        .igniteAIAssessments.push(
-          assessment
+            requireCorrection:
+              aiResult.requireCorrection,
+
+            correctionReasons:
+              aiResult.correctionReasons,
+
+            recommendedCategory:
+              aiResult.recommendedCategory,
+
+            model:
+              aiResult.model,
+
+            rubricVersion:
+              aiResult.rubricVersion,
+
+            assessedAt:
+              new Date()
+          };
+
+          freshRegistration
+            .igniteAIAssessments.push(
+              assessment
+            );
+
+          await freshRegistration.save();
+
+          setAssessmentJob(
+            registrationId,
+            {
+              status: 'completed',
+              startedAt:
+                getAssessmentJob(
+                  registrationId
+                )?.startedAt ||
+                new Date(),
+
+              completedAt:
+                new Date(),
+
+              assessmentId:
+                assessment.assessmentId,
+
+              error: ''
+            }
+          );
+
+          clearAssessmentJobLater(
+            registrationId
+          );
+
+        } catch (err) {
+          console.error(
+            'Ignite AI background assessment error:',
+            err
+          );
+
+          const rawMessage =
+            String(
+              err?.message || ''
+            );
+
+          let publicMessage =
+            'Ignite AI™ assessment failed. No assessment was saved.';
+
+          if (
+            rawMessage.includes('429') ||
+            rawMessage
+              .toLowerCase()
+              .includes(
+                'no credits remaining'
+              ) ||
+            rawMessage
+              .toLowerCase()
+              .includes(
+                'insufficient_quota'
+              )
+          ) {
+            publicMessage =
+              'Ignite AI™ is currently unavailable because the AI service account has insufficient API credits. No assessment was saved. Please contact the MTERMS administrator.';
+          }
+
+          setAssessmentJob(
+            registrationId,
+            {
+              status: 'failed',
+              startedAt:
+                getAssessmentJob(
+                  registrationId
+                )?.startedAt ||
+                new Date(),
+
+              completedAt:
+                new Date(),
+
+              assessmentId: '',
+              error:
+                publicMessage
+            }
+          );
+
+          clearAssessmentJobLater(
+            registrationId
+          );
+        }
+      });
+
+    } catch (err) {
+      console.error(
+        'Ignite AI assessment start error:',
+        err
+      );
+
+      return res.status(500).json({
+        error:
+          err?.message ||
+          'Ignite AI™ assessment could not be started.'
+      });
+    }
+  }
+);
+
+
+router.get(
+  '/assessment-status/:registrationId',
+  adminAuth,
+  async (req, res) => {
+    try {
+      const registrationId =
+        String(
+          req.params.registrationId || ''
         );
 
-      await registration.save();
+      const job =
+        getAssessmentJob(
+          registrationId
+        );
+
+      const registration =
+        await Registration.findById(
+          registrationId
+        ).lean();
+
+      if (!registration) {
+        return res.status(404).json({
+          error:
+            'Participant registration not found.'
+        });
+      }
+
+      const latestAbstract =
+        pickLatestAbstract(
+          registration.uploads
+        );
 
       const savedAssessment =
         getAssessmentForAbstract(
@@ -952,42 +1177,57 @@ router.post(
           latestAbstract
         );
 
-      return res.status(201).json({
+      if (savedAssessment) {
+        return res.json({
+          ok: true,
+          status: 'completed',
+          assessment:
+            serializeAssessment(
+              savedAssessment
+            )
+        });
+      }
+
+      if (!job) {
+        return res.json({
+          ok: true,
+          status: 'not-started',
+          assessment: null,
+          error: ''
+        });
+      }
+
+      return res.json({
         ok: true,
+        status:
+          job.status,
 
-        message:
-          'Ignite AI™ assessment completed and saved successfully.',
+        startedAt:
+          job.startedAt || null,
 
-        assessment:
-          serializeAssessment(
-            savedAssessment
-          )
+        completedAt:
+          job.completedAt || null,
+
+        assessmentId:
+          job.assessmentId || '',
+
+        assessment: null,
+
+        error:
+          job.error || ''
       });
-} catch (err) {
-  console.error(
-    'Ignite AI assessment error:',
-    err
-  );
 
-  const rawMessage =
-    String(err?.message || '');
+    } catch (err) {
+      console.error(
+        'Ignite AI assessment status error:',
+        err
+      );
 
-  let publicMessage =
-    'Ignite AI™ assessment failed. No assessment was saved.';
-
-  if (
-    rawMessage.includes('429') ||
-    rawMessage.toLowerCase().includes('no credits remaining') ||
-    rawMessage.toLowerCase().includes('insufficient_quota')
-  ) {
-    publicMessage =
-      'Ignite AI™ is currently unavailable because the AI service account has insufficient API credits. No assessment was saved. Please contact the MTERMS administrator.';
-  }
-
-  return res.status(500).json({
-    error: publicMessage
-  });
-}
+      return res.status(500).json({
+        error:
+          'Failed to check Ignite AI™ assessment status.'
+      });
+    }
   }
 );
 
