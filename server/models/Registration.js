@@ -11,6 +11,180 @@ const UploadSchema = new mongoose.Schema({
   uploadedAt: { type: Date, default: Date.now }
 }, { _id: false });
 
+
+
+const IgniteAIAssessmentSchema = new mongoose.Schema({
+  assessmentId: {
+    type: String,
+    required: true
+  },
+
+  status: {
+    type: String,
+    enum: ['completed'],
+    default: 'completed'
+  },
+
+  abstractVersion: {
+    type: Number,
+    required: true
+  },
+
+  abstractGridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+
+  abstractFilename: {
+    type: String,
+    default: ''
+  },
+
+  abstractContentType: {
+    type: String,
+    default: ''
+  },
+
+  abstractUploadedAt: {
+    type: Date
+  },
+
+  scores: {
+    introductionObjective: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 5
+    },
+
+    materialsMethods: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 5
+    },
+
+    results: {
+      type: Number,
+      required: true,
+      enum: [0, 2, 4, 6, 8, 10]
+    },
+
+    conclusion: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 5
+    },
+
+    significanceImplication: {
+      type: Number,
+      required: true,
+      enum: [0, 2, 4, 6, 8, 10]
+    },
+
+    total: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 35
+    }
+  },
+
+  scoreJustifications: {
+    introductionObjective: {
+      type: String,
+      default: ''
+    },
+
+    materialsMethods: {
+      type: String,
+      default: ''
+    },
+
+    results: {
+      type: String,
+      default: ''
+    },
+
+    conclusion: {
+      type: String,
+      default: ''
+    },
+
+    significanceImplication: {
+      type: String,
+      default: ''
+    }
+  },
+
+  requireCorrection: {
+    type: String,
+    enum: ['yes', 'no'],
+    required: true
+  },
+
+  correctionReasons: {
+    tooLong: {
+      type: Boolean,
+      default: false
+    },
+
+    poorlyWritten: {
+      type: Boolean,
+      default: false
+    },
+
+    weakHypothesis: {
+      type: Boolean,
+      default: false
+    },
+
+    vagueExperimentalPlan: {
+      type: Boolean,
+      default: false
+    },
+
+    insufficientData: {
+      type: Boolean,
+      default: false
+    },
+
+    others: {
+      type: Boolean,
+      default: false
+    },
+
+    othersText: {
+      type: String,
+      default: ''
+    }
+  },
+
+  recommendedCategory: {
+    type: String,
+    enum: ['Oral presentation', 'Poster presentation'],
+    required: true
+  },
+
+  model: {
+    type: String,
+    default: ''
+  },
+
+  rubricVersion: {
+    type: String,
+    default: 'MTERMS-2026-v1'
+  },
+
+  assessedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { _id: false });
+
+
+
 const RegistrationSchema = new mongoose.Schema({
   regCode: { type: String, unique: true },
 
@@ -146,7 +320,12 @@ reviewEmailHistory: [{
   commentSnapshot: { type: String }
 }],
 
-  uploads: [UploadSchema]
+igniteAIAssessments: {
+  type: [IgniteAIAssessmentSchema],
+  default: []
+},
+
+uploads: [UploadSchema]
   
 }, { timestamps: true });
 
