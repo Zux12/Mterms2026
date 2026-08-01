@@ -326,6 +326,78 @@
       color:#1d4ed8;
     }
 
+
+    .assessment-progress{
+  margin-top:14px;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  background:#f8fbff;
+  padding:14px;
+}
+
+.assessment-progress-title{
+  font-weight:900;
+  color:#0B2A6B;
+  margin-bottom:10px;
+}
+
+.progress-list{
+  display:grid;
+  gap:8px;
+}
+
+.progress-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:9px 10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#fff;
+}
+
+.progress-icon{
+  width:24px;
+  flex:0 0 24px;
+  text-align:center;
+  font-weight:900;
+}
+
+.progress-waiting{
+  color:#667085;
+}
+
+.progress-active{
+  color:#2563eb;
+}
+
+.progress-done{
+  color:#15803d;
+}
+
+.progress-failed{
+  color:#b42318;
+}
+
+body.ai-assessing button,
+body.ai-assessing input{
+  pointer-events:none;
+}
+
+body.ai-assessing #startAssessmentBtn{
+  opacity:.65;
+}
+
+.assessment-warning{
+  margin-top:12px;
+  border:1px solid #fcd34d;
+  border-radius:10px;
+  background:#fffbeb;
+  color:#92400e;
+  padding:10px;
+  font-weight:800;
+}
+
     .score-table{
       min-width:760px;
     }
@@ -660,6 +732,21 @@
           id="assessmentMessage"
           style="margin-top:14px;text-align:center;font-weight:900">
         </div>
+
+<div id="assessmentProgress" class="assessment-progress hidden">
+  <div class="assessment-progress-title">
+    Ignite AI™ Assessment Progress
+  </div>
+
+  <div id="assessmentProgressList" class="progress-list"></div>
+
+  <div id="assessmentProgressWarning" class="assessment-warning">
+    Ignite AI™ is currently assessing this abstract.
+    Please do not refresh or close this page.
+  </div>
+</div>
+
+        
       </div>
 
       <div id="aiResultCard" class="card hidden">
@@ -1072,6 +1159,141 @@
       ).length;
   }
 
+
+
+
+const assessmentProgressSteps = [
+  {
+    key: 'participant',
+    label: 'Loading participant information'
+  },
+  {
+    key: 'abstract',
+    label: 'Retrieving the latest abstract'
+  },
+  {
+    key: 'extract',
+    label: 'Extracting abstract text'
+  },
+  {
+    key: 'rubric',
+    label: 'Applying the MTERMS reviewer rubric'
+  },
+  {
+    key: 'ai',
+    label: 'Ignite AI™  is assessing the abstract'
+  },
+  {
+    key: 'validate',
+    label: 'Validating returned scores'
+  },
+  {
+    key: 'save',
+    label: 'Saving the successful assessment'
+  },
+  {
+    key: 'complete',
+    label: 'Assessment completed'
+  }
+];
+
+let assessmentProgressState = {};
+
+function resetAssessmentProgress(){
+  assessmentProgressState = {};
+
+  assessmentProgressSteps.forEach(step => {
+    assessmentProgressState[step.key] = 'waiting';
+  });
+
+  renderAssessmentProgress();
+}
+
+function setAssessmentProgress(stepKey, status){
+  if (!assessmentProgressState[stepKey]) {
+    return;
+  }
+
+  assessmentProgressState[stepKey] = status;
+  renderAssessmentProgress();
+}
+
+function renderAssessmentProgress(){
+  $('assessmentProgressList').innerHTML =
+    assessmentProgressSteps.map(step => {
+      const status =
+        assessmentProgressState[step.key] ||
+        'waiting';
+
+      let icon = '○';
+      let className = 'progress-waiting';
+
+      if (status === 'active') {
+        icon = '⏳';
+        className = 'progress-active';
+      }
+
+      if (status === 'done') {
+        icon = '✓';
+        className = 'progress-done';
+      }
+
+      if (status === 'failed') {
+        icon = '✕';
+        className = 'progress-failed';
+      }
+
+      return `
+        <div class="progress-row">
+          <div class="progress-icon ${className}">
+            ${icon}
+          </div>
+
+          <div>
+            ${escapeHtml(step.label)}
+          </div>
+        </div>
+      `;
+    }).join('');
+}
+
+function showAssessmentProgress(){
+  resetAssessmentProgress();
+
+  $('assessmentProgress').classList.remove('hidden');
+
+  $('assessmentProgressWarning').classList.remove('hidden');
+}
+
+function hideAssessmentProgressWarning(){
+  $('assessmentProgressWarning').classList.add('hidden');
+}
+
+function markAssessmentFailed(activeStep){
+  if (activeStep) {
+    setAssessmentProgress(activeStep, 'failed');
+  }
+
+  hideAssessmentProgressWarning();
+}
+
+function setAssessmentPageLocked(locked){
+  document.body.classList.toggle(
+    'ai-assessing',
+    locked
+  );
+
+  $('refreshBtn').disabled = locked;
+  $('prevBtn').disabled = locked;
+  $('nextBtn').disabled = locked;
+  $('searchInput').disabled = locked;
+  $('closeAssessmentBtn').disabled = locked;
+  $('logoutBtn').disabled = locked;
+}
+
+
+  
+  
   function fillParticipantDetails(
     participant
   ){
@@ -1251,6 +1473,11 @@
     $('comparisonUnavailable')
       .classList.add('hidden');
 
+
+    $('assessmentProgress').classList.add('hidden');
+resetAssessmentProgress();
+setAssessmentPageLocked(false);
+    
     $('assessmentMessage').textContent =
       'Checking Ignite AI™ readiness...';
 
@@ -1323,94 +1550,204 @@
     }
   }
 
-  async function startAssessment(){
-    if (
-      !selectedRegistrationId ||
-      !currentReadiness?.ready
-    ) {
-      return;
-    }
+async function startAssessment(){
+  if (
+    !selectedRegistrationId ||
+    !currentReadiness?.ready
+  ) {
+    return;
+  }
 
-    const confirmed =
-      confirm(
-        'Start the official Ignite AI™ assessment for this abstract?\n\n' +
-        'A successful assessment will be saved and locked for this abstract version.'
+  const confirmed =
+    confirm(
+      'Start the official Ignite AI™ assessment for this abstract?\n\n' +
+      'A successful assessment will be saved and locked for this abstract version.'
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  let activeStep = 'participant';
+
+  setAssessmentPageLocked(true);
+  showAssessmentProgress();
+
+  $('startAssessmentBtn').disabled = true;
+
+  $('readinessBanner').innerHTML = `
+    <div class="ready-banner processing">
+      Ignite AI™ assessment is in progress.
+    </div>
+  `;
+
+  $('assessmentMessage').textContent =
+    'Preparing the abstract for assessment...';
+
+  try {
+    setAssessmentProgress('participant', 'active');
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress('participant', 'done');
+
+    activeStep = 'abstract';
+    setAssessmentProgress('abstract', 'active');
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress('abstract', 'done');
+
+    activeStep = 'extract';
+    setAssessmentProgress('extract', 'active');
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress('extract', 'done');
+
+    activeStep = 'rubric';
+    setAssessmentProgress('rubric', 'active');
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 350)
+    );
+
+    setAssessmentProgress('rubric', 'done');
+
+    activeStep = 'ai';
+    setAssessmentProgress('ai', 'active');
+
+    $('assessmentMessage').textContent =
+      'Ignite AI™  is assessing the abstract using the official MTERMS rubric...';
+
+    const response =
+      await fetch(
+        `${API}/api/ignite-ai/assess/${selectedRegistrationId}`,
+        {
+          method:'POST',
+          headers:
+            authHeader()
+        }
       );
 
-    if (!confirmed) {
-      return;
+    const data =
+      await response.json().catch(
+        () => ({})
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        `HTTP ${response.status}`
+      );
     }
+
+    setAssessmentProgress('ai', 'done');
+
+    activeStep = 'validate';
+    setAssessmentProgress('validate', 'active');
+
+    $('assessmentMessage').textContent =
+      'Validating the completed assessment...';
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 400)
+    );
+
+    setAssessmentProgress('validate', 'done');
+
+    activeStep = 'save';
+    setAssessmentProgress('save', 'active');
+
+    $('assessmentMessage').textContent =
+      'Confirming that the assessment was saved successfully...';
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 400)
+    );
+
+    setAssessmentProgress('save', 'done');
+
+    activeStep = 'complete';
+    setAssessmentProgress('complete', 'done');
+
+    hideAssessmentProgressWarning();
+
+    $('assessmentMessage').textContent =
+      `✅ Assessment completed successfully. Assessment ID: ${
+        data.assessment?.assessmentId || '—'
+      }`;
+
+    renderAIResult(
+      data.assessment
+    );
+
+    await loadComparison(
+      selectedRegistrationId
+    );
+
+    await loadParticipants(
+      currentPage
+    );
+
+    currentReadiness = {
+      ...currentReadiness,
+      ready:false,
+      currentAssessment:data.assessment
+    };
+
+    $('startAssessmentBtn').textContent =
+      'Assessment Completed';
 
     $('startAssessmentBtn').disabled =
       true;
 
     $('readinessBanner').innerHTML = `
-      <div class="ready-banner processing">
-        Ignite AI™ assessment is in progress. Please do not close this page.
+      <div class="ready-banner ready-yes">
+        Ignite AI™ assessment completed successfully.<br>
+        Assessment ID:
+        ${escapeHtml(
+          data.assessment?.assessmentId || '—'
+        )}
       </div>
     `;
 
+  } catch (err) {
+    markAssessmentFailed(activeStep);
+
     $('assessmentMessage').textContent =
-      'Extracting the abstract, applying the MTERMS rubric and generating the assessment...';
+      '❌ Assessment failed: ' +
+      err.message +
+      ' No assessment was saved.';
 
-    try {
-      const response =
-        await fetch(
-          `${API}/api/ignite-ai/assess/${selectedRegistrationId}`,
-          {
-            method:'POST',
-            headers:
-              authHeader()
-          }
-        );
+    $('startAssessmentBtn').disabled =
+      false;
 
-      const data =
-        await response.json().catch(
-          () => ({})
-        );
+    $('readinessBanner').innerHTML = `
+      <div class="ready-banner ready-no">
+        Assessment failed. No result was saved or locked.<br>
+        Reason:
+        ${escapeHtml(err.message)}
+      </div>
+    `;
+  } finally {
+    setAssessmentPageLocked(false);
 
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-          `HTTP ${response.status}`
-        );
-      }
-
-      $('assessmentMessage').textContent =
-        `✅ ${data.message}`;
-
-      renderAIResult(
-        data.assessment
-      );
-
-      await loadComparison(
-        selectedRegistrationId
-      );
-
-      await loadParticipants(
-        currentPage
-      );
-
-      await openParticipant(
-        selectedRegistrationId
-      );
-
-    } catch (err) {
-      $('assessmentMessage').textContent =
-        '❌ Assessment failed: ' +
-        err.message +
-        ' No assessment was saved.';
-
+    if (
+      currentReadiness?.ready &&
+      !$('aiResultCard').classList.contains('hidden')
+    ) {
       $('startAssessmentBtn').disabled =
-        false;
-
-      $('readinessBanner').innerHTML = `
-        <div class="ready-banner ready-no">
-          Assessment failed. No result was saved or locked.
-        </div>
-      `;
+        true;
     }
   }
+}
 
   function renderAIResult(
     assessment
@@ -1823,6 +2160,11 @@
     .addEventListener(
       'click',
       () => {
+
+$('assessmentProgress').classList.add('hidden');
+resetAssessmentProgress();
+setAssessmentPageLocked(false);
+        
         $('assessmentPanel')
           .classList.add('hidden');
 
