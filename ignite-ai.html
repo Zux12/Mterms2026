@@ -447,6 +447,83 @@ body.ai-assessing #startAssessmentBtn{
       margin:5px 0;
     }
 
+    .category-label-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:7px;
+}
+
+.category-label-row strong{
+  margin:0;
+}
+
+.category-info{
+  position:relative;
+  display:inline-block;
+}
+
+.category-info summary{
+  list-style:none;
+  width:22px;
+  height:22px;
+  border:1px solid #93c5fd;
+  border-radius:50%;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-weight:900;
+  font-size:.85rem;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+}
+
+.category-info summary::-webkit-details-marker{
+  display:none;
+}
+
+.category-info-box{
+  position:absolute;
+  right:0;
+  top:30px;
+  width:min(520px,85vw);
+  z-index:50;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  padding:14px;
+  box-shadow:0 18px 45px rgba(0,0,0,.18);
+  font-size:.9rem;
+  line-height:1.5;
+}
+
+.category-info-box h4{
+  margin:0 0 7px;
+  color:var(--navy);
+}
+
+.category-info-box ul{
+  margin:5px 0 14px 20px;
+  padding:0;
+}
+
+.category-info-box li{
+  margin:4px 0;
+}
+
+.category-disclaimer{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid #fcd34d;
+  border-radius:9px;
+  background:#fffbeb;
+  color:#92400e;
+  font-size:.86rem;
+  font-weight:700;
+}
+
     .quality-box{
       border:1px solid #bfdbfe;
       border-radius:14px;
@@ -775,10 +852,53 @@ body.ai-assessing #startAssessmentBtn{
             <div id="aiRequireCorrection" class="readonly-box"></div>
           </div>
 
-          <div>
-            <strong>Recommended Category</strong>
-            <div id="aiRecommendedCategory" class="readonly-box"></div>
-          </div>
+<div>
+  <div class="category-label-row">
+    <strong>Recommended Category</strong>
+
+    <details class="category-info">
+      <summary
+        title="View category recommendation guidance"
+        aria-label="View category recommendation guidance">
+        i
+      </summary>
+
+      <div class="category-info-box">
+        <h4>Oral Presentation</h4>
+
+        <div>Recommend Oral Presentation when:</div>
+
+        <ul>
+          <li>Scientific quality is high.</li>
+          <li>Novelty is strong.</li>
+          <li>Methods are clear.</li>
+          <li>Results are well supported.</li>
+          <li>The conclusion is supported by the results.</li>
+          <li>Significance to tissue engineering and regenerative medicine is high.</li>
+          <li>No major corrections are required.</li>
+        </ul>
+
+        <h4>Poster Presentation</h4>
+
+        <div>Recommend Poster Presentation when:</div>
+
+        <ul>
+          <li>Results are preliminary.</li>
+          <li>The study has promise but needs improvement.</li>
+          <li>Major corrections are required.</li>
+          <li>Methods or results are incomplete.</li>
+          <li>The work is better suited for discussion than a full oral session.</li>
+        </ul>
+
+        <div class="category-disclaimer">
+          Disclaimer: Ignite AI™ determines the recommended category only from the information provided in the submitted abstract. The recommendation is intended to support the MTERMS committee’s decision and does not replace the committee’s final determination.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div id="aiRecommendedCategory" class="readonly-box"></div>
+</div>
         </div>
 
         <div style="margin-top:14px">
