@@ -17,8 +17,9 @@ function cleanExtractedText(value) {
 
 function getFileExtension(filename = '') {
   const name = String(filename || '').toLowerCase().trim();
-  const dotIndex = name.lastIndexOf('');
+const dotIndex = name.lastIndexOf('.');
 
+  
   if (dotIndex === -1) return '';
 
   return name.slice(dotIndex);
