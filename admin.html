@@ -795,6 +795,15 @@ table thead th{
     </select>
   </label>
 
+
+<label style="display:flex;align-items:center;gap:8px;margin-top:10px">
+  <input type="checkbox" id="f-tesmaMemberAdmin">
+  <span>TESMA Member</span>
+</label>
+
+
+          
+
  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
   <label style="flex:1 1 220px;margin:0">Role
     <select id="f-roleType" style="width:100%">
@@ -1906,6 +1915,7 @@ $('f-roleType').value = doc.roleType || 'Professional';
 $('f-nationality').value = doc.nationality || 'Malaysian';
 $('f-profSubtype').value = (doc.professionalSubtype === 'Member') ? 'Standard' : (doc.professionalSubtype || 'Standard');
 $('f-tesmaMember').checked = !!doc.tesmaMember || (doc.professionalSubtype === 'Member');
+$('f-tesmaMemberAdmin').checked = !!doc.tesmaMember;
 
 refreshAdminOptionBUI();
 
