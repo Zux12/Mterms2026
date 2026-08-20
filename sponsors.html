@@ -865,6 +865,22 @@
 }
 
 
+/* Histocenter sponsor profile responsive layout */
+@media (max-width: 760px){
+  #sponsors .histocenter-layout{
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  #sponsors .histocenter-profile{
+    padding-left: 0 !important;
+    padding-top: 24px !important;
+    border-left: none !important;
+    border-top: 1px solid rgba(30,90,168,.18) !important;
+  }
+}    
+
+    
 /* AuctuCel sponsor profile responsive layout */
 @media (max-width: 760px){
   #sponsors .auctucel-layout{
@@ -1292,21 +1308,129 @@
     <span class="tier-badge">SILVER</span>
   </div>
 
-  <div class="cards cards-stretch" style="margin-top:14px;">
-    <div class="card sponsor-card">
-      <a href="https://histocenter.com/main.html" target="_blank" rel="noopener noreferrer" aria-label="Histocenter (M) Sdn. Bhd.">
+
+
+<!-- Histocenter full-width profile -->
+<div
+  class="card sponsor-card"
+  style="
+    width:100%;
+    max-width:none;
+    margin-top:18px;
+    padding:30px;
+    box-sizing:border-box;
+  "
+>
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:minmax(220px, 32%) minmax(0, 68%);
+      gap:36px;
+      align-items:center;
+    "
+    class="histocenter-layout"
+  >
+
+    <!-- Histocenter logo and company name -->
+    <div style="text-align:center;">
+      <a
+        href="https://histocenter.com/main.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Histocenter (M) Sdn. Bhd."
+        style="display:block;"
+      >
         <img
           src="public/histocenter logo.jpg"
           alt="Histocenter (M) Sdn. Bhd. logo"
-          style="width:100%; height:auto; max-height:120px; object-fit:contain; display:block; margin:0 auto;"
+          style="
+            width:100%;
+            max-width:320px;
+            height:auto;
+            max-height:150px;
+            object-fit:contain;
+            display:block;
+            margin:0 auto;
+          "
         />
       </a>
-      <p style="margin:10px 0 0;"><strong>Histocenter (M) Sdn. Bhd.</strong></p>
-      <p style="margin:6px 0 0; opacity:.9;">Silver sponsor.</p>
+
+      <h3
+        style="
+          margin:20px 0 5px;
+          font-size:1.15rem;
+          text-align:center;
+        "
+      >
+        Histocenter (M) Sdn. Bhd.
+      </h3>
+
+      <p
+        style="
+          margin:0;
+          text-align:center;
+          color:#64748b;
+          font-size:.88rem;
+          font-weight:700;
+          letter-spacing:.08em;
+          text-transform:uppercase;
+        "
+      >
+        Silver Sponsor
+      </p>
     </div>
 
+    <!-- Histocenter profile -->
+    <div
+      style="
+        padding-left:32px;
+        border-left:1px solid rgba(30,90,168,.18);
+      "
+      class="histocenter-profile"
+    >
 
+      <h3
+        style="
+          margin:0 0 14px;
+          color:#1e5aa8;
+          font-size:1.35rem;
+          line-height:1.3;
+        "
+      >
+        About Histocenter Malaysia
+      </h3>
+
+      <p
+        style="
+          margin:0;
+          color:#334155;
+          font-size:.98rem;
+          line-height:1.75;
+          text-align:left;
+        "
+      >
+        Histocenter (M) Sdn. Bhd. is a 100% Malaysian-owned company established in 1987, providing technology solutions to the scientific, medical, diagnostic, research, and industrial communities. Building upon its core expertise in histology and pathology solutions, the company has expanded its portfolio to encompass comprehensive microscopy systems, digital imaging hardware and software, analytical instruments, laboratory apparatus, and related scientific solutions.
+      </p>
+
+      <p
+        style="
+          margin:14px 0 0;
+          color:#334155;
+          font-size:.98rem;
+          line-height:1.75;
+          text-align:left;
+        "
+      >
+        Serving customers across both the public and private sectors, Histocenter supports hospitals and medical centres, universities, research institutions, independent laboratories, veterinary services, government agencies, educational institutions, and industrial organisations throughout Malaysia. Beyond supplying scientific technologies, the company focuses on understanding customer requirements, developing appropriate solutions, and providing ongoing technical and after-sales support to help laboratories and institutions achieve reliable and effective outcomes.
+      </p>
+
+    </div>
   </div>
+</div>
+
+  
+  
 
   <div
   class="card sponsor-card"
