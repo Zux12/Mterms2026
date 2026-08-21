@@ -1021,13 +1021,12 @@ function createCardEditor(
 
   <div class="control-row">
 
-    <button
-      type="button"
-      class="btn btn-secondary photo-control-btn"
-      data-photo-action="zoom-out"
-      data-id="${escapeHtml(participant._id)}">
-      − Zoom
-    </button>
+ <button
+  type="button"
+  class="btn btn-secondary photo-control-btn"
+  onclick="changePhotoZoom('${escapeHtml(participant._id)}', -0.05)">
+  − Zoom
+</button>
 
 
     <span
@@ -1037,22 +1036,20 @@ function createCardEditor(
     </span>
 
 
-    <button
-      type="button"
-      class="btn btn-secondary photo-control-btn"
-      data-photo-action="zoom-in"
-      data-id="${escapeHtml(participant._id)}">
-      + Zoom
-    </button>
+<button
+  type="button"
+  class="btn btn-secondary photo-control-btn"
+  onclick="changePhotoZoom('${escapeHtml(participant._id)}', 0.05)">
+  + Zoom
+</button>
 
 
-    <button
-      type="button"
-      class="btn btn-secondary photo-control-btn"
-      data-photo-action="reset"
-      data-id="${escapeHtml(participant._id)}">
-      Reset
-    </button>
+<button
+  type="button"
+  class="btn btn-secondary photo-control-btn"
+  onclick="resetPhotoAdjustment('${escapeHtml(participant._id)}')">
+  Reset
+</button>
 
   </div>
 
@@ -1068,84 +1065,47 @@ function createCardEditor(
    PHOTO ADJUSTMENT CONTROLS
    ========================================================= */
 
-$('cardWorkspace')
-  .addEventListener(
-    'click',
-    event => {
 
-      const button =
-        event.target.closest(
-          '[data-photo-action]'
-        );
+function changePhotoZoom(id, amount){
 
+  const adjustment =
+    getPhotoAdjustment(id);
 
-      if(!button){
-        return;
-      }
+  const currentZoom =
+    Number(adjustment.zoom) || 1;
 
+  adjustment.zoom =
+    Math.min(
+      2.5,
+      Math.max(
+        0.5,
+        currentZoom + amount
+      )
+    );
 
-      const id =
-        button.dataset.id;
+  savePhotoAdjustments();
 
-      const action =
-        button.dataset.photoAction;
+  applyPhotoAdjustment(id);
 
-
-      if(!id){
-        return;
-      }
+}
 
 
-      const adjustment =
-        getPhotoAdjustment(id);
+function resetPhotoAdjustment(id){
+
+  const adjustment =
+    getPhotoAdjustment(id);
+
+  adjustment.x = 0;
+  adjustment.y = 0;
+  adjustment.zoom = 1;
+
+  savePhotoAdjustments();
+
+  applyPhotoAdjustment(id);
+
+}
 
 
-      if(
-        action ===
-        'zoom-in'
-      ){
-
-        adjustment.zoom =
-          Math.min(
-            2.5,
-            adjustment.zoom + 0.05
-          );
-
-      }
-
-
-      if(
-        action ===
-        'zoom-out'
-      ){
-
-        adjustment.zoom =
-          Math.max(
-            0.5,
-            adjustment.zoom - 0.05
-          );
-
-      }
-
-
-      if(
-        action ===
-        'reset'
-      ){
-
-        adjustment.x = 0;
-        adjustment.y = 0;
-        adjustment.zoom = 1;
-
-      }
-
-
-      savePhotoAdjustments();
-
-      applyPhotoAdjustment(id);
-
-    }
-  );
 
 $('cardWorkspace')
   .addEventListener(
