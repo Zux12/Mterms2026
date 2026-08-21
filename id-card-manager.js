@@ -8,10 +8,141 @@ const ADMIN_KEY =
 let allParticipants = [];
 let filteredParticipants = [];
 let selectedParticipants = new Map();
+let participantPhotoUrls = new Map();
+
+const PHOTO_ADJUSTMENT_KEY =
+  'mterms-id-card-photo-adjustments';
+
+let photoAdjustments = loadSavedPhotoAdjustments();
+
+let activePhotoDrag = null;
 
 
 const $ = id =>
   document.getElementById(id);
+
+function loadSavedPhotoAdjustments(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        PHOTO_ADJUSTMENT_KEY
+      );
+
+    if(!raw){
+      return {};
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    return parsed &&
+      typeof parsed === 'object'
+        ? parsed
+        : {};
+
+  }catch(error){
+
+    console.warn(
+      'Could not load saved photo adjustments.',
+      error
+    );
+
+    return {};
+
+  }
+
+}
+
+
+function savePhotoAdjustments(){
+
+  try{
+
+    localStorage.setItem(
+      PHOTO_ADJUSTMENT_KEY,
+      JSON.stringify(
+        photoAdjustments
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      'Could not save photo adjustments.',
+      error
+    );
+
+  }
+
+}
+
+
+function getPhotoAdjustment(id){
+
+  if(
+    !photoAdjustments[id]
+  ){
+
+    photoAdjustments[id] = {
+      x:0,
+      y:0,
+      zoom:1
+    };
+
+  }
+
+  return photoAdjustments[id];
+
+}
+
+
+
+function applyPhotoAdjustment(id){
+
+  const adjustment =
+    getPhotoAdjustment(id);
+
+
+  const images =
+    document.querySelectorAll(
+      `[data-adjusted-photo="${CSS.escape(id)}"]`
+    );
+
+
+  images.forEach(
+    image => {
+
+      image.style.transform =
+        `translate(
+          calc(-50% + ${adjustment.x}px),
+          calc(-50% + ${adjustment.y}px)
+        )
+        scale(${adjustment.zoom})`;
+
+    }
+  );
+
+
+  const zoomLabels =
+    document.querySelectorAll(
+      `[data-zoom-label="${CSS.escape(id)}"]`
+    );
+
+
+  zoomLabels.forEach(
+    label => {
+
+      label.textContent =
+        `${Math.round(
+          adjustment.zoom * 100
+        )}%`;
+
+    }
+  );
+
+}
 
 
 function authHeader(){
@@ -675,15 +806,24 @@ async function loadParticipantPhoto(
       `${API}${latest.downloadUrl}`;
 
 
-    frame.innerHTML =
-      `
-        <img
-          class="id-card-photo"
-          src="${escapeHtml(photoUrl)}"
-          alt="${escapeHtml(fullName(participant))}"
-          draggable="false"
-          data-photo-id="${escapeHtml(id)}">
-      `;
+    participantPhotoUrls.set(
+  id,
+  photoUrl
+);
+
+
+frame.innerHTML =
+  `
+    <img
+      class="id-card-photo"
+      src="${escapeHtml(photoUrl)}"
+      alt="${escapeHtml(fullName(participant))}"
+      draggable="false"
+      data-photo-id="${escapeHtml(id)}"
+      data-adjusted-photo="${escapeHtml(id)}">
+  `;
+
+  applyPhotoAdjustment(id);
 
 
   }catch(error){
@@ -705,8 +845,8 @@ async function loadParticipantPhoto(
   }
 
 }
-function renderCardWorkspace(){
-
+async function renderCardWorkspace(){
+  
   const selected =
     [
       ...selectedParticipants
@@ -751,19 +891,18 @@ function renderCardWorkspace(){
 
 
   /* 2. Now load each participant's latest photo */
-  selected.forEach(
-    participant => {
-
+await Promise.all(
+  selected.map(
+    participant =>
       loadParticipantPhoto(
         participant
-      );
+      )
+  )
+);
 
-    }
-  );
 
-
-  /* 3. Build the A4 preview */
-  renderA4Pages();
+/* 3. Build the A4 preview */
+renderA4Pages();
 
 }
 
@@ -871,14 +1010,53 @@ function createCardEditor(
       </div>
 
 
-      <div class="photo-controls">
+<div
+  class="photo-controls"
+  data-controls-id="${escapeHtml(participant._id)}">
 
-        <div class="photo-instruction">
-          Photo adjustment controls
-          will appear here.
-        </div>
+  <div class="photo-instruction">
+    Drag the photo directly inside the frame to reposition it.
+  </div>
 
-      </div>
+
+  <div class="control-row">
+
+    <button
+      type="button"
+      class="btn btn-secondary photo-control-btn"
+      data-photo-action="zoom-out"
+      data-id="${escapeHtml(participant._id)}">
+      − Zoom
+    </button>
+
+
+    <span
+      class="zoom-value"
+      data-zoom-label="${escapeHtml(participant._id)}">
+      100%
+    </span>
+
+
+    <button
+      type="button"
+      class="btn btn-secondary photo-control-btn"
+      data-photo-action="zoom-in"
+      data-id="${escapeHtml(participant._id)}">
+      + Zoom
+    </button>
+
+
+    <button
+      type="button"
+      class="btn btn-secondary photo-control-btn"
+      data-photo-action="reset"
+      data-id="${escapeHtml(participant._id)}">
+      Reset
+    </button>
+
+  </div>
+
+</div>
 
     </div>
   `;
@@ -887,8 +1065,367 @@ function createCardEditor(
 
 
 /* =========================================================
+   PHOTO ADJUSTMENT CONTROLS
+   ========================================================= */
+
+$('cardWorkspace')
+  .addEventListener(
+    'click',
+    event => {
+
+      const button =
+        event.target.closest(
+          '[data-photo-action]'
+        );
+
+
+      if(!button){
+        return;
+      }
+
+
+      const id =
+        button.dataset.id;
+
+      const action =
+        button.dataset.photoAction;
+
+
+      if(!id){
+        return;
+      }
+
+
+      const adjustment =
+        getPhotoAdjustment(id);
+
+
+      if(
+        action ===
+        'zoom-in'
+      ){
+
+        adjustment.zoom =
+          Math.min(
+            2.5,
+            adjustment.zoom + 0.05
+          );
+
+      }
+
+
+      if(
+        action ===
+        'zoom-out'
+      ){
+
+        adjustment.zoom =
+          Math.max(
+            1,
+            adjustment.zoom - 0.05
+          );
+
+      }
+
+
+      if(
+        action ===
+        'reset'
+      ){
+
+        adjustment.x = 0;
+        adjustment.y = 0;
+        adjustment.zoom = 1;
+
+      }
+
+
+      savePhotoAdjustments();
+
+      applyPhotoAdjustment(id);
+
+    }
+  );
+
+$('cardWorkspace')
+  .addEventListener(
+    'pointerdown',
+    event => {
+
+      const frame =
+        event.target.closest(
+          '.id-card-photo-frame'
+        );
+
+
+      if(!frame){
+        return;
+      }
+
+
+      const image =
+        frame.querySelector(
+          '.id-card-photo'
+        );
+
+
+      if(!image){
+        return;
+      }
+
+
+      const id =
+        image.dataset.photoId;
+
+
+      if(!id){
+        return;
+      }
+
+
+      event.preventDefault();
+
+
+      const adjustment =
+        getPhotoAdjustment(id);
+
+
+      activePhotoDrag = {
+
+        id,
+
+        startPointerX:
+          event.clientX,
+
+        startPointerY:
+          event.clientY,
+
+        startImageX:
+          adjustment.x,
+
+        startImageY:
+          adjustment.y
+
+      };
+
+
+      frame.classList.add(
+        'dragging'
+      );
+
+
+      if(
+        frame.setPointerCapture
+      ){
+
+        try{
+
+          frame.setPointerCapture(
+            event.pointerId
+          );
+
+        }catch(error){
+          // Safari may ignore this.
+        }
+
+      }
+
+    }
+  );
+
+document.addEventListener(
+  'pointermove',
+  event => {
+
+    if(
+      !activePhotoDrag
+    ){
+      return;
+    }
+
+
+    const id =
+      activePhotoDrag.id;
+
+
+    const adjustment =
+      getPhotoAdjustment(id);
+
+
+    adjustment.x =
+      activePhotoDrag.startImageX +
+      (
+        event.clientX -
+        activePhotoDrag.startPointerX
+      );
+
+
+    adjustment.y =
+      activePhotoDrag.startImageY +
+      (
+        event.clientY -
+        activePhotoDrag.startPointerY
+      );
+
+
+    applyPhotoAdjustment(id);
+
+  }
+);
+
+document.addEventListener(
+  'pointerup',
+  () => {
+
+    if(
+      !activePhotoDrag
+    ){
+      return;
+    }
+
+
+    savePhotoAdjustments();
+
+
+    document
+      .querySelectorAll(
+        '.id-card-photo-frame.dragging'
+      )
+      .forEach(
+        frame =>
+          frame.classList.remove(
+            'dragging'
+          )
+      );
+
+
+    activePhotoDrag =
+      null;
+
+  }
+);
+
+/* =========================================================
    A4 PLACEHOLDER
    ========================================================= */
+
+function createPrintableCard(
+  participant
+){
+
+  const id =
+    String(
+      participant._id
+    );
+
+
+  const name =
+    fullName(
+      participant
+    );
+
+
+  const affiliation =
+    participant
+      ?.professional
+      ?.affiliation ||
+    participant
+      ?.student
+      ?.university ||
+    '';
+
+
+  const category =
+    participant.category ||
+    'Participant';
+
+
+  const photoUrl =
+    participantPhotoUrls
+      .get(id);
+
+
+  const photoHtml =
+    photoUrl
+      ? `
+          <img
+            class="id-card-photo"
+            src="${escapeHtml(photoUrl)}"
+            alt="${escapeHtml(name)}"
+            draggable="false"
+            data-adjusted-photo="${escapeHtml(id)}">
+        `
+      : `
+          <div class="photo-loading">
+            No photo
+          </div>
+        `;
+
+
+  return `
+    <div class="id-card">
+
+      <div class="id-card-branding">
+
+        <img
+          class="id-card-mterms"
+          src="public/mterm.jpg"
+          alt="MTERMS">
+
+
+        <div class="id-card-orgs">
+
+          <img
+            src="public/uitm.png"
+            alt="UiTM">
+
+          <img
+            src="public/tesma.png"
+            alt="TESMA">
+
+        </div>
+
+      </div>
+
+
+      <div class="id-card-photo-frame">
+
+        ${photoHtml}
+
+      </div>
+
+
+      <div class="id-card-info">
+
+        <div class="id-card-name">
+          ${escapeHtml(name)}
+        </div>
+
+
+        <div class="id-card-affiliation">
+          ${escapeHtml(
+            affiliation
+          )}
+        </div>
+
+
+        <div class="id-card-category">
+          ${escapeHtml(
+            category.toUpperCase()
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="id-card-footer">
+        MTERMS 2026
+      </div>
+
+    </div>
+  `;
+
+}
 
 function renderA4Pages(){
 
@@ -900,6 +1437,7 @@ function renderA4Pages(){
 
 
   const pages = [];
+
 
   for(
     let index = 0;
@@ -920,13 +1458,12 @@ function renderA4Pages(){
   $('a4Pages').innerHTML =
     pages
       .map(
-        (pageRows,pageIndex) =>
-          `
+        (pageRows,pageIndex) => {
+
+          return `
             <div
               class="a4-page"
-              data-page="${
-                pageIndex + 1
-              }">
+              data-page="${pageIndex + 1}">
 
               ${pageRows
                 .map(
@@ -935,25 +1472,9 @@ function renderA4Pages(){
                       <div
                         class="print-card-slot">
 
-                        <div
-                          style="
-                            width:100%;
-                            height:100%;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            text-align:center;
-                            font-size:12px;
-                            color:#667085;
-                          ">
-
-                          ${escapeHtml(
-                            fullName(
-                              participant
-                            )
-                          )}
-
-                        </div>
+                        ${createPrintableCard(
+                          participant
+                        )}
 
                       </div>
                     `
@@ -961,9 +1482,24 @@ function renderA4Pages(){
                 .join('')}
 
             </div>
-          `
+          `;
+
+        }
       )
       .join('');
+
+
+  selected.forEach(
+    participant => {
+
+      applyPhotoAdjustment(
+        String(
+          participant._id
+        )
+      );
+
+    }
+  );
 
 
   updateSummary();
