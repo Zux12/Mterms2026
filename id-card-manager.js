@@ -49,6 +49,23 @@ function fullName(doc){
     .trim();
 }
 
+function hasProfilePhoto(participant){
+
+  const uploads =
+    Array.isArray(
+      participant?.uploads
+    )
+      ? participant.uploads
+      : [];
+
+
+  return uploads.some(
+    upload =>
+      upload?.type ===
+      'profilePhoto'
+  );
+
+}
 
 /* =========================================================
    LOAD ALL PARTICIPANTS
@@ -235,6 +252,9 @@ function applyFilters(){
     $('paymentFilter')
       .value;
 
+  const photoStatus =
+  $('photoFilter')
+    .value;
 
   filteredParticipants =
     allParticipants.filter(
@@ -280,12 +300,33 @@ function applyFilters(){
           paymentStatus ===
             payment;
 
+        const participantHasPhoto =
+  hasProfilePhoto(
+    participant
+  );
+
+
+const matchPhoto =
+  !photoStatus ||
+
+  (
+    photoStatus ===
+      'uploaded' &&
+    participantHasPhoto
+  ) ||
+
+  (
+    photoStatus ===
+      'missing' &&
+    !participantHasPhoto
+  );
 
         return (
-          matchSearch &&
-          matchCategory &&
-          matchPayment
-        );
+  matchSearch &&
+  matchCategory &&
+  matchPayment &&
+  matchPhoto
+);
 
       }
     );
@@ -335,9 +376,26 @@ function renderParticipantList(){
             selectedParticipants
               .has(id);
 
+          const photoUploaded =
+  hasProfilePhoto(
+    participant
+  );
+
+
+const photoClass =
+  photoUploaded
+    ? 'photo-uploaded'
+    : 'photo-missing';
+
+
+const photoStatusText =
+  photoUploaded
+    ? '✓ Photo Uploaded'
+    : 'No Photo';
+
 
           return `
-            <label class="participant-item">
+            <label class="participant-item ${photoClass}">
 
               <input
                 type="checkbox"
@@ -376,6 +434,17 @@ function renderParticipantList(){
                     ''
                   )}
                 </div>
+
+                <div
+  class="photo-status-badge ${
+    photoUploaded
+      ? 'uploaded'
+      : 'missing'
+  }">
+
+  ${photoStatusText}
+
+</div>
 
               </div>
 
@@ -1014,6 +1083,11 @@ $('paymentFilter')
     applyFilters
   );
 
+$('photoFilter')
+  .addEventListener(
+    'change',
+    applyFilters
+  );
 
 $('previewPrintBtn')
   .addEventListener(
