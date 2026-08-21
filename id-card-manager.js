@@ -455,6 +455,187 @@ $('participantList')
    CARD WORKSPACE
    ========================================================= */
 
+function pickLatestPhoto(rows){
+
+  if(
+    !Array.isArray(rows) ||
+    rows.length === 0
+  ){
+    return null;
+  }
+
+
+  return rows
+    .slice()
+    .sort(
+      (a,b) => {
+
+        const versionA =
+          Number(a.version) || 0;
+
+        const versionB =
+          Number(b.version) || 0;
+
+
+        if(
+          versionB !== versionA
+        ){
+          return versionB - versionA;
+        }
+
+
+        const timeA =
+          new Date(
+            a.uploadedAt || 0
+          ).getTime();
+
+
+        const timeB =
+          new Date(
+            b.uploadedAt || 0
+          ).getTime();
+
+
+        return timeB - timeA;
+
+      }
+    )[0];
+
+}
+
+async function loadParticipantPhoto(
+  participant
+){
+
+  const id =
+    String(
+      participant._id
+    );
+
+
+  const frame =
+    document.querySelector(
+      `[data-photo-frame="${CSS.escape(id)}"]`
+    );
+
+
+  if(!frame){
+    return;
+  }
+
+
+  const regCode =
+    participant.regCode || '';
+
+
+  const email =
+    participant
+      ?.personal
+      ?.email || '';
+
+
+  if(
+    !regCode ||
+    !email
+  ){
+
+    frame.innerHTML =
+      `
+        <div class="photo-loading">
+          No registration code or email.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/api/uploads/history?regCode=${encodeURIComponent(regCode)}&email=${encodeURIComponent(email)}&type=profilePhoto`,
+        {
+          cache:'no-store'
+        }
+      );
+
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        `HTTP ${response.status}`
+      );
+
+    }
+
+
+    const rows =
+      Array.isArray(data.rows)
+        ? data.rows
+        : [];
+
+
+    const latest =
+      pickLatestPhoto(rows);
+
+
+    if(!latest){
+
+      frame.innerHTML =
+        `
+          <div class="photo-loading">
+            No photo uploaded
+          </div>
+        `;
+
+      return;
+
+    }
+
+
+    const photoUrl =
+      `${API}${latest.downloadUrl}`;
+
+
+    frame.innerHTML =
+      `
+        <img
+          class="id-card-photo"
+          src="${escapeHtml(photoUrl)}"
+          alt="${escapeHtml(fullName(participant))}"
+          draggable="false"
+          data-photo-id="${escapeHtml(id)}">
+      `;
+
+
+  }catch(error){
+
+    console.error(
+      'Photo load failed:',
+      participant.regCode,
+      error
+    );
+
+
+    frame.innerHTML =
+      `
+        <div class="photo-loading photo-error">
+          Photo failed to load
+        </div>
+      `;
+
+  }
+
+}
 function renderCardWorkspace(){
 
   const selected =
@@ -488,6 +669,7 @@ function renderCardWorkspace(){
   }
 
 
+  /* 1. Create the ID cards first */
   $('cardWorkspace').innerHTML =
     selected
       .map(
@@ -499,10 +681,22 @@ function renderCardWorkspace(){
       .join('');
 
 
+  /* 2. Now load each participant's latest photo */
+  selected.forEach(
+    participant => {
+
+      loadParticipantPhoto(
+        participant
+      );
+
+    }
+  );
+
+
+  /* 3. Build the A4 preview */
   renderA4Pages();
 
 }
-
 
 function createCardEditor(
   participant
@@ -566,25 +760,17 @@ function createCardEditor(
         </div>
 
 
-        <div
-          class="id-card-photo-frame">
+<div
+  class="id-card-photo-frame"
+  data-photo-frame="${escapeHtml(participant._id)}">
 
-          <div
-            style="
-              width:100%;
-              height:100%;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              text-align:center;
-              color:#98a2b3;
-              font-size:10px;
-              padding:10px;
-            ">
-            Loading photo...
-          </div>
+  <div
+    class="photo-loading"
+    data-photo-loading="${escapeHtml(participant._id)}">
+    Loading photo...
+  </div>
 
-        </div>
+</div>
 
 
         <div class="id-card-info">
