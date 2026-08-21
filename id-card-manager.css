@@ -609,6 +609,10 @@ select:focus{
   cursor:grabbing;
 }
 
+.id-card-photo-frame.dragging{
+  cursor:grabbing;
+  outline:2px solid rgba(14,165,166,.45);
+}
 
 .id-card-photo{
   position:absolute;
@@ -625,6 +629,8 @@ select:focus{
   transform:
     translate(-50%,-50%)
     scale(1);
+
+  transform-origin:center center;
 
   user-select:none;
 
@@ -701,6 +707,20 @@ select:focus{
   margin-top:14px;
 }
 
+.photo-control-btn{
+  padding:7px 10px;
+  font-size:.82rem;
+}
+
+
+.badge-editor .id-card-photo-frame{
+  cursor:grab;
+}
+
+
+.print-card-slot .id-card-photo-frame{
+  cursor:default;
+}
 
 .photo-instruction{
   text-align:center;
