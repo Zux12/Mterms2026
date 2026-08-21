@@ -180,12 +180,12 @@ body{
 
   grid-template-columns:
     minmax(260px,1.5fr)
-    minmax(180px,.8fr)
-    minmax(160px,.7fr)
+    minmax(170px,.8fr)
+    minmax(150px,.7fr)
+    minmax(170px,.8fr)
     auto;
 
   gap:12px;
-
   align-items:end;
 }
 
@@ -351,6 +351,46 @@ select:focus{
   background:#ffffff;
 }
 
+/* Participant has uploaded a profile photo */
+.participant-item.photo-uploaded{
+  background:#f0fdf4;
+  border-color:#86efac;
+}
+
+
+/* Participant has NOT uploaded a profile photo */
+.participant-item.photo-missing{
+  background:#fff7f7;
+  border-color:#fecaca;
+}
+
+.photo-status-badge{
+  display:inline-flex;
+  align-items:center;
+
+  margin-top:7px;
+
+  padding:4px 8px;
+
+  border-radius:999px;
+
+  font-size:.74rem;
+  font-weight:900;
+}
+
+
+.photo-status-badge.uploaded{
+  background:#dcfce7;
+  color:#166534;
+  border:1px solid #86efac;
+}
+
+
+.photo-status-badge.missing{
+  background:#fee2e2;
+  color:#991b1b;
+  border:1px solid #fecaca;
+}
 
 .participant-item:hover{
   background:#f9fafb;
