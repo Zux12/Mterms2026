@@ -1121,7 +1121,7 @@ $('cardWorkspace')
 
         adjustment.zoom =
           Math.max(
-            0.3,
+            0.5,
             adjustment.zoom - 0.05
           );
 
