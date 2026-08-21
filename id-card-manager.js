@@ -788,18 +788,35 @@ async function loadParticipantPhoto(
       pickLatestPhoto(rows);
 
 
-    if(!latest){
+if(!latest){
 
-      frame.innerHTML =
-        `
-          <div class="photo-loading">
-            No photo uploaded
-          </div>
-        `;
+  const defaultPhotoUrl =
+    'public/Person.png';
 
-      return;
 
-    }
+  participantPhotoUrls.set(
+    id,
+    defaultPhotoUrl
+  );
+
+
+  frame.innerHTML =
+    `
+      <img
+        class="id-card-photo"
+        src="${defaultPhotoUrl}"
+        alt="Default participant photo"
+        draggable="false"
+        data-photo-id="${escapeHtml(id)}"
+        data-adjusted-photo="${escapeHtml(id)}">
+    `;
+
+
+  applyPhotoAdjustment(id);
+
+  return;
+
+}
 
 
     const photoUrl =
