@@ -1078,7 +1078,7 @@ function changePhotoZoom(id, amount){
     Math.min(
       2.5,
       Math.max(
-        0.5,
+        0.1,
         currentZoom + amount
       )
     );
