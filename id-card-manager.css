@@ -951,18 +951,35 @@ select:focus{
 
 @media print{
 
+.no-print{
+  display:none !important;
+}
+
+   #printPreviewSection{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+#a4Pages{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+   
   @page{
     size:A4 portrait;
     margin:0;
   }
 
 
-  html,
-  body{
-    width:210mm;
-
-    background:#ffffff;
-  }
+html,
+body{
+  width:210mm !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:#ffffff !important;
+}
 
 
   .no-print,
@@ -971,11 +988,11 @@ select:focus{
   }
 
 
-  .page-shell{
-    width:auto;
-
-    margin:0;
-  }
+.page-shell{
+  width:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+}
 
 
   .print-preview-section{
@@ -988,17 +1005,20 @@ select:focus{
   }
 
 
-  .a4-page{
-    width:210mm;
-    height:297mm;
+.a4-page{
+  width:210mm !important;
+  height:297mm !important;
 
-    margin:0;
+  margin:0 !important;
+  padding:0 !important;
 
-    box-shadow:none;
+  box-shadow:none !important;
 
-    break-after:page;
-    page-break-after:always;
-  }
+  break-after:page;
+  page-break-after:always;
+
+  overflow:hidden;
+}
 
 
   .a4-page:last-child{
