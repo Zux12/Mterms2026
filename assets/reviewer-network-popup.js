@@ -7,13 +7,6 @@
     return new Date().toISOString().slice(0,10);
   }
 
-  function shouldAutoOpen(){
-    const submitted = localStorage.getItem(SUBMITTED_KEY) === '1';
-    if (submitted) return false;
-
-    const lastSeen = localStorage.getItem(STORAGE_KEY);
-    return lastSeen !== todayKey();
-  }
 
   function markSeenToday(){
     localStorage.setItem(STORAGE_KEY, todayKey());
@@ -106,7 +99,7 @@ floatBtn.innerHTML = `
           </div>
 
           <div class="rn-small">
-            This invitation will appear automatically once per day. You may also reopen it anytime using the Reviewer Network icon.
+            You may reopen this invitation anytime using the Reviewer Network icon.
           </div>
         </div>
       </div>
@@ -133,9 +126,7 @@ floatBtn.innerHTML = `
       if (e.key === 'Escape') closePopup();
     });
 
-    if (shouldAutoOpen()) {
-      setTimeout(openPopup, 3800);
-    }
+
   }
 
   if (document.readyState === 'loading') {
