@@ -719,6 +719,12 @@ table thead th{
 
     <!-- Dashboard -->
     <div id="dash" class="no-print" style="display:none">
+
+      <!-- Conference Readiness Dashboard -->
+<div id="adminReadinessMount"></div>
+
+
+      
       <div class="card">
         <div class="row">
           <label>Search (name, email, code)
@@ -1606,9 +1612,6 @@ $('aLogin').addEventListener('click', () => {
 
   loadPage(1);
 
-  setTimeout(() => {
-    document.getElementById('analyticsWelcomeModal').style.display = 'flex';
-}, 600);
 
   
 });
@@ -2801,9 +2804,7 @@ const nav = document.getElementById('adminNav');
 if (nav) nav.style.display = 'block';
 loadPage(1);
 
-setTimeout(() => {
-    document.getElementById('analyticsWelcomeModal').style.display = 'flex';
-}, 600);
+
       }
     })();
   </script>
@@ -2937,94 +2938,133 @@ header.brand-header .admin-tools-menu .btn{
 
 
 
-<!-- ========= MTERMS Analytics Announcement ========= -->
-<div id="analyticsWelcomeModal"
-     style="display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,.45);
-            z-index:99999;
-            align-items:center;
-            justify-content:center;
-            padding:20px;">
 
-  <div style="
-      width:min(720px,95vw);
-      background:#fff;
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:0 25px 70px rgba(0,0,0,.25);
-      border:1px solid #e5e7eb;">
 
-    <div style="
-        background:#0B2A6B;
-        color:#fff;
-        padding:18px 24px;
-        font-size:1.3rem;
-        font-weight:800;">
 
-      📊 New Feature Available
-    </div>
 
-    <div style="padding:24px">
+<script>
+async function loadAdminReadinessDashboard(){
 
-      <h2 style="margin-top:0;color:#0B2A6B">
-        MTERMS 2026 Website Analytics. By Igniteinno Analytics
-      </h2>
+  const mount =
+    document.getElementById(
+      'adminReadinessMount'
+    );
 
-      <p style="line-height:1.7;font-size:15px">
+  if(!mount) return;
 
-        A new Website Analytics dashboard is now available for administrators.
+  try{
 
-        <br><br>
+    const response =
+      await fetch(
+        'admin-readiness-dashboard.html',
+        {
+          cache:'no-store'
+        }
+      );
 
-        You can now monitor:
+    if(!response.ok){
+      throw new Error(
+        'Could not load admin readiness dashboard.'
+      );
+    }
 
-      </p>
+    const html =
+      await response.text();
 
-      <ul style="line-height:1.8">
-        <li>🌍 Visitors by Country</li>
-        <li>📈 Daily Visitor Trends</li>
-        <li>💻 Device, Browser & Operating System</li>
-        <li>📄 Most Visited Pages</li>
-        <li>👥 New vs Returning Visitors</li>
-        <li>🕒 Session Duration & Visitor Journey</li>
-        <li>📊 And Many More Analytics On MTERMS2026</li>
-      </ul>
 
-      <p style="margin-top:18px">
-        The Analytics dashboard can also be accessed anytime from
-        <strong>Admin Tools → Website Analytics</strong>.
-      </p>
+    /*
+     * Insert HTML into temporary container first.
+     * Scripts inserted using innerHTML do not automatically run,
+     * so we handle them separately below.
+     */
 
-      <div style="
-          display:flex;
-          gap:12px;
-          justify-content:flex-end;
-          margin-top:30px;">
+    const temp =
+      document.createElement('div');
 
-        <button
-          onclick="document.getElementById('analyticsWelcomeModal').style.display='none'"
-          class="btn btn-secondary">
-          Maybe Later
-        </button>
+    temp.innerHTML = html;
 
-        <button
-          onclick="window.location.href='analytics-admin.html'"
-          class="btn btn-primary">
-          Open Analytics →
-        </button>
 
+    /*
+     * Extract scripts before adding HTML.
+     */
+
+    const scripts =
+      Array.from(
+        temp.querySelectorAll(
+          'script'
+        )
+      );
+
+
+    scripts.forEach(
+      script =>
+        script.remove()
+    );
+
+
+    mount.innerHTML =
+      temp.innerHTML;
+
+
+    /*
+     * Run scripts from the dashboard file.
+     */
+
+    scripts.forEach(
+      oldScript => {
+
+        const newScript =
+          document.createElement(
+            'script'
+          );
+
+
+        if(oldScript.src){
+
+          newScript.src =
+            oldScript.src;
+
+        }
+        else{
+
+          newScript.textContent =
+            oldScript.textContent;
+
+        }
+
+
+        document.body.appendChild(
+          newScript
+        );
+
+      }
+    );
+
+  }
+  catch(err){
+
+    console.error(
+      'Readiness dashboard load error:',
+      err
+    );
+
+
+    mount.innerHTML = `
+      <div class="card">
+        <span style="color:#b42318;font-weight:700">
+          ❌ Conference Readiness Dashboard could not be loaded.
+        </span>
       </div>
+    `;
 
-    </div>
+  }
 
-  </div>
-</div>  
-
-
+}
 
 
+/* Load dashboard module */
+loadAdminReadinessDashboard();
+</script>
   
 </body>
 </html>
