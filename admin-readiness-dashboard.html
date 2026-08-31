@@ -1,562 +1,1103 @@
 <!-- =========================================================
      MTERMS 2026
-     ADMIN CONFERENCE READINESS DASHBOARD
-     File: admin-readiness-dashboard.html
+     CONFERENCE READINESS DASHBOARD
 
-     HTML + CSS + JS are all contained in this file.
+     File:
+     admin-readiness-dashboard.html
+
+     This is a PARTIAL HTML file loaded into admin.html.
+     HTML + CSS + JavaScript are all contained here.
+
+     REAL DATA DEFINITIONS
+     ---------------------------------------------------------
+     Participants:
+       All registration records.
+
+     Payment Ready:
+       payment.status === "paid"
+
+     Abstract Ready:
+       Presenter has at least one uploaded "abstract" file.
+
+     Panel Review Completed:
+       Presenter review status === "submitted"
+
+     Ignite AI Completed:
+       The LATEST abstract has an Ignite AI assessment
+       matching that exact abstract GridFS ID.
+
+     ID / Photo Ready:
+       Participant has at least one "profilePhoto" upload.
+
+     Oral Ready:
+       Oral presenter has at least one "slides" upload.
+
+     Poster Ready:
+       Poster presenter has at least one "poster" upload.
+
+     Overall Readiness:
+       Average of:
+       Payment
+       Abstract
+       Panel Review
+       Ignite AI
+       ID / Photo
+       Presentation Materials
+
+     Registration itself is NOT included in the overall score.
 ========================================================= -->
+
 
 <style>
 
-  /* =========================================================
-     MAIN READINESS WRAPPER
-  ========================================================= */
+/* =========================================================
+   ROOT
+========================================================= */
 
-  #mtermsReadinessModule{
-    margin-bottom:16px;
-    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  }
-
-
-  /* =========================================================
-     TOGGLE BUTTON
-  ========================================================= */
-
-  .mrd-toggle{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-
-    padding:16px 18px;
-
-    border:1px solid #dbe3ee;
-    border-radius:14px;
-
-    background:#ffffff;
-    color:#0b1115;
-
-    cursor:pointer;
-
-    box-shadow:0 10px 26px rgba(0,0,0,.06);
-
-    transition:
-      transform .18s ease,
-      box-shadow .18s ease,
-      border-color .18s ease;
-  }
-
-  .mrd-toggle:hover{
-    transform:translateY(-1px);
-    box-shadow:0 14px 32px rgba(0,0,0,.09);
-    border-color:#c8d4e3;
-  }
-
-  .mrd-toggle-left{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    text-align:left;
-    gap:3px;
-  }
-
-  .mrd-toggle-title{
-    font-size:1.04rem;
-    font-weight:900;
-    color:#0B2A6B;
-  }
-
-  .mrd-toggle-subtitle{
-    font-size:.88rem;
-    color:#667085;
-    font-weight:500;
-  }
-
-  .mrd-toggle-right{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    flex-shrink:0;
-  }
-
-  .mrd-mini-readiness{
-    display:flex;
-    align-items:center;
-    gap:7px;
-
-    font-size:.92rem;
-    font-weight:800;
-    color:#344054;
-  }
-
-  .mrd-status-dot{
-    width:9px;
-    height:9px;
-    border-radius:50%;
-    background:#16a34a;
-    box-shadow:0 0 0 4px rgba(22,163,74,.12);
-  }
-
-  .mrd-chevron{
-    font-size:18px;
-    transition:transform .25s ease;
-  }
-
-  .mrd-toggle.mrd-open .mrd-chevron{
-    transform:rotate(180deg);
-  }
+#mtermsReadinessModule{
+  width:100%;
+  margin:0 0 16px 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
 
 
-  /* =========================================================
-     EXPANDABLE AREA
-  ========================================================= */
+/* =========================================================
+   TOGGLE BUTTON
+========================================================= */
 
-  .mrd-expand{
-    max-height:0;
-    overflow:hidden;
-    opacity:0;
+.mrd-toggle{
+  width:100%;
 
-    transition:
-      max-height .55s ease,
-      opacity .3s ease,
-      margin-top .3s ease;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
 
-    margin-top:0;
-  }
+  padding:17px 19px;
 
-  .mrd-expand.mrd-open{
-    max-height:5000px;
-    opacity:1;
-    margin-top:12px;
-  }
+  background:#ffffff;
 
+  border:1px solid #dfe5ec;
+  border-radius:14px;
 
-  /* =========================================================
-     DASHBOARD BODY
-  ========================================================= */
+  color:#0b1115;
 
-  .mrd-dashboard{
-    background:#ffffff;
-    border:1px solid #e5e7eb;
-    border-radius:16px;
-    padding:18px;
+  cursor:pointer;
 
-    box-shadow:0 14px 34px rgba(0,0,0,.07);
-  }
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.06);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+}
 
 
-  /* =========================================================
-     HEADER
-  ========================================================= */
+.mrd-toggle:hover{
+  transform:translateY(-1px);
 
-  .mrd-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    flex-wrap:wrap;
+  border-color:#cbd5e1;
 
-    padding-bottom:15px;
-    border-bottom:1px solid #eaecf0;
-  }
-
-  .mrd-header-title{
-    margin:0;
-    font-size:1.3rem;
-    color:#0B2A6B;
-    font-weight:900;
-  }
-
-  .mrd-header-sub{
-    margin:5px 0 0;
-    font-size:.9rem;
-    color:#667085;
-  }
-
-  .mrd-header-actions{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    flex-wrap:wrap;
-  }
-
-  .mrd-refresh{
-    border:none;
-    border-radius:10px;
-    padding:9px 13px;
-
-    background:#0B2A6B;
-    color:#fff;
-
-    font-weight:800;
-    cursor:pointer;
-  }
-
-  .mrd-refresh:hover{
-    filter:brightness(.96);
-  }
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.09);
+}
 
 
-  /* =========================================================
-     KPI SECTION
-  ========================================================= */
+.mrd-toggle-left{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  text-align:left;
+  gap:3px;
+}
+
+
+.mrd-toggle-title{
+  font-size:1.06rem;
+  font-weight:900;
+  letter-spacing:.1px;
+  color:#0B2A6B;
+}
+
+
+.mrd-toggle-subtitle{
+  font-size:.87rem;
+  color:#667085;
+  font-weight:500;
+}
+
+
+.mrd-toggle-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:14px;
+
+  flex-shrink:0;
+}
+
+
+.mrd-mini-readiness{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  font-size:.9rem;
+  font-weight:850;
+
+  color:#344054;
+}
+
+
+.mrd-status-dot{
+  width:9px;
+  height:9px;
+
+  border-radius:50%;
+
+  background:#98a2b3;
+
+  box-shadow:
+    0 0 0 4px rgba(152,162,179,.13);
+
+  transition:
+    background .3s ease,
+    box-shadow .3s ease;
+}
+
+
+.mrd-chevron{
+  display:inline-block;
+
+  font-size:17px;
+  color:#475467;
+
+  transition:
+    transform .28s ease;
+}
+
+
+.mrd-toggle.mrd-open .mrd-chevron{
+  transform:rotate(180deg);
+}
+
+
+/* =========================================================
+   EXPAND / COLLAPSE
+========================================================= */
+
+.mrd-expand{
+  display:grid;
+
+  grid-template-rows:0fr;
+
+  opacity:0;
+
+  margin-top:0;
+
+  transition:
+    grid-template-rows .45s ease,
+    opacity .28s ease,
+    margin-top .3s ease;
+}
+
+
+.mrd-expand > .mrd-expand-inner{
+  overflow:hidden;
+  min-height:0;
+}
+
+
+.mrd-expand.mrd-open{
+  grid-template-rows:1fr;
+
+  opacity:1;
+
+  margin-top:12px;
+}
+
+
+/* =========================================================
+   DASHBOARD BODY
+========================================================= */
+
+.mrd-dashboard{
+  background:#ffffff;
+
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+
+  padding:18px;
+
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.07);
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.mrd-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+
+  flex-wrap:wrap;
+
+  padding-bottom:16px;
+
+  border-bottom:
+    1px solid #eaecf0;
+}
+
+
+.mrd-header-title{
+  margin:0;
+
+  font-size:1.3rem;
+  font-weight:950;
+
+  color:#0B2A6B;
+}
+
+
+.mrd-header-sub{
+  margin-top:5px;
+
+  font-size:.86rem;
+
+  color:#667085;
+}
+
+
+.mrd-header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+
+.mrd-refresh{
+  border:none;
+
+  border-radius:10px;
+
+  padding:9px 14px;
+
+  background:#0B2A6B;
+  color:#ffffff;
+
+  font-size:.88rem;
+  font-weight:850;
+
+  cursor:pointer;
+
+  transition:
+    transform .15s ease,
+    filter .15s ease;
+}
+
+
+.mrd-refresh:hover{
+  transform:translateY(-1px);
+  filter:brightness(.96);
+}
+
+
+.mrd-refresh:disabled{
+  cursor:not-allowed;
+  opacity:.7 !important;
+}
+
+
+/* =========================================================
+   DATA NOTICE / ERROR
+========================================================= */
+
+.mrd-system-message{
+  display:none;
+
+  margin-top:14px;
+
+  padding:11px 13px;
+
+  border-radius:10px;
+
+  font-size:.86rem;
+  line-height:1.5;
+}
+
+
+.mrd-system-message.mrd-error{
+  display:block;
+
+  background:#fff5f5;
+
+  border:1px solid #fecaca;
+
+  color:#991b1b;
+}
+
+
+.mrd-system-message.mrd-info{
+  display:block;
+
+  background:#f8fbff;
+
+  border:1px solid #dbeafe;
+
+  color:#344054;
+}
+
+
+/* =========================================================
+   KPI CARDS
+========================================================= */
+
+.mrd-kpis{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,minmax(0,1fr));
+
+  gap:12px;
+
+  margin-top:18px;
+}
+
+
+.mrd-kpi{
+  position:relative;
+
+  min-height:145px;
+
+  padding:16px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(11,42,107,.025),
+      rgba(14,165,166,.025)
+    );
+
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+
+  overflow:hidden;
+}
+
+
+.mrd-kpi::before{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  top:0;
+  bottom:0;
+
+  width:4px;
+
+  background:#0EA5A6;
+
+  opacity:.8;
+}
+
+
+.mrd-kpi-value{
+  font-size:2rem;
+
+  line-height:1;
+
+  font-weight:950;
+
+  color:#0B2A6B;
+}
+
+
+.mrd-kpi-count{
+  margin-top:9px;
+
+  font-size:.93rem;
+
+  font-weight:850;
+
+  color:#344054;
+}
+
+
+.mrd-kpi-label{
+  margin-top:8px;
+
+  font-size:.85rem;
+
+  color:#667085;
+
+  font-weight:700;
+}
+
+
+/* =========================================================
+   MAIN VISUAL GRID
+========================================================= */
+
+.mrd-main-grid{
+  display:grid;
+
+  grid-template-columns:
+    320px minmax(0,1fr);
+
+  gap:16px;
+
+  margin-top:16px;
+}
+
+
+.mrd-panel{
+  background:#ffffff;
+
+  border:1px solid #e5e7eb;
+
+  border-radius:14px;
+
+  padding:16px;
+}
+
+
+.mrd-panel-title{
+  font-size:1rem;
+
+  font-weight:900;
+
+  color:#101828;
+
+  margin-bottom:4px;
+}
+
+
+.mrd-panel-sub{
+  font-size:.81rem;
+
+  color:#667085;
+
+  margin-bottom:15px;
+
+  line-height:1.45;
+}
+
+
+/* =========================================================
+   OVERALL READINESS RING
+========================================================= */
+
+.mrd-ring-wrap{
+  min-height:270px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+
+
+.mrd-ring{
+  --percentage:0;
+
+  width:190px;
+  height:190px;
+
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  background:
+    conic-gradient(
+      #0EA5A6 calc(var(--percentage) * 1%),
+      #eef2f6 0
+    );
+
+  transition:
+    background .5s ease;
+}
+
+
+.mrd-ring::after{
+  content:"";
+
+  position:absolute;
+
+  width:142px;
+  height:142px;
+
+  border-radius:50%;
+
+  background:#ffffff;
+
+  box-shadow:
+    inset 0 0 0 1px #f2f4f7;
+}
+
+
+.mrd-ring-value{
+  position:relative;
+
+  z-index:2;
+
+  text-align:center;
+}
+
+
+.mrd-ring-percent{
+  font-size:2rem;
+
+  line-height:1;
+
+  font-weight:950;
+
+  color:#0B2A6B;
+}
+
+
+.mrd-ring-label{
+  margin-top:7px;
+
+  font-size:.75rem;
+
+  letter-spacing:.08em;
+
+  color:#667085;
+
+  font-weight:850;
+}
+
+
+.mrd-ring-note{
+  margin-top:15px;
+
+  max-width:245px;
+
+  text-align:center;
+
+  font-size:.76rem;
+  line-height:1.45;
+
+  color:#667085;
+}
+
+
+/* =========================================================
+   READINESS BY AREA
+========================================================= */
+
+.mrd-bars{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+
+  padding-top:4px;
+}
+
+
+.mrd-bar-row{
+  display:grid;
+
+  grid-template-columns:
+    125px minmax(0,1fr) 118px;
+
+  align-items:center;
+
+  gap:11px;
+}
+
+
+.mrd-bar-label{
+  font-size:.84rem;
+
+  font-weight:800;
+
+  color:#344054;
+}
+
+
+.mrd-bar-track{
+  position:relative;
+
+  height:12px;
+
+  background:#eef2f6;
+
+  border-radius:999px;
+
+  overflow:hidden;
+}
+
+
+.mrd-bar-fill{
+  width:0%;
+  height:100%;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #0B2A6B,
+      #0EA5A6
+    );
+
+  transition:
+    width .75s ease;
+}
+
+
+.mrd-bar-value{
+  text-align:right;
+
+  font-size:.81rem;
+
+  font-weight:850;
+
+  color:#344054;
+
+  white-space:nowrap;
+}
+
+
+.mrd-bar-value span{
+  color:#667085;
+
+  font-weight:700;
+}
+
+
+/* =========================================================
+   PRESENTATION READINESS
+========================================================= */
+
+.mrd-presentation{
+  margin-top:16px;
+}
+
+
+.mrd-presentation-summary{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+
+  gap:12px;
+
+  margin-bottom:16px;
+}
+
+
+.mrd-pres-stat{
+  border:1px solid #e5e7eb;
+
+  border-radius:12px;
+
+  padding:13px;
+
+  text-align:center;
+
+  background:#fafbfc;
+}
+
+
+.mrd-pres-stat-value{
+  font-size:1.45rem;
+
+  font-weight:950;
+
+  color:#0B2A6B;
+}
+
+
+.mrd-pres-stat-label{
+  margin-top:4px;
+
+  font-size:.78rem;
+
+  color:#667085;
+
+  font-weight:700;
+}
+
+
+.mrd-presentation-table{
+  width:100%;
+
+  border-collapse:collapse;
+
+  font-size:.88rem;
+}
+
+
+.mrd-presentation-table thead th{
+  background:#f8fafc !important;
+
+  color:#344054 !important;
+
+  font-weight:850 !important;
+}
+
+
+.mrd-presentation-table th,
+.mrd-presentation-table td{
+  padding:10px;
+
+  border-bottom:
+    1px solid #eaecf0;
+
+  text-align:center;
+}
+
+
+.mrd-presentation-table th:first-child,
+.mrd-presentation-table td:first-child{
+  text-align:left;
+}
+
+
+.mrd-ready-text{
+  color:#15803d;
+
+  font-weight:900;
+}
+
+
+.mrd-pending-text{
+  color:#b45309;
+
+  font-weight:900;
+}
+
+
+/* Presentation mini bars */
+
+.mrd-presentation-bars{
+  margin-top:18px;
+
+  display:grid;
+  gap:12px;
+}
+
+
+.mrd-pres-bar-row{
+  display:grid;
+
+  grid-template-columns:
+    85px minmax(0,1fr) 110px;
+
+  gap:10px;
+
+  align-items:center;
+}
+
+
+.mrd-pres-bar-label{
+  font-size:.83rem;
+
+  font-weight:850;
+
+  color:#344054;
+}
+
+
+.mrd-pres-track{
+  display:flex;
+
+  height:14px;
+
+  background:#eef2f6;
+
+  border-radius:999px;
+
+  overflow:hidden;
+}
+
+
+.mrd-pres-ready-fill{
+  width:0%;
+
+  height:100%;
+
+  background:#16a34a;
+
+  transition:width .7s ease;
+}
+
+
+.mrd-pres-pending-fill{
+  width:0%;
+
+  height:100%;
+
+  background:#f59e0b;
+
+  transition:width .7s ease;
+}
+
+
+.mrd-pres-bar-number{
+  text-align:right;
+
+  font-size:.79rem;
+
+  color:#667085;
+
+  font-weight:750;
+}
+
+
+/* =========================================================
+   DEFINITION BOX
+========================================================= */
+
+.mrd-definition{
+  margin-top:16px;
+
+  padding:12px 14px;
+
+  background:#f8fbff;
+
+  border:1px solid #dbeafe;
+
+  border-radius:10px;
+
+  font-size:.81rem;
+
+  line-height:1.65;
+
+  color:#475467;
+}
+
+
+.mrd-definition strong{
+  color:#101828;
+}
+
+
+/* =========================================================
+   ATTENTION REQUIRED
+========================================================= */
+
+.mrd-attention{
+  margin-top:16px;
+}
+
+
+.mrd-alert-list{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:10px;
+}
+
+
+.mrd-alert{
+  min-height:64px;
+
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+
+  padding:12px 13px;
+
+  background:#fffaf3;
+
+  border:1px solid #fed7aa;
+
+  border-radius:11px;
+}
+
+
+.mrd-alert.mrd-alert-clear{
+  background:#f6fef9;
+
+  border-color:#bbf7d0;
+}
+
+
+.mrd-alert-icon{
+  font-size:17px;
+
+  line-height:1.2;
+}
+
+
+.mrd-alert-number{
+  margin-right:4px;
+
+  color:#9a3412;
+
+  font-weight:950;
+}
+
+
+.mrd-alert-clear .mrd-alert-number{
+  color:#15803d;
+}
+
+
+.mrd-alert-text{
+  font-size:.84rem;
+
+  line-height:1.45;
+
+  color:#475467;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.mrd-footer{
+  margin-top:16px;
+
+  padding-top:13px;
+
+  border-top:1px solid #eaecf0;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  font-size:.75rem;
+
+  color:#98a2b3;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:1000px){
 
   .mrd-kpis{
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:12px;
-
-    margin-top:18px;
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
   }
 
-  .mrd-kpi{
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-
-    padding:16px;
-
-    min-height:145px;
-
-    background:
-      linear-gradient(
-        180deg,
-        rgba(11,42,107,.025),
-        rgba(14,165,166,.025)
-      );
-
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-  }
-
-  .mrd-kpi-value{
-    font-size:2rem;
-    line-height:1;
-    font-weight:950;
-    color:#0B2A6B;
-  }
-
-  .mrd-kpi-count{
-    margin-top:8px;
-    font-size:.95rem;
-    font-weight:800;
-    color:#344054;
-  }
-
-  .mrd-kpi-label{
-    margin-top:8px;
-    font-size:.88rem;
-    color:#667085;
-    font-weight:700;
-  }
-
-
-  /* =========================================================
-     MAIN READINESS VISUALS
-  ========================================================= */
 
   .mrd-main-grid{
-    display:grid;
-    grid-template-columns:320px minmax(0,1fr);
-    gap:16px;
-
-    margin-top:16px;
+    grid-template-columns:1fr;
   }
 
-  .mrd-panel{
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-    padding:16px;
-    background:#fff;
-  }
+}
 
-  .mrd-panel-title{
-    font-size:1rem;
-    font-weight:900;
-    color:#101828;
-    margin-bottom:4px;
-  }
 
-  .mrd-panel-sub{
-    font-size:.82rem;
-    color:#667085;
-    margin-bottom:15px;
+@media(max-width:760px){
+
+  .mrd-alert-list{
+    grid-template-columns:1fr;
   }
 
 
-  /* =========================================================
-     READINESS RING
-  ========================================================= */
-
-  .mrd-ring-wrap{
-    min-height:270px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
+  .mrd-presentation-summary{
+    grid-template-columns:1fr;
   }
 
-  .mrd-ring{
-    --percentage:0;
-
-    width:190px;
-    height:190px;
-    border-radius:50%;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    position:relative;
-
-    background:
-      conic-gradient(
-        #0EA5A6 calc(var(--percentage) * 1%),
-        #eef2f6 0
-      );
-  }
-
-  .mrd-ring::after{
-    content:"";
-    position:absolute;
-
-    width:142px;
-    height:142px;
-    border-radius:50%;
-
-    background:#fff;
-  }
-
-  .mrd-ring-value{
-    position:relative;
-    z-index:2;
-
-    text-align:center;
-  }
-
-  .mrd-ring-percent{
-    font-size:2rem;
-    font-weight:950;
-    color:#0B2A6B;
-  }
-
-  .mrd-ring-label{
-    font-size:.77rem;
-    color:#667085;
-    font-weight:700;
-  }
-
-
-  /* =========================================================
-     READINESS BAR CHART
-  ========================================================= */
-
-  .mrd-bars{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-    padding-top:5px;
-  }
 
   .mrd-bar-row{
-    display:grid;
-    grid-template-columns:145px minmax(0,1fr) 55px;
-    align-items:center;
-    gap:10px;
+    grid-template-columns:
+      105px minmax(0,1fr) 100px;
   }
 
-  .mrd-bar-label{
-    font-size:.85rem;
-    font-weight:800;
-    color:#344054;
+
+  .mrd-pres-bar-row{
+    grid-template-columns:
+      75px minmax(0,1fr) 90px;
   }
 
-  .mrd-bar-track{
-    height:12px;
-    background:#eef2f6;
-    border-radius:999px;
-    overflow:hidden;
+}
+
+
+@media(max-width:600px){
+
+  .mrd-kpis{
+    grid-template-columns:1fr;
   }
 
-  .mrd-bar-fill{
-    height:100%;
-    width:0%;
-    border-radius:999px;
 
-    background:
-      linear-gradient(
-        90deg,
-        #0B2A6B,
-        #0EA5A6
-      );
-
-    transition:width .7s ease;
+  .mrd-mini-readiness{
+    display:none;
   }
+
+
+  .mrd-toggle{
+    padding:15px;
+  }
+
+
+  .mrd-dashboard{
+    padding:13px;
+  }
+
+
+  .mrd-bar-row{
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+
 
   .mrd-bar-value{
-    font-size:.82rem;
-    font-weight:900;
-    color:#344054;
-    text-align:right;
-  }
-
-
-  /* =========================================================
-     PRESENTATION READINESS
-  ========================================================= */
-
-  .mrd-presentation{
-    margin-top:16px;
-  }
-
-  .mrd-presentation-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:.9rem;
-  }
-
-  .mrd-presentation-table th,
-  .mrd-presentation-table td{
-    padding:10px;
-    border-bottom:1px solid #eaecf0;
-    text-align:center;
-  }
-
-  .mrd-presentation-table th:first-child,
-  .mrd-presentation-table td:first-child{
     text-align:left;
   }
 
-  .mrd-ready-text{
-    color:#15803d;
-    font-weight:900;
-  }
 
-  .mrd-pending-text{
-    color:#b45309;
-    font-weight:900;
-  }
-
-  .mrd-definition{
-    margin-top:14px;
-
-    border:1px solid #dbeafe;
-    border-radius:10px;
-
-    padding:11px 13px;
-
-    background:#f8fbff;
-
-    font-size:.82rem;
-    line-height:1.6;
-
-    color:#475467;
-  }
-
-  .mrd-definition strong{
-    color:#101828;
+  .mrd-pres-bar-row{
+    grid-template-columns:1fr;
+    gap:6px;
   }
 
 
-  /* =========================================================
-     ATTENTION REQUIRED
-  ========================================================= */
-
-  .mrd-attention{
-    margin-top:16px;
+  .mrd-pres-bar-number{
+    text-align:left;
   }
 
-  .mrd-alert-list{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:10px;
-  }
-
-  .mrd-alert{
-    border:1px solid #fed7aa;
-    background:#fffaf3;
-
-    border-radius:11px;
-
-    padding:12px 13px;
-
-    display:flex;
-    align-items:flex-start;
-    gap:9px;
-  }
-
-  .mrd-alert-icon{
-    font-size:17px;
-  }
-
-  .mrd-alert-number{
-    font-weight:900;
-    color:#9a3412;
-  }
-
-  .mrd-alert-text{
-    font-size:.86rem;
-    color:#475467;
-  }
-
-
-  /* =========================================================
-     LOADING
-  ========================================================= */
-
-  .mrd-loading{
-    padding:24px;
-    text-align:center;
-    color:#667085;
-    font-weight:700;
-  }
-
-
-  /* =========================================================
-     MOBILE
-  ========================================================= */
-
-  @media(max-width:900px){
-
-    .mrd-kpis{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-    }
-
-    .mrd-main-grid{
-      grid-template-columns:1fr;
-    }
-
-    .mrd-alert-list{
-      grid-template-columns:1fr;
-    }
-
-  }
-
-  @media(max-width:600px){
-
-    .mrd-kpis{
-      grid-template-columns:1fr;
-    }
-
-    .mrd-bar-row{
-      grid-template-columns:110px minmax(0,1fr) 45px;
-    }
-
-    .mrd-mini-readiness{
-      display:none;
-    }
-
-  }
+}
 
 </style>
 
 
+
+<!-- =========================================================
+     MODULE
+========================================================= -->
+
 <div id="mtermsReadinessModule">
 
+
   <!-- =====================================================
-       COLLAPSED BUTTON
+       COLLAPSED / EXPANDED BUTTON
   ====================================================== -->
 
   <button
@@ -565,6 +1106,7 @@
     type="button"
     aria-expanded="false">
 
+
     <div class="mrd-toggle-left">
 
       <div class="mrd-toggle-title">
@@ -572,7 +1114,7 @@
       </div>
 
       <div class="mrd-toggle-subtitle">
-        Operational overview of MTERMS 2026 conference readiness
+        Live operational readiness of MTERMS 2026
       </div>
 
     </div>
@@ -582,13 +1124,17 @@
 
       <div class="mrd-mini-readiness">
 
-        <span class="mrd-status-dot"></span>
+        <span
+          id="mrdStatusDot"
+          class="mrd-status-dot">
+        </span>
 
         <span id="mrdCollapsedScore">
           Readiness —
         </span>
 
       </div>
+
 
       <span class="mrd-chevron">
         ▼
@@ -599,672 +1145,2884 @@
   </button>
 
 
+
   <!-- =====================================================
-       EXPANDABLE DASHBOARD
+       EXPANDABLE SECTION
   ====================================================== -->
 
   <div
     id="mrdExpand"
     class="mrd-expand">
 
-    <div class="mrd-dashboard">
+    <div class="mrd-expand-inner">
 
 
-      <!-- HEADER -->
-
-      <div class="mrd-header">
-
-        <div>
-
-          <h2 class="mrd-header-title">
-            MTERMS 2026 Conference Readiness
-          </h2>
-
-          <div
-            id="mrdLastUpdated"
-            class="mrd-header-sub">
-
-            Data not loaded yet.
-
-          </div>
-
-        </div>
+      <div class="mrd-dashboard">
 
 
-        <div class="mrd-header-actions">
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
-          <button
-            id="mrdRefresh"
-            class="mrd-refresh"
-            type="button">
-
-            Refresh Readiness
-
-          </button>
-
-        </div>
-
-      </div>
+        <div class="mrd-header">
 
 
-      <!-- =================================================
-           KPI CARDS
-      ================================================== -->
+          <div>
 
-      <div class="mrd-kpis">
-
-
-        <!-- PARTICIPANTS -->
-
-        <div class="mrd-kpi">
-
-          <div
-            id="mrdParticipantsValue"
-            class="mrd-kpi-value">
-            —
-          </div>
-
-          <div
-            id="mrdParticipantsCount"
-            class="mrd-kpi-count">
-            —
-          </div>
-
-          <div class="mrd-kpi-label">
-            Registered Participants
-          </div>
-
-        </div>
-
-
-        <!-- PAYMENT -->
-
-        <div class="mrd-kpi">
-
-          <div
-            id="mrdPaymentValue"
-            class="mrd-kpi-value">
-            —
-          </div>
-
-          <div
-            id="mrdPaymentCount"
-            class="mrd-kpi-count">
-            —
-          </div>
-
-          <div class="mrd-kpi-label">
-            Payment Ready
-          </div>
-
-        </div>
-
-
-        <!-- REVIEWS -->
-
-        <div class="mrd-kpi">
-
-          <div
-            id="mrdReviewValue"
-            class="mrd-kpi-value">
-            —
-          </div>
-
-          <div
-            id="mrdReviewCount"
-            class="mrd-kpi-count">
-            —
-          </div>
-
-          <div class="mrd-kpi-label">
-            Panel Reviews Completed
-          </div>
-
-        </div>
-
-
-        <!-- ABSTRACT -->
-
-        <div class="mrd-kpi">
-
-          <div
-            id="mrdAbstractValue"
-            class="mrd-kpi-value">
-            —
-          </div>
-
-          <div
-            id="mrdAbstractCount"
-            class="mrd-kpi-count">
-            —
-          </div>
-
-          <div class="mrd-kpi-label">
-            Abstract Ready
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- =================================================
-           OVERALL + READINESS BY AREA
-      ================================================== -->
-
-      <div class="mrd-main-grid">
-
-
-        <!-- OVERALL RING -->
-
-        <div class="mrd-panel">
-
-          <div class="mrd-panel-title">
-            Overall Conference Readiness
-          </div>
-
-          <div class="mrd-panel-sub">
-            Combined operational readiness score
-          </div>
-
-
-          <div class="mrd-ring-wrap">
+            <h2 class="mrd-header-title">
+              MTERMS 2026 Conference Readiness
+            </h2>
 
             <div
-              id="mrdRing"
-              class="mrd-ring">
+              id="mrdLastUpdated"
+              class="mrd-header-sub">
 
-              <div class="mrd-ring-value">
+              Open the dashboard to load live data.
+
+            </div>
+
+          </div>
+
+
+          <div class="mrd-header-actions">
+
+            <button
+              id="mrdRefresh"
+              class="mrd-refresh"
+              type="button">
+
+              Refresh Readiness
+
+            </button>
+
+          </div>
+
+
+        </div>
+
+
+
+        <div
+          id="mrdSystemMessage"
+          class="mrd-system-message">
+        </div>
+
+
+
+        <!-- =================================================
+             TOP KPI CARDS
+        ================================================== -->
+
+        <div class="mrd-kpis">
+
+
+          <!-- PARTICIPANTS -->
+
+          <div class="mrd-kpi">
+
+            <div
+              id="mrdParticipantsValue"
+              class="mrd-kpi-value">
+              —
+            </div>
+
+            <div
+              id="mrdParticipantsCount"
+              class="mrd-kpi-count">
+              — / —
+            </div>
+
+            <div class="mrd-kpi-label">
+              Registered Participants
+            </div>
+
+          </div>
+
+
+
+          <!-- PAYMENT -->
+
+          <div class="mrd-kpi">
+
+            <div
+              id="mrdPaymentValue"
+              class="mrd-kpi-value">
+              —
+            </div>
+
+            <div
+              id="mrdPaymentCount"
+              class="mrd-kpi-count">
+              — / —
+            </div>
+
+            <div class="mrd-kpi-label">
+              Payment Ready
+            </div>
+
+          </div>
+
+
+
+          <!-- REVIEW -->
+
+          <div class="mrd-kpi">
+
+            <div
+              id="mrdReviewValue"
+              class="mrd-kpi-value">
+              —
+            </div>
+
+            <div
+              id="mrdReviewCount"
+              class="mrd-kpi-count">
+              — / —
+            </div>
+
+            <div class="mrd-kpi-label">
+              Panel Reviews Completed
+            </div>
+
+          </div>
+
+
+
+          <!-- ABSTRACT -->
+
+          <div class="mrd-kpi">
+
+            <div
+              id="mrdAbstractValue"
+              class="mrd-kpi-value">
+              —
+            </div>
+
+            <div
+              id="mrdAbstractCount"
+              class="mrd-kpi-count">
+              — / —
+            </div>
+
+            <div class="mrd-kpi-label">
+              Abstract Ready
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             OVERALL + AREA READINESS
+        ================================================== -->
+
+        <div class="mrd-main-grid">
+
+
+          <!-- ===============================================
+               OVERALL READINESS
+          ================================================ -->
+
+          <div class="mrd-panel">
+
+            <div class="mrd-panel-title">
+              Overall Conference Readiness
+            </div>
+
+            <div class="mrd-panel-sub">
+              Combined score across active operational readiness areas
+            </div>
+
+
+            <div class="mrd-ring-wrap">
+
+
+              <div
+                id="mrdRing"
+                class="mrd-ring">
+
+
+                <div class="mrd-ring-value">
+
+                  <div
+                    id="mrdRingPercent"
+                    class="mrd-ring-percent">
+                    —
+                  </div>
+
+                  <div class="mrd-ring-label">
+                    READY
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="mrd-ring-note">
+
+                Registration count itself is not used to artificially
+                increase the overall readiness percentage.
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+
+          <!-- ===============================================
+               READINESS BY AREA
+          ================================================ -->
+
+          <div class="mrd-panel">
+
+            <div class="mrd-panel-title">
+              Readiness by Area
+            </div>
+
+            <div class="mrd-panel-sub">
+              Live completion level and actual number completed
+            </div>
+
+
+            <div class="mrd-bars">
+
+
+              <!-- REGISTRATION -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Registration
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarRegistration"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
 
                 <div
-                  id="mrdRingPercent"
-                  class="mrd-ring-percent">
+                  id="mrdBarRegistrationValue"
+                  class="mrd-bar-value">
                   —
                 </div>
 
-                <div class="mrd-ring-label">
-                  READY
+              </div>
+
+
+
+              <!-- PAYMENT -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Payment
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarPayment"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarPaymentValue"
+                  class="mrd-bar-value">
+                  —
                 </div>
 
               </div>
 
+
+
+              <!-- ABSTRACT -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Abstract
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarAbstract"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarAbstractValue"
+                  class="mrd-bar-value">
+                  —
+                </div>
+
+              </div>
+
+
+
+              <!-- PANEL REVIEW -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Panel Review
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarReview"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarReviewValue"
+                  class="mrd-bar-value">
+                  —
+                </div>
+
+              </div>
+
+
+
+              <!-- IGNITE AI -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Ignite AI
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarAI"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarAIValue"
+                  class="mrd-bar-value">
+                  —
+                </div>
+
+              </div>
+
+
+
+              <!-- ID PHOTO -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  ID / Photo
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarPhoto"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarPhotoValue"
+                  class="mrd-bar-value">
+                  —
+                </div>
+
+              </div>
+
+
+
+              <!-- PRESENTATION -->
+
+              <div class="mrd-bar-row">
+
+                <div class="mrd-bar-label">
+                  Presentation
+                </div>
+
+                <div class="mrd-bar-track">
+
+                  <div
+                    id="mrdBarPresentation"
+                    class="mrd-bar-fill">
+                  </div>
+
+                </div>
+
+                <div
+                  id="mrdBarPresentationValue"
+                  class="mrd-bar-value">
+                  —
+                </div>
+
+              </div>
+
+
             </div>
 
+
           </div>
+
 
         </div>
 
 
 
-        <!-- READINESS BY AREA -->
+        <!-- =================================================
+             PRESENTATION READINESS
+        ================================================== -->
 
-        <div class="mrd-panel">
+        <div class="mrd-panel mrd-presentation">
+
 
           <div class="mrd-panel-title">
-            Readiness by Area
+            Presentation Readiness
           </div>
 
           <div class="mrd-panel-sub">
-            Operational completion across conference functions
+            Readiness based on the actual presentation type and required uploaded presentation material
           </div>
 
 
-          <div class="mrd-bars">
+
+          <!-- SUMMARY -->
+
+          <div class="mrd-presentation-summary">
 
 
-            <div class="mrd-bar-row">
+            <div class="mrd-pres-stat">
 
-              <div class="mrd-bar-label">
-                Registration
+              <div
+                id="mrdPresentationOverallPct"
+                class="mrd-pres-stat-value">
+                —
               </div>
 
-              <div class="mrd-bar-track">
+              <div class="mrd-pres-stat-label">
+                Presentation Material Ready
+              </div>
+
+            </div>
+
+
+
+            <div class="mrd-pres-stat">
+
+              <div
+                id="mrdPresentationReadyCount"
+                class="mrd-pres-stat-value">
+                —
+              </div>
+
+              <div class="mrd-pres-stat-label">
+                Ready Presenters
+              </div>
+
+            </div>
+
+
+
+            <div class="mrd-pres-stat">
+
+              <div
+                id="mrdPresentationPendingCount"
+                class="mrd-pres-stat-value">
+                —
+              </div>
+
+              <div class="mrd-pres-stat-label">
+                Pending Presenters
+              </div>
+
+            </div>
+
+
+          </div>
+
+
+
+          <!-- TABLE -->
+
+          <div style="overflow:auto">
+
+            <table class="mrd-presentation-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>Status</th>
+
+                  <th>
+                    Oral
+                  </th>
+
+                  <th>
+                    Poster
+                  </th>
+
+                  <th>
+                    Total
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+
+                <tr>
+
+                  <td class="mrd-ready-text">
+                    Ready
+                  </td>
+
+                  <td id="mrdOralReady">
+                    —
+                  </td>
+
+                  <td id="mrdPosterReady">
+                    —
+                  </td>
+
+                  <td id="mrdPresentationReadyTotal">
+                    —
+                  </td>
+
+                </tr>
+
+
+
+                <tr>
+
+                  <td class="mrd-pending-text">
+                    Pending
+                  </td>
+
+                  <td id="mrdOralPending">
+                    —
+                  </td>
+
+                  <td id="mrdPosterPending">
+                    —
+                  </td>
+
+                  <td id="mrdPresentationPendingTotal">
+                    —
+                  </td>
+
+                </tr>
+
+
+                <tr>
+
+                  <td>
+                    Total
+                  </td>
+
+                  <td id="mrdOralTotal">
+                    —
+                  </td>
+
+                  <td id="mrdPosterTotal">
+                    —
+                  </td>
+
+                  <td id="mrdPresentationTotal">
+                    —
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+
+
+            </table>
+
+          </div>
+
+
+
+          <!-- VISUAL BARS -->
+
+          <div class="mrd-presentation-bars">
+
+
+            <div class="mrd-pres-bar-row">
+
+              <div class="mrd-pres-bar-label">
+                Oral
+              </div>
+
+              <div class="mrd-pres-track">
+
                 <div
-                  id="mrdBarRegistration"
-                  class="mrd-bar-fill">
+                  id="mrdOralReadyBar"
+                  class="mrd-pres-ready-fill">
                 </div>
+
+                <div
+                  id="mrdOralPendingBar"
+                  class="mrd-pres-pending-fill">
+                </div>
+
               </div>
 
               <div
-                id="mrdBarRegistrationValue"
-                class="mrd-bar-value">
+                id="mrdOralBarText"
+                class="mrd-pres-bar-number">
                 —
               </div>
 
             </div>
 
 
-            <div class="mrd-bar-row">
 
-              <div class="mrd-bar-label">
-                Payment
+            <div class="mrd-pres-bar-row">
+
+              <div class="mrd-pres-bar-label">
+                Poster
               </div>
 
-              <div class="mrd-bar-track">
+              <div class="mrd-pres-track">
+
                 <div
-                  id="mrdBarPayment"
-                  class="mrd-bar-fill">
+                  id="mrdPosterReadyBar"
+                  class="mrd-pres-ready-fill">
                 </div>
+
+                <div
+                  id="mrdPosterPendingBar"
+                  class="mrd-pres-pending-fill">
+                </div>
+
               </div>
 
               <div
-                id="mrdBarPaymentValue"
-                class="mrd-bar-value">
+                id="mrdPosterBarText"
+                class="mrd-pres-bar-number">
                 —
               </div>
 
             </div>
 
 
-            <div class="mrd-bar-row">
+          </div>
 
-              <div class="mrd-bar-label">
-                Abstract
-              </div>
 
-              <div class="mrd-bar-track">
-                <div
-                  id="mrdBarAbstract"
-                  class="mrd-bar-fill">
-                </div>
-              </div>
+
+          <!-- DEFINITIONS -->
+
+          <div class="mrd-definition">
+
+            <strong>Presentation Readiness Definition</strong>
+
+            <br><br>
+
+            <strong>Oral — Ready:</strong>
+            The participant is confirmed as an Oral presenter and has uploaded at least one
+            <strong>slides</strong> file. The MTERMS upload system accepts Oral slides in PDF format.
+
+            <br>
+
+            <strong>Oral — Pending:</strong>
+            The participant is confirmed as an Oral presenter but no slides file has been uploaded.
+
+            <br><br>
+
+            <strong>Poster — Ready:</strong>
+            The participant is confirmed as a Poster presenter and has uploaded at least one
+            <strong>poster</strong> file.
+
+            <br>
+
+            <strong>Poster — Pending:</strong>
+            The participant is confirmed as a Poster presenter but no poster file has been uploaded.
+
+            <br><br>
+
+            Participants who are not currently assigned as Oral or Poster are not included
+            in Presentation Readiness.
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             ATTENTION REQUIRED
+        ================================================== -->
+
+        <div class="mrd-panel mrd-attention">
+
+
+          <div class="mrd-panel-title">
+            Attention Required
+          </div>
+
+          <div class="mrd-panel-sub">
+            Live items that may require committee follow-up
+          </div>
+
+
+          <div class="mrd-alert-list">
+
+
+            <!-- PAYMENT -->
+
+            <div
+              id="mrdAlertPayment"
+              class="mrd-alert">
 
               <div
-                id="mrdBarAbstractValue"
-                class="mrd-bar-value">
-                —
+                id="mrdAlertPaymentIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdUnpaid"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  registrations are not marked as paid
+                </span>
+
               </div>
 
             </div>
 
 
-            <div class="mrd-bar-row">
 
-              <div class="mrd-bar-label">
-                Panel Review
-              </div>
+            <!-- ABSTRACT -->
 
-              <div class="mrd-bar-track">
-                <div
-                  id="mrdBarReview"
-                  class="mrd-bar-fill">
-                </div>
-              </div>
+            <div
+              id="mrdAlertAbstract"
+              class="mrd-alert">
 
               <div
-                id="mrdBarReviewValue"
-                class="mrd-bar-value">
-                —
+                id="mrdAlertAbstractIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdAbstractPending"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  presenters do not have an uploaded abstract
+                </span>
+
               </div>
 
             </div>
 
 
-            <div class="mrd-bar-row">
 
-              <div class="mrd-bar-label">
-                Ignite AI
-              </div>
+            <!-- PANEL REVIEW -->
 
-              <div class="mrd-bar-track">
-                <div
-                  id="mrdBarAI"
-                  class="mrd-bar-fill">
-                </div>
-              </div>
+            <div
+              id="mrdAlertReview"
+              class="mrd-alert">
 
               <div
-                id="mrdBarAIValue"
-                class="mrd-bar-value">
-                —
+                id="mrdAlertReviewIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdReviewPending"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  presenter panel reviews are not yet submitted
+                </span>
+
               </div>
 
             </div>
 
 
-            <div class="mrd-bar-row">
 
-              <div class="mrd-bar-label">
-                ID / Photo
-              </div>
+            <!-- IGNITE AI -->
 
-              <div class="mrd-bar-track">
-                <div
-                  id="mrdBarPhoto"
-                  class="mrd-bar-fill">
-                </div>
-              </div>
+            <div
+              id="mrdAlertAI"
+              class="mrd-alert">
 
               <div
-                id="mrdBarPhotoValue"
-                class="mrd-bar-value">
-                —
+                id="mrdAlertAIIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdAIPending"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  latest presenter abstracts do not yet have a current Ignite AI assessment
+                </span>
+
               </div>
 
             </div>
 
 
+
+            <!-- PHOTO -->
+
+            <div
+              id="mrdAlertPhoto"
+              class="mrd-alert">
+
+              <div
+                id="mrdAlertPhotoIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdPhotoPending"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  registered participants do not have an ID/profile photo upload
+                </span>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- PRESENTATION -->
+
+            <div
+              id="mrdAlertPresentation"
+              class="mrd-alert">
+
+              <div
+                id="mrdAlertPresentationIcon"
+                class="mrd-alert-icon">
+                ⚠
+              </div>
+
+              <div>
+
+                <span
+                  id="mrdPresentationPendingAlert"
+                  class="mrd-alert-number">
+                  —
+                </span>
+
+                <span class="mrd-alert-text">
+                  Oral/Poster presenters are missing their required presentation material
+                </span>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <div class="mrd-footer">
+
+          <div>
+            Live data from the MTERMS 2026 administration database.
+          </div>
+
+          <div>
+            Readiness recalculates whenever Refresh Readiness is selected.
           </div>
 
         </div>
+
 
       </div>
-
-
-
-      <!-- =================================================
-           PRESENTATION READINESS
-      ================================================== -->
-
-      <div class="mrd-panel mrd-presentation">
-
-        <div class="mrd-panel-title">
-          Presentation Readiness
-        </div>
-
-        <div class="mrd-panel-sub">
-          Current readiness of conference presenters
-        </div>
-
-
-        <div style="overflow:auto">
-
-          <table class="mrd-presentation-table">
-
-            <thead>
-
-              <tr>
-                <th>Status</th>
-                <th>Oral</th>
-                <th>Poster</th>
-                <th>Total</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              <tr>
-
-                <td class="mrd-ready-text">
-                  Ready
-                </td>
-
-                <td id="mrdOralReady">—</td>
-
-                <td id="mrdPosterReady">—</td>
-
-                <td id="mrdPresentationReadyTotal">—</td>
-
-              </tr>
-
-
-              <tr>
-
-                <td class="mrd-pending-text">
-                  Pending
-                </td>
-
-                <td id="mrdOralPending">—</td>
-
-                <td id="mrdPosterPending">—</td>
-
-                <td id="mrdPresentationPendingTotal">—</td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-
-        <!-- DEFINITION -->
-
-        <div class="mrd-definition">
-
-          <strong>Definition:</strong>
-
-          <br>
-
-          <strong>Ready</strong> means the presenter has completed
-          the required submission or presentation preparation
-          currently tracked by the MTERMS 2026 platform.
-
-          <br>
-
-          <strong>Pending</strong> means one or more required
-          presentation items or preparation steps are still
-          incomplete.
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =================================================
-           ATTENTION REQUIRED
-      ================================================== -->
-
-      <div class="mrd-panel mrd-attention">
-
-        <div class="mrd-panel-title">
-          Attention Required
-        </div>
-
-        <div class="mrd-panel-sub">
-          Items requiring committee follow-up
-        </div>
-
-
-        <div class="mrd-alert-list">
-
-
-          <div class="mrd-alert">
-
-            <div class="mrd-alert-icon">
-              ⚠
-            </div>
-
-            <div>
-
-              <span
-                id="mrdUnpaid"
-                class="mrd-alert-number">
-                —
-              </span>
-
-              <span class="mrd-alert-text">
-                registrations pending payment
-              </span>
-
-            </div>
-
-          </div>
-
-
-
-          <div class="mrd-alert">
-
-            <div class="mrd-alert-icon">
-              ⚠
-            </div>
-
-            <div>
-
-              <span
-                id="mrdAbstractPending"
-                class="mrd-alert-number">
-                —
-              </span>
-
-              <span class="mrd-alert-text">
-                presenter abstracts requiring attention
-              </span>
-
-            </div>
-
-          </div>
-
-
-
-          <div class="mrd-alert">
-
-            <div class="mrd-alert-icon">
-              ⚠
-            </div>
-
-            <div>
-
-              <span
-                id="mrdReviewPending"
-                class="mrd-alert-number">
-                —
-              </span>
-
-              <span class="mrd-alert-text">
-                panel reviews outstanding
-              </span>
-
-            </div>
-
-          </div>
-
-
-
-          <div class="mrd-alert">
-
-            <div class="mrd-alert-icon">
-              ⚠
-            </div>
-
-            <div>
-
-              <span
-                id="mrdPhotoPending"
-                class="mrd-alert-number">
-                —
-              </span>
-
-              <span class="mrd-alert-text">
-                participants without completed ID photo readiness
-              </span>
-
-            </div>
-
-          </div>
-
-
-        </div>
-
-      </div>
-
 
     </div>
 
   </div>
 
+
 </div>
+
 
 
 <script>
 
 (function(){
 
-  /* =========================================================
-     CONFIGURATION
-  ========================================================= */
 
-  const READINESS_API =
-    'https://mterm2026-559f9bf571b5.herokuapp.com';
+/* =========================================================
+   PREVENT DOUBLE INITIALISATION
+========================================================= */
 
-  const ADMIN_STORAGE_KEY =
-    'mterms-admin-basic';
+if(
+  window.__MTERMS_READINESS_DASHBOARD_INITIALISED__
+){
+  return;
+}
 
-
-  /* =========================================================
-     HELPERS
-  ========================================================= */
-
-  function el(id){
-    return document.getElementById(id);
-  }
+window.__MTERMS_READINESS_DASHBOARD_INITIALISED__ =
+  true;
 
 
-  function authHeaders(){
 
-    const token =
-      localStorage.getItem(ADMIN_STORAGE_KEY);
+/* =========================================================
+   CONFIGURATION
+========================================================= */
 
-    return token
-      ? {
-          'Authorization':
+const READINESS_API =
+  'https://mterm2026-559f9bf571b5.herokuapp.com';
+
+
+const ADMIN_STORAGE_KEY =
+  'mterms-admin-basic';
+
+
+const REGISTRATION_PAGE_SIZE =
+  100;
+
+
+
+/* =========================================================
+   SMALL HELPERS
+========================================================= */
+
+function el(id){
+
+  return document.getElementById(id);
+
+}
+
+
+function adminHeaders(){
+
+  const token =
+    localStorage.getItem(
+      ADMIN_STORAGE_KEY
+    );
+
+  return token
+    ? {
+        'Authorization':
           'Basic ' + token
-        }
-      : {};
+      }
+    : {};
 
+}
+
+
+function numeric(value){
+
+  const n =
+    Number(value);
+
+  return Number.isFinite(n)
+    ? n
+    : 0;
+
+}
+
+
+function percentage(
+  completed,
+  total
+){
+
+  completed =
+    numeric(completed);
+
+  total =
+    numeric(total);
+
+
+  if(total <= 0){
+    return null;
   }
 
 
-  function pct(value,total){
+  return Math.round(
+    (
+      completed /
+      total
+    ) *
+    100
+  );
 
-    if(!total){
-      return 0;
+}
+
+
+function displayPct(value){
+
+  return value === null
+    ? 'N/A'
+    : `${value}%`;
+
+}
+
+
+function escapeHtml(value){
+
+  return String(
+    value ?? ''
+  )
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+
+}
+
+
+function normalizeStatus(value){
+
+  return String(
+    value || ''
+  )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function hasUpload(
+  registration,
+  uploadType
+){
+
+  const uploads =
+    Array.isArray(
+      registration?.uploads
+    )
+      ? registration.uploads
+      : [];
+
+
+  return uploads.some(
+    upload =>
+      String(
+        upload?.type || ''
+      ) === uploadType
+  );
+
+}
+
+
+function getUploadsByType(
+  registration,
+  uploadType
+){
+
+  const uploads =
+    Array.isArray(
+      registration?.uploads
+    )
+      ? registration.uploads
+      : [];
+
+
+  return uploads.filter(
+    upload =>
+      String(
+        upload?.type || ''
+      ) === uploadType
+  );
+
+}
+
+
+
+/* =========================================================
+   PICK LATEST UPLOAD
+
+   Same principle as your existing system:
+   highest version first, then newest uploadedAt.
+========================================================= */
+
+function pickLatestUpload(
+  registration,
+  uploadType
+){
+
+  const rows =
+    getUploadsByType(
+      registration,
+      uploadType
+    );
+
+
+  if(!rows.length){
+    return null;
+  }
+
+
+  return rows
+    .slice()
+    .sort(
+      (a,b) => {
+
+        const va =
+          numeric(
+            a?.version
+          );
+
+        const vb =
+          numeric(
+            b?.version
+          );
+
+
+        if(vb !== va){
+          return vb - va;
+        }
+
+
+        const ta =
+          new Date(
+            a?.uploadedAt || 0
+          ).getTime();
+
+
+        const tb =
+          new Date(
+            b?.uploadedAt || 0
+          ).getTime();
+
+
+        return tb - ta;
+
+      }
+    )[0];
+
+}
+
+
+
+/* =========================================================
+   IGNITE AI
+
+   IMPORTANT:
+   We count Ignite AI as CURRENT only when the assessment's
+   abstractGridFsId matches the GridFS ID of the LATEST
+   uploaded abstract.
+
+   An old Ignite AI assessment for an earlier abstract
+   therefore does NOT count as ready.
+========================================================= */
+
+function hasCurrentIgniteAssessment(
+  registration
+){
+
+  const latestAbstract =
+    pickLatestUpload(
+      registration,
+      'abstract'
+    );
+
+
+  if(
+    !latestAbstract ||
+    !latestAbstract.gridFsId
+  ){
+    return false;
+  }
+
+
+  const latestAbstractId =
+    String(
+      latestAbstract.gridFsId
+    );
+
+
+  const assessments =
+    Array.isArray(
+      registration
+        ?.igniteAIAssessments
+    )
+      ? registration
+          .igniteAIAssessments
+      : [];
+
+
+  return assessments.some(
+    assessment => {
+
+      const assessmentAbstractId =
+        String(
+          assessment
+            ?.abstractGridFsId ||
+          ''
+        );
+
+
+      const assessmentId =
+        String(
+          assessment
+            ?.assessmentId ||
+          ''
+        ).trim();
+
+
+      const status =
+        normalizeStatus(
+          assessment?.status ||
+          'completed'
+        );
+
+
+      return (
+        assessmentId &&
+        assessmentAbstractId ===
+          latestAbstractId &&
+        status === 'completed'
+      );
+
+    }
+  );
+
+}
+
+
+
+/* =========================================================
+   REGISTRATION TYPES
+========================================================= */
+
+function isPresenter(
+  registration
+){
+
+  return (
+    registration
+      ?.program
+      ?.presenting === true
+  );
+
+}
+
+
+function isOralPresenter(
+  registration
+){
+
+  return (
+    isPresenter(registration) &&
+    String(
+      registration
+        ?.program
+        ?.type ||
+      ''
+    ) === 'talk'
+  );
+
+}
+
+
+function isPosterPresenter(
+  registration
+){
+
+  return (
+    isPresenter(registration) &&
+    String(
+      registration
+        ?.program
+        ?.type ||
+      ''
+    ) === 'poster'
+  );
+
+}
+
+
+
+/* =========================================================
+   PRESENTATION READINESS
+========================================================= */
+
+function oralPresenterReady(
+  registration
+){
+
+  return (
+    isOralPresenter(
+      registration
+    ) &&
+    hasUpload(
+      registration,
+      'slides'
+    )
+  );
+
+}
+
+
+function posterPresenterReady(
+  registration
+){
+
+  return (
+    isPosterPresenter(
+      registration
+    ) &&
+    hasUpload(
+      registration,
+      'poster'
+    )
+  );
+
+}
+
+
+
+/* =========================================================
+   LOAD ALL REGISTRATIONS
+
+   /api/admin/registrations caps limit at 100.
+   Therefore this deliberately paginates until ALL
+   registration records have been loaded.
+========================================================= */
+
+async function loadAllRegistrations(){
+
+  const allRows = [];
+
+  let page =
+    1;
+
+  let expectedTotal =
+    null;
+
+
+  while(true){
+
+    const response =
+      await fetch(
+        `${READINESS_API}/api/admin/registrations` +
+        `?page=${page}` +
+        `&limit=${REGISTRATION_PAGE_SIZE}` +
+        `&q=`,
+        {
+          headers:
+            adminHeaders(),
+
+          cache:
+            'no-store'
+        }
+      );
+
+
+    const data =
+      await response
+        .json()
+        .catch(
+          ()=>({})
+        );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        `Unable to load registration page ${page}.`
+      );
+
     }
 
-    return Math.round(
-      (value / total) * 100
+
+    const rows =
+      Array.isArray(
+        data.rows
+      )
+        ? data.rows
+        : [];
+
+
+    allRows.push(
+      ...rows
+    );
+
+
+    if(
+      expectedTotal === null
+    ){
+
+      expectedTotal =
+        numeric(
+          data.total
+        );
+
+    }
+
+
+    /*
+     * Stop when:
+     * 1. we have reached reported total
+     * OR
+     * 2. this page contains fewer than 100 rows.
+     */
+
+    if(
+      allRows.length >=
+        expectedTotal ||
+      rows.length <
+        REGISTRATION_PAGE_SIZE
+    ){
+
+      break;
+    }
+
+
+    page++;
+
+
+    /*
+     * Safety guard.
+     */
+
+    if(page > 100){
+
+      throw new Error(
+        'Registration pagination exceeded the safety limit.'
+      );
+
+    }
+
+  }
+
+
+  return {
+    rows:
+      allRows,
+
+    total:
+      expectedTotal !== null
+        ? expectedTotal
+        : allRows.length
+  };
+
+}
+
+
+
+/* =========================================================
+   LOAD PANEL REVIEW STATUS
+
+   Uses the existing admin batch endpoint.
+========================================================= */
+
+async function loadPanelReviewMap(
+  registrationIds
+){
+
+  const cleanIds =
+    registrationIds.filter(
+      Boolean
+    );
+
+
+  if(!cleanIds.length){
+    return {};
+  }
+
+
+  const response =
+    await fetch(
+      `${READINESS_API}/api/admin/reviews/statuses`,
+      {
+        method:
+          'POST',
+
+        headers:{
+          'Content-Type':
+            'application/json',
+
+          ...adminHeaders()
+        },
+
+        body:
+          JSON.stringify({
+            registrationIds:
+              cleanIds
+          }),
+
+        cache:
+          'no-store'
+      }
+    );
+
+
+  const data =
+    await response
+      .json()
+      .catch(
+        ()=>({})
+      );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      data.error ||
+      'Unable to load panel review statuses.'
     );
 
   }
 
 
-  function safeNumber(value){
+  return data.map || {};
 
-    const n = Number(value);
+}
 
-    return Number.isFinite(n)
-      ? n
-      : 0;
+
+
+/* =========================================================
+   BAR DRAWING
+========================================================= */
+
+function setReadinessBar(
+  barId,
+  textId,
+  completed,
+  total
+){
+
+  const pct =
+    percentage(
+      completed,
+      total
+    );
+
+
+  const width =
+    pct === null
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            100,
+            pct
+          )
+        );
+
+
+  const bar =
+    el(barId);
+
+
+  const text =
+    el(textId);
+
+
+  if(bar){
+
+    bar.style.width =
+      width + '%';
 
   }
 
 
-  /* =========================================================
-     TOGGLE
-  ========================================================= */
+  if(text){
 
-  const toggle =
-    el('mrdToggle');
+    text.innerHTML =
+      pct === null
+        ? `N/A <span>0 / 0</span>`
+        : `${pct}% <span>${completed} / ${total}</span>`;
 
-  const expandable =
-    el('mrdExpand');
+  }
+
+}
 
 
-  let dashboardLoaded = false;
 
+/* =========================================================
+   PRESENTATION STACKED BAR
+========================================================= */
+
+function setPresentationBar(
+  readyBarId,
+  pendingBarId,
+  textId,
+  ready,
+  pending
+){
+
+  const total =
+    ready +
+    pending;
+
+
+  const readyPct =
+    total
+      ? (
+          ready /
+          total
+        ) * 100
+      : 0;
+
+
+  const pendingPct =
+    total
+      ? (
+          pending /
+          total
+        ) * 100
+      : 0;
+
+
+  const readyBar =
+    el(readyBarId);
+
+
+  const pendingBar =
+    el(pendingBarId);
+
+
+  if(readyBar){
+
+    readyBar.style.width =
+      readyPct + '%';
+
+  }
+
+
+  if(pendingBar){
+
+    pendingBar.style.width =
+      pendingPct + '%';
+
+  }
+
+
+  const text =
+    el(textId);
+
+
+  if(text){
+
+    text.textContent =
+      total
+        ? `${ready} ready / ${total}`
+        : 'No presenters';
+
+  }
+
+}
+
+
+
+/* =========================================================
+   ATTENTION REQUIRED
+========================================================= */
+
+function setAlertState(
+  wrapperId,
+  iconId,
+  numberId,
+  number
+){
+
+  const wrapper =
+    el(wrapperId);
+
+
+  const icon =
+    el(iconId);
+
+
+  const numberEl =
+    el(numberId);
+
+
+  if(numberEl){
+
+    numberEl.textContent =
+      number;
+
+  }
+
+
+  if(!wrapper){
+    return;
+  }
+
+
+  if(number === 0){
+
+    wrapper.classList.add(
+      'mrd-alert-clear'
+    );
+
+
+    if(icon){
+
+      icon.textContent =
+        '✓';
+
+    }
+
+  }
+  else{
+
+    wrapper.classList.remove(
+      'mrd-alert-clear'
+    );
+
+
+    if(icon){
+
+      icon.textContent =
+        '⚠';
+
+    }
+
+  }
+
+}
+
+
+
+/* =========================================================
+   OVERALL SCORE
+
+   Registration is deliberately excluded.
+
+   The score uses:
+   - Payment
+   - Abstract
+   - Panel Review
+   - Ignite AI
+   - ID / Photo
+   - Presentation Material
+
+   If a metric has no applicable population, it is excluded
+   instead of being treated as 0%.
+========================================================= */
+
+function calculateOverall(
+  metrics
+){
+
+  const valid =
+    metrics.filter(
+      metric =>
+        metric !== null &&
+        Number.isFinite(
+          metric
+        )
+    );
+
+
+  if(!valid.length){
+    return 0;
+  }
+
+
+  const sum =
+    valid.reduce(
+      (
+        total,
+        value
+      ) =>
+        total +
+        value,
+      0
+    );
+
+
+  return Math.round(
+    sum /
+    valid.length
+  );
+
+}
+
+
+
+/* =========================================================
+   READINESS COLOUR
+========================================================= */
+
+function updateReadinessColour(
+  score
+){
+
+  const dot =
+    el(
+      'mrdStatusDot'
+    );
+
+
+  if(!dot){
+    return;
+  }
+
+
+  let background;
+  let shadow;
+
+
+  if(score >= 90){
+
+    background =
+      '#16a34a';
+
+    shadow =
+      '0 0 0 4px rgba(22,163,74,.13)';
+
+  }
+  else if(score >= 75){
+
+    background =
+      '#0EA5A6';
+
+    shadow =
+      '0 0 0 4px rgba(14,165,166,.13)';
+
+  }
+  else if(score >= 50){
+
+    background =
+      '#f59e0b';
+
+    shadow =
+      '0 0 0 4px rgba(245,158,11,.14)';
+
+  }
+  else{
+
+    background =
+      '#dc2626';
+
+    shadow =
+      '0 0 0 4px rgba(220,38,38,.13)';
+
+  }
+
+
+  dot.style.background =
+    background;
+
+
+  dot.style.boxShadow =
+    shadow;
+
+}
+
+
+
+/* =========================================================
+   SYSTEM MESSAGE
+========================================================= */
+
+function clearSystemMessage(){
+
+  const box =
+    el(
+      'mrdSystemMessage'
+    );
+
+
+  if(!box){
+    return;
+  }
+
+
+  box.className =
+    'mrd-system-message';
+
+
+  box.textContent =
+    '';
+
+}
+
+
+function showSystemMessage(
+  message,
+  type = 'info'
+){
+
+  const box =
+    el(
+      'mrdSystemMessage'
+    );
+
+
+  if(!box){
+    return;
+  }
+
+
+  box.className =
+    'mrd-system-message ' +
+    (
+      type === 'error'
+        ? 'mrd-error'
+        : 'mrd-info'
+    );
+
+
+  box.textContent =
+    message;
+
+}
+
+
+
+/* =========================================================
+   LOAD / CALCULATE DASHBOARD
+========================================================= */
+
+let dashboardLoaded =
+  false;
+
+
+let dashboardLoading =
+  false;
+
+
+
+async function loadReadinessDashboard(){
+
+  if(dashboardLoading){
+    return;
+  }
+
+
+  dashboardLoading =
+    true;
+
+
+  clearSystemMessage();
+
+
+  const refreshButton =
+    el(
+      'mrdRefresh'
+    );
+
+
+  if(refreshButton){
+
+    refreshButton.disabled =
+      true;
+
+
+    refreshButton.textContent =
+      'Refreshing...';
+
+  }
+
+
+  if(
+    el(
+      'mrdLastUpdated'
+    )
+  ){
+
+    el(
+      'mrdLastUpdated'
+    ).textContent =
+      'Loading live conference data...';
+
+  }
+
+
+  try{
+
+
+    /* =====================================================
+       LOAD ALL REGISTRATIONS
+    ====================================================== */
+
+    const registrationResult =
+      await loadAllRegistrations();
+
+
+    const registrations =
+      registrationResult.rows;
+
+
+    /*
+     * Use actual loaded registration array for the working
+     * denominator.
+
+     * The API-reported total is also checked below.
+     */
+
+    const totalParticipants =
+      registrations.length;
+
+
+
+    if(
+      registrationResult.total !==
+      totalParticipants
+    ){
+
+      showSystemMessage(
+        `The server reports ${registrationResult.total} registrations, ` +
+        `while ${totalParticipants} complete registration records were loaded. ` +
+        `The readiness calculations below use the ${totalParticipants} records actually loaded.`,
+        'info'
+      );
+
+    }
+
+
+
+    /* =====================================================
+       PARTICIPANT GROUPS
+    ====================================================== */
+
+    const presenters =
+      registrations.filter(
+        isPresenter
+      );
+
+
+    const totalPresenters =
+      presenters.length;
+
+
+
+    const oralPresenters =
+      registrations.filter(
+        isOralPresenter
+      );
+
+
+    const posterPresenters =
+      registrations.filter(
+        isPosterPresenter
+      );
+
+
+    const totalOral =
+      oralPresenters.length;
+
+
+    const totalPoster =
+      posterPresenters.length;
+
+
+    const totalPresentationPresenters =
+      totalOral +
+      totalPoster;
+
+
+
+    /* =====================================================
+       PAYMENT
+    ====================================================== */
+
+    const paymentReady =
+      registrations.filter(
+        registration =>
+          normalizeStatus(
+            registration
+              ?.payment
+              ?.status
+          ) === 'paid'
+      ).length;
+
+
+
+    /* =====================================================
+       ABSTRACT
+
+       An actual abstract upload is required.
+    ====================================================== */
+
+    const abstractReady =
+      presenters.filter(
+        registration =>
+          hasUpload(
+            registration,
+            'abstract'
+          )
+      ).length;
+
+
+
+    /* =====================================================
+       ID / PHOTO
+
+       An actual profilePhoto upload is required.
+    ====================================================== */
+
+    const photoReady =
+      registrations.filter(
+        registration =>
+          hasUpload(
+            registration,
+            'profilePhoto'
+          )
+      ).length;
+
+
+
+    /* =====================================================
+       IGNITE AI
+
+       Must match latest abstract.
+    ====================================================== */
+
+    const igniteAIReady =
+      presenters.filter(
+        registration =>
+          hasCurrentIgniteAssessment(
+            registration
+          )
+      ).length;
+
+
+
+    /* =====================================================
+       PANEL REVIEW
+
+       Only "submitted" counts as completed.
+    ====================================================== */
+
+    const presenterIds =
+      presenters
+        .map(
+          registration =>
+            registration?._id
+              ? String(
+                  registration._id
+                )
+              : ''
+        )
+        .filter(
+          Boolean
+        );
+
+
+    const reviewMap =
+      await loadPanelReviewMap(
+        presenterIds
+      );
+
+
+    const completedReviews =
+      presenters.filter(
+        registration => {
+
+          const id =
+            String(
+              registration?._id ||
+              ''
+            );
+
+
+          return (
+            normalizeStatus(
+              reviewMap[
+                id
+              ]?.status
+            ) ===
+            'submitted'
+          );
+
+        }
+      ).length;
+
+
+
+    /* =====================================================
+       PRESENTATION MATERIALS
+    ====================================================== */
+
+    const oralReady =
+      oralPresenters.filter(
+        oralPresenterReady
+      ).length;
+
+
+    const oralPending =
+      Math.max(
+        totalOral -
+        oralReady,
+        0
+      );
+
+
+    const posterReady =
+      posterPresenters.filter(
+        posterPresenterReady
+      ).length;
+
+
+    const posterPending =
+      Math.max(
+        totalPoster -
+        posterReady,
+        0
+      );
+
+
+    const presentationReady =
+      oralReady +
+      posterReady;
+
+
+    const presentationPending =
+      oralPending +
+      posterPending;
+
+
+
+    /* =====================================================
+       PERCENTAGES
+    ====================================================== */
+
+    const registrationPct =
+      totalParticipants
+        ? 100
+        : null;
+
+
+    const paymentPct =
+      percentage(
+        paymentReady,
+        totalParticipants
+      );
+
+
+    const abstractPct =
+      percentage(
+        abstractReady,
+        totalPresenters
+      );
+
+
+    const reviewPct =
+      percentage(
+        completedReviews,
+        totalPresenters
+      );
+
+
+    const igniteAIPct =
+      percentage(
+        igniteAIReady,
+        totalPresenters
+      );
+
+
+    const photoPct =
+      percentage(
+        photoReady,
+        totalParticipants
+      );
+
+
+    const presentationPct =
+      percentage(
+        presentationReady,
+        totalPresentationPresenters
+      );
+
+
+
+    /* =====================================================
+       OVERALL READINESS
+    ====================================================== */
+
+    const overall =
+      calculateOverall([
+        paymentPct,
+        abstractPct,
+        reviewPct,
+        igniteAIPct,
+        photoPct,
+        presentationPct
+      ]);
+
+
+
+    /* =====================================================
+       TOP KPI CARDS
+    ====================================================== */
+
+
+    /* PARTICIPANTS */
+
+    el(
+      'mrdParticipantsValue'
+    ).textContent =
+      totalParticipants;
+
+
+    el(
+      'mrdParticipantsCount'
+    ).textContent =
+      `${totalParticipants} / ${totalParticipants}`;
+
+
+
+    /* PAYMENT */
+
+    el(
+      'mrdPaymentValue'
+    ).textContent =
+      displayPct(
+        paymentPct
+      );
+
+
+    el(
+      'mrdPaymentCount'
+    ).textContent =
+      `${paymentReady} / ${totalParticipants}`;
+
+
+
+    /* PANEL REVIEW */
+
+    el(
+      'mrdReviewValue'
+    ).textContent =
+      displayPct(
+        reviewPct
+      );
+
+
+    el(
+      'mrdReviewCount'
+    ).textContent =
+      `${completedReviews} / ${totalPresenters}`;
+
+
+
+    /* ABSTRACT */
+
+    el(
+      'mrdAbstractValue'
+    ).textContent =
+      displayPct(
+        abstractPct
+      );
+
+
+    el(
+      'mrdAbstractCount'
+    ).textContent =
+      `${abstractReady} / ${totalPresenters}`;
+
+
+
+    /* =====================================================
+       OVERALL RING
+    ====================================================== */
+
+    el(
+      'mrdRing'
+    ).style.setProperty(
+      '--percentage',
+      overall
+    );
+
+
+    el(
+      'mrdRingPercent'
+    ).textContent =
+      `${overall}%`;
+
+
+    el(
+      'mrdCollapsedScore'
+    ).textContent =
+      `Readiness ${overall}%`;
+
+
+    updateReadinessColour(
+      overall
+    );
+
+
+
+    /* =====================================================
+       READINESS BY AREA
+    ====================================================== */
+
+    setReadinessBar(
+      'mrdBarRegistration',
+      'mrdBarRegistrationValue',
+      totalParticipants,
+      totalParticipants
+    );
+
+
+    setReadinessBar(
+      'mrdBarPayment',
+      'mrdBarPaymentValue',
+      paymentReady,
+      totalParticipants
+    );
+
+
+    setReadinessBar(
+      'mrdBarAbstract',
+      'mrdBarAbstractValue',
+      abstractReady,
+      totalPresenters
+    );
+
+
+    setReadinessBar(
+      'mrdBarReview',
+      'mrdBarReviewValue',
+      completedReviews,
+      totalPresenters
+    );
+
+
+    setReadinessBar(
+      'mrdBarAI',
+      'mrdBarAIValue',
+      igniteAIReady,
+      totalPresenters
+    );
+
+
+    setReadinessBar(
+      'mrdBarPhoto',
+      'mrdBarPhotoValue',
+      photoReady,
+      totalParticipants
+    );
+
+
+    setReadinessBar(
+      'mrdBarPresentation',
+      'mrdBarPresentationValue',
+      presentationReady,
+      totalPresentationPresenters
+    );
+
+
+
+    /* =====================================================
+       PRESENTATION READINESS TABLE
+    ====================================================== */
+
+    el(
+      'mrdOralReady'
+    ).textContent =
+      oralReady;
+
+
+    el(
+      'mrdPosterReady'
+    ).textContent =
+      posterReady;
+
+
+    el(
+      'mrdPresentationReadyTotal'
+    ).textContent =
+      presentationReady;
+
+
+    el(
+      'mrdOralPending'
+    ).textContent =
+      oralPending;
+
+
+    el(
+      'mrdPosterPending'
+    ).textContent =
+      posterPending;
+
+
+    el(
+      'mrdPresentationPendingTotal'
+    ).textContent =
+      presentationPending;
+
+
+    el(
+      'mrdOralTotal'
+    ).textContent =
+      totalOral;
+
+
+    el(
+      'mrdPosterTotal'
+    ).textContent =
+      totalPoster;
+
+
+    el(
+      'mrdPresentationTotal'
+    ).textContent =
+      totalPresentationPresenters;
+
+
+
+    /* =====================================================
+       PRESENTATION SUMMARY
+    ====================================================== */
+
+    el(
+      'mrdPresentationOverallPct'
+    ).textContent =
+      displayPct(
+        presentationPct
+      );
+
+
+    el(
+      'mrdPresentationReadyCount'
+    ).textContent =
+      `${presentationReady} / ${totalPresentationPresenters}`;
+
+
+    el(
+      'mrdPresentationPendingCount'
+    ).textContent =
+      presentationPending;
+
+
+
+    /* =====================================================
+       PRESENTATION BARS
+    ====================================================== */
+
+    setPresentationBar(
+      'mrdOralReadyBar',
+      'mrdOralPendingBar',
+      'mrdOralBarText',
+      oralReady,
+      oralPending
+    );
+
+
+    setPresentationBar(
+      'mrdPosterReadyBar',
+      'mrdPosterPendingBar',
+      'mrdPosterBarText',
+      posterReady,
+      posterPending
+    );
+
+
+
+    /* =====================================================
+       ATTENTION REQUIRED
+    ====================================================== */
+
+    const unpaid =
+      Math.max(
+        totalParticipants -
+        paymentReady,
+        0
+      );
+
+
+    const missingAbstract =
+      Math.max(
+        totalPresenters -
+        abstractReady,
+        0
+      );
+
+
+    const reviewPending =
+      Math.max(
+        totalPresenters -
+        completedReviews,
+        0
+      );
+
+
+    const aiPending =
+      Math.max(
+        totalPresenters -
+        igniteAIReady,
+        0
+      );
+
+
+    const photoPending =
+      Math.max(
+        totalParticipants -
+        photoReady,
+        0
+      );
+
+
+    setAlertState(
+      'mrdAlertPayment',
+      'mrdAlertPaymentIcon',
+      'mrdUnpaid',
+      unpaid
+    );
+
+
+    setAlertState(
+      'mrdAlertAbstract',
+      'mrdAlertAbstractIcon',
+      'mrdAbstractPending',
+      missingAbstract
+    );
+
+
+    setAlertState(
+      'mrdAlertReview',
+      'mrdAlertReviewIcon',
+      'mrdReviewPending',
+      reviewPending
+    );
+
+
+    setAlertState(
+      'mrdAlertAI',
+      'mrdAlertAIIcon',
+      'mrdAIPending',
+      aiPending
+    );
+
+
+    setAlertState(
+      'mrdAlertPhoto',
+      'mrdAlertPhotoIcon',
+      'mrdPhotoPending',
+      photoPending
+    );
+
+
+    setAlertState(
+      'mrdAlertPresentation',
+      'mrdAlertPresentationIcon',
+      'mrdPresentationPendingAlert',
+      presentationPending
+    );
+
+
+
+    /* =====================================================
+       TIMESTAMP
+    ====================================================== */
+
+    const refreshed =
+      new Date()
+        .toLocaleString(
+          'en-MY',
+          {
+            timeZone:
+              'Asia/Kuala_Lumpur',
+
+            year:
+              'numeric',
+
+            month:
+              'short',
+
+            day:
+              '2-digit',
+
+            hour:
+              'numeric',
+
+            minute:
+              '2-digit',
+
+            second:
+              '2-digit',
+
+            hour12:
+              true
+          }
+        );
+
+
+    el(
+      'mrdLastUpdated'
+    ).textContent =
+      `Last refreshed: ${refreshed} · Malaysia Time (UTC+8)`;
+
+
+    dashboardLoaded =
+      true;
+
+
+  }
+  catch(err){
+
+
+    console.error(
+      'MTERMS readiness dashboard:',
+      err
+    );
+
+
+    showSystemMessage(
+      err?.message ||
+      'The readiness dashboard could not load live data.',
+      'error'
+    );
+
+
+    if(
+      el(
+        'mrdLastUpdated'
+      )
+    ){
+
+      el(
+        'mrdLastUpdated'
+      ).textContent =
+        'Live readiness data could not be loaded.';
+
+    }
+
+
+  }
+  finally{
+
+
+    dashboardLoading =
+      false;
+
+
+    if(refreshButton){
+
+      refreshButton.disabled =
+        false;
+
+
+      refreshButton.textContent =
+        'Refresh Readiness';
+
+    }
+
+
+  }
+
+}
+
+
+
+/* =========================================================
+   EXPAND / COLLAPSE
+========================================================= */
+
+const toggle =
+  el(
+    'mrdToggle'
+  );
+
+
+const expandable =
+  el(
+    'mrdExpand'
+  );
+
+
+if(
+  toggle &&
+  expandable
+){
 
   toggle.addEventListener(
     'click',
     async function(){
 
       const opening =
-        !expandable.classList.contains(
-          'mrd-open'
+        !expandable
+          .classList
+          .contains(
+            'mrd-open'
+          );
+
+
+      expandable
+        .classList
+        .toggle(
+          'mrd-open',
+          opening
         );
 
 
-      expandable.classList.toggle(
-        'mrd-open',
-        opening
-      );
+      toggle
+        .classList
+        .toggle(
+          'mrd-open',
+          opening
+        );
 
-      toggle.classList.toggle(
-        'mrd-open',
-        opening
-      );
 
       toggle.setAttribute(
         'aria-expanded',
@@ -1273,6 +4031,11 @@
           : 'false'
       );
 
+
+      /*
+       * First opening:
+       * load real data.
+       */
 
       if(
         opening &&
@@ -1286,698 +4049,32 @@
     }
   );
 
+}
 
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
-  el('mrdRefresh')
-    .addEventListener(
-      'click',
-      async function(){
 
-        await loadReadinessDashboard();
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
 
-      }
-    );
+const refreshButton =
+  el(
+    'mrdRefresh'
+  );
 
 
-  /* =========================================================
-     DATA LOADER
-  ========================================================= */
+if(refreshButton){
 
-  async function loadReadinessDashboard(){
+  refreshButton.addEventListener(
+    'click',
+    async function(){
 
-    const refreshButton =
-      el('mrdRefresh');
-
-
-    refreshButton.disabled = true;
-
-    refreshButton.textContent =
-      'Refreshing...';
-
-
-    try{
-
-      /*
-       * -------------------------------------------------------
-       * LOAD REGISTRATIONS
-       *
-       * We request a high limit because this dashboard needs
-       * conference-wide numbers rather than one admin page.
-       * -------------------------------------------------------
-       */
-
-      const registrationResponse =
-        await fetch(
-          `${READINESS_API}/api/admin/registrations?page=1&limit=1000&q=`,
-          {
-            headers:authHeaders(),
-            cache:'no-store'
-          }
-        );
-
-
-      const registrationData =
-        await registrationResponse
-          .json()
-          .catch(()=>({}));
-
-
-      if(!registrationResponse.ok){
-
-        throw new Error(
-          registrationData.error ||
-          'Unable to load conference registrations.'
-        );
-
-      }
-
-
-      const registrations =
-        Array.isArray(
-          registrationData.rows
-        )
-          ? registrationData.rows
-          : [];
-
-
-      const totalParticipants =
-        safeNumber(
-          registrationData.total
-        ) ||
-        registrations.length;
-
-
-
-      /*
-       * -------------------------------------------------------
-       * BASIC PARTICIPANT COUNTS
-       * -------------------------------------------------------
-       */
-
-      const paidParticipants =
-        registrations.filter(
-          doc =>
-            String(
-              doc?.payment?.status || ''
-            ).toLowerCase() === 'paid'
-        ).length;
-
-
-      const presenters =
-        registrations.filter(
-          doc =>
-            !!doc?.program?.presenting
-        );
-
-
-      const totalPresenters =
-        presenters.length;
-
-
-
-      /*
-       * -------------------------------------------------------
-       * PANEL REVIEW STATUS
-       * -------------------------------------------------------
-       */
-
-      let completedReviews = 0;
-
-
-      if(registrations.length){
-
-        try{
-
-          const ids =
-            registrations
-              .map(doc => doc._id)
-              .filter(Boolean);
-
-
-          const reviewResponse =
-            await fetch(
-              `${READINESS_API}/api/admin/reviews/statuses`,
-              {
-                method:'POST',
-
-                headers:{
-                  'Content-Type':
-                    'application/json',
-
-                  ...authHeaders()
-                },
-
-                body:JSON.stringify({
-                  registrationIds:ids
-                }),
-
-                cache:'no-store'
-              }
-            );
-
-
-          const reviewData =
-            await reviewResponse
-              .json()
-              .catch(()=>({}));
-
-
-          if(reviewResponse.ok){
-
-            const reviewMap =
-              reviewData.map || {};
-
-
-            completedReviews =
-              presenters.filter(
-                doc =>
-                  reviewMap[
-                    doc._id
-                  ]?.status ===
-                  'submitted'
-              ).length;
-
-          }
-
-        }
-        catch(err){
-
-          console.warn(
-            'Readiness panel review check failed:',
-            err
-          );
-
-        }
-
-      }
-
-
-
-      /*
-       * -------------------------------------------------------
-       * TEMPORARY ABSTRACT READINESS LOGIC
-       *
-       * Current registration object does not necessarily
-       * contain upload-history records.
-       *
-       * We therefore use completed submission information
-       * available directly in registration data.
-       * -------------------------------------------------------
-       */
-
-      const abstractReady =
-        presenters.filter(
-          doc =>
-            !!(
-              doc?.submission?.title &&
-              doc?.submission?.theme
-            )
-        ).length;
-
-
-
-      /*
-       * -------------------------------------------------------
-       * PRESENTATION TYPE
-       * -------------------------------------------------------
-       */
-
-      const oralPresenters =
-        presenters.filter(
-          doc =>
-            doc?.program?.type ===
-            'talk'
-        );
-
-
-      const posterPresenters =
-        presenters.filter(
-          doc =>
-            doc?.program?.type ===
-            'poster'
-        );
-
-
-      /*
-       * For now:
-       *
-       * READY =
-       * presenter has completed submission
-       * information in registration.
-       *
-       * This can later be tightened further to include
-       * uploaded slide/poster files if desired.
-       */
-
-      function presenterReady(doc){
-
-        return !!(
-          doc?.submission?.title &&
-          doc?.submission?.theme &&
-          Array.isArray(
-            doc?.submission?.authors
-          ) &&
-          doc.submission.authors.length
-        );
-
-      }
-
-
-      const oralReady =
-        oralPresenters.filter(
-          presenterReady
-        ).length;
-
-
-      const posterReady =
-        posterPresenters.filter(
-          presenterReady
-        ).length;
-
-
-      const oralPending =
-        Math.max(
-          oralPresenters.length -
-          oralReady,
-          0
-        );
-
-
-      const posterPending =
-        Math.max(
-          posterPresenters.length -
-          posterReady,
-          0
-        );
-
-
-      const presentationReadyTotal =
-        oralReady +
-        posterReady;
-
-
-      const presentationPendingTotal =
-        oralPending +
-        posterPending;
-
-
-
-      /*
-       * -------------------------------------------------------
-       * PHOTO / IGNITE AI
-       *
-       * These require additional API calls if we want exact
-       * conference-wide figures.
-       *
-       * For this first dashboard version they are represented
-       * conservatively until dedicated batch endpoints exist.
-       * -------------------------------------------------------
-       */
-
-      const photoReady =
-        registrations.filter(
-          doc =>
-            !!(
-              doc?.profilePhoto ||
-              doc?.photo ||
-              doc?.profilePhotoUrl
-            )
-        ).length;
-
-
-      const igniteAIReady =
-        registrations.filter(
-          doc =>
-            !!(
-              doc?.igniteAI?.assessmentId ||
-              doc?.igniteAIAssessmentId
-            )
-        ).length;
-
-
-
-      /* =====================================================
-         PERCENTAGES
-      ====================================================== */
-
-      const paymentPct =
-        pct(
-          paidParticipants,
-          totalParticipants
-        );
-
-
-      const reviewPct =
-        pct(
-          completedReviews,
-          totalPresenters
-        );
-
-
-      const abstractPct =
-        pct(
-          abstractReady,
-          totalPresenters
-        );
-
-
-      const registrationPct =
-        totalParticipants
-          ? 100
-          : 0;
-
-
-      const aiPct =
-        pct(
-          igniteAIReady,
-          totalPresenters
-        );
-
-
-      const photoPct =
-        pct(
-          photoReady,
-          totalParticipants
-        );
-
-
-
-      /*
-       * Overall readiness:
-       *
-       * Average of operational categories.
-       */
-
-      const overall =
-        Math.round(
-          (
-            registrationPct +
-            paymentPct +
-            abstractPct +
-            reviewPct +
-            aiPct +
-            photoPct
-          ) / 6
-        );
-
-
-
-      /* =====================================================
-         WRITE KPI DATA
-      ====================================================== */
-
-      el(
-        'mrdParticipantsValue'
-      ).textContent =
-        totalParticipants;
-
-
-      el(
-        'mrdParticipantsCount'
-      ).textContent =
-        `${totalParticipants} total`;
-
-
-      el(
-        'mrdPaymentValue'
-      ).textContent =
-        `${paymentPct}%`;
-
-
-      el(
-        'mrdPaymentCount'
-      ).textContent =
-        `${paidParticipants} / ${totalParticipants}`;
-
-
-      el(
-        'mrdReviewValue'
-      ).textContent =
-        `${reviewPct}%`;
-
-
-      el(
-        'mrdReviewCount'
-      ).textContent =
-        `${completedReviews} / ${totalPresenters}`;
-
-
-      el(
-        'mrdAbstractValue'
-      ).textContent =
-        `${abstractPct}%`;
-
-
-      el(
-        'mrdAbstractCount'
-      ).textContent =
-        `${abstractReady} / ${totalPresenters}`;
-
-
-
-      /* =====================================================
-         OVERALL RING
-      ====================================================== */
-
-      el(
-        'mrdRing'
-      ).style.setProperty(
-        '--percentage',
-        overall
-      );
-
-
-      el(
-        'mrdRingPercent'
-      ).textContent =
-        `${overall}%`;
-
-
-      el(
-        'mrdCollapsedScore'
-      ).textContent =
-        `Readiness ${overall}%`;
-
-
-
-      /* =====================================================
-         READINESS BARS
-      ====================================================== */
-
-      setBar(
-        'mrdBarRegistration',
-        'mrdBarRegistrationValue',
-        registrationPct
-      );
-
-
-      setBar(
-        'mrdBarPayment',
-        'mrdBarPaymentValue',
-        paymentPct
-      );
-
-
-      setBar(
-        'mrdBarAbstract',
-        'mrdBarAbstractValue',
-        abstractPct
-      );
-
-
-      setBar(
-        'mrdBarReview',
-        'mrdBarReviewValue',
-        reviewPct
-      );
-
-
-      setBar(
-        'mrdBarAI',
-        'mrdBarAIValue',
-        aiPct
-      );
-
-
-      setBar(
-        'mrdBarPhoto',
-        'mrdBarPhotoValue',
-        photoPct
-      );
-
-
-
-      /* =====================================================
-         PRESENTATION READINESS
-      ====================================================== */
-
-      el(
-        'mrdOralReady'
-      ).textContent =
-        oralReady;
-
-
-      el(
-        'mrdPosterReady'
-      ).textContent =
-        posterReady;
-
-
-      el(
-        'mrdPresentationReadyTotal'
-      ).textContent =
-        presentationReadyTotal;
-
-
-      el(
-        'mrdOralPending'
-      ).textContent =
-        oralPending;
-
-
-      el(
-        'mrdPosterPending'
-      ).textContent =
-        posterPending;
-
-
-      el(
-        'mrdPresentationPendingTotal'
-      ).textContent =
-        presentationPendingTotal;
-
-
-
-      /* =====================================================
-         ATTENTION REQUIRED
-      ====================================================== */
-
-      el(
-        'mrdUnpaid'
-      ).textContent =
-        Math.max(
-          totalParticipants -
-          paidParticipants,
-          0
-        );
-
-
-      el(
-        'mrdAbstractPending'
-      ).textContent =
-        Math.max(
-          totalPresenters -
-          abstractReady,
-          0
-        );
-
-
-      el(
-        'mrdReviewPending'
-      ).textContent =
-        Math.max(
-          totalPresenters -
-          completedReviews,
-          0
-        );
-
-
-      el(
-        'mrdPhotoPending'
-      ).textContent =
-        Math.max(
-          totalParticipants -
-          photoReady,
-          0
-        );
-
-
-
-      /* =====================================================
-         TIMESTAMP
-      ====================================================== */
-
-      el(
-        'mrdLastUpdated'
-      ).textContent =
-        'Last refreshed: ' +
-        new Date().toLocaleString();
-
-
-
-      dashboardLoaded = true;
+      await loadReadinessDashboard();
 
     }
-    catch(err){
+  );
 
-      console.error(
-        'MTERMS readiness dashboard:',
-        err
-      );
-
-
-      el(
-        'mrdLastUpdated'
-      ).textContent =
-        'Unable to load readiness data: ' +
-        (
-          err?.message ||
-          'Unknown error'
-        );
-
-    }
-    finally{
-
-      refreshButton.disabled =
-        false;
-
-
-      refreshButton.textContent =
-        'Refresh Readiness';
-
-    }
-
-  }
-
-
-
-  /* =========================================================
-     BAR HELPER
-  ========================================================= */
-
-  function setBar(
-    barId,
-    textId,
-    percentage
-  ){
-
-    const value =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          safeNumber(
-            percentage
-          )
-        )
-      );
-
-
-    el(
-      barId
-    ).style.width =
-      value + '%';
-
-
-    el(
-      textId
-    ).textContent =
-      value + '%';
-
-  }
+}
 
 
 })();
