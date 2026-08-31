@@ -906,44 +906,86 @@
 }
 
 
+/* Main 2-column warning layout */
 .mrd-alert-list{
   display:grid;
-
-  grid-template-columns:
-    repeat(2,minmax(0,1fr));
-
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
 }
 
 
+/*
+  Each warning + its expandable detail area
+  lives inside this wrapper.
+*/
+.mrd-attention-item{
+  min-width:0;
+}
+
+
+/*
+  When opened, make the item span the whole dashboard width.
+  This gives the participant table enough room.
+*/
+.mrd-attention-item.mrd-expanded{
+  grid-column:1 / -1;
+}
+
+
+/* Clickable warning header */
 .mrd-alert{
+  width:100%;
+
   min-height:64px;
 
   display:flex;
-  align-items:flex-start;
-  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
 
-  padding:12px 13px;
+  padding:12px 14px;
 
   background:#fffaf3;
 
   border:1px solid #fed7aa;
-
   border-radius:11px;
+
+  cursor:pointer;
+
+  text-align:left;
+  font-family:inherit;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
 }
 
 
-.mrd-alert.mrd-alert-clear{
-  background:#f6fef9;
+.mrd-alert:hover{
+  background:#fff7ed;
 
-  border-color:#bbf7d0;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.05);
+
+  transform:translateY(-1px);
+}
+
+
+.mrd-alert-left{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+
+  min-width:0;
 }
 
 
 .mrd-alert-icon{
   font-size:17px;
-
   line-height:1.2;
+  flex-shrink:0;
 }
 
 
@@ -956,17 +998,241 @@
 }
 
 
-.mrd-alert-clear .mrd-alert-number{
+.mrd-alert-text{
+  font-size:.84rem;
+  line-height:1.45;
+
+  color:#475467;
+}
+
+
+.mrd-alert-action{
+  flex-shrink:0;
+
+  font-size:.76rem;
+  font-weight:850;
+
+  color:#0B2A6B;
+
+  white-space:nowrap;
+}
+
+
+/* Green state when nothing is outstanding */
+.mrd-alert.mrd-alert-clear{
+  background:#f6fef9;
+
+  border-color:#bbf7d0;
+}
+
+
+.mrd-alert.mrd-alert-clear .mrd-alert-number{
   color:#15803d;
 }
 
 
-.mrd-alert-text{
+/* =========================================================
+   EXPANDED ATTENTION DETAILS
+========================================================= */
+
+.mrd-alert-detail{
+  display:none;
+
+  margin-top:8px;
+
+  padding:14px;
+
+  background:#ffffff;
+
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.04);
+}
+
+
+.mrd-attention-item.mrd-expanded
+.mrd-alert-detail{
+  display:block;
+}
+
+
+.mrd-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:10px;
+}
+
+
+.mrd-detail-title{
+  font-size:.88rem;
+
+  font-weight:900;
+
+  color:#101828;
+}
+
+
+.mrd-detail-count{
+  font-size:.78rem;
+
+  color:#667085;
+
+  font-weight:700;
+}
+
+
+/* Scrollable table wrapper */
+.mrd-detail-table-wrap{
+  overflow:auto;
+
+  border:1px solid #eaecf0;
+  border-radius:9px;
+}
+
+
+/* Expanded participant table */
+.mrd-detail-table{
+  width:100%;
+
+  border-collapse:collapse;
+
+  font-size:.8rem;
+}
+
+
+.mrd-detail-table thead th{
+  background:#f8fafc !important;
+
+  color:#344054 !important;
+
+  font-weight:850 !important;
+
+  white-space:nowrap;
+}
+
+
+.mrd-detail-table th,
+.mrd-detail-table td{
+  padding:9px 10px;
+
+  text-align:left;
+
+  border-bottom:
+    1px solid #eaecf0;
+
+  vertical-align:top;
+}
+
+
+.mrd-detail-table tbody tr:last-child td{
+  border-bottom:none;
+}
+
+
+.mrd-detail-code{
+  white-space:nowrap;
+
+  font-weight:800;
+
+  color:#0B2A6B;
+}
+
+
+.mrd-detail-status{
+  font-weight:800;
+
+  color:#b45309;
+}
+
+
+.mrd-detail-empty{
+  padding:16px;
+
+  text-align:center;
+
+  color:#15803d;
+
   font-size:.84rem;
 
-  line-height:1.45;
+  font-weight:800;
 
-  color:#475467;
+  background:#f6fef9;
+
+  border:1px solid #bbf7d0;
+
+  border-radius:9px;
+}
+
+
+/* Show all button */
+.mrd-show-all{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-top:10px;
+
+  padding:7px 11px;
+
+  border:1px solid #d0d5dd;
+  border-radius:8px;
+
+  background:#fff;
+
+  color:#344054;
+
+  font-family:inherit;
+  font-size:.78rem;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+
+.mrd-show-all:hover{
+  background:#f8fafc;
+}
+
+
+/* Small explanatory text inside detail */
+.mrd-detail-note{
+  margin-top:9px;
+
+  font-size:.75rem;
+  line-height:1.5;
+
+  color:#667085;
+}
+
+
+@media(max-width:760px){
+
+  .mrd-alert-list{
+    grid-template-columns:1fr;
+  }
+
+
+  .mrd-attention-item.mrd-expanded{
+    grid-column:auto;
+  }
+
+
+  .mrd-alert{
+    align-items:flex-start;
+  }
+
+
+  .mrd-alert-action{
+    font-size:.7rem;
+  }
+
 }
 
 
@@ -1880,209 +2146,377 @@
 
 
         <!-- =================================================
-             ATTENTION REQUIRED
-        ================================================== -->
+     ATTENTION REQUIRED
+================================================== -->
 
-        <div class="mrd-panel mrd-attention">
+<div class="mrd-panel mrd-attention">
 
 
-          <div class="mrd-panel-title">
-            Attention Required
+  <div class="mrd-panel-title">
+    Attention Required
+  </div>
+
+  <div class="mrd-panel-sub">
+    Live items that may require committee follow-up.
+    Select an item to view the affected participants.
+  </div>
+
+
+  <div
+    id="mrdAlertList"
+    class="mrd-alert-list">
+
+
+    <!-- =================================================
+         PAYMENT
+    ================================================== -->
+
+    <div
+      id="mrdItemPayment"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertPayment"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailPayment"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertPaymentIcon"
+            class="mrd-alert-icon">
+            ⚠
           </div>
 
-          <div class="mrd-panel-sub">
-            Live items that may require committee follow-up
-          </div>
+          <div>
 
+            <span
+              id="mrdUnpaid"
+              class="mrd-alert-number">
+              —
+            </span>
 
-          <div class="mrd-alert-list">
-
-
-            <!-- PAYMENT -->
-
-            <div
-              id="mrdAlertPayment"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertPaymentIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdUnpaid"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  registrations are not marked as paid
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- ABSTRACT -->
-
-            <div
-              id="mrdAlertAbstract"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertAbstractIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdAbstractPending"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  presenters do not have an uploaded abstract
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- PANEL REVIEW -->
-
-            <div
-              id="mrdAlertReview"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertReviewIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdReviewPending"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  presenter panel reviews are not yet submitted
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- IGNITE AI -->
-
-            <div
-              id="mrdAlertAI"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertAIIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdAIPending"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  latest presenter abstracts do not yet have a current Ignite AI assessment
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- PHOTO -->
-
-            <div
-              id="mrdAlertPhoto"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertPhotoIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdPhotoPending"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  registered participants do not have an ID/profile photo upload
-                </span>
-
-              </div>
-
-            </div>
-
-
-
-            <!-- PRESENTATION -->
-
-            <div
-              id="mrdAlertPresentation"
-              class="mrd-alert">
-
-              <div
-                id="mrdAlertPresentationIcon"
-                class="mrd-alert-icon">
-                ⚠
-              </div>
-
-              <div>
-
-                <span
-                  id="mrdPresentationPendingAlert"
-                  class="mrd-alert-number">
-                  —
-                </span>
-
-                <span class="mrd-alert-text">
-                  Oral/Poster presenters are missing their required presentation material
-                </span>
-
-              </div>
-
-            </div>
-
+            <span class="mrd-alert-text">
+              registrations are not marked as paid
+            </span>
 
           </div>
-
 
         </div>
 
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
 
+      </button>
+
+
+      <div
+        id="mrdDetailPayment"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailPaymentContent"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         ABSTRACT
+    ================================================== -->
+
+    <div
+      id="mrdItemAbstract"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertAbstract"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailAbstract"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertAbstractIcon"
+            class="mrd-alert-icon">
+            ⚠
+          </div>
+
+          <div>
+
+            <span
+              id="mrdAbstractPending"
+              class="mrd-alert-number">
+              —
+            </span>
+
+            <span class="mrd-alert-text">
+              presenters do not have an uploaded abstract
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
+
+      </button>
+
+
+      <div
+        id="mrdDetailAbstract"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailAbstractContent"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PANEL REVIEW
+    ================================================== -->
+
+    <div
+      id="mrdItemReview"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertReview"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailReview"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertReviewIcon"
+            class="mrd-alert-icon">
+            ⚠
+          </div>
+
+          <div>
+
+            <span
+              id="mrdReviewPending"
+              class="mrd-alert-number">
+              —
+            </span>
+
+            <span class="mrd-alert-text">
+              presenter panel reviews are not yet submitted
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
+
+      </button>
+
+
+      <div
+        id="mrdDetailReview"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailReviewContent"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         IGNITE AI
+    ================================================== -->
+
+    <div
+      id="mrdItemAI"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertAI"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailAI"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertAIIcon"
+            class="mrd-alert-icon">
+            ⚠
+          </div>
+
+          <div>
+
+            <span
+              id="mrdAIPending"
+              class="mrd-alert-number">
+              —
+            </span>
+
+            <span class="mrd-alert-text">
+              latest presenter abstracts do not yet have a current Ignite AI assessment
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
+
+      </button>
+
+
+      <div
+        id="mrdDetailAI"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailAIContent"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PHOTO
+    ================================================== -->
+
+    <div
+      id="mrdItemPhoto"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertPhoto"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailPhoto"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertPhotoIcon"
+            class="mrd-alert-icon">
+            ⚠
+          </div>
+
+          <div>
+
+            <span
+              id="mrdPhotoPending"
+              class="mrd-alert-number">
+              —
+            </span>
+
+            <span class="mrd-alert-text">
+              registered participants do not have an ID/profile photo upload
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
+
+      </button>
+
+
+      <div
+        id="mrdDetailPhoto"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailPhotoContent"></div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PRESENTATION MATERIAL
+    ================================================== -->
+
+    <div
+      id="mrdItemPresentation"
+      class="mrd-attention-item">
+
+      <button
+        id="mrdAlertPresentation"
+        class="mrd-alert mrd-alert-toggle"
+        type="button"
+        data-detail="mrdDetailPresentation"
+        aria-expanded="false">
+
+        <div class="mrd-alert-left">
+
+          <div
+            id="mrdAlertPresentationIcon"
+            class="mrd-alert-icon">
+            ⚠
+          </div>
+
+          <div>
+
+            <span
+              id="mrdPresentationPendingAlert"
+              class="mrd-alert-number">
+              —
+            </span>
+
+            <span class="mrd-alert-text">
+              Oral/Poster presenters are missing their required presentation material
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="mrd-alert-action">
+          View details ▼
+        </div>
+
+      </button>
+
+
+      <div
+        id="mrdDetailPresentation"
+        class="mrd-alert-detail">
+
+        <div id="mrdDetailPresentationContent"></div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>
 
         <!-- =================================================
              FOOTER
@@ -2947,6 +3381,912 @@ function setAlertState(
 
 }
 
+/* =========================================================
+   ATTENTION DETAIL DATA
+========================================================= */
+
+const ATTENTION_PREVIEW_LIMIT = 15;
+
+
+/*
+  Stores the real participant rows belonging to each
+  Attention Required category.
+*/
+const attentionDetailData = {
+
+  payment:[],
+
+  abstract:[],
+
+  review:[],
+
+  ai:[],
+
+  photo:[],
+
+  presentation:[]
+
+};
+
+
+
+function registrationCode(registration){
+
+  return String(
+    registration?.regCode || ''
+  );
+
+}
+
+
+
+function participantName(registration){
+
+  const first =
+    String(
+      registration
+        ?.personal
+        ?.firstName ||
+      ''
+    ).trim();
+
+
+  const last =
+    String(
+      registration
+        ?.personal
+        ?.lastName ||
+      ''
+    ).trim();
+
+
+  return (
+    `${first} ${last}`.trim() ||
+    'Unnamed participant'
+  );
+
+}
+
+
+
+function presentationTypeLabel(
+  registration
+){
+
+  const type =
+    String(
+      registration
+        ?.program
+        ?.type ||
+      ''
+    );
+
+
+  if(type === 'talk'){
+    return 'Oral';
+  }
+
+
+  if(type === 'poster'){
+    return 'Poster';
+  }
+
+
+  if(type === 'workshop'){
+    return 'Workshop';
+  }
+
+
+  return 'Not assigned';
+
+}
+
+
+
+/* =========================================================
+   IGNITE AI PENDING REASON
+========================================================= */
+
+function getIgniteAIPendingReason(
+  registration
+){
+
+  const latestAbstract =
+    pickLatestUpload(
+      registration,
+      'abstract'
+    );
+
+
+  if(!latestAbstract){
+
+    return {
+      abstract:'—',
+      reason:'No abstract uploaded'
+    };
+
+  }
+
+
+  const abstractLabel =
+    latestAbstract.version
+      ? `v${latestAbstract.version}`
+      : latestAbstract.filename ||
+        'Uploaded';
+
+
+  const assessments =
+    Array.isArray(
+      registration
+        ?.igniteAIAssessments
+    )
+      ? registration
+          .igniteAIAssessments
+      : [];
+
+
+  if(!assessments.length){
+
+    return {
+      abstract:
+        abstractLabel,
+
+      reason:
+        'Not assessed'
+    };
+
+  }
+
+
+  /*
+    There is at least one previous assessment,
+    but hasCurrentIgniteAssessment() already returned false.
+
+    This normally means that a newer abstract has been
+    uploaded after the previous Ignite AI assessment.
+  */
+
+  return {
+    abstract:
+      abstractLabel,
+
+    reason:
+      'New/current abstract not yet assessed'
+  };
+
+}
+
+
+
+/* =========================================================
+   DETAIL TABLE BUILDER
+========================================================= */
+
+function buildAttentionTable({
+  title,
+  rows,
+  columns,
+  dataKey,
+  showAll = false,
+  note = ''
+}){
+
+  const total =
+    rows.length;
+
+
+  if(!total){
+
+    return `
+      <div class="mrd-detail-empty">
+        ✓ No outstanding records for this item.
+      </div>
+    `;
+
+  }
+
+
+  const visibleRows =
+    showAll
+      ? rows
+      : rows.slice(
+          0,
+          ATTENTION_PREVIEW_LIMIT
+        );
+
+
+  const headerHtml =
+    columns
+      .map(
+        column =>
+          `<th>${escapeHtml(column.label)}</th>`
+      )
+      .join('');
+
+
+  const bodyHtml =
+    visibleRows
+      .map(
+        row => {
+
+          return `
+            <tr>
+
+              ${
+                columns
+                  .map(
+                    column => {
+
+                      const value =
+                        typeof column.value ===
+                        'function'
+                          ? column.value(row)
+                          : row[
+                              column.value
+                            ];
+
+
+                      const cssClass =
+                        column.className
+                          ? ` class="${column.className}"`
+                          : '';
+
+
+                      return `
+                        <td${cssClass}>
+                          ${escapeHtml(
+                            value ?? '—'
+                          )}
+                        </td>
+                      `;
+
+                    }
+                  )
+                  .join('')
+              }
+
+            </tr>
+          `;
+
+        }
+      )
+      .join('');
+
+
+  const showAllButton =
+    !showAll &&
+    total >
+      ATTENTION_PREVIEW_LIMIT
+      ? `
+          <button
+            type="button"
+            class="mrd-show-all"
+            data-show-all="${escapeHtml(dataKey)}">
+
+            Show All ${total}
+
+          </button>
+        `
+      : '';
+
+
+  return `
+
+    <div class="mrd-detail-header">
+
+      <div class="mrd-detail-title">
+        ${escapeHtml(title)}
+      </div>
+
+      <div class="mrd-detail-count">
+
+        Showing
+        ${visibleRows.length}
+        of
+        ${total}
+
+      </div>
+
+    </div>
+
+
+    <div class="mrd-detail-table-wrap">
+
+      <table class="mrd-detail-table">
+
+        <thead>
+
+          <tr>
+            ${headerHtml}
+          </tr>
+
+        </thead>
+
+        <tbody>
+          ${bodyHtml}
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    ${showAllButton}
+
+
+    ${
+      note
+        ? `
+            <div class="mrd-detail-note">
+              ${escapeHtml(note)}
+            </div>
+          `
+        : ''
+    }
+
+  `;
+
+}
+
+
+
+/* =========================================================
+   RENDER INDIVIDUAL DETAIL LISTS
+========================================================= */
+
+function renderPaymentDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailPaymentContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Registrations Pending Payment',
+
+      rows:
+        attentionDetailData.payment,
+
+      dataKey:
+        'payment',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(row),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Participant',
+          value:
+            row =>
+              participantName(row)
+        },
+        {
+          label:'Category',
+          value:
+            row =>
+              row?.category || '—'
+        },
+        {
+          label:'Payment Status',
+          value:
+            row =>
+              row
+                ?.payment
+                ?.status ||
+              'pending',
+          className:
+            'mrd-detail-status'
+        }
+      ]
+
+    });
+
+}
+
+
+
+function renderAbstractDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailAbstractContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Presenters Without Uploaded Abstract',
+
+      rows:
+        attentionDetailData.abstract,
+
+      dataKey:
+        'abstract',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(row),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Presenter',
+          value:
+            row =>
+              participantName(row)
+        },
+        {
+          label:'Presentation',
+          value:
+            row =>
+              presentationTypeLabel(row)
+        },
+        {
+          label:'Abstract Status',
+          value:
+            () =>
+              'No abstract uploaded',
+          className:
+            'mrd-detail-status'
+        }
+      ]
+
+    });
+
+}
+
+
+
+function renderReviewDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailReviewContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Panel Reviews Not Yet Submitted',
+
+      rows:
+        attentionDetailData.review,
+
+      dataKey:
+        'review',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(
+                row.registration
+              ),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Presenter',
+          value:
+            row =>
+              participantName(
+                row.registration
+              )
+        },
+        {
+          label:'Reviewer',
+          value:
+            row =>
+              row.review
+                ?.assignedReviewerUsername ||
+              'Not assigned'
+        },
+        {
+          label:'Review Status',
+          value:
+            row => {
+
+              const status =
+                normalizeStatus(
+                  row.review
+                    ?.status
+                );
+
+
+              if(!status){
+                return 'Not assigned';
+              }
+
+
+              if(status === 'draft'){
+                return 'Draft';
+              }
+
+
+              if(status === 'assigned'){
+                return 'Assigned';
+              }
+
+
+              return status;
+
+            },
+          className:
+            'mrd-detail-status'
+        }
+      ]
+
+    });
+
+}
+
+
+
+function renderAIDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailAIContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Ignite AI Assessments Outstanding',
+
+      rows:
+        attentionDetailData.ai,
+
+      dataKey:
+        'ai',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(row),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Presenter',
+          value:
+            row =>
+              participantName(row)
+        },
+        {
+          label:'Latest Abstract',
+          value:
+            row =>
+              getIgniteAIPendingReason(
+                row
+              ).abstract
+        },
+        {
+          label:'Ignite AI Status',
+          value:
+            row =>
+              getIgniteAIPendingReason(
+                row
+              ).reason,
+          className:
+            'mrd-detail-status'
+        }
+      ],
+
+      note:
+        'A previous Ignite AI assessment does not count as current if the presenter has subsequently uploaded a newer abstract.'
+
+    });
+
+}
+
+
+
+function renderPhotoDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailPhotoContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Participants Without ID / Profile Photo',
+
+      rows:
+        attentionDetailData.photo,
+
+      dataKey:
+        'photo',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(row),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Participant',
+          value:
+            row =>
+              participantName(row)
+        },
+        {
+          label:'Category',
+          value:
+            row =>
+              row?.category || '—'
+        },
+        {
+          label:'Photo Status',
+          value:
+            () =>
+              'No profile photo uploaded',
+          className:
+            'mrd-detail-status'
+        }
+      ]
+
+    });
+
+}
+
+
+
+function renderPresentationDetails(
+  showAll = false
+){
+
+  el(
+    'mrdDetailPresentationContent'
+  ).innerHTML =
+    buildAttentionTable({
+
+      title:
+        'Presenters Missing Presentation Material',
+
+      rows:
+        attentionDetailData.presentation,
+
+      dataKey:
+        'presentation',
+
+      showAll,
+
+      columns:[
+        {
+          label:'Registration Code',
+          value:
+            row =>
+              registrationCode(row),
+          className:
+            'mrd-detail-code'
+        },
+        {
+          label:'Presenter',
+          value:
+            row =>
+              participantName(row)
+        },
+        {
+          label:'Presentation Type',
+          value:
+            row =>
+              presentationTypeLabel(row)
+        },
+        {
+          label:'Required Material',
+          value:
+            row =>
+              isOralPresenter(row)
+                ? 'Slides PDF'
+                : 'Poster file',
+          className:
+            'mrd-detail-status'
+        }
+      ],
+
+      note:
+        'Oral presenters require a slides upload. Poster presenters require a poster upload.'
+
+    });
+
+}
+
+
+
+/* =========================================================
+   RENDER ALL ATTENTION DETAILS
+========================================================= */
+
+function renderAllAttentionDetails(){
+
+  renderPaymentDetails();
+
+  renderAbstractDetails();
+
+  renderReviewDetails();
+
+  renderAIDetails();
+
+  renderPhotoDetails();
+
+  renderPresentationDetails();
+
+}
+
+
+
+/* =========================================================
+   EXPAND / COLLAPSE INTERACTION
+========================================================= */
+
+function setupAttentionDetailInteractions(){
+
+  const list =
+    el(
+      'mrdAlertList'
+    );
+
+
+  if(!list){
+    return;
+  }
+
+
+  list.addEventListener(
+    'click',
+    event => {
+
+
+      /*
+       * SHOW ALL
+       */
+
+      const showAllButton =
+        event.target.closest(
+          '[data-show-all]'
+        );
+
+
+      if(showAllButton){
+
+        event.stopPropagation();
+
+
+        const key =
+          showAllButton.dataset
+            .showAll;
+
+
+        if(key === 'payment'){
+          renderPaymentDetails(true);
+        }
+
+
+        if(key === 'abstract'){
+          renderAbstractDetails(true);
+        }
+
+
+        if(key === 'review'){
+          renderReviewDetails(true);
+        }
+
+
+        if(key === 'ai'){
+          renderAIDetails(true);
+        }
+
+
+        if(key === 'photo'){
+          renderPhotoDetails(true);
+        }
+
+
+        if(key === 'presentation'){
+          renderPresentationDetails(true);
+        }
+
+
+        return;
+      }
+
+
+
+      /*
+       * EXPAND / COLLAPSE
+       */
+
+      const button =
+        event.target.closest(
+          '.mrd-alert-toggle'
+        );
+
+
+      if(!button){
+        return;
+      }
+
+
+      const item =
+        button.closest(
+          '.mrd-attention-item'
+        );
+
+
+      if(!item){
+        return;
+      }
+
+
+      const opening =
+        !item.classList
+          .contains(
+            'mrd-expanded'
+          );
+
+
+      item.classList.toggle(
+        'mrd-expanded',
+        opening
+      );
+
+
+      button.setAttribute(
+        'aria-expanded',
+        opening
+          ? 'true'
+          : 'false'
+      );
+
+
+      const action =
+        button.querySelector(
+          '.mrd-alert-action'
+        );
+
+
+      if(action){
+
+        action.textContent =
+          opening
+            ? 'Hide details ▲'
+            : 'View details ▼';
+
+      }
+
+    }
+  );
+
+}     
 
 
 /* =========================================================
@@ -3822,6 +5162,180 @@ async function loadReadinessDashboard(){
         0
       );
 
+     /* =====================================================
+   BUILD DETAIL LISTS FOR ATTENTION REQUIRED
+====================================================== */
+
+
+/*
+  PAYMENT PENDING
+*/
+attentionDetailData.payment =
+  registrations.filter(
+    registration =>
+      normalizeStatus(
+        registration
+          ?.payment
+          ?.status
+      ) !== 'paid'
+  );
+
+
+
+/*
+  ABSTRACT PENDING
+
+  Presenter with no actual abstract upload.
+*/
+attentionDetailData.abstract =
+  presenters.filter(
+    registration =>
+      !hasUpload(
+        registration,
+        'abstract'
+      )
+  );
+
+
+
+/*
+  PANEL REVIEW PENDING
+
+  Keep both registration and review information
+  so the expanded view can show:
+  - Not assigned
+  - Assigned
+  - Draft
+*/
+attentionDetailData.review =
+  presenters
+    .filter(
+      registration => {
+
+        const registrationId =
+          String(
+            registration?._id ||
+            ''
+          );
+
+
+        return (
+          normalizeStatus(
+            reviewMap[
+              registrationId
+            ]?.status
+          ) !==
+          'submitted'
+        );
+
+      }
+    )
+    .map(
+      registration => {
+
+        const registrationId =
+          String(
+            registration?._id ||
+            ''
+          );
+
+
+        return {
+
+          registration,
+
+          review:
+            reviewMap[
+              registrationId
+            ] ||
+            null
+
+        };
+
+      }
+    );
+
+
+
+/*
+  IGNITE AI PENDING
+
+  Latest abstract must have a matching CURRENT
+  Ignite AI assessment.
+*/
+attentionDetailData.ai =
+  presenters.filter(
+    registration =>
+      !hasCurrentIgniteAssessment(
+        registration
+      )
+  );
+
+
+
+/*
+  ID / PROFILE PHOTO PENDING
+*/
+attentionDetailData.photo =
+  registrations.filter(
+    registration =>
+      !hasUpload(
+        registration,
+        'profilePhoto'
+      )
+  );
+
+
+
+/*
+  PRESENTATION MATERIAL PENDING
+
+  Only confirmed Oral / Poster presenters are included.
+*/
+attentionDetailData.presentation =
+  registrations.filter(
+    registration => {
+
+      if(
+        isOralPresenter(
+          registration
+        )
+      ){
+
+        return !hasUpload(
+          registration,
+          'slides'
+        );
+
+      }
+
+
+      if(
+        isPosterPresenter(
+          registration
+        )
+      ){
+
+        return !hasUpload(
+          registration,
+          'poster'
+        );
+
+      }
+
+
+      return false;
+
+    }
+  );
+
+
+
+/*
+  Populate the expandable detail tables.
+*/
+renderAllAttentionDetails();  
+
 
     setAlertState(
       'mrdAlertPayment',
@@ -4076,6 +5590,14 @@ if(refreshButton){
 
 }
 
+
+/* =========================================================
+   ATTENTION REQUIRED EXPAND / COLLAPSE
+========================================================= */
+
+setupAttentionDetailInteractions();
+
+     
 
 })();
 </script>
