@@ -466,6 +466,73 @@
     }
 
 
+/* ------------------------------------------
+   Participant agenda action
+   ------------------------------------------ */
+
+.mterms-countdown-participant{
+  margin-top: 18px;
+  padding-top: 17px;
+
+  border-top: 1px solid rgba(255,255,255,.10);
+
+  font-family: Inter, Arial, sans-serif;
+}
+
+
+.mterms-countdown-participant-label{
+  margin-bottom: 10px;
+
+  color: rgba(255,255,255,.58);
+
+  font-size: .76rem;
+  font-weight: 500;
+
+  letter-spacing: .03em;
+}
+
+
+.mterms-countdown-agenda{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 10px 20px;
+
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.06);
+
+  color: #ffffff !important;
+
+  border: 1px solid rgba(255,255,255,.30);
+
+  text-decoration: none !important;
+
+  font-size: .82rem;
+  font-weight: 700;
+
+  letter-spacing: .025em;
+
+  backdrop-filter: blur(4px);
+
+  transition:
+    background .22s ease,
+    border-color .22s ease,
+    transform .22s ease;
+}
+
+
+.mterms-countdown-agenda:hover{
+  background: rgba(255,255,255,.12);
+
+  border-color: rgba(255,255,255,.55);
+
+  transform: translateY(-2px);
+}
+
     /* ------------------------------------------
        Event started / finished modes
        ------------------------------------------ */
@@ -593,6 +660,22 @@
 
         font-size: .84rem;
       }
+
+      .mterms-countdown-participant{
+  margin-top: 16px;
+  padding-top: 15px;
+}
+
+
+.mterms-countdown-agenda{
+  width: calc(100% - 34px);
+
+  max-width: 330px;
+
+  padding: 11px 16px;
+
+  font-size: .78rem;
+}
 
     }
 
@@ -779,19 +862,38 @@
       </div>
 
 
-      <div class="mterms-countdown-action">
+<div class="mterms-countdown-action">
 
-        <a
-          class="mterms-countdown-register"
-          href="https://www.mterms2026.com/register.html"
-          target="_blank"
-          rel="noopener">
+  <a
+    class="mterms-countdown-register"
+    href="https://www.mterms2026.com/register.html"
+    target="_blank"
+    rel="noopener">
 
-          REGISTER FOR MTERMS 2026
+    REGISTER FOR MTERMS 2026
 
-        </a>
+  </a>
 
-      </div>
+</div>
+
+
+<div class="mterms-countdown-participant">
+
+  <div class="mterms-countdown-participant-label">
+    Already attending MTERMS 2026?
+  </div>
+
+<a
+  class="mterms-countdown-agenda"
+  href="public/mterms%20final%20schedule.pdf"
+  target="_blank"
+  rel="noopener">
+
+  DOWNLOAD CONFERENCE AGENDA
+
+</a>
+
+</div>
 
     </div>
 
