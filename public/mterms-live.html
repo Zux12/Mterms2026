@@ -613,6 +613,15 @@ main{
   border:1px solid #e8ecf2;
   padding:10px 11px;
   border-radius:11px;
+
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 42px;
+  gap:8px;
+  align-items:start;
+}
+
+.parallel-session-main{
+  min-width:0;
 }
 
 .parallel-label{
@@ -626,6 +635,25 @@ main{
   font-weight:700;
   margin-top:2px;
   line-height:1.35;
+}
+
+.parallel-star{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#aab2bf;
+  font-size:19px;
+  display:grid;
+  place-items:center;
+  padding:0;
+}
+
+.parallel-star.saved{
+  color:#e49a00;
+  background:#fff7e3;
+  border-color:#ffe2a1;
 }
 
 /* =========================
@@ -3196,6 +3224,10 @@ function renderProgramme(){
   target.innerHTML =
     list.map(item => {
 
+      const isParallel =
+        Array.isArray(item.parallel) &&
+        item.parallel.length > 0;
+
       const isSaved =
         saved.includes(item.id);
 
@@ -3216,47 +3248,72 @@ function renderProgramme(){
 
               ${
                 item.detail
-                ? `<div class="program-detail">
-                    ${escapeHTML(item.detail)}
-                  </div>`
-                : ``
+                  ? `<div class="program-detail">
+                      ${escapeHTML(item.detail)}
+                    </div>`
+                  : ``
               }
 
             </div>
 
-            <button
-              class="star-btn ${isSaved ? "saved" : ""}"
-              type="button"
-              data-save="${escapeHTML(item.id)}"
-              aria-label="Save session"
-            >
-              ${isSaved ? "★" : "☆"}
-            </button>
+            ${
+              !isParallel
+                ? `
+                  <button
+                    class="star-btn ${isSaved ? "saved" : ""}"
+                    type="button"
+                    data-save="${escapeHTML(item.id)}"
+                    aria-label="Save session"
+                  >
+                    ${isSaved ? "★" : "☆"}
+                  </button>
+                `
+                : `<div></div>`
+            }
 
           </div>
 
           ${
-            item.parallel
-            ? `
-              <div class="parallel-list">
+            isParallel
+              ? `
+                <div class="parallel-list">
 
-                ${item.parallel.map(p => `
-                  <div class="parallel-session">
+                  ${item.parallel.map(p => {
 
-                    <div class="parallel-label">
-                      ${escapeHTML(p.label)}
-                    </div>
+                    const parallelSaved =
+                      saved.includes(p.id);
 
-                    <div class="parallel-title">
-                      ${escapeHTML(p.title)}
-                    </div>
+                    return `
+                      <div class="parallel-session">
 
-                  </div>
-                `).join("")}
+                        <div class="parallel-session-main">
 
-              </div>
-            `
-            : ``
+                          <div class="parallel-label">
+                            ${escapeHTML(p.label)}
+                          </div>
+
+                          <div class="parallel-title">
+                            ${escapeHTML(p.title)}
+                          </div>
+
+                        </div>
+
+                        <button
+                          class="parallel-star ${parallelSaved ? "saved" : ""}"
+                          type="button"
+                          data-save="${escapeHTML(p.id)}"
+                          aria-label="Save ${escapeHTML(p.label)}"
+                        >
+                          ${parallelSaved ? "★" : "☆"}
+                        </button>
+
+                      </div>
+                    `;
+                  }).join("")}
+
+                </div>
+              `
+              : ``
           }
 
         </div>
@@ -3270,7 +3327,9 @@ function renderProgramme(){
 
       button.addEventListener("click",()=>{
 
-        toggleSchedule(button.dataset.save);
+        toggleSchedule(
+          button.dataset.save
+        );
 
       });
 
@@ -3345,13 +3404,92 @@ function renderMySchedule(){
   const ids =
     getSchedule();
 
-  const list =
-    PROGRAMME.filter(item =>
+  const list = [];
+
+
+  PROGRAMME.forEach(item => {
+
+    /*
+      Normal single programme item
+    */
+    if(
+      !item.parallel &&
       ids.includes(item.id)
-    );
+    ){
+
+      list.push({
+        id:item.id,
+        day:item.day,
+        date:item.date,
+        start:item.start,
+        end:item.end,
+        title:item.title,
+        parentTitle:"",
+        isParallel:false
+      });
+
+    }
+
+
+    /*
+      Individual selections inside
+      parallel programme blocks
+    */
+    if(
+      Array.isArray(item.parallel)
+    ){
+
+      item.parallel.forEach(p => {
+
+        if(ids.includes(p.id)){
+
+          list.push({
+            id:p.id,
+            day:item.day,
+            date:item.date,
+            start:item.start,
+            end:item.end,
+            title:p.label + " — " + p.title,
+            parentTitle:item.title,
+            isParallel:true
+          });
+
+        }
+
+      });
+
+    }
+
+  });
+
+
+  /*
+    Sort selections in conference order
+  */
+  list.sort((a,b)=>{
+
+    const aTime =
+      malaysiaTimestamp(
+        a.date,
+        a.start
+      );
+
+    const bTime =
+      malaysiaTimestamp(
+        b.date,
+        b.start
+      );
+
+    return aTime - bTime;
+
+  });
+
 
   const target =
-    document.getElementById("myScheduleList");
+    document.getElementById(
+      "myScheduleList"
+    );
+
 
   if(!list.length){
 
@@ -3377,12 +3515,19 @@ function renderMySchedule(){
       `;
 
     const btn =
-      document.getElementById("emptyProgrammeBtn");
+      document.getElementById(
+        "emptyProgrammeBtn"
+      );
 
     if(btn){
-      btn.addEventListener("click",()=>{
-        goToPage("programme");
-      });
+
+      btn.addEventListener(
+        "click",
+        ()=>{
+          goToPage("programme");
+        }
+      );
+
     }
 
     return;
@@ -3391,11 +3536,37 @@ function renderMySchedule(){
 
   target.innerHTML =
     list.map(item => `
+
       <div class="schedule-item">
 
         <div class="schedule-date">
-          Day ${item.day} · ${item.date === "2026-09-07" ? "7 September" : "8 September"}
+          Day ${item.day}
+          ·
+          ${
+            item.date === "2026-09-07"
+              ? "7 September"
+              : "8 September"
+          }
         </div>
+
+        ${
+          item.parentTitle
+            ? `
+              <div
+                style="
+                  margin-top:5px;
+                  font-size:10px;
+                  color:var(--muted);
+                  font-weight:800;
+                  text-transform:uppercase;
+                  letter-spacing:.06em;
+                "
+              >
+                ${escapeHTML(item.parentTitle)}
+              </div>
+            `
+            : ``
+        }
 
         <div class="schedule-title">
           ${escapeHTML(item.title)}
@@ -3407,8 +3578,46 @@ function renderMySchedule(){
           ${formatTime24to12(item.end)}
         </div>
 
+        <div style="margin-top:9px;">
+
+          <button
+            class="btn btn-outline"
+            type="button"
+            data-remove-schedule="${escapeHTML(item.id)}"
+            style="
+              min-height:38px;
+              padding:0 11px;
+              font-size:12px;
+            "
+          >
+            Remove
+          </button>
+
+        </div>
+
       </div>
+
     `).join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-remove-schedule]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          toggleSchedule(
+            button.dataset.removeSchedule
+          );
+
+        }
+      );
+
+    });
 
 }
 
