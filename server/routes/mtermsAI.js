@@ -822,8 +822,68 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const knowledge =
-      await getRelevantKnowledge(message);
+/*
+=========================================================
+RESOLVE RELATIVE DATES USING MALAYSIA TIME
+=========================================================
+*/
+
+const malaysiaNow = new Date(
+  new Date().toLocaleString('en-US', {
+    timeZone: 'Asia/Kuala_Lumpur'
+  })
+);
+
+const malaysiaToday =
+  malaysiaNow.toLocaleDateString('en-MY', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+const tomorrowDate =
+  new Date(malaysiaNow);
+
+tomorrowDate.setDate(
+  tomorrowDate.getDate() + 1
+);
+
+const malaysiaTomorrow =
+  tomorrowDate.toLocaleDateString('en-MY', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+let resolvedMessage =
+  message.trim();
+
+resolvedMessage =
+  resolvedMessage.replace(
+    /\btoday\b/gi,
+    `today (${malaysiaToday})`
+  );
+
+resolvedMessage =
+  resolvedMessage.replace(
+    /\btomorrow\b/gi,
+    `tomorrow (${malaysiaTomorrow})`
+  );
+
+console.log(
+  '[MTERMS AI] Original:',
+  message
+);
+
+console.log(
+  '[MTERMS AI] Date resolved:',
+  resolvedMessage
+);
+
+const knowledge =
+  await getRelevantKnowledge(resolvedMessage);
 
     const safeHistory =
       Array.isArray(history)
@@ -842,10 +902,10 @@ router.post('/', async (req, res) => {
         content: buildSystemPrompt(knowledge)
       },
       ...safeHistory,
-      {
-        role: 'user',
-        content: message.trim()
-      }
+{
+  role: 'user',
+  content: resolvedMessage
+}
     ];
 
     const groqResponse =
