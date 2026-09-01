@@ -746,11 +746,11 @@
         content: answer
       });
 
-      addMessage(
-        'assistant',
-        escapeHTML(answer),
-        true
-      );
+addMessage(
+  'assistant',
+  formatAIResponse(answer),
+  true
+);
 
     } catch (error) {
 
@@ -783,6 +783,18 @@
      SECURITY
      ============================================================ */
 
+function formatAIResponse(value) {
+  let text = escapeHTML(value);
+
+  // Bold: **text**
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Italic: *text*
+  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  return text;
+}
+   
   function escapeHTML(value) {
 
     return String(value)
