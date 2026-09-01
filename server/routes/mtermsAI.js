@@ -2,6 +2,8 @@
 
 const express = require('express');
 const router = express.Router();
+const MTERMS_KNOWLEDGE =
+  require('../knowledge/mtermsKnowledge');
 
 const GROQ_API_URL =
   'https://api.groq.com/openai/v1/chat/completions';
@@ -27,6 +29,699 @@ const KNOWLEDGE_PAGES = [
 
 let pageCache = {};
 const CACHE_DURATION = 10 * 60 * 1000;
+/* =========================================================
+   STRUCTURED DIRECT ANSWERS
+   These do NOT use Groq
+   ========================================================= */
+
+function getDirectAnswer(message) {
+
+  const q = message
+    .toLowerCase()
+    .trim();
+
+
+  /*
+   VENUE
+  */
+
+  if (
+    /\b(where.*(conference|mterms)|venue|where is mterms|where will mterms|where is the event)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.venue,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   CONFERENCE DATES
+  */
+
+  if (
+    /\b(when is mterms|conference dates?|what date|which date|mterms date)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.dates,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   CPD
+  */
+
+  if (
+    /\b(cpd|cpd points?|how many points?)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.cpd,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   TIMEZONE
+  */
+
+  if (
+    /\b(timezone|time zone|utc\+?8|malaysia time)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.timezone,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   CONTACT
+  */
+
+  if (
+    /\b(contact|email|secretariat email|who do i email)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.contact,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   DAY 1 REGISTRATION
+  */
+
+  if (
+    /\b(day 1 registration|registration.*7 september|registration.*monday)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.day1Registration,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   DAY 1 END
+  */
+
+  if (
+    /\b(what time.*day 1.*end|when.*day 1.*end|day 1.*finish|day 1.*adjourn)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.day1End,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   DAY 2 REGISTRATION
+  */
+
+  if (
+    /\b(day 2 registration|registration.*8 september|registration.*tuesday)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.day2Registration,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   CONFERENCE END
+  */
+
+  if (
+    /\b(when.*conference.*end|what time.*conference.*end|when does mterms end|closing time)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.conferenceEnd,
+      source: 'structured'
+    };
+
+  }
+
+
+  /*
+   IGNITEINNO / PLATFORM DEVELOPER
+  */
+
+  if (
+    /\b(igniteinno|ignite inno|who built|who developed|who made.*(website|platform|ai)|developer.*(website|platform|ai)|technology partner)\b/i.test(q)
+  ) {
+
+    return {
+      answer:
+        MTERMS_KNOWLEDGE.directAnswers.platformDeveloper +
+        ` More information is available at ${MTERMS_KNOWLEDGE.igniteInno.website}`,
+      source: 'structured'
+    };
+
+  }
+
+
+  return null;
+}
+
+/* =========================================================
+   STRUCTURED KNOWLEDGE RETRIEVAL
+   ========================================================= */
+
+function getStructuredKnowledge(message) {
+
+  const q =
+    message.toLowerCase();
+
+  const results = [];
+
+
+  /* -------------------------------------------------------
+     CONFERENCE BASICS
+     ------------------------------------------------------- */
+
+  if (
+    /mterms|conference|venue|date|cpd|theme|tesma|uitm/i.test(q)
+  ) {
+
+    results.push(
+      `CONFERENCE:
+Name: ${MTERMS_KNOWLEDGE.conference.fullName}
+Theme: ${MTERMS_KNOWLEDGE.conference.theme}
+Dates: ${MTERMS_KNOWLEDGE.conference.dates.display}
+Venue: ${MTERMS_KNOWLEDGE.conference.venue.name}, ${MTERMS_KNOWLEDGE.conference.venue.city}
+CPD Points: ${MTERMS_KNOWLEDGE.conference.cpdPoints}
+Timezone: ${MTERMS_KNOWLEDGE.conference.timezone.utcOffset}`
+    );
+
+  }
+
+
+  /* -------------------------------------------------------
+     SPEAKERS
+     ------------------------------------------------------- */
+
+  const speakerKeywords =
+    /speaker|keynote|plenary|professor|prof\b|dr\b|who is|who are|john mason|bassem|chua|ika|tamadon|kyung|sean ng/i;
+
+  if (speakerKeywords.test(q)) {
+
+    const matchedSpeakers =
+      MTERMS_KNOWLEDGE.speakers.filter(speaker => {
+
+        const searchable = [
+          speaker.name,
+          ...(speaker.aliases || []),
+          ...(speaker.category || []),
+          ...(speaker.expertise || []),
+          speaker.mtermsTalk || ''
+        ]
+          .join(' ')
+          .toLowerCase();
+
+        /*
+         If user asks generally about speakers,
+         include everyone.
+        */
+
+        if (
+          /who are.*speaker|speakers|keynote speakers|plenary speakers/i.test(q)
+        ) {
+          return true;
+        }
+
+        return q
+          .split(/\s+/)
+          .some(word =>
+            word.length >= 4 &&
+            searchable.includes(word)
+          );
+
+      });
+
+
+    if (matchedSpeakers.length) {
+
+      results.push(
+        'MTERMS SPEAKERS:\n' +
+        matchedSpeakers
+          .slice(0, 8)
+          .map(speaker => {
+
+            return [
+              `Name: ${speaker.name}`,
+              speaker.category
+                ? `Role: ${speaker.category.join(', ')}`
+                : '',
+              speaker.institution
+                ? `Institution: ${speaker.institution}`
+                : '',
+              speaker.position
+                ? `Position: ${speaker.position}`
+                : '',
+              speaker.mtermsTalk
+                ? `MTERMS Talk: ${speaker.mtermsTalk}`
+                : '',
+              speaker.programme
+                ? `Programme: ${speaker.programme}`
+                : '',
+              speaker.expertise
+                ? `Expertise: ${speaker.expertise.join(', ')}`
+                : ''
+            ]
+              .filter(Boolean)
+              .join('\n');
+
+          })
+          .join('\n\n')
+      );
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     PROGRAMME
+     ------------------------------------------------------- */
+
+  if (
+    /program|programme|agenda|schedule|session|day 1|day 2|7 september|8 september|morning|afternoon|evening|lunch|keynote|plenary|symposium|oral presentation|syis|agm|forum/i.test(q)
+  ) {
+
+    const programmeLines = [];
+
+    const days = [
+      MTERMS_KNOWLEDGE.programme.day1,
+      MTERMS_KNOWLEDGE.programme.day2
+    ];
+
+
+    for (const day of days) {
+
+      /*
+       If user specifically asks one date/day,
+       don't send the other day unnecessarily.
+      */
+
+      if (
+        /day 1|7 september/i.test(q) &&
+        day.date !== '2026-09-07'
+      ) {
+        continue;
+      }
+
+      if (
+        /day 2|8 september/i.test(q) &&
+        day.date !== '2026-09-08'
+      ) {
+        continue;
+      }
+
+
+      programmeLines.push(
+        `${day.label} — ${day.day}, ${day.date}`
+      );
+
+
+      for (const event of day.events) {
+
+        const eventText = [
+          event.start,
+          event.end ? `–${event.end}` : '',
+          event.title,
+          event.speaker || '',
+          event.topic || '',
+          event.theme || '',
+          ...(event.tracks || []).map(
+            track =>
+              `${track.code}: ${track.title}`
+          )
+        ]
+          .join(' ')
+          .toLowerCase();
+
+
+        /*
+         For a general programme question,
+         include the full selected day.
+        */
+
+        const generalProgrammeQuestion =
+          /full programme|programme|program|agenda|schedule|day 1|day 2|7 september|8 september/i.test(q);
+
+
+        const matchingEvent =
+          q
+            .split(/\s+/)
+            .some(word =>
+              word.length >= 4 &&
+              eventText.includes(word)
+            );
+
+
+        if (
+          generalProgrammeQuestion ||
+          matchingEvent
+        ) {
+
+          let line =
+            `${event.start}`;
+
+          if (event.end) {
+            line += `–${event.end}`;
+          }
+
+          line +=
+            ` — ${event.title}`;
+
+          if (event.speaker) {
+            line +=
+              ` — ${event.speaker}`;
+          }
+
+          if (event.topic) {
+            line +=
+              ` — ${event.topic}`;
+          }
+
+          if (event.theme) {
+            line +=
+              ` — Theme: ${event.theme}`;
+          }
+
+          programmeLines.push(line);
+
+
+          if (event.tracks) {
+
+            event.tracks.forEach(track => {
+
+              programmeLines.push(
+                `  ${track.code}: ${track.title}`
+              );
+
+            });
+
+          }
+
+        }
+
+      }
+
+    }
+
+
+    if (programmeLines.length) {
+
+      results.push(
+        'FINAL MTERMS 2026 PROGRAMME:\n' +
+        programmeLines.join('\n')
+      );
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     SCIENTIFIC TOPICS
+     ------------------------------------------------------- */
+
+  const topicAliases = {
+
+    organoid:
+      'organoids',
+
+    organoids:
+      'organoids',
+
+    brain:
+      'brainDevelopment',
+
+    stem:
+      'stemCells',
+
+    "stem cell":
+      'stemCells',
+
+    biomaterial:
+      'biomaterials',
+
+    biomaterials:
+      'biomaterials',
+
+    hydrogel:
+      'hydrogels',
+
+    hydrogels:
+      'hydrogels',
+
+    exosome:
+      'extracellularVesicles',
+
+    exosomes:
+      'extracellularVesicles',
+
+    vesicle:
+      'extracellularVesicles',
+
+    "extracellular vesicle":
+      'extracellularVesicles',
+
+    biofabrication:
+      'biofabrication',
+
+    nerve:
+      'nerveRegeneration',
+
+    vascular:
+      'vascularRegeneration',
+
+    "clinical trial":
+      'clinicalTrials',
+
+    "smart technology":
+      'smartMedicalTechnology',
+
+    "3d printing":
+      'threeDPrinting',
+
+    "3d-printed":
+      'threeDPrinting'
+
+  };
+
+
+  for (
+    const [phrase, mapKey]
+    of Object.entries(topicAliases)
+  ) {
+
+    if (
+      q.includes(phrase) &&
+      MTERMS_KNOWLEDGE.topicMap[mapKey]
+    ) {
+
+      results.push(
+        `TOPIC MATCH — ${phrase}:\n` +
+        MTERMS_KNOWLEDGE.topicMap[mapKey]
+          .map(item =>
+            `${item.date}, ${item.time} — ${item.event}`
+          )
+          .join('\n')
+      );
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     PRESENTER GUIDELINES
+     ------------------------------------------------------- */
+
+  if (
+    /oral presenter|oral presentation|presentation guideline|presenting orally|presentation time/i.test(q)
+  ) {
+
+    results.push(
+      `ORAL PRESENTATION GUIDELINES:
+Presentation: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.presentationTime}
+Q&A: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.questionAnswerTime}
+Total: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.plannedPresentationLength}
+Upload deadline: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.uploadDeadline}
+Requirement: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.acceptance}
+Award information: ${MTERMS_KNOWLEDGE.presenterGuidelines.oral.award}`
+    );
+
+  }
+
+
+  if (
+    /poster|poster presenter|poster presentation|poster size|poster guideline/i.test(q)
+  ) {
+
+    results.push(
+      `POSTER PRESENTATION GUIDELINES:
+Orientation: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.orientation}
+Dimensions: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.dimensions}
+Maximum file size: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.maximumFileSize}
+Formats: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.requiredFormats.join(', ')}
+Upload deadline: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.uploadDeadline}
+Finalist presentation: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.finalistPresentationTime}
+Finalist Q&A: ${MTERMS_KNOWLEDGE.presenterGuidelines.poster.finalistQuestionAnswerTime}`
+    );
+
+  }
+
+
+  /* -------------------------------------------------------
+     PREVIOUS MTERMS
+     ------------------------------------------------------- */
+
+  if (
+    /previous mterms|past mterms|history of mterms|earlier mterms|mterms 2014|mterms 2016|mterms 2022|mterms 2024/i.test(q)
+  ) {
+
+    const historyText =
+      MTERMS_KNOWLEDGE.previousMterms.editions
+        .map(item => {
+
+          const parts = [
+            `${item.edition}${ordinal(item.edition)} MTERMS — ${item.year}`
+          ];
+
+          if (item.dates) {
+            parts.push(item.dates);
+          }
+
+          if (item.theme) {
+            parts.push(
+              `Theme: ${item.theme}`
+            );
+          }
+
+          if (item.venue) {
+            parts.push(
+              `Venue: ${item.venue}`
+            );
+          }
+
+          if (item.format) {
+            parts.push(
+              `Format: ${item.format}`
+            );
+          }
+
+          if (item.locations) {
+            parts.push(
+              item.locations.join('; ')
+            );
+          }
+
+          return parts.join(' — ');
+
+        })
+        .join('\n');
+
+
+    results.push(
+      `MTERMS HISTORY:
+${MTERMS_KNOWLEDGE.previousMterms.seriesBackground}
+
+${historyText}`
+    );
+
+  }
+
+
+  /* -------------------------------------------------------
+     IGNITEINNO
+     ------------------------------------------------------- */
+
+  if (
+    /igniteinno|ignite inno|digital platform|who built|who developed|technology partner/i.test(q)
+  ) {
+
+    results.push(
+      `IGNITEINNO VENTURES:
+Role: ${MTERMS_KNOWLEDGE.igniteInno.mtermsRole}
+Contributions: ${MTERMS_KNOWLEDGE.igniteInno.contributions.join('; ')}
+AI credit: ${MTERMS_KNOWLEDGE.igniteInno.aiCredit}
+Website: ${MTERMS_KNOWLEDGE.igniteInno.website}`
+    );
+
+  }
+
+
+  return results
+    .filter(Boolean)
+    .join('\n\n');
+
+}
+
+
+function ordinal(number) {
+
+  const n =
+    Number(number);
+
+  if (
+    n % 100 >= 11 &&
+    n % 100 <= 13
+  ) {
+    return 'th';
+  }
+
+  switch (n % 10) {
+
+    case 1:
+      return 'st';
+
+    case 2:
+      return 'nd';
+
+    case 3:
+      return 'rd';
+
+    default:
+      return 'th';
+
+  }
+
+}
 
 /* =========================================================
    MTERMS DATE CONTROL
@@ -810,6 +1505,21 @@ You help participants with:
 
 IMPORTANT RULES:
 
+KNOWLEDGE PRIORITY:
+
+The section labelled "AUTHORITATIVE STRUCTURED MTERMS KNOWLEDGE"
+has the highest priority.
+
+It contains curated conference facts and the FINAL MTERMS 2026 agenda.
+
+If structured knowledge conflicts with information retrieved from
+the MTERMS website, ALWAYS use the structured knowledge.
+
+The website knowledge is supplementary only.
+
+Never override a final programme time from the structured knowledge
+with an older or tentative programme time from a website page.
+
 1. For MTERMS-specific factual information, only use the approved knowledge below.
 
 2. Never invent:
@@ -871,6 +1581,29 @@ router.post('/', async (req, res) => {
       });
     }
 
+/*
+=========================================================
+STRUCTURED DIRECT ANSWER
+=========================================================
+*/
+
+const directAnswer =
+  getDirectAnswer(message);
+
+if (directAnswer) {
+
+  console.log(
+    '[MTERMS AI] Direct structured answer'
+  );
+
+  return res.json({
+    ok: true,
+    answer: directAnswer.answer,
+    mode: 'direct'
+  });
+
+}
+    
     if (!process.env.GROQ_API_KEY) {
       console.error('[MTERMS AI] GROQ_API_KEY missing');
 
@@ -1013,8 +1746,34 @@ console.log(
   resolvedMessage
 );
 
-const knowledge =
+/*
+=========================================================
+STRUCTURED + WEBSITE KNOWLEDGE
+=========================================================
+*/
+
+const structuredKnowledge =
+  getStructuredKnowledge(resolvedMessage);
+
+const websiteKnowledge =
   await getRelevantKnowledge(resolvedMessage);
+
+const knowledge = `
+
+==================================================
+AUTHORITATIVE STRUCTURED MTERMS KNOWLEDGE
+==================================================
+
+${structuredKnowledge || 'No specific structured record matched.'}
+
+
+==================================================
+SUPPLEMENTARY OFFICIAL WEBSITE KNOWLEDGE
+==================================================
+
+${websiteKnowledge || 'No additional website information matched.'}
+
+`;
 
     const safeHistory =
       Array.isArray(history)
