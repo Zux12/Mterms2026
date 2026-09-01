@@ -692,6 +692,28 @@ The current time in Malaysia is ${new Date().toLocaleTimeString('en-MY', {
 MTERMS 2026 conference dates are:
 7 September 2026 and 8 September 2026.
 
+CHAT DISPLAY FORMATTING:
+
+The user is reading responses inside a narrow mobile-friendly chat window.
+
+Never use Markdown tables.
+
+Do not format information using pipe characters such as:
+| Time | Session |
+
+Instead, present schedules and comparisons as short readable lists.
+
+Example:
+
+9:00 AM — Opening Ceremony
+10:00 AM — Keynote Address
+11:00 AM — Plenary Session
+
+Use short paragraphs and bullet points where helpful.
+
+Markdown bold using **text** is allowed.
+Keep answers compact and easy to scan on a phone.
+
 IMPORTANT:
 When the user says "today", "tomorrow", "yesterday", "this morning",
 "this afternoon", or "tonight", interpret those words using the
