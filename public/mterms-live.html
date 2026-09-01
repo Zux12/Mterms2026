@@ -3139,8 +3139,37 @@ function renderTimeline(list,now){
       const done =
         now >= end;
 
-      const savedItem =
-        saved.includes(item.id);
+let savedLabel = "";
+
+if(item.parallel){
+
+  const selectedParallel =
+    item.parallel.filter(p =>
+      saved.includes(p.id)
+    );
+
+  if(selectedParallel.length === 1){
+
+    savedLabel =
+      selectedParallel[0].label +
+      " IN MY SCHEDULE";
+
+  }else if(selectedParallel.length > 1){
+
+    savedLabel =
+      selectedParallel
+        .map(p => p.label)
+        .join(", ") +
+      " IN MY SCHEDULE";
+
+  }
+
+}else if(saved.includes(item.id)){
+
+  savedLabel =
+    "MY SCHEDULE";
+
+}
 
       return `
         <div class="
@@ -3174,12 +3203,15 @@ function renderTimeline(list,now){
                 ? `<span class="tag live">LIVE NOW</span>`
                 : ``
               }
-
-              ${
-                savedItem
-                ? `<span class="tag saved">★ MY SCHEDULE</span>`
-                : ``
-              }
+${
+  savedLabel
+    ? `
+      <span class="tag saved">
+        ★ ${escapeHTML(savedLabel)}
+      </span>
+    `
+    : ``
+}
 
               ${
                 item.parallel
