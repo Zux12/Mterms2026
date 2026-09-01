@@ -3651,16 +3651,18 @@ function renderMySchedule(){
       ids.includes(item.id)
     ){
 
-      list.push({
-        id:item.id,
-        day:item.day,
-        date:item.date,
-        start:item.start,
-        end:item.end,
-        title:item.title,
-        parentTitle:"",
-        isParallel:false
-      });
+list.push({
+  id:item.id,
+  day:item.day,
+  date:item.date,
+  start:item.start,
+  end:item.end,
+  title:item.title,
+  parentTitle:"",
+  isParallel:false,
+  hasDiscussion:
+    !["Break","General"].includes(item.type)
+});
 
     }
 
@@ -3677,16 +3679,17 @@ function renderMySchedule(){
 
         if(ids.includes(p.id)){
 
-          list.push({
-            id:p.id,
-            day:item.day,
-            date:item.date,
-            start:item.start,
-            end:item.end,
-            title:p.label + " — " + p.title,
-            parentTitle:item.title,
-            isParallel:true
-          });
+list.push({
+  id:p.id,
+  day:item.day,
+  date:item.date,
+  start:item.start,
+  end:item.end,
+  title:p.label + " — " + p.title,
+  parentTitle:item.title,
+  isParallel:true,
+  hasDiscussion:true
+});
 
         }
 
@@ -3833,22 +3836,48 @@ ${
     : ``
 }
 
-<div style="margin-top:9px;">
+<div
+  style="
+    margin-top:9px;
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+  "
+>
 
-          <button
-            class="btn btn-outline"
-            type="button"
-            data-remove-schedule="${escapeHTML(item.id)}"
-            style="
-              min-height:38px;
-              padding:0 11px;
-              font-size:12px;
-            "
-          >
-            Remove
-          </button>
+  ${
+    item.hasDiscussion
+      ? `
+        <button
+          class="btn btn-soft"
+          type="button"
+          data-schedule-discuss="${escapeHTML(item.id)}"
+          style="
+            min-height:38px;
+            padding:0 11px;
+            font-size:12px;
+          "
+        >
+          💬 Open Discussion
+        </button>
+      `
+      : ``
+  }
 
-        </div>
+  <button
+    class="btn btn-outline"
+    type="button"
+    data-remove-schedule="${escapeHTML(item.id)}"
+    style="
+      min-height:38px;
+      padding:0 11px;
+      font-size:12px;
+    "
+  >
+    Remove
+  </button>
+
+</div>
 
       </div>
 
@@ -3873,6 +3902,26 @@ ${
       );
 
     });
+
+
+  target
+  .querySelectorAll(
+    "[data-schedule-discuss]"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      ()=>{
+
+        goToDiscussionRoom(
+          button.dataset.scheduleDiscuss
+        );
+
+      }
+    );
+
+  });
 
 }
 
