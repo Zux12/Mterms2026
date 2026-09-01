@@ -198,55 +198,469 @@ function scorePage(question, page, content) {
 
 
 /* =========================================================
-   GET ONLY RELEVANT KNOWLEDGE
+   SMART TEXT CHUNKING
+   ========================================================= */
+
+function createChunks(text, chunkSize = 1400) {
+  if (!text) return [];
+
+  /*
+   Split primarily around paragraphs/lines.
+  */
+  const paragraphs = text
+    .split(/\n+/)
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+
+  let current = '';
+
+  for (const paragraph of paragraphs) {
+
+    if (
+      current.length + paragraph.length >
+      chunkSize
+    ) {
+
+      if (current.trim()) {
+        chunks.push(current.trim());
+      }
+
+      current = paragraph;
+
+    } else {
+
+      current +=
+        (current ? '\n' : '') +
+        paragraph;
+
+    }
+  }
+
+  if (current.trim()) {
+    chunks.push(current.trim());
+  }
+
+  return chunks;
+}
+
+
+/* =========================================================
+   NORMALISE WORDS
+   ========================================================= */
+
+function getQuestionWords(question) {
+
+  const stopWords = new Set([
+    'the',
+    'and',
+    'are',
+    'who',
+    'what',
+    'when',
+    'where',
+    'which',
+    'how',
+    'does',
+    'this',
+    'that',
+    'with',
+    'from',
+    'have',
+    'about',
+    'should',
+    'would',
+    'could',
+    'tell',
+    'please',
+    'mterms',
+    '2026'
+  ]);
+
+  return question
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(word =>
+      word.length >= 3 &&
+      !stopWords.has(word)
+    );
+}
+
+
+/* =========================================================
+   SCORE INDIVIDUAL CHUNKS
+   ========================================================= */
+
+function scoreChunk(
+  question,
+  page,
+  chunk
+) {
+
+  const q =
+    question.toLowerCase();
+
+  const lowerChunk =
+    chunk.toLowerCase();
+
+  const words =
+    getQuestionWords(question);
+
+  let score = 0;
+
+
+  /*
+   Keyword matches
+  */
+
+  for (const word of words) {
+
+    const occurrences =
+      lowerChunk.split(word).length - 1;
+
+    score +=
+      occurrences * 3;
+
+  }
+
+
+  /*
+   Exact phrase bonus
+  */
+
+  const meaningfulPhrase =
+    words.join(' ');
+
+  if (
+    meaningfulPhrase.length > 4 &&
+    lowerChunk.includes(meaningfulPhrase)
+  ) {
+
+    score += 20;
+
+  }
+
+
+  /*
+   SPEAKERS
+  */
+
+  if (
+    /speaker|speakers|keynote|plenary|professor|prof\b|dr\b|who is|who are/i.test(q)
+  ) {
+
+    if (
+      /speaker|keynote|plenary|professor|prof\b|dr\b/i.test(lowerChunk)
+    ) {
+      score += 25;
+    }
+
+    if (page.name === 'Speakers') {
+      score += 15;
+    }
+
+    if (page.name === 'Homepage') {
+      score += 8;
+    }
+
+  }
+
+
+  /*
+   PROGRAMME
+  */
+
+  if (
+    /program|programme|agenda|schedule|session|morning|afternoon|lunch|today|tomorrow|time|7 september|8 september/i.test(q)
+  ) {
+
+    if (page.name === 'Programme') {
+      score += 25;
+    }
+
+    if (
+      /session|programme|program|am|pm|september/i.test(lowerChunk)
+    ) {
+      score += 10;
+    }
+
+  }
+
+
+  /*
+   VENUE
+  */
+
+  if (
+    /venue|where|location|concorde|hotel|room|hall/i.test(q)
+  ) {
+
+    if (page.name === 'Venue') {
+      score += 30;
+    }
+
+    if (
+      /concorde|shah alam|venue|hotel/i.test(lowerChunk)
+    ) {
+      score += 15;
+    }
+
+  }
+
+
+  /*
+   REGISTRATION
+  */
+
+  if (
+    /register|registration|fee|fees|payment|price|cost/i.test(q)
+  ) {
+
+    if (page.name === 'Registration') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   DEADLINES / ABSTRACTS
+  */
+
+  if (
+    /deadline|abstract|submission|submit|due date/i.test(q)
+  ) {
+
+    if (page.name === 'Deadlines') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   WORKSHOP
+  */
+
+  if (/workshop/i.test(q)) {
+
+    if (page.name === 'Workshop') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   PUBLICATION
+  */
+
+  if (
+    /publication|publish|journal|paper|manuscript/i.test(q)
+  ) {
+
+    if (page.name === 'Publication') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   TRAVEL
+  */
+
+  if (
+    /travel|airport|grab|train|transport|drive|getting there/i.test(q)
+  ) {
+
+    if (page.name === 'Getting There') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   ACCOMMODATION
+  */
+
+  if (
+    /accommodation|stay|nearby hotel/i.test(q)
+  ) {
+
+    if (page.name === 'Accommodation') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   RESTAURANTS
+  */
+
+  if (
+    /restaurant|food|eat|makan|dinner|lunch place/i.test(q)
+  ) {
+
+    if (page.name === 'Restaurants') {
+      score += 30;
+    }
+
+  }
+
+
+  /*
+   CONTACT
+  */
+
+  if (
+    /contact|email|secretariat|organiser|organizer/i.test(q)
+  ) {
+
+    if (page.name === 'Contact') {
+      score += 30;
+    }
+
+  }
+
+
+  return score;
+}
+
+
+/* =========================================================
+   SMART KNOWLEDGE RETRIEVAL
    ========================================================= */
 
 async function getRelevantKnowledge(question) {
-  const loadedPages = [];
+
+  const candidates = [];
+
+
+  /*
+   Load every approved page from cache / website.
+  */
 
   for (const page of KNOWLEDGE_PAGES) {
-    const content = await loadPage(page);
+
+    const content =
+      await loadPage(page);
 
     if (!content) continue;
 
-    loadedPages.push({
-      ...page,
-      content,
-      score: scorePage(question, page, content)
+
+    /*
+     Break page into smaller meaningful sections.
+    */
+
+    const chunks =
+      createChunks(content);
+
+
+    chunks.forEach((chunk, index) => {
+
+      candidates.push({
+
+        pageName:
+          page.name,
+
+        url:
+          page.url,
+
+        chunkIndex:
+          index,
+
+        text:
+          chunk,
+
+        score:
+          scoreChunk(
+            question,
+            page,
+            chunk
+          )
+
+      });
+
     });
+
   }
 
-  loadedPages.sort((a, b) => b.score - a.score);
 
   /*
-   Keep only the top 3 most relevant pages.
+   Highest relevance first.
   */
-  const selected = loadedPages.slice(0, 3);
+
+  candidates.sort(
+    (a, b) =>
+      b.score - a.score
+  );
+
 
   /*
-   Limit each page excerpt to ~3500 chars.
-   This keeps us safely under Groq free-tier limits.
+   Take the best 5 sections from anywhere
+   on the MTERMS website.
   */
-  const knowledge = selected
-    .map(item => `
+
+  const selected =
+    candidates
+      .filter(item => item.score > 0)
+      .slice(0, 5);
+
+
+  /*
+   Fallback if question has no obvious match.
+  */
+
+  if (!selected.length) {
+
+    const homepage =
+      candidates.filter(
+        item =>
+          item.pageName === 'Homepage'
+      );
+
+    selected.push(
+      ...homepage.slice(0, 2)
+    );
+
+  }
+
+
+  const knowledge =
+    selected
+      .map(item => `
+
 ========================================
-SOURCE: ${item.name}
+SOURCE: ${item.pageName}
 URL: ${item.url}
+RELEVANCE SCORE: ${item.score}
 ========================================
 
-${item.content.substring(0, 3500)}
+${item.text}
+
 `)
-    .join('\n');
+      .join('\n');
+
 
   console.log(
-    '[MTERMS AI] Relevant sources:',
-    selected.map(x => `${x.name}(${x.score})`).join(', ')
+    '[MTERMS AI] Retrieved:',
+    selected
+      .map(item =>
+        `${item.pageName}#${item.chunkIndex}(${item.score})`
+      )
+      .join(', ')
   );
+
 
   console.log(
     '[MTERMS AI] Knowledge chars:',
     knowledge.length
   );
+
 
   return knowledge;
 }
