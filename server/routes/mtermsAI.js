@@ -28,6 +28,64 @@ const KNOWLEDGE_PAGES = [
 let pageCache = {};
 const CACHE_DURATION = 10 * 60 * 1000;
 
+/* =========================================================
+   MTERMS DATE CONTROL
+   Deterministic — does NOT depend on Groq
+   ========================================================= */
+
+const MTERMS_DAY_1 = '2026-09-07';
+const MTERMS_DAY_2 = '2026-09-08';
+
+
+function getMalaysiaDateISO() {
+
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date());
+
+  const values = {};
+
+  for (const part of parts) {
+    if (part.type !== 'literal') {
+      values[part.type] = part.value;
+    }
+  }
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+
+function getMalaysiaDateReadable() {
+
+  return new Intl.DateTimeFormat('en-MY', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(new Date());
+
+}
+
+
+/*
+Only intercept questions that depend on the CURRENT day/time.
+
+Normal questions such as:
+"Who are the keynote speakers?"
+still go to Groq.
+*/
+
+function isTodayQuestion(message) {
+
+  return /\b(today|right now|currently|now|this morning|this afternoon|this evening|tonight)\b/i
+    .test(message);
+
+}
+
 
 /* =========================================================
    CLEAN HTML
@@ -821,6 +879,79 @@ router.post('/', async (req, res) => {
         error: 'AI service is not configured.'
       });
     }
+
+
+/*
+=========================================================
+DETERMINISTIC TODAY HANDLING
+=========================================================
+*/
+
+const malaysiaDate =
+  getMalaysiaDateISO();
+
+const malaysiaDateReadable =
+  getMalaysiaDateReadable();
+
+
+if (isTodayQuestion(message)) {
+
+  /*
+   BEFORE CONFERENCE
+  */
+
+  if (malaysiaDate < MTERMS_DAY_1) {
+
+    return res.json({
+      ok: true,
+      answer:
+        `Today is **${malaysiaDateReadable}**. ` +
+        `MTERMS 2026 has not started yet. ` +
+        `The conference will be held on **7–8 September 2026** at Concorde Hotel, Shah Alam.`
+    });
+
+  }
+
+
+  /*
+   DURING CONFERENCE — allow Groq to answer
+  */
+
+  if (
+    malaysiaDate === MTERMS_DAY_1 ||
+    malaysiaDate === MTERMS_DAY_2
+  ) {
+
+    console.log(
+      '[MTERMS AI] Conference day detected:',
+      malaysiaDate
+    );
+
+    /*
+     Do nothing here.
+     The request continues down to Groq.
+    */
+
+  }
+
+
+  /*
+   AFTER CONFERENCE
+  */
+
+  if (malaysiaDate > MTERMS_DAY_2) {
+
+    return res.json({
+      ok: true,
+      answer:
+        `Today is **${malaysiaDateReadable}**. ` +
+        `MTERMS 2026 concluded on **8 September 2026**. ` +
+        `I can still help you with the conference programme, speakers and other MTERMS information.`
+    });
+
+  }
+
+}
 
 /*
 =========================================================
