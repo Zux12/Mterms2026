@@ -11,7 +11,8 @@
   if (window.__MTERMS_AI_V2_LOADED__) return;
   window.__MTERMS_AI_V2_LOADED__ = true;
 
-  const API_URL = '/api/mterms-ai';
+  const API_URL =
+  'https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-ai';
 
   const conversation = [];
 
