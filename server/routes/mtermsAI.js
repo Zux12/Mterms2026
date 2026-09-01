@@ -29,6 +29,827 @@ const KNOWLEDGE_PAGES = [
 
 let pageCache = {};
 const CACHE_DURATION = 10 * 60 * 1000;
+
+
+/* =========================================================
+   GROQ CAPACITY + QUEUE MANAGER
+   Protects the free API from bursts and rate-limit failures
+   ========================================================= */
+
+const GROQ_MAX_RPM = 30;
+
+/*
+Use 28 instead of the absolute 30 as a small safety margin.
+*/
+const GROQ_SAFE_RPM = 28;
+
+/*
+Maximum time a participant request is allowed to wait
+before we fall back to local MTERMS knowledge.
+*/
+const GROQ_MAX_QUEUE_WAIT_MS = 18000;
+
+/*
+Keep a tiny daily reserve to prevent several simultaneous
+requests from racing into the final few API calls.
+
+Change to 0 if you literally want to consume every last request.
+*/
+const GROQ_DAILY_RESERVE = 5;
+
+/*
+Estimated output reserve when deciding whether enough
+TPM capacity remains.
+*/
+const GROQ_OUTPUT_TOKEN_RESERVE = 600;
+
+
+/*
+Current known Groq capacity.
+
+These values are updated from Groq response headers.
+*/
+const groqCapacity = {
+
+  dailyRemaining: null,
+  dailyLimit: null,
+
+  tokenRemaining: null,
+  tokenLimit: null,
+
+  tokenResetAt: 0,
+  dailyResetAt: 0,
+
+  lastRequestAt: 0,
+
+  recentRequests: [],
+
+  totalQueued: 0,
+
+  fallbackMode: false,
+
+  lastStatusCode: null
+
+};
+
+
+/*
+One-at-a-time queue chain.
+
+This prevents 20 participants from all hitting Groq
+at exactly the same millisecond.
+*/
+let groqQueue = Promise.resolve();
+
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+/*
+Convert Groq reset strings such as:
+
+7.66s
+2m59.56s
+1h2m3s
+
+into milliseconds.
+*/
+function parseGroqDuration(value) {
+
+  if (!value) return 0;
+
+  const text =
+    String(value).trim().toLowerCase();
+
+  let totalMs = 0;
+
+  const hours =
+    text.match(/([\d.]+)h/);
+
+  const minutes =
+    text.match(/([\d.]+)m/);
+
+  const seconds =
+    text.match(/([\d.]+)s/);
+
+  if (hours) {
+    totalMs +=
+      parseFloat(hours[1]) *
+      60 * 60 * 1000;
+  }
+
+  if (minutes) {
+    totalMs +=
+      parseFloat(minutes[1]) *
+      60 * 1000;
+  }
+
+  if (seconds) {
+    totalMs +=
+      parseFloat(seconds[1]) *
+      1000;
+  }
+
+  return totalMs;
+}
+
+
+/*
+Very conservative token estimate.
+
+Actual tokenization varies, but characters / 4 is a useful
+approximation for deciding whether a request should wait.
+*/
+function estimateTokens(messages) {
+
+  const text =
+    messages
+      .map(item => item.content || '')
+      .join('\n');
+
+  return Math.ceil(
+    text.length / 4
+  );
+
+}
+
+
+/*
+Keep only request timestamps from the last 60 seconds.
+*/
+function cleanRecentRequests() {
+
+  const cutoff =
+    Date.now() - 60000;
+
+  groqCapacity.recentRequests =
+    groqCapacity.recentRequests.filter(
+      timestamp =>
+        timestamp > cutoff
+    );
+
+}
+
+
+/*
+Update our capacity information from Groq's official
+rate-limit response headers.
+*/
+function updateGroqCapacityFromHeaders(response) {
+
+  const now =
+    Date.now();
+
+
+  const dailyRemaining =
+    response.headers.get(
+      'x-ratelimit-remaining-requests'
+    );
+
+  const dailyLimit =
+    response.headers.get(
+      'x-ratelimit-limit-requests'
+    );
+
+  const tokenRemaining =
+    response.headers.get(
+      'x-ratelimit-remaining-tokens'
+    );
+
+  const tokenLimit =
+    response.headers.get(
+      'x-ratelimit-limit-tokens'
+    );
+
+  const tokenReset =
+    response.headers.get(
+      'x-ratelimit-reset-tokens'
+    );
+
+  const dailyReset =
+    response.headers.get(
+      'x-ratelimit-reset-requests'
+    );
+
+
+  if (dailyRemaining !== null) {
+
+    groqCapacity.dailyRemaining =
+      Number(dailyRemaining);
+
+  }
+
+
+  if (dailyLimit !== null) {
+
+    groqCapacity.dailyLimit =
+      Number(dailyLimit);
+
+  }
+
+
+  if (tokenRemaining !== null) {
+
+    groqCapacity.tokenRemaining =
+      Number(tokenRemaining);
+
+  }
+
+
+  if (tokenLimit !== null) {
+
+    groqCapacity.tokenLimit =
+      Number(tokenLimit);
+
+  }
+
+
+  if (tokenReset) {
+
+    groqCapacity.tokenResetAt =
+      now +
+      parseGroqDuration(tokenReset);
+
+  }
+
+
+  if (dailyReset) {
+
+    groqCapacity.dailyResetAt =
+      now +
+      parseGroqDuration(dailyReset);
+
+  }
+
+
+  groqCapacity.lastStatusCode =
+    response.status;
+
+
+  /*
+   If daily quota is nearly exhausted,
+   move automatically into fallback mode.
+  */
+
+  if (
+    Number.isFinite(
+      groqCapacity.dailyRemaining
+    ) &&
+    groqCapacity.dailyRemaining <=
+      GROQ_DAILY_RESERVE
+  ) {
+
+    groqCapacity.fallbackMode =
+      true;
+
+    console.warn(
+      '[MTERMS AI] Groq daily limit near exhaustion. ' +
+      'Switching to knowledge-only mode.'
+    );
+
+  }
+
+
+  console.log(
+    '[MTERMS AI] Groq capacity:',
+    {
+      dailyRemaining:
+        groqCapacity.dailyRemaining,
+
+      tokenRemaining:
+        groqCapacity.tokenRemaining,
+
+      recentRPM:
+        groqCapacity.recentRequests.length,
+
+      fallbackMode:
+        groqCapacity.fallbackMode
+    }
+  );
+
+}
+
+
+/*
+Determine how long we should wait before making
+the next Groq request.
+*/
+function calculateGroqWait(
+  estimatedInputTokens
+) {
+
+  const now =
+    Date.now();
+
+  cleanRecentRequests();
+
+
+  /*
+   DAILY LIMIT
+  */
+
+  if (
+    groqCapacity.fallbackMode
+  ) {
+
+    return {
+      fallback: true,
+      waitMs: 0,
+      reason: 'daily_limit'
+    };
+
+  }
+
+
+  if (
+    Number.isFinite(
+      groqCapacity.dailyRemaining
+    ) &&
+    groqCapacity.dailyRemaining <=
+      GROQ_DAILY_RESERVE
+  ) {
+
+    return {
+      fallback: true,
+      waitMs: 0,
+      reason: 'daily_limit'
+    };
+
+  }
+
+
+  /*
+   RPM PROTECTION
+
+   If we already sent 28 requests in the last minute,
+   wait until the oldest one leaves the rolling window.
+  */
+
+  if (
+    groqCapacity.recentRequests.length >=
+    GROQ_SAFE_RPM
+  ) {
+
+    const oldest =
+      groqCapacity.recentRequests[0];
+
+    const rpmWait =
+      (oldest + 60000) -
+      now +
+      250;
+
+    return {
+      fallback: false,
+      waitMs:
+        Math.max(250, rpmWait),
+      reason: 'rpm'
+    };
+
+  }
+
+
+  /*
+   TPM PROTECTION
+
+   If Groq told us that remaining tokens are lower
+   than this request needs, wait for token reset.
+  */
+
+  const requiredTokens =
+    estimatedInputTokens +
+    GROQ_OUTPUT_TOKEN_RESERVE;
+
+
+  if (
+    Number.isFinite(
+      groqCapacity.tokenRemaining
+    ) &&
+    groqCapacity.tokenRemaining <
+      requiredTokens
+  ) {
+
+    const tokenWait =
+      groqCapacity.tokenResetAt -
+      now +
+      250;
+
+    if (tokenWait > 0) {
+
+      return {
+        fallback: false,
+        waitMs: tokenWait,
+        reason: 'tokens'
+      };
+
+    }
+
+  }
+
+
+  /*
+   Smooth bursts.
+
+   With a 30 RPM limit, roughly one request every
+   two seconds is safe during sustained traffic.
+
+   We use ~2.1 seconds.
+  */
+
+  const minimumSpacing =
+    2100;
+
+  const sinceLast =
+    now -
+    groqCapacity.lastRequestAt;
+
+
+  if (
+    groqCapacity.lastRequestAt &&
+    sinceLast < minimumSpacing
+  ) {
+
+    return {
+      fallback: false,
+      waitMs:
+        minimumSpacing -
+        sinceLast,
+      reason: 'spacing'
+    };
+
+  }
+
+
+  return {
+    fallback: false,
+    waitMs: 0,
+    reason: 'ready'
+  };
+
+}
+
+
+/*
+Generate a graceful knowledge-only response.
+
+This still uses the structured conference information,
+but does NOT call Groq.
+*/
+function buildKnowledgeFallback(
+  message,
+  structuredKnowledge
+) {
+
+  const direct =
+    getDirectAnswer(message);
+
+  if (direct) {
+
+    return direct.answer;
+
+  }
+
+
+  if (
+    structuredKnowledge &&
+    structuredKnowledge.trim()
+  ) {
+
+    return (
+      `MTERMS AI is currently operating in ` +
+      `conference information mode due to high AI traffic.\n\n` +
+      structuredKnowledge.trim()
+    );
+
+  }
+
+
+  return (
+    `MTERMS AI is currently operating in conference ` +
+    `information mode due to high AI traffic. ` +
+    `I can still help with the programme, speakers, venue, ` +
+    `registration, presentation guidelines and other official ` +
+    `MTERMS 2026 information.`
+  );
+
+}
+
+
+/*
+Actually send ONE request to Groq.
+
+This function is only called when the queue decides
+there is enough capacity.
+*/
+async function performGroqRequest(
+  messages
+) {
+
+  groqCapacity.lastRequestAt =
+    Date.now();
+
+  groqCapacity.recentRequests.push(
+    groqCapacity.lastRequestAt
+  );
+
+  cleanRecentRequests();
+
+
+  const response =
+    await fetch(
+      GROQ_API_URL,
+      {
+
+        method: 'POST',
+
+        headers: {
+
+          'Authorization':
+            `Bearer ${process.env.GROQ_API_KEY}`,
+
+          'Content-Type':
+            'application/json'
+
+        },
+
+        body: JSON.stringify({
+
+          model:
+            'openai/gpt-oss-20b',
+
+          messages,
+
+          temperature: 0.15,
+
+          max_completion_tokens: 500
+
+        })
+
+      }
+    );
+
+
+  updateGroqCapacityFromHeaders(
+    response
+  );
+
+
+  return response;
+}
+
+
+/*
+Main queued Groq function.
+*/
+function callGroqSafely(
+  messages,
+  structuredKnowledge,
+  originalMessage
+) {
+
+  const queuedAt =
+    Date.now();
+
+
+  groqCapacity.totalQueued++;
+
+
+  const job =
+    groqQueue.then(
+      async () => {
+
+        try {
+
+          const estimatedTokens =
+            estimateTokens(messages);
+
+
+          console.log(
+            '[MTERMS AI] Groq queue job:',
+            {
+              estimatedTokens,
+              queued:
+                groqCapacity.totalQueued
+            }
+          );
+
+
+          while (true) {
+
+            const elapsed =
+              Date.now() -
+              queuedAt;
+
+
+            /*
+             Do not hold a Heroku request too long.
+            */
+
+            if (
+              elapsed >=
+              GROQ_MAX_QUEUE_WAIT_MS
+            ) {
+
+              return {
+                fallback: true,
+                reason:
+                  'queue_timeout',
+
+                answer:
+                  buildKnowledgeFallback(
+                    originalMessage,
+                    structuredKnowledge
+                  )
+              };
+
+            }
+
+
+            const status =
+              calculateGroqWait(
+                estimatedTokens
+              );
+
+
+            /*
+             Daily quota exhausted.
+            */
+
+            if (status.fallback) {
+
+              return {
+                fallback: true,
+                reason:
+                  status.reason,
+
+                answer:
+                  buildKnowledgeFallback(
+                    originalMessage,
+                    structuredKnowledge
+                  )
+              };
+
+            }
+
+
+            /*
+             Safe now.
+            */
+
+            if (
+              status.waitMs <= 0
+            ) {
+
+              break;
+
+            }
+
+
+            /*
+             Do not wait beyond our maximum HTTP queue time.
+            */
+
+            if (
+              elapsed +
+              status.waitMs >
+              GROQ_MAX_QUEUE_WAIT_MS
+            ) {
+
+              return {
+                fallback: true,
+                reason:
+                  'queue_timeout',
+
+                answer:
+                  buildKnowledgeFallback(
+                    originalMessage,
+                    structuredKnowledge
+                  )
+              };
+
+            }
+
+
+            console.log(
+              `[MTERMS AI] Waiting ${status.waitMs}ms ` +
+              `for Groq capacity (${status.reason})`
+            );
+
+
+            await sleep(
+              status.waitMs
+            );
+
+          }
+
+
+          /*
+           Send request.
+          */
+
+          let response =
+            await performGroqRequest(
+              messages
+            );
+
+
+          /*
+           If Groq still returns 429 because of organization-level
+           activity or token timing, respect retry-after once.
+          */
+
+          if (
+            response.status === 429
+          ) {
+
+            const retryAfter =
+              Number(
+                response.headers.get(
+                  'retry-after'
+                ) || 0
+              );
+
+
+            const retryMs =
+              Math.max(
+                0,
+                retryAfter * 1000
+              );
+
+
+            const elapsed =
+              Date.now() -
+              queuedAt;
+
+
+            if (
+              retryMs > 0 &&
+              elapsed + retryMs <
+                GROQ_MAX_QUEUE_WAIT_MS
+            ) {
+
+              console.warn(
+                `[MTERMS AI] Groq 429. ` +
+                `Retrying after ${retryAfter}s.`
+              );
+
+
+              await sleep(
+                retryMs + 200
+              );
+
+
+              response =
+                await performGroqRequest(
+                  messages
+                );
+
+            }
+
+          }
+
+
+          return {
+            fallback: false,
+            response
+          };
+
+
+        } finally {
+
+          groqCapacity.totalQueued =
+            Math.max(
+              0,
+              groqCapacity.totalQueued - 1
+            );
+
+        }
+
+      }
+    );
+
+
+  /*
+   Ensure one failed queue job does not permanently
+   break the queue chain.
+  */
+
+  groqQueue =
+    job.catch(
+      error => {
+
+        console.error(
+          '[MTERMS AI] Queue error:',
+          error
+        );
+
+      }
+    );
+
+
+  return job;
+}
 /* =========================================================
    STRUCTURED DIRECT ANSWERS
    These do NOT use Groq
@@ -1798,39 +2619,109 @@ ${websiteKnowledge || 'No additional website information matched.'}
 }
     ];
 
-    const groqResponse =
-      await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization':
-            `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type':
-            'application/json'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-20b',
-          messages,
-          temperature: 0.15,
-          max_completion_tokens: 500
-        })
-      });
+/* =========================================================
+   SEND THROUGH GROQ CAPACITY QUEUE
+   ========================================================= */
+
+const groqResult =
+  await callGroqSafely(
+    messages,
+    structuredKnowledge,
+    message
+  );
+
+
+/*
+Knowledge-only fallback was used.
+*/
+
+if (groqResult.fallback) {
+
+  console.warn(
+    '[MTERMS AI] Knowledge fallback:',
+    groqResult.reason
+  );
+
+  return res.json({
+
+    ok: true,
+
+    answer:
+      groqResult.answer,
+
+    mode:
+      'knowledge-fallback',
+
+    reason:
+      groqResult.reason
+
+  });
+
+}
+
+
+const groqResponse =
+  groqResult.response;
 
     const data =
       await groqResponse
         .json()
         .catch(() => null);
 
-    if (!groqResponse.ok) {
-      console.error(
-        '[MTERMS AI] Groq API error:',
-        JSON.stringify(data)
-      );
+if (!groqResponse.ok) {
 
-      return res.status(502).json({
-        ok: false,
-        error: 'AI service temporarily unavailable.'
-      });
-    }
+  console.error(
+    '[MTERMS AI] Groq API error:',
+    JSON.stringify(data)
+  );
+
+
+  /*
+   Rate limit or capacity problem:
+   NEVER show the participant an ugly error.
+  */
+
+  if (
+    groqResponse.status === 429 ||
+    groqResponse.status === 498 ||
+    groqResponse.status >= 500
+  ) {
+
+    return res.json({
+
+      ok: true,
+
+      answer:
+        buildKnowledgeFallback(
+          message,
+          structuredKnowledge
+        ),
+
+      mode:
+        'knowledge-fallback',
+
+      reason:
+        `groq_${groqResponse.status}`
+
+    });
+
+  }
+
+
+  /*
+   Unexpected non-capacity error.
+  */
+
+  return res.status(502).json({
+
+    ok: false,
+
+    error:
+      'AI service temporarily unavailable.'
+
+  });
+
+}
 
     const answer =
       data?.choices?.[0]
@@ -1844,10 +2735,11 @@ ${websiteKnowledge || 'No additional website information matched.'}
       });
     }
 
-    return res.json({
-      ok: true,
-      answer
-    });
+return res.json({
+  ok: true,
+  answer,
+  mode: 'groq'
+});
 
   } catch (error) {
     console.error(
