@@ -586,6 +586,34 @@ main{
   margin-top:5px;
 }
 
+.program-discuss-btn{
+  margin-top:9px;
+  min-height:36px;
+  padding:0 11px;
+  border:1px solid #dbe5f0;
+  border-radius:10px;
+  background:#f8fbff;
+  color:var(--blue);
+  font-size:11px;
+  font-weight:800;
+}
+
+.program-discuss-btn:hover{
+  background:#eef6ff;
+}
+
+.timeline-discuss-btn{
+  margin-top:8px;
+  min-height:34px;
+  padding:0 10px;
+  border:1px solid #dbe5f0;
+  border-radius:9px;
+  background:#fff;
+  color:var(--blue);
+  font-size:10px;
+  font-weight:800;
+}
+
 .star-btn{
   width:42px;
   height:42px;
@@ -3221,11 +3249,64 @@ ${
 
             </div>
 
+            ${
+  item.parallel
+    ? `
+      <button
+        class="timeline-discuss-btn"
+        type="button"
+        data-live-discuss-parent="${escapeHTML(item.id)}"
+      >
+        💬 View Session Discussions
+      </button>
+    `
+    : (
+        !["Break","General"].includes(item.type)
+          ? `
+            <button
+              class="timeline-discuss-btn"
+              type="button"
+              data-live-discuss="${escapeHTML(item.id)}"
+            >
+              💬 Open Discussion
+            </button>
+          `
+          : ``
+      )
+}
+
           </div>
 
         </div>
       `;
     }).join("");
+
+  document
+  .querySelectorAll("[data-live-discuss]")
+  .forEach(button => {
+
+    button.addEventListener("click",()=>{
+
+      goToDiscussionRoom(
+        button.dataset.liveDiscuss
+      );
+
+    });
+
+  });
+
+
+document
+  .querySelectorAll("[data-live-discuss-parent]")
+  .forEach(button => {
+
+    button.addEventListener("click",()=>{
+
+      goToPage("discuss");
+
+    });
+
+  });
 
 }
 
@@ -3302,6 +3383,21 @@ function renderProgramme(){
                   : ``
               }
 
+              ${
+  !isParallel &&
+  !["Break","General"].includes(item.type)
+    ? `
+      <button
+        class="program-discuss-btn"
+        type="button"
+        data-program-discuss="${escapeHTML(item.id)}"
+      >
+        💬 Open Discussion
+      </button>
+    `
+    : ``
+}
+
             </div>
 
             ${
@@ -3344,6 +3440,14 @@ function renderProgramme(){
                             ${escapeHTML(p.title)}
                           </div>
 
+                          <button
+  class="program-discuss-btn"
+  type="button"
+  data-program-discuss="${escapeHTML(p.id)}"
+>
+  💬 Open Discussion
+</button>
+
                         </div>
 
                         <button
@@ -3382,6 +3486,20 @@ function renderProgramme(){
       });
 
     });
+
+ target
+  .querySelectorAll("[data-program-discuss]")
+  .forEach(button => {
+
+    button.addEventListener("click",()=>{
+
+      goToDiscussionRoom(
+        button.dataset.programDiscuss
+      );
+
+    });
+
+  }); 
 
 }
 
@@ -4016,6 +4134,18 @@ function showDiscussionHub(){
 }
 
 
+function goToDiscussionRoom(roomId){
+
+  goToPage("discuss");
+
+  setTimeout(()=>{
+
+    openDiscussionRoom(roomId);
+
+  },0);
+
+}
+  
 function openDiscussionRoom(roomId){
 
   const profile =
