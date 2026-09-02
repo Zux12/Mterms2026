@@ -6,6 +6,9 @@ const MtermsLiveAnnouncement =
 const MtermsLiveMessage =
   require('../models/MtermsLiveMessage');
 
+const MtermsLiveFeedback =
+  require('../models/MtermsLiveFeedback');
+
 const router = express.Router();
 
 
@@ -810,6 +813,253 @@ router.delete(
 
   }
 );
+
+
+/* =====================================================
+   SESSION FEEDBACK
+===================================================== */
+
+
+/*
+  GET /api/live/feedback/session/:sessionId
+
+  Returns this participant/device's feedback
+  for one session, if it exists.
+*/
+
+router.get(
+  '/feedback/session/:sessionId',
+  async (req, res) => {
+
+    try {
+
+      const sessionId =
+        String(req.params.sessionId || '')
+          .trim()
+          .slice(0, 120);
+
+      const participantId =
+        String(req.query.participantId || '')
+          .trim()
+          .slice(0, 200);
+
+
+      if (!sessionId || !participantId) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Session ID and participant ID are required'
+        });
+
+      }
+
+
+      const feedback =
+        await MtermsLiveFeedback
+          .findOne({
+            feedbackType: 'session',
+            sessionId,
+            participantId
+          })
+          .lean();
+
+
+      res.json({
+        ok: true,
+        feedback: feedback
+          ? {
+              id: String(feedback._id),
+              sessionId: feedback.sessionId,
+              rating: feedback.rating,
+              comment: feedback.comment || '',
+              updatedAt: feedback.updatedAt
+            }
+          : null
+      });
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live session feedback GET error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to load session feedback'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  PUT /api/live/feedback/session/:sessionId
+
+  Create or update one feedback response
+  per participant/device per session.
+*/
+
+router.put(
+  '/feedback/session/:sessionId',
+  async (req, res) => {
+
+    try {
+
+      const sessionId =
+        String(req.params.sessionId || '')
+          .trim()
+          .slice(0, 120);
+
+      const participantId =
+        String(req.body?.participantId || '')
+          .trim()
+          .slice(0, 200);
+
+      const rating =
+        Number(req.body?.rating);
+
+      const comment =
+        String(req.body?.comment || '')
+          .trim()
+          .slice(0, 1000);
+
+
+      if (!sessionId || !participantId) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Session ID and participant ID are required'
+        });
+
+      }
+
+
+      if (
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5
+      ) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Rating must be between 1 and 5'
+        });
+
+      }
+
+
+      const feedback =
+        await MtermsLiveFeedback
+          .findOneAndUpdate(
+            {
+              feedbackType: 'session',
+              sessionId,
+              participantId
+            },
+            {
+              $set: {
+                rating,
+                comment
+              },
+              $setOnInsert: {
+                feedbackType: 'session',
+                sessionId,
+                participantId
+              }
+            },
+            {
+              new: true,
+              upsert: true,
+              runValidators: true
+            }
+          );
+
+
+      res.json({
+        ok: true,
+        feedback: {
+          id: String(feedback._id),
+          sessionId: feedback.sessionId,
+          rating: feedback.rating,
+          comment: feedback.comment || '',
+          updatedAt: feedback.updatedAt
+        }
+      });
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live session feedback PUT error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to save session feedback'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  GET /api/live/feedback/sessions
+
+  Admin summary for all session feedback.
+*/
+
+router.get(
+  '/feedback/sessions',
+  async (req, res) => {
+
+    try {
+
+      const feedback =
+        await MtermsLiveFeedback
+          .find({
+            feedbackType: 'session'
+          })
+          .sort({
+            createdAt: -1
+          })
+          .lean();
+
+
+      res.json({
+        ok: true,
+        feedback:
+          feedback.map(item => ({
+            id: String(item._id),
+            sessionId: item.sessionId,
+            rating: item.rating,
+            comment: item.comment || '',
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt
+          }))
+      });
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live session feedback admin GET error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to load session feedback'
+      });
+
+    }
+
+  }
+);
+
 
 module.exports = router;
 
