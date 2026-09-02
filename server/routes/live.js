@@ -1061,6 +1061,237 @@ router.get(
 );
 
 
+/* =====================================================
+   OVERALL CONFERENCE FEEDBACK
+===================================================== */
+
+
+/*
+  GET this participant's conference feedback
+*/
+
+router.get(
+  '/feedback/conference',
+  async (req, res) => {
+
+    try {
+
+      const participantId =
+        String(req.query.participantId || '')
+          .trim()
+          .slice(0, 200);
+
+
+      if (!participantId) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Participant ID is required'
+        });
+
+      }
+
+
+      const feedback =
+        await MtermsLiveFeedback
+          .findOne({
+            feedbackType: 'conference',
+            participantId
+          })
+          .lean();
+
+
+      res.json({
+        ok: true,
+
+        feedback: feedback
+          ? {
+              id: String(feedback._id),
+              rating: feedback.rating,
+              comment: feedback.comment || '',
+              updatedAt: feedback.updatedAt
+            }
+          : null
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live conference feedback GET error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to load conference feedback'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  Create/update this participant's
+  conference feedback.
+*/
+
+router.put(
+  '/feedback/conference',
+  async (req, res) => {
+
+    try {
+
+      const participantId =
+        String(req.body?.participantId || '')
+          .trim()
+          .slice(0, 200);
+
+      const rating =
+        Number(req.body?.rating);
+
+      const comment =
+        String(req.body?.comment || '')
+          .trim()
+          .slice(0, 1000);
+
+
+      if (!participantId) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Participant ID is required'
+        });
+
+      }
+
+
+      if (
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5
+      ) {
+
+        return res.status(400).json({
+          ok: false,
+          error: 'Rating must be between 1 and 5'
+        });
+
+      }
+
+
+      const feedback =
+        await MtermsLiveFeedback
+          .findOneAndUpdate(
+            {
+              feedbackType: 'conference',
+              participantId
+            },
+            {
+              $set: {
+                rating,
+                comment
+              },
+
+              $setOnInsert: {
+                feedbackType: 'conference',
+                participantId,
+                sessionId: ''
+              }
+            },
+            {
+              new: true,
+              upsert: true,
+              runValidators: true
+            }
+          );
+
+
+      res.json({
+        ok: true,
+
+        feedback: {
+          id: String(feedback._id),
+          rating: feedback.rating,
+          comment: feedback.comment || '',
+          updatedAt: feedback.updatedAt
+        }
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live conference feedback PUT error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to save conference feedback'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  Admin: all overall conference feedback.
+*/
+
+router.get(
+  '/feedback/conference/all',
+  async (req, res) => {
+
+    try {
+
+      const feedback =
+        await MtermsLiveFeedback
+          .find({
+            feedbackType: 'conference'
+          })
+          .sort({
+            createdAt: -1
+          })
+          .lean();
+
+
+      res.json({
+        ok: true,
+
+        feedback:
+          feedback.map(item => ({
+            id: String(item._id),
+            rating: item.rating,
+            comment: item.comment || '',
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt
+          }))
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live conference feedback admin GET error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to load conference feedback'
+      });
+
+    }
+
+  }
+);
+
+
 module.exports = router;
 
 
