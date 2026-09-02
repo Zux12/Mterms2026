@@ -2075,14 +2075,38 @@ async getSessionFeedback(){
 },
 
 
-  getConferenceFeedback(){
+async getConferenceFeedback(){
 
-    return loadJSON(
-      KEYS.conferenceFeedback,
-      {}
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/conference/all`,
+      {
+        method:"GET",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
     );
 
-  },
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load conference feedback"
+    );
+
+  }
+
+
+  return data.feedback || [];
+
+},
 
 
   getInformation(){
@@ -4648,30 +4672,41 @@ async function renderFeedbackAdmin(){
 
   }
 
+/*
+  Overall conference feedback
+  from MongoDB.
+*/
 
-  /*
-    Overall conference feedback remains
-    prototype/localStorage for now.
-  */
+try{
 
-  const conference =
-    AdminStore
+  const conferenceFeedback =
+    await AdminStore
       .getConferenceFeedback();
 
 
-  if(
-    conference &&
-    conference.rating
-  ){
+  const total =
+    conferenceFeedback.length;
+
+
+  const average =
+    total
+      ? conferenceFeedback.reduce(
+          (sum,item) =>
+            sum +
+            Number(item.rating || 0),
+          0
+        ) / total
+      : 0;
+
+
+  if(total){
 
     document
       .getElementById(
         "overallConferenceRating"
       )
       .textContent =
-        Number(
-          conference.rating
-        ).toFixed(1) +
+        average.toFixed(1) +
         " ★";
 
 
@@ -4680,7 +4715,20 @@ async function renderFeedbackAdmin(){
         "overallConferenceNote"
       )
       .textContent =
-        "Prototype response";
+        total +
+        (
+          total === 1
+            ? " response"
+            : " responses"
+        );
+
+
+    const comments =
+      conferenceFeedback
+        .filter(
+          item =>
+            item.comment
+        );
 
 
     document
@@ -4688,19 +4736,22 @@ async function renderFeedbackAdmin(){
         "overallFeedbackComments"
       )
       .innerHTML =
-        conference.comment
-          ? `
-            <div class="comment">
-              ${escapeHTML(
-                conference.comment
-              )}
-            </div>
-          `
+        comments.length
+          ? comments
+              .map(item => `
+                <div class="comment">
+                  ${escapeHTML(
+                    item.comment
+                  )}
+                </div>
+              `)
+              .join("")
           : `
             <div class="empty">
-              No comment was provided.
+              No comments were provided.
             </div>
           `;
+
 
   }else{
 
@@ -4717,7 +4768,7 @@ async function renderFeedbackAdmin(){
         "overallConferenceNote"
       )
       .textContent =
-        "No response yet";
+        "No responses yet";
 
 
     document
@@ -4731,6 +4782,40 @@ async function renderFeedbackAdmin(){
       `;
 
   }
+
+
+}catch(error){
+
+  console.error(error);
+
+
+  document
+    .getElementById(
+      "overallConferenceRating"
+    )
+    .textContent =
+      "—";
+
+
+  document
+    .getElementById(
+      "overallConferenceNote"
+    )
+    .textContent =
+      "Unable to load";
+
+
+  document
+    .getElementById(
+      "overallFeedbackComments"
+    )
+    .innerHTML = `
+      <div class="empty">
+        Unable to load overall conference feedback.
+      </div>
+    `;
+
+}
 
 }
 
