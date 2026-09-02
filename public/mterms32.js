@@ -198,9 +198,12 @@ function buildMterms32(){
       aria-label="Open MTERMS32"
       title="MTERMS32"
     >
-      <span class="m32-launch-icon">
-        M
-      </span>
+<span class="m32-launch-icon">
+  <img
+    src="/public/mirc2.png"
+    alt="MTERMS32"
+  >
+</span>
     </button>
 
 
