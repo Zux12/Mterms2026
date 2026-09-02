@@ -2041,14 +2041,38 @@ async deleteReply(
 },
 
 
-  getSessionFeedback(){
+async getSessionFeedback(){
 
-    return loadJSON(
-      KEYS.sessionFeedback,
-      {}
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/sessions`,
+      {
+        method:"GET",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
     );
 
-  },
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load session feedback"
+    );
+
+  }
+
+
+  return data.feedback || [];
+
+},
 
 
   getConferenceFeedback(){
@@ -3198,14 +3222,11 @@ async function renderOverviewStats(){
   }
 
 
-  const sessionFeedback =
-    AdminStore
-      .getSessionFeedback();
+try{
 
-  const feedbackCount =
-    Object.keys(
-      sessionFeedback
-    ).length;
+  const sessionFeedback =
+    await AdminStore
+      .getSessionFeedback();
 
 
   document
@@ -3213,7 +3234,14 @@ async function renderOverviewStats(){
       "overviewFeedback"
     )
     .textContent =
-      feedbackCount;
+      sessionFeedback.length;
+
+
+}catch(error){
+
+  console.error(error);
+
+}
 
 }
 
@@ -4370,111 +4398,261 @@ if(!background){
    FEEDBACK
 ===================================================== */
 
-function renderFeedbackAdmin(){
+async function renderFeedbackAdmin(){
 
-  const feedback =
-    AdminStore.getSessionFeedback();
-
-  const rooms =
-    discussionRoomDefinitions();
-
-  const rows = [];
+  const sessionTarget =
+    document.getElementById(
+      "sessionFeedbackAdminList"
+    );
 
 
-  Object.entries(
-    feedback
-  )
-  .forEach(
-    ([roomId,item]) => {
+  sessionTarget.innerHTML = `
+    <div class="empty">
+      Loading session feedback…
+    </div>
+  `;
 
-      const room =
-        rooms.find(
-          r => r.id === roomId
+
+  try{
+
+    const feedback =
+      await AdminStore
+        .getSessionFeedback();
+
+    const rooms =
+      discussionRoomDefinitions();
+
+    const grouped = {};
+
+
+    feedback.forEach(item => {
+
+      if(!grouped[item.sessionId]){
+
+        grouped[item.sessionId] = {
+          ratings:[],
+          comments:[]
+        };
+
+      }
+
+
+      grouped[item.sessionId]
+        .ratings
+        .push(
+          Number(item.rating)
         );
 
-      rows.push({
 
-        roomId,
+      if(item.comment){
 
-        title:
-          room
-            ? room.title
-            : roomId,
+        grouped[item.sessionId]
+          .comments
+          .push(item.comment);
 
-        rating:
-          Number(
-            item.rating || 0
-          ),
+      }
 
-        comment:
-          item.comment || ""
-
-      });
-
-    }
-  );
+    });
 
 
-  document
-    .getElementById(
-      "feedbackResponseCount"
-    )
-    .textContent =
-      rows.length;
+    const rows =
+      Object.entries(grouped)
+        .map(([sessionId,data]) => {
+
+          const room =
+            rooms.find(
+              r =>
+                r.id === sessionId
+            );
 
 
-  document
-    .getElementById(
-      "sessionFeedbackAdminList"
-    )
-    .innerHTML =
-      rows.length
-        ? rows
-            .map(row => `
-              <div class="feedback-session">
+          const total =
+            data.ratings.length;
 
-                <div class="feedback-session-head">
 
-                  <div class="feedback-session-main">
+          const average =
+            total
+              ? data.ratings.reduce(
+                  (sum,value) =>
+                    sum + value,
+                  0
+                ) / total
+              : 0;
 
-                    <div class="feedback-session-title">
-                      ${escapeHTML(row.title)}
-                    </div>
 
-                    <div class="feedback-session-rating">
+          const distribution = {
+            5:0,
+            4:0,
+            3:0,
+            2:0,
+            1:0
+          };
 
-                      ${"★".repeat(row.rating)}
-                      ${"☆".repeat(5 - row.rating)}
 
-                    </div>
+          data.ratings
+            .forEach(rating => {
 
-                    <div class="feedback-count">
-                      Prototype response
-                    </div>
+              if(
+                distribution[rating] !==
+                undefined
+              ){
 
-                  </div>
+                distribution[rating]++;
+
+              }
+
+            });
+
+
+          return {
+            sessionId,
+
+            title:
+              room
+                ? room.title
+                : sessionId,
+
+            total,
+            average,
+            distribution,
+            comments:data.comments
+          };
+
+        });
+
+
+    document
+      .getElementById(
+        "feedbackResponseCount"
+      )
+      .textContent =
+        feedback.length;
+
+
+    if(!rows.length){
+
+      sessionTarget.innerHTML = `
+        <div class="empty">
+          No session feedback has been submitted yet.
+        </div>
+      `;
+
+    }else{
+
+      sessionTarget.innerHTML =
+        rows.map(row => `
+
+          <div class="feedback-session">
+
+            <div class="feedback-session-head">
+
+              <div class="feedback-session-main">
+
+                <div class="feedback-session-title">
+                  ${escapeHTML(row.title)}
+                </div>
+
+                <div class="feedback-session-rating">
+
+                  ${row.average.toFixed(1)} ★
 
                 </div>
 
-                ${
-                  row.comment
-                    ? `
-                      <div class="comment">
-                        ${escapeHTML(row.comment)}
-                      </div>
-                    `
-                    : ``
-                }
+                <div class="feedback-count">
+                  ${row.total}
+                  ${row.total === 1
+                    ? "response"
+                    : "responses"}
+                </div>
 
               </div>
-            `)
-            .join("")
-        : `
-          <div class="empty">
-            No session feedback has been submitted yet.
-          </div>
-        `;
 
+            </div>
+
+
+            <div
+              style="
+                margin-top:10px;
+                font-size:11px;
+                line-height:1.8;
+                color:var(--muted);
+              "
+            >
+
+              <div>
+                ★★★★★ — ${row.distribution[5]}
+              </div>
+
+              <div>
+                ★★★★☆ — ${row.distribution[4]}
+              </div>
+
+              <div>
+                ★★★☆☆ — ${row.distribution[3]}
+              </div>
+
+              <div>
+                ★★☆☆☆ — ${row.distribution[2]}
+              </div>
+
+              <div>
+                ★☆☆☆☆ — ${row.distribution[1]}
+              </div>
+
+            </div>
+
+
+            ${
+              row.comments.length
+                ? `
+                  <div
+                    style="
+                      margin-top:10px;
+                      font-size:10px;
+                      font-weight:850;
+                      color:var(--muted);
+                      text-transform:uppercase;
+                      letter-spacing:.06em;
+                    "
+                  >
+                    Comments
+                  </div>
+
+                  ${row.comments
+                    .map(comment => `
+                      <div class="comment">
+                        ${escapeHTML(comment)}
+                      </div>
+                    `)
+                    .join("")}
+                `
+                : ``
+            }
+
+          </div>
+
+        `).join("");
+
+    }
+
+
+  }catch(error){
+
+    console.error(error);
+
+    sessionTarget.innerHTML = `
+      <div class="empty">
+        Unable to load session feedback.
+      </div>
+    `;
+
+  }
+
+
+  /*
+    Overall conference feedback remains
+    prototype/localStorage for now.
+  */
 
   const conference =
     AdminStore
@@ -4546,12 +4724,11 @@ function renderFeedbackAdmin(){
       .getElementById(
         "overallFeedbackComments"
       )
-      .innerHTML =
-        `
+      .innerHTML = `
         <div class="empty">
           No overall conference feedback yet.
         </div>
-        `;
+      `;
 
   }
 
