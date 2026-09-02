@@ -1936,23 +1936,109 @@ async deleteAnnouncement(id){
 },
 
 
-  getDiscussions(){
+async getDiscussions(){
 
-    return loadJSON(
-      KEYS.discussions,
-      {}
+  const response =
+    await fetch(
+      `${LIVE_API}/messages`,
+      {
+        method:"GET",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
     );
 
-  },
 
-  saveDiscussions(data){
+  const data =
+    await response.json();
 
-    saveJSON(
-      KEYS.discussions,
-      data
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load discussions"
     );
 
-  },
+  }
+
+
+  return data.messages || [];
+
+},
+
+
+async deletePost(postId){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/messages/${encodeURIComponent(postId)}`,
+      {
+        method:"DELETE",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to delete post"
+    );
+
+  }
+
+
+  return true;
+
+},
+
+
+async deleteReply(
+  postId,
+  replyId
+){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/messages/${encodeURIComponent(postId)}/replies/${encodeURIComponent(replyId)}`,
+      {
+        method:"DELETE",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to delete reply"
+    );
+
+  }
+
+
+  return true;
+
+},
 
 
   getSessionFeedback(){
@@ -2550,6 +2636,41 @@ function discussionRoomDefinitions(){
 }
 
 
+function groupMessagesBySession(
+  messages
+){
+
+  const grouped = {};
+
+
+  (messages || [])
+    .forEach(message => {
+
+      if(
+        !grouped[
+          message.sessionId
+        ]
+      ){
+
+        grouped[
+          message.sessionId
+        ] = [];
+
+      }
+
+
+      grouped[
+        message.sessionId
+      ]
+      .push(message);
+
+    });
+
+
+  return grouped;
+
+}
+  
 /* =====================================================
    NAVIGATION
 ===================================================== */
@@ -3034,54 +3155,57 @@ function renderAdminTimeline(
 }
 
 
-function renderOverviewStats(){
+async function renderOverviewStats(){
 
-  const discussions =
-    AdminStore.getDiscussions();
+  try{
 
-  let topics = 0;
-  let questions = 0;
+    const messages =
+      await AdminStore
+        .getDiscussions();
 
 
-  Object.values(discussions)
-    .forEach(posts => {
+    const topics =
+      messages.length;
 
-      topics += posts.length;
 
-      posts.forEach(post => {
+    const questions =
+      messages.filter(
+        post =>
+          post.type === "Question"
+      ).length;
 
-        if(post.type === "Question"){
-          questions++;
-        }
 
-      });
+    document
+      .getElementById(
+        "overviewTopics"
+      )
+      .textContent =
+        topics;
 
-    });
+
+    document
+      .getElementById(
+        "overviewQuestions"
+      )
+      .textContent =
+        questions;
+
+
+  }catch(error){
+
+    console.error(error);
+
+  }
 
 
   const sessionFeedback =
-    AdminStore.getSessionFeedback();
+    AdminStore
+      .getSessionFeedback();
 
   const feedbackCount =
     Object.keys(
       sessionFeedback
     ).length;
-
-
-  document
-    .getElementById(
-      "overviewTopics"
-    )
-    .textContent =
-      topics;
-
-
-  document
-    .getElementById(
-      "overviewQuestions"
-    )
-    .textContent =
-      questions;
 
 
   document
@@ -3394,7 +3518,7 @@ async function renderAnnouncements(){
 let activeAdminRoomId = null;
 
 
-function renderAdminRooms(){
+async function renderAdminRooms(){
 
   activeAdminRoomId = null;
 
@@ -3416,12 +3540,8 @@ function renderAdminRooms(){
   const rooms =
     discussionRoomDefinitions();
 
-  const discussions =
-    AdminStore.getDiscussions();
-
   const now =
     malaysiaNowComparable();
-
 
   const target =
     document
@@ -3430,106 +3550,140 @@ function renderAdminRooms(){
       );
 
 
-  target.innerHTML =
-    rooms.map(room => {
-
-      const posts =
-        discussions[room.id] || [];
-
-      const replies =
-        posts.reduce(
-          (sum,post) =>
-            sum +
-            (
-              post.replies || []
-            ).length,
-          0
-        );
-
-      const start =
-        malaysiaTimestamp(
-          room.date,
-          room.start
-        );
-
-      const end =
-        malaysiaTimestamp(
-          room.date,
-          room.end
-        );
-
-      const live =
-        now >= start &&
-        now < end;
+  target.innerHTML = `
+    <div class="empty">
+      Loading discussions…
+    </div>
+  `;
 
 
-      return `
-        <div
-          class="
-            room
-            ${live ? "live-room" : ""}
-          "
-        >
+  try{
 
-          <div
-            class="
-              room-status
-              ${live ? "live" : ""}
-            "
-          >
-            ${
-              live
-                ? "● LIVE NOW"
-                : "SESSION ROOM"
-            }
-          </div>
+    const messages =
+      await AdminStore
+        .getDiscussions();
 
-          <div class="room-title">
-            ${escapeHTML(room.title)}
-          </div>
-
-          <div class="room-stats">
-            ${posts.length} topics
-            ·
-            ${replies} replies
-          </div>
-
-          <div class="item-actions">
-
-            <button
-              class="btn btn-soft btn-small"
-              type="button"
-              data-admin-room="${escapeHTML(room.id)}"
-            >
-              View Discussion
-            </button>
-
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
-
-
-  target
-    .querySelectorAll(
-      "[data-admin-room]"
-    )
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        ()=>{
-
-          openAdminRoom(
-            button.dataset.adminRoom
-          );
-
-        }
+    const discussions =
+      groupMessagesBySession(
+        messages
       );
 
-    });
+
+    target.innerHTML =
+      rooms.map(room => {
+
+        const posts =
+          discussions[
+            room.id
+          ] || [];
+
+        const replies =
+          posts.reduce(
+            (sum,post) =>
+              sum +
+              (
+                post.replies || []
+              ).length,
+            0
+          );
+
+        const start =
+          malaysiaTimestamp(
+            room.date,
+            room.start
+          );
+
+        const end =
+          malaysiaTimestamp(
+            room.date,
+            room.end
+          );
+
+        const live =
+          now >= start &&
+          now < end;
+
+
+        return `
+          <div
+            class="
+              room
+              ${live ? "live-room" : ""}
+            "
+          >
+
+            <div
+              class="
+                room-status
+                ${live ? "live" : ""}
+              "
+            >
+              ${
+                live
+                  ? "● LIVE NOW"
+                  : "SESSION ROOM"
+              }
+            </div>
+
+            <div class="room-title">
+              ${escapeHTML(room.title)}
+            </div>
+
+            <div class="room-stats">
+              ${posts.length} topics
+              ·
+              ${replies} replies
+            </div>
+
+            <div class="item-actions">
+
+              <button
+                class="btn btn-soft btn-small"
+                type="button"
+                data-admin-room="${escapeHTML(room.id)}"
+              >
+                View Discussion
+              </button>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+
+    target
+      .querySelectorAll(
+        "[data-admin-room]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            openAdminRoom(
+              button.dataset.adminRoom
+            );
+
+          }
+        );
+
+      });
+
+
+  }catch(error){
+
+    console.error(error);
+
+    target.innerHTML = `
+      <div class="empty">
+        Unable to load discussions.
+      </div>
+    `;
+
+  }
 
 }
 
@@ -3605,15 +3759,7 @@ document
   );
 
 
-function renderAdminPosts(){
-
-  const discussions =
-    AdminStore.getDiscussions();
-
-  const posts =
-    discussions[
-      activeAdminRoomId
-    ] || [];
+async function renderAdminPosts(){
 
   const target =
     document
@@ -3622,200 +3768,282 @@ function renderAdminPosts(){
       );
 
 
-  if(!posts.length){
-
-    target.innerHTML =
-      `
-      <div class="empty">
-        No posts in this session yet.
-      </div>
-      `;
-
-    return;
-
-  }
+  target.innerHTML = `
+    <div class="empty">
+      Loading posts…
+    </div>
+  `;
 
 
-  target.innerHTML =
-    posts.map(post => {
+  try{
 
-      const identity =
-        [
-          post.title,
-          post.author
-        ]
-        .filter(Boolean)
-        .join(" ");
-
-      const affiliation =
-        post.affiliation
-          ? " · " +
-            post.affiliation
-          : "";
-
-      return `
-        <div class="post">
-
-          <div class="post-head">
-
-            <strong>
-              ${escapeHTML(identity)}
-            </strong>
-
-            ${escapeHTML(affiliation)}
-
-            ·
-            ${escapeHTML(post.time || "")}
-
-          </div>
+    const messages =
+      await AdminStore
+        .getDiscussions();
 
 
-          <div class="post-message">
-            ${escapeHTML(post.message)}
-          </div>
+    const posts =
+      messages.filter(
+        message =>
+          message.sessionId ===
+          activeAdminRoomId
+      );
 
 
-          ${
-            post.type === "Question"
-              ? `
-                <div class="post-type">
-                  QUESTION
-                </div>
-              `
-              : ``
-          }
+    if(!posts.length){
 
-
-          <div class="item-actions">
-
-            <button
-              class="btn btn-danger btn-small"
-              type="button"
-              data-delete-post="${escapeHTML(post.id)}"
-            >
-              Delete Post
-            </button>
-
-          </div>
-
-
-          ${
-            (post.replies || []).length
-              ? `
-                <div class="post-replies">
-
-                  ${(post.replies || [])
-                    .map((reply,index) => {
-
-                      const replyIdentity =
-                        [
-                          reply.title,
-                          reply.author
-                        ]
-                        .filter(Boolean)
-                        .join(" ");
-
-                      return `
-                        <div class="reply">
-
-                          <div class="reply-head">
-
-                            <strong>
-                              ${escapeHTML(replyIdentity)}
-                            </strong>
-
-                            ${
-                              reply.affiliation
-                                ? " · " +
-                                  escapeHTML(reply.affiliation)
-                                : ""
-                            }
-
-                            ·
-                            ${escapeHTML(reply.time || "")}
-
-                          </div>
-
-                          <div class="reply-body">
-                            ${escapeHTML(reply.message)}
-                          </div>
-
-                          <div class="item-actions">
-
-                            <button
-                              class="btn btn-danger btn-small"
-                              type="button"
-                              data-delete-reply-post="${escapeHTML(post.id)}"
-                              data-delete-reply-index="${index}"
-                            >
-                              Delete Reply
-                            </button>
-
-                          </div>
-
-                        </div>
-                      `;
-
-                    })
-                    .join("")}
-
-                </div>
-              `
-              : ``
-          }
-
+      target.innerHTML = `
+        <div class="empty">
+          No posts in this session yet.
         </div>
       `;
 
-    }).join("");
+      return;
+
+    }
 
 
-  target
-    .querySelectorAll(
-      "[data-delete-post]"
-    )
-    .forEach(button => {
+    target.innerHTML =
+      posts.map(post => {
 
-      button.addEventListener(
-        "click",
-        ()=>{
+        const identity =
+          [
+            post.title,
+            post.author
+          ]
+          .filter(Boolean)
+          .join(" ");
 
-          deleteAdminPost(
-            button.dataset.deletePost
-          );
+        const affiliation =
+          post.affiliation
+            ? " · " +
+              post.affiliation
+            : "";
 
-        }
-      );
+        const time =
+          post.createdAt
+            ? new Date(
+                post.createdAt
+              )
+              .toLocaleTimeString(
+                "en-MY",
+                {
+                  hour:"numeric",
+                  minute:"2-digit",
+                  hour12:true,
+                  timeZone:
+                    "Asia/Kuala_Lumpur"
+                }
+              )
+            : "";
 
-    });
+
+        return `
+          <div class="post">
+
+            <div class="post-head">
+
+              <strong>
+                ${escapeHTML(identity)}
+              </strong>
+
+              ${escapeHTML(affiliation)}
+
+              ${
+                time
+                  ? " · " +
+                    escapeHTML(time)
+                  : ""
+              }
+
+            </div>
 
 
-  target
-    .querySelectorAll(
-      "[data-delete-reply-post]"
-    )
-    .forEach(button => {
+            <div class="post-message">
+              ${escapeHTML(post.message)}
+            </div>
 
-      button.addEventListener(
-        "click",
-        ()=>{
 
-          deleteAdminReply(
-            button.dataset.deleteReplyPost,
-            Number(
-              button.dataset.deleteReplyIndex
-            )
-          );
+            ${
+              post.type === "Question"
+                ? `
+                  <div class="post-type">
+                    QUESTION
+                  </div>
+                `
+                : ``
+            }
 
-        }
-      );
 
-    });
+            <div class="item-actions">
+
+              <button
+                class="btn btn-danger btn-small"
+                type="button"
+                data-delete-post="${escapeHTML(post.id)}"
+              >
+                Delete Post
+              </button>
+
+            </div>
+
+
+            ${
+              (post.replies || []).length
+                ? `
+                  <div class="post-replies">
+
+                    ${(post.replies || [])
+                      .map(reply => {
+
+                        const replyIdentity =
+                          [
+                            reply.title,
+                            reply.author
+                          ]
+                          .filter(Boolean)
+                          .join(" ");
+
+                        const replyTime =
+                          reply.createdAt
+                            ? new Date(
+                                reply.createdAt
+                              )
+                              .toLocaleTimeString(
+                                "en-MY",
+                                {
+                                  hour:"numeric",
+                                  minute:"2-digit",
+                                  hour12:true,
+                                  timeZone:
+                                    "Asia/Kuala_Lumpur"
+                                }
+                              )
+                            : "";
+
+
+                        return `
+                          <div class="reply">
+
+                            <div class="reply-head">
+
+                              <strong>
+                                ${escapeHTML(replyIdentity)}
+                              </strong>
+
+                              ${
+                                reply.affiliation
+                                  ? " · " +
+                                    escapeHTML(
+                                      reply.affiliation
+                                    )
+                                  : ""
+                              }
+
+                              ${
+                                replyTime
+                                  ? " · " +
+                                    escapeHTML(
+                                      replyTime
+                                    )
+                                  : ""
+                              }
+
+                            </div>
+
+                            <div class="reply-body">
+                              ${escapeHTML(reply.message)}
+                            </div>
+
+                            <div class="item-actions">
+
+                              <button
+                                class="btn btn-danger btn-small"
+                                type="button"
+                                data-delete-reply-post="${escapeHTML(post.id)}"
+                                data-delete-reply-id="${escapeHTML(reply.id)}"
+                              >
+                                Delete Reply
+                              </button>
+
+                            </div>
+
+                          </div>
+                        `;
+
+                      })
+                      .join("")}
+
+                  </div>
+                `
+                : ``
+            }
+
+          </div>
+        `;
+
+      }).join("");
+
+
+    target
+      .querySelectorAll(
+        "[data-delete-post]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            deleteAdminPost(
+              button.dataset.deletePost
+            );
+
+          }
+        );
+
+      });
+
+
+    target
+      .querySelectorAll(
+        "[data-delete-reply-post]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            deleteAdminReply(
+              button.dataset.deleteReplyPost,
+              button.dataset.deleteReplyId
+            );
+
+          }
+        );
+
+      });
+
+
+  }catch(error){
+
+    console.error(error);
+
+    target.innerHTML = `
+      <div class="empty">
+        Unable to load posts.
+      </div>
+    `;
+
+  }
 
 }
 
 
-function deleteAdminPost(postId){
+async function deleteAdminPost(
+  postId
+){
 
   if(
     !confirm(
@@ -3826,39 +4054,36 @@ function deleteAdminPost(postId){
   }
 
 
-  const discussions =
-    AdminStore.getDiscussions();
+  try{
+
+    await AdminStore
+      .deletePost(
+        postId
+      );
 
 
-  discussions[
-    activeAdminRoomId
-  ] =
-    (
-      discussions[
-        activeAdminRoomId
-      ] || []
-    )
-    .filter(
-      post =>
-        post.id !== postId
+    await renderAdminPosts();
+
+    renderOverviewStats();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Unable to delete post."
     );
 
-
-  AdminStore
-    .saveDiscussions(
-      discussions
-    );
-
-
-  renderAdminPosts();
-  renderOverviewStats();
+  }
 
 }
 
 
-function deleteAdminReply(
+async function deleteAdminReply(
   postId,
-  replyIndex
+  replyId
 ){
 
   if(
@@ -3870,42 +4095,28 @@ function deleteAdminReply(
   }
 
 
-  const discussions =
-    AdminStore.getDiscussions();
+  try{
 
-  const posts =
-    discussions[
-      activeAdminRoomId
-    ] || [];
+    await AdminStore
+      .deleteReply(
+        postId,
+        replyId
+      );
 
-  const post =
-    posts.find(
-      p => p.id === postId
+
+    await renderAdminPosts();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Unable to delete reply."
     );
 
-
-  if(!post){
-    return;
   }
-
-
-  post.replies =
-    (
-      post.replies || []
-    )
-    .filter(
-      (_,index) =>
-        index !== replyIndex
-    );
-
-
-  AdminStore
-    .saveDiscussions(
-      discussions
-    );
-
-
-  renderAdminPosts();
 
 }
 
@@ -3924,35 +4135,48 @@ document
   );
 
 
-function renderQuestions(){
+async function renderQuestions(){
 
-  const discussions =
-    AdminStore.getDiscussions();
-
-  const rooms =
-    discussionRoomDefinitions();
-
-  const questions = [];
+  const target =
+    document
+      .getElementById(
+        "questionList"
+      );
 
 
-  Object.entries(
-    discussions
-  )
-  .forEach(
-    ([roomId,posts]) => {
+  target.innerHTML = `
+    <div class="empty">
+      Loading questions…
+    </div>
+  `;
 
-      const room =
-        rooms.find(
-          r => r.id === roomId
-        );
 
-      posts.forEach(post => {
+  try{
 
-        if(
-          post.type === "Question"
-        ){
+    const messages =
+      await AdminStore
+        .getDiscussions();
 
-          questions.push({
+    const rooms =
+      discussionRoomDefinitions();
+
+    const questions =
+      messages
+        .filter(
+          post =>
+            post.type === "Question"
+        )
+        .map(post => {
+
+          const room =
+            rooms.find(
+              r =>
+                r.id ===
+                post.sessionId
+            );
+
+
+          return {
 
             roomTitle:
               room
@@ -3978,113 +4202,149 @@ function renderQuestions(){
                 post.likes || 0
               ),
 
-            time:
-              post.time || ""
+            createdAt:
+              post.createdAt || ""
 
-          });
+          };
 
-        }
-
-      });
-
-    }
-  );
+        });
 
 
-  const sort =
-    document
-      .getElementById(
-        "questionSort"
-      )
-      .value;
+    const sort =
+      document
+        .getElementById(
+          "questionSort"
+        )
+        .value;
 
 
-  if(sort === "votes"){
+    if(sort === "votes"){
 
-    questions.sort(
-      (a,b) =>
-        b.likes - a.likes
-    );
-
-  }
-
-
-  const target =
-    document
-      .getElementById(
-        "questionList"
+      questions.sort(
+        (a,b) =>
+          b.likes - a.likes
       );
 
+    }else{
 
-  if(!questions.length){
+      questions.sort(
+        (a,b) =>
+          new Date(
+            b.createdAt
+          ) -
+          new Date(
+            a.createdAt
+          )
+      );
 
-    target.innerHTML =
-      `
-      <div class="empty">
-        No questions have been submitted yet.
-      </div>
+    }
+
+
+    if(!questions.length){
+
+      target.innerHTML = `
+        <div class="empty">
+          No questions have been submitted yet.
+        </div>
       `;
 
-    return;
+      return;
+
+    }
+
+
+    target.innerHTML =
+      questions.map(q => {
+
+        const time =
+          q.createdAt
+            ? new Date(
+                q.createdAt
+              )
+              .toLocaleTimeString(
+                "en-MY",
+                {
+                  hour:"numeric",
+                  minute:"2-digit",
+                  hour12:true,
+                  timeZone:
+                    "Asia/Kuala_Lumpur"
+                }
+              )
+            : "";
+
+
+        return `
+          <div class="question">
+
+            <div class="question-top">
+
+              <div class="question-votes">
+
+                <div class="vote-number">
+                  ${q.likes}
+                </div>
+
+                <div class="vote-label">
+                  LIKES
+                </div>
+
+              </div>
+
+
+              <div class="question-main">
+
+                <div class="question-room">
+                  ${escapeHTML(q.roomTitle)}
+                </div>
+
+                <div class="question-message">
+                  ${escapeHTML(q.message)}
+                </div>
+
+                <div class="question-author">
+
+                  ${escapeHTML(q.author)}
+
+                  ${
+                    q.affiliation
+                      ? " · " +
+                        escapeHTML(
+                          q.affiliation
+                        )
+                      : ""
+                  }
+
+                  ${
+                    time
+                      ? " · " +
+                        escapeHTML(time)
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+
+  }catch(error){
+
+    console.error(error);
+
+    target.innerHTML = `
+      <div class="empty">
+        Unable to load questions.
+      </div>
+    `;
 
   }
-
-
-  target.innerHTML =
-    questions.map(q => `
-      <div class="question">
-
-        <div class="question-top">
-
-          <div class="question-votes">
-
-            <div class="vote-number">
-              ${q.likes}
-            </div>
-
-            <div class="vote-label">
-              LIKES
-            </div>
-
-          </div>
-
-
-          <div class="question-main">
-
-            <div class="question-room">
-              ${escapeHTML(q.roomTitle)}
-            </div>
-
-            <div class="question-message">
-              ${escapeHTML(q.message)}
-            </div>
-
-            <div class="question-author">
-
-              ${escapeHTML(q.author)}
-
-              ${
-                q.affiliation
-                  ? " · " +
-                    escapeHTML(q.affiliation)
-                  : ""
-              }
-
-              ${
-                q.time
-                  ? " · " +
-                    escapeHTML(q.time)
-                  : ""
-              }
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    `).join("");
 
 }
 
