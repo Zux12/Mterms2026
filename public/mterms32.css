@@ -773,3 +773,43 @@
   }
 
 }
+
+
+@media(min-width:601px){
+
+  #m32-launcher{
+    overflow:hidden !important;
+  }
+
+  #m32-launcher .m32-launch-icon{
+    width:48px !important;
+    height:48px !important;
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+
+    overflow:hidden !important;
+  }
+
+  #m32-launcher .m32-launch-icon img{
+    width:42px !important;
+    height:42px !important;
+
+    max-width:42px !important;
+    max-height:42px !important;
+
+    object-fit:contain !important;
+
+    position:static !important;
+    inset:auto !important;
+
+    transform:none !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    display:block !important;
+  }
+
+}
