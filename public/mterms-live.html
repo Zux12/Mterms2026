@@ -1148,6 +1148,46 @@ main{
   padding:15px;
 }
 
+.my-discussion-item{
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  cursor:pointer;
+}
+
+.my-discussion-item:last-child{
+  border-bottom:0;
+}
+
+.my-discussion-item:hover{
+  background:#f8fafc;
+}
+
+.my-discussion-meta{
+  font-size:10px;
+  color:var(--blue);
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.my-discussion-message{
+  margin-top:4px;
+  font-size:13px;
+  line-height:1.45;
+  color:var(--text);
+}
+
+.my-discussion-open{
+  margin-top:6px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:750;
+}
+
 .more-panel h3{
   margin:0 0 12px;
   font-size:17px;
@@ -4330,6 +4370,82 @@ function goToDiscussionRoom(roomId){
 
 }
 
+function goToDiscussionPost(
+  roomId,
+  postId
+){
+
+  goToPage("discuss");
+
+
+  setTimeout(()=>{
+
+    openDiscussionRoom(
+      roomId
+    );
+
+
+    setTimeout(()=>{
+
+      const post =
+        document.querySelector(
+          `[data-post="${CSS.escape(postId)}"]`
+        );
+
+      if(!post){
+        return;
+      }
+
+
+      /*
+        Open the thread automatically.
+      */
+      const thread =
+        document.getElementById(
+          "thread-" + postId
+        );
+
+      if(thread){
+        thread.classList.remove(
+          "hidden-thread"
+        );
+      }
+
+
+      /*
+        Scroll the selected post
+        into view.
+      */
+      post.scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
+
+
+      /*
+        Temporary visual highlight.
+      */
+      post.style.transition =
+        "box-shadow .25s ease";
+
+      post.style.boxShadow =
+        "0 0 0 3px rgba(22,119,255,.18)";
+
+
+      setTimeout(()=>{
+
+        post.style.boxShadow = "";
+
+      },1800);
+
+
+    },50);
+
+
+  },0);
+
+}
+
 function getSessionFeedback(){
 
   return loadJSON(
@@ -5215,89 +5331,157 @@ function renderMorePanel(section){
     document.getElementById("morePanel");
 
 
-  if(section === "discussions"){
+if(section === "discussions"){
 
-    const profile =
-      getProfile();
+  const profile =
+    getProfile();
 
-    const discussions =
-      getDiscussions();
+  const discussions =
+    getDiscussions();
 
-    const myPosts = [];
+  const rooms =
+    discussionRoomDefinitions();
 
-    Object.entries(discussions)
-      .forEach(([roomId,posts]) => {
+  const myPosts = [];
 
-        posts.forEach(post => {
 
-          if(
-            post.mine ||
-            (
-              profile &&
-              post.author === profile.name
-            )
-          ){
+  Object.entries(discussions)
+    .forEach(([roomId,posts]) => {
 
-            myPosts.push({
-              roomId,
-              message:post.message,
-              type:post.type
-            });
+      const room =
+        rooms.find(r => r.id === roomId);
 
-          }
+      posts.forEach(post => {
 
-        });
+        if(
+          post.mine ||
+          (
+            profile &&
+            post.author === profile.name
+          )
+        ){
+
+          myPosts.push({
+            roomId,
+            postId:post.id,
+            roomTitle:
+              room
+                ? room.title
+                : "Session Discussion",
+            message:post.message,
+            type:post.type || "Discussion",
+            time:post.time || ""
+          });
+
+        }
+
+
+        /*
+          Also include threads where this
+          participant replied.
+        */
+        (post.replies || [])
+          .forEach(reply => {
+
+            if(
+              reply.mine ||
+              (
+                profile &&
+                reply.author === profile.name
+              )
+            ){
+
+              myPosts.push({
+                roomId,
+                postId:post.id,
+                roomTitle:
+                  room
+                    ? room.title
+                    : "Session Discussion",
+                message:reply.message,
+                type:"Reply",
+                time:reply.time || ""
+              });
+
+            }
+
+          });
 
       });
 
+    });
 
-    target.innerHTML =
-      `
-      <div class="more-panel">
 
-        <h3>My Discussions</h3>
+  target.innerHTML =
+    `
+    <div class="more-panel">
 
-        ${
-          myPosts.length
-            ? myPosts.map(item => `
-                <div
-                  style="
-                    padding:10px 0;
-                    border-bottom:1px solid var(--line);
-                  "
-                >
-                  <div
-                    style="
-                      font-size:11px;
-                      color:var(--blue);
-                      font-weight:800;
-                    "
-                  >
-                    ${escapeHTML(item.type)}
-                  </div>
+      <h3>My Discussions</h3>
 
-                  <div
-                    style="
-                      font-size:13px;
-                      line-height:1.45;
-                      margin-top:3px;
-                    "
-                  >
-                    ${escapeHTML(item.message)}
-                  </div>
+      ${
+        myPosts.length
+          ? myPosts.map(item => `
+              <button
+                class="my-discussion-item"
+                type="button"
+                data-my-discussion-room="${escapeHTML(item.roomId)}"
+                data-my-discussion-post="${escapeHTML(item.postId)}"
+              >
+
+                <div class="my-discussion-meta">
+                  ${escapeHTML(item.type)}
+                  ·
+                  ${escapeHTML(item.roomTitle)}
                 </div>
-              `).join("")
-            : `
-              <div class="info-placeholder">
-                You have not posted anything yet.
-              </div>
-            `
+
+                <div class="my-discussion-message">
+                  ${escapeHTML(item.message)}
+                </div>
+
+                <div class="my-discussion-open">
+                  Open discussion →
+                </div>
+
+              </button>
+            `).join("")
+          : `
+            <div class="info-placeholder">
+              You have not participated in any discussions yet.
+            </div>
+          `
+      }
+
+    </div>
+    `;
+
+
+  target
+    .querySelectorAll(
+      "[data-my-discussion-room]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          const roomId =
+            button.dataset.myDiscussionRoom;
+
+          const postId =
+            button.dataset.myDiscussionPost;
+
+          goToDiscussionPost(
+            roomId,
+            postId
+          );
+
         }
+      );
 
-      </div>
-      `;
+    });
 
-  }
+}
 
 
   if(section === "feedback"){
