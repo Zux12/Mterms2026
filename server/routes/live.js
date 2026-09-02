@@ -12,6 +12,9 @@ const MtermsLiveFeedback =
 const MtermsLiveInformation =
   require('../models/MtermsLiveInformation');
 
+const MtermsIrcMessage =
+  require('../models/MtermsIrcMessage');
+
 const router = express.Router();
 
 
@@ -1462,6 +1465,47 @@ router.put(
       res.status(500).json({
         ok:false,
         error:'Unable to save useful information'
+      });
+
+    }
+
+  }
+);
+
+/* =====================================================
+   MTERMS32 CHAT CLEANUP
+===================================================== */
+
+router.delete(
+  '/mterms32/history',
+  async (req, res) => {
+
+    try{
+
+      const result =
+        await MtermsIrcMessage
+          .deleteMany({});
+
+
+      res.json({
+        ok:true,
+        deletedCount:
+          result.deletedCount || 0
+      });
+
+
+    }catch(error){
+
+      console.error(
+        'MTERMS32 history clear error:',
+        error
+      );
+
+
+      res.status(500).json({
+        ok:false,
+        error:
+          'Unable to clear MTERMS32 chat history'
       });
 
     }
