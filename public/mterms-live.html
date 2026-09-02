@@ -4858,22 +4858,79 @@ function goToDiscussionPost(
 
 }
 
-function getSessionFeedback(){
+async function getSessionFeedback(
+  sessionId
+){
 
-  return loadJSON(
-    KEYS.sessionFeedback,
-    {}
-  );
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/session/${encodeURIComponent(sessionId)}?participantId=${encodeURIComponent(getParticipantId())}`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load session feedback"
+    );
+
+  }
+
+
+  return data.feedback;
 
 }
 
 
-function saveSessionFeedback(data){
+async function saveSessionFeedback(
+  sessionId,
+  rating,
+  comment
+){
 
-  saveJSON(
-    KEYS.sessionFeedback,
-    data
-  );
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/session/${encodeURIComponent(sessionId)}`,
+      {
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:JSON.stringify({
+          participantId:
+            getParticipantId(),
+
+          rating,
+
+          comment
+        })
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to save session feedback"
+    );
+
+  }
+
+
+  return data.feedback;
 
 }
 
@@ -4908,7 +4965,7 @@ function sessionRoomState(room){
 }
 
 
-function renderSessionFeedback(room){
+async function renderSessionFeedback(room){
 
   const target =
     document.getElementById(
@@ -4979,11 +5036,20 @@ function renderSessionFeedback(room){
     load any feedback already stored.
   */
 
-  const allFeedback =
-    getSessionFeedback();
+let existing = null;
 
-  const existing =
-    allFeedback[room.id] || null;
+try{
+
+  existing =
+    await getSessionFeedback(
+      room.id
+    );
+
+}catch(error){
+
+  console.error(error);
+
+}
 
 
   if(existing){
@@ -5188,7 +5254,7 @@ function renderSessionFeedbackForm(
     )
     .addEventListener(
       "click",
-      ()=>{
+async ()=>{
 
         if(!selectedRating){
 
@@ -5200,38 +5266,57 @@ function renderSessionFeedbackForm(
         }
 
 
-        const allFeedback =
-          getSessionFeedback();
+       const comment =
+  document
+    .getElementById(
+      "sessionFeedbackComment"
+    )
+    .value
+    .trim()
+    .slice(0,1000);
 
 
-        allFeedback[room.id] = {
-
-          rating:
-            selectedRating,
-
-          comment:
-            document
-              .getElementById(
-                "sessionFeedbackComment"
-              )
-              .value
-              .trim()
-              .slice(0,1000),
-
-          submittedAt:
-            new Date().toISOString()
-
-        };
+const button =
+  document
+    .getElementById(
+      "submitSessionFeedbackBtn"
+    );
 
 
-        saveSessionFeedback(
-          allFeedback
-        );
+button.disabled = true;
+button.textContent =
+  "Submitting…";
 
 
-        renderSessionFeedback(
-          room
-        );
+try{
+
+  await saveSessionFeedback(
+    room.id,
+    selectedRating,
+    comment
+  );
+
+
+  await renderSessionFeedback(
+    room
+  );
+
+
+}catch(error){
+
+  console.error(error);
+
+  alert(
+    error.message ||
+    "Unable to save feedback."
+  );
+
+
+  button.disabled = false;
+  button.textContent =
+    "Submit Feedback";
+
+}
 
       }
     );
