@@ -16,6 +16,7 @@ const igniteRouter = require('./routes/ignite');
 const igniteAIRouter = require('./routes/igniteAI');
 const analyticsRouter = require('./routes/analytics');
 const mtermsAIRouter = require('./routes/mtermsAI');
+const liveRouter = require('./routes/live');
 
 const app = express();
 
@@ -83,6 +84,7 @@ app.use('/api/ignite-ai', igniteAIRouter);
 app.use('/api/reviewer', reviewerRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/mterms-ai', mtermsAIRouter);
+app.use('/api/live', liveRouter);
 
 /* Friendly root */
 app.get('/', (req, res) => {
