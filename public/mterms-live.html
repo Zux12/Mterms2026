@@ -2065,9 +2065,18 @@ const KEYS = {
   profile: "mtermsLiveProfileV1",
   schedule: "mtermsLiveScheduleV1",
   announcementsRead: "mtermsLiveAnnouncementsReadV1",
-  discussions: "mtermsLivePrototypeDiscussionsV1",
-  feedback: "mtermsLiveFeedbackPrototypeV1",
-  sessionFeedback: "mtermsLiveSessionFeedbackV1"
+
+  participantId:
+    "mtermsLiveParticipantIdV1",
+
+  discussions:
+    "mtermsLivePrototypeDiscussionsV1",
+
+  feedback:
+    "mtermsLiveFeedbackPrototypeV1",
+
+  sessionFeedback:
+    "mtermsLiveSessionFeedbackV1"
 };
   
 /* =====================================================
@@ -2726,7 +2735,49 @@ function sessionSearchText(item){
   ).toLowerCase();
 }
 
-  
+function getParticipantId(){
+
+  let id =
+    localStorage.getItem(
+      KEYS.participantId
+    );
+
+
+  if(id){
+    return id;
+  }
+
+
+  if(
+    window.crypto &&
+    typeof crypto.randomUUID === "function"
+  ){
+
+    id =
+      crypto.randomUUID();
+
+  }else{
+
+    id =
+      "participant-" +
+      Date.now() +
+      "-" +
+      Math.random()
+        .toString(36)
+        .slice(2,12);
+
+  }
+
+
+  localStorage.setItem(
+    KEYS.participantId,
+    id
+  );
+
+
+  return id;
+
+}  
 
 function getProfile(){
   return loadJSON(KEYS.profile,null);
@@ -2740,15 +2791,196 @@ function saveSchedule(ids){
   saveJSON(KEYS.schedule,ids);
 }
 
+let liveDiscussions = {};
+
+
 function getDiscussions(){
-  return loadJSON(
-    KEYS.discussions,
-    JSON.parse(JSON.stringify(DEFAULT_DISCUSSIONS))
-  );
+
+  return liveDiscussions;
+
 }
 
-function saveDiscussions(data){
-  saveJSON(KEYS.discussions,data);
+
+function formatDiscussionTime(iso){
+
+  if(!iso){
+    return "";
+  }
+
+  try{
+
+    return new Date(iso)
+      .toLocaleTimeString(
+        "en-MY",
+        {
+          hour:"numeric",
+          minute:"2-digit",
+          hour12:true,
+          timeZone:
+            "Asia/Kuala_Lumpur"
+        }
+      );
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+async function loadAllDiscussions(){
+
+  try{
+
+    const response =
+      await fetch(
+        `${LIVE_API}/messages`,
+        {
+          method:"GET",
+          headers:{
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok || !data.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to load discussions"
+      );
+
+    }
+
+
+    const participantId =
+      getParticipantId();
+
+
+    const grouped = {};
+
+
+    (data.messages || [])
+      .forEach(item => {
+
+        if(!grouped[item.sessionId]){
+          grouped[item.sessionId] = [];
+        }
+
+
+        grouped[item.sessionId].push({
+
+          id:item.id,
+
+          author:item.author,
+
+          title:
+            item.title || "",
+
+          affiliation:
+            item.affiliation || "",
+
+          time:
+            formatDiscussionTime(
+              item.createdAt
+            ),
+
+          type:
+            item.type,
+
+          message:
+            item.message,
+
+          likes:
+            Number(
+              item.likes || 0
+            ),
+
+          liked:
+            Array.isArray(
+              item.likedBy
+            ) &&
+            item.likedBy.includes(
+              participantId
+            ),
+
+          mine:
+            item.participantId ===
+            participantId,
+
+          replies:
+            (item.replies || [])
+              .map(reply => ({
+
+                id:reply.id,
+
+                author:
+                  reply.author,
+
+                title:
+                  reply.title || "",
+
+                affiliation:
+                  reply.affiliation || "",
+
+                time:
+                  formatDiscussionTime(
+                    reply.createdAt
+                  ),
+
+                message:
+                  reply.message,
+
+                mine:
+                  reply.participantId ===
+                  participantId
+
+              }))
+
+        });
+
+      });
+
+
+    liveDiscussions =
+      grouped;
+
+
+    /*
+      Refresh visible discussion UI.
+    */
+
+    renderDiscussionRooms();
+
+
+    if(activeRoomId){
+      renderPosts();
+    }
+
+
+    /*
+      If My Discussions is currently open,
+      it will refresh the next time it is opened.
+    */
+
+
+  }catch(error){
+
+    console.error(
+      "MTERMS Live discussion load error:",
+      error
+    );
+
+  }
+
 }
 
 
@@ -5038,80 +5270,147 @@ document.getElementById("backToRooms")
    POSTS AND THREADS
 ===================================================== */
 
-document.getElementById("postMessageBtn")
-  .addEventListener("click",()=>{
+document
+  .getElementById(
+    "postMessageBtn"
+  )
+  .addEventListener(
+    "click",
+    async ()=>{
 
-    if(!activeRoomId) return;
+      if(!activeRoomId){
+        return;
+      }
 
-    const profile =
-      getProfile();
 
-    if(!profile){
-      openProfile();
-      return;
-    }
+      const profile =
+        getProfile();
 
-    const textarea =
-      document.getElementById("newPostText");
 
-    const message =
-      textarea.value.trim();
+      if(!profile){
 
-    if(!message){
-      alert("Please write a message first.");
-      textarea.focus();
-      return;
-    }
+        openProfile();
+        return;
 
-    const discussions =
-      getDiscussions();
+      }
 
-    if(!discussions[activeRoomId]){
-      discussions[activeRoomId] = [];
-    }
 
-    discussions[activeRoomId].unshift({
+      const textarea =
+        document.getElementById(
+          "newPostText"
+        );
 
-      id:
-        "local-" +
-        Date.now() +
-        "-" +
-        Math.random()
-          .toString(36)
-          .slice(2,8),
 
-      author:profile.name,
-      title:profile.title || "",
-      affiliation:profile.affiliation || "",
-      time:new Date().toLocaleTimeString(
-        "en-MY",
-        {
-          hour:"numeric",
-          minute:"2-digit",
-          hour12:true,
-          timeZone:"Asia/Kuala_Lumpur"
+      const message =
+        textarea.value.trim();
+
+
+      if(!message){
+
+        alert(
+          "Please write a message first."
+        );
+
+        textarea.focus();
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById(
+          "postMessageBtn"
+        );
+
+
+      button.disabled = true;
+      button.textContent =
+        "Posting…";
+
+
+      try{
+
+        const response =
+          await fetch(
+            `${LIVE_API}/messages`,
+            {
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:JSON.stringify({
+
+                sessionId:
+                  activeRoomId,
+
+                author:
+                  profile.name,
+
+                title:
+                  profile.title || "",
+
+                affiliation:
+                  profile.affiliation || "",
+
+                type:
+                  document
+                    .getElementById(
+                      "postType"
+                    )
+                    .value,
+
+                message,
+
+                participantId:
+                  getParticipantId()
+
+              })
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if(!response.ok || !data.ok){
+
+          throw new Error(
+            data.error ||
+            "Unable to post message"
+          );
+
         }
-      ),
 
-      type:
-        document.getElementById("postType")
-          .value,
 
-      message,
-      likes:0,
-      liked:false,
-      replies:[],
-      mine:true
+        textarea.value = "";
 
-    });
 
-    saveDiscussions(discussions);
+        await loadAllDiscussions();
 
-    textarea.value = "";
 
-    renderPosts();
+      }catch(error){
 
-  });
+        console.error(error);
+
+        alert(
+          error.message ||
+          "Unable to post message."
+        );
+
+      }finally{
+
+        button.disabled = false;
+        button.textContent =
+          "Post";
+
+      }
+
+    }
+  );
 
 
 function renderPosts(){
@@ -5344,112 +5643,185 @@ function renderPosts(){
 }
 
 
-function togglePostLike(postId){
+async function togglePostLike(
+  postId
+){
 
-  const discussions =
-    getDiscussions();
+  try{
 
-  const posts =
-    discussions[activeRoomId] || [];
+    const response =
+      await fetch(
+        `${LIVE_API}/messages/${encodeURIComponent(postId)}/like`,
+        {
+          method:"POST",
 
-  const post =
-    posts.find(p => p.id === postId);
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-  if(!post) return;
+          body:JSON.stringify({
+            participantId:
+              getParticipantId()
+          })
+        }
+      );
 
-  post.liked = !post.liked;
 
-  post.likes =
-    Math.max(
-      0,
-      (post.likes || 0) +
-      (post.liked ? 1 : -1)
+    const data =
+      await response.json();
+
+
+    if(!response.ok || !data.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to update like"
+      );
+
+    }
+
+
+    await loadAllDiscussions();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Unable to update like."
     );
 
-  saveDiscussions(discussions);
-
-  renderPosts();
+  }
 
 }
 
 
-function addReply(postId){
+async function addReply(
+  postId
+){
 
   const profile =
     getProfile();
 
+
   if(!profile){
+
     openProfile();
     return;
+
   }
+
 
   const input =
     document.querySelector(
       `[data-reply-input="${CSS.escape(postId)}"]`
     );
 
-  if(!input) return;
+
+  if(!input){
+    return;
+  }
+
 
   const message =
     input.value.trim();
 
-  if(!message) return;
 
-
-  const discussions =
-    getDiscussions();
-
-  const posts =
-    discussions[activeRoomId] || [];
-
-  const post =
-    posts.find(p => p.id === postId);
-
-  if(!post) return;
-
-  if(!post.replies){
-    post.replies = [];
+  if(!message){
+    return;
   }
 
-  post.replies.push({
 
-    author:profile.name,
-    title:profile.title || "",
-    affiliation:profile.affiliation || "",
+  try{
 
-    time:new Date().toLocaleTimeString(
-      "en-MY",
-      {
-        hour:"numeric",
-        minute:"2-digit",
-        hour12:true,
-        timeZone:"Asia/Kuala_Lumpur"
-      }
-    ),
+    const response =
+      await fetch(
+        `${LIVE_API}/messages/${encodeURIComponent(postId)}/replies`,
+        {
+          method:"POST",
 
-    message,
-    mine:true
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-  });
+          body:JSON.stringify({
 
-  saveDiscussions(discussions);
+            author:
+              profile.name,
 
-  renderPosts();
+            title:
+              profile.title || "",
 
-  setTimeout(()=>{
+            affiliation:
+              profile.affiliation || "",
 
-    const thread =
-      document.getElementById(
-        "thread-" + postId
+            message,
+
+            participantId:
+              getParticipantId()
+
+          })
+        }
       );
 
-    if(thread){
-      thread.classList.remove(
-        "hidden-thread"
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok || !data.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to post reply"
       );
+
     }
 
-  },0);
+
+    await loadAllDiscussions();
+
+
+    /*
+      Re-open the thread after
+      refreshing from MongoDB.
+    */
+
+    setTimeout(()=>{
+
+      const thread =
+        document.getElementById(
+          "thread-" + postId
+        );
+
+
+      if(thread){
+
+        thread
+          .classList
+          .remove(
+            "hidden-thread"
+          );
+
+      }
+
+    },50);
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Unable to post reply."
+    );
+
+  }
 
 }
 
@@ -5855,7 +6227,7 @@ function initialise(){
 
   renderMySchedule();
 
-  renderDiscussionRooms();
+  loadAllDiscussions();
 
   renderLive();
 
@@ -5894,6 +6266,16 @@ setInterval(
   10000
 );
 
+/*
+  Temporary discussion refresh.
+
+  Socket.IO will replace this later.
+*/
+setInterval(
+  loadAllDiscussions,
+  5000
+);
+  
 }
 
 
