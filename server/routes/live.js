@@ -670,6 +670,147 @@ router.post(
 );
 
 
+/* =====================================================
+   ADMIN MODERATION
+===================================================== */
+
+
+/*
+  DELETE /api/live/messages/:id
+
+  Soft-delete a main discussion post.
+*/
+
+router.delete(
+  '/messages/:id',
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await MtermsLiveMessage
+          .findByIdAndUpdate(
+            req.params.id,
+            {
+              $set: {
+                isDeleted: true
+              }
+            },
+            {
+              new: true
+            }
+          );
+
+
+      if (!post) {
+
+        return res.status(404).json({
+          ok: false,
+          error: 'Discussion post not found'
+        });
+
+      }
+
+
+      res.json({
+        ok: true
+      });
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live post DELETE error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to delete post'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  DELETE /api/live/messages/:id/replies/:replyId
+
+  Remove one reply from a thread.
+*/
+
+router.delete(
+  '/messages/:id/replies/:replyId',
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await MtermsLiveMessage.findOne({
+          _id: req.params.id,
+          isDeleted: false
+        });
+
+
+      if (!post) {
+
+        return res.status(404).json({
+          ok: false,
+          error: 'Discussion post not found'
+        });
+
+      }
+
+
+      const before =
+        post.replies.length;
+
+
+      post.replies =
+        post.replies.filter(
+          reply =>
+            String(reply._id) !==
+            String(req.params.replyId)
+        );
+
+
+      if (
+        post.replies.length === before
+      ) {
+
+        return res.status(404).json({
+          ok: false,
+          error: 'Reply not found'
+        });
+
+      }
+
+
+      await post.save();
+
+
+      res.json({
+        ok: true
+      });
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live reply DELETE error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to delete reply'
+      });
+
+    }
+
+  }
+);
+
 module.exports = router;
 
 
