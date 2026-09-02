@@ -2792,6 +2792,9 @@ function saveSchedule(ids){
 }
 
 let liveDiscussions = {};
+let discussionInputActive = false;
+
+let openThreadId = null;
 
 
 function getDiscussions(){
@@ -2831,6 +2834,10 @@ function formatDiscussionTime(iso){
 
 
 async function loadAllDiscussions(){
+
+    if(discussionInputActive){
+    return;
+  }
 
   try{
 
@@ -5271,6 +5278,18 @@ document.getElementById("backToRooms")
 ===================================================== */
 
 document
+  .getElementById("newPostText")
+  .addEventListener("focus",()=>{
+    discussionInputActive = true;
+  });
+
+document
+  .getElementById("newPostText")
+  .addEventListener("blur",()=>{
+    discussionInputActive = false;
+  });
+  
+document
   .getElementById(
     "postMessageBtn"
   )
@@ -5603,29 +5622,53 @@ function renderPosts(){
     });
 
 
-  target
-    .querySelectorAll("[data-thread]")
-    .forEach(button => {
+target
+  .querySelectorAll("[data-thread]")
+  .forEach(button => {
 
-      button.addEventListener("click",()=>{
+    button.addEventListener("click",()=>{
 
-        const id =
-          button.dataset.thread;
+      const id =
+        button.dataset.thread;
 
-        const thread =
-          document.getElementById(
-            "thread-" + id
-          );
+      const thread =
+        document.getElementById(
+          "thread-" + id
+        );
 
-        thread.classList.toggle(
+      const willOpen =
+        thread.classList.contains(
           "hidden-thread"
         );
 
-      });
+      thread.classList.toggle(
+        "hidden-thread"
+      );
+
+      openThreadId =
+        willOpen
+          ? id
+          : null;
 
     });
 
+  });
 
+
+target
+  .querySelectorAll("[data-reply-input]")
+  .forEach(input => {
+
+    input.addEventListener("focus",()=>{
+      discussionInputActive = true;
+    });
+
+    input.addEventListener("blur",()=>{
+      discussionInputActive = false;
+    });
+
+  });
+  
   target
     .querySelectorAll("[data-reply-send]")
     .forEach(button => {
@@ -5639,6 +5682,23 @@ function renderPosts(){
       });
 
     });
+
+if(openThreadId){
+
+  const openThread =
+    document.getElementById(
+      "thread-" + openThreadId
+    );
+
+  if(openThread){
+
+    openThread
+      .classList
+      .remove("hidden-thread");
+
+  }
+
+}
 
 }
 
@@ -5783,7 +5843,9 @@ async function addReply(
     }
 
 
-    await loadAllDiscussions();
+    openThreadId = postId;
+
+await loadAllDiscussions();
 
 
     /*
@@ -5791,25 +5853,7 @@ async function addReply(
       refreshing from MongoDB.
     */
 
-    setTimeout(()=>{
-
-      const thread =
-        document.getElementById(
-          "thread-" + postId
-        );
-
-
-      if(thread){
-
-        thread
-          .classList
-          .remove(
-            "hidden-thread"
-          );
-
-      }
-
-    },50);
+    
 
 
   }catch(error){
