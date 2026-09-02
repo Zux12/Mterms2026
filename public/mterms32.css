@@ -51,20 +51,30 @@
 }
 
 #m32-launcher .m32-launch-icon{
-  width:44px;
-  height:44px;
+  width:48px;
+  height:48px;
 
-  background:#fff;
-  border:1px solid #000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-  display:grid;
-  place-items:center;
+  background:transparent;
+  border:0;
 
-  font-family:"Courier New",monospace;
-  font-size:22px;
-  font-weight:bold;
+  overflow:hidden;
+}
 
-  color:#000080;
+#m32-launcher .m32-launch-icon img{
+  width:100%;
+  height:100%;
+
+  object-fit:contain;
+
+  display:block;
+
+  image-rendering:auto;
+
+  pointer-events:none;
 }
 
 #m32-launcher.m32-activity{
