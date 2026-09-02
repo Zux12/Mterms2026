@@ -1661,12 +1661,54 @@ textarea.form-control{
     </div>
 
 
-    <div
+     <div
       class="saved-notice"
       id="infoSavedNotice"
     >
       ✓ Information saved.
     </div>
+
+  </div>
+
+
+  <div
+    class="card"
+    style="
+      margin-top:14px;
+      padding:16px;
+    "
+  >
+
+    <div
+      style="
+        font-size:15px;
+        font-weight:850;
+      "
+    >
+      MTERMS32 Chat
+    </div>
+
+    <div
+      style="
+        margin-top:5px;
+        font-size:12px;
+        line-height:1.5;
+        color:var(--muted);
+      "
+    >
+      Clear participant messages, bot messages
+      and join/quit history from the nostalgic
+      MTERMS32 chat rooms.
+    </div>
+
+    <button
+      class="btn btn-danger"
+      id="clearMterms32HistoryBtn"
+      type="button"
+      style="margin-top:12px;"
+    >
+      Clear Chat History
+    </button>
 
   </div>
 
@@ -5032,10 +5074,115 @@ document
 
 
       }finally{
-
         button.disabled = false;
         button.textContent =
           "Save Information";
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "clearMterms32HistoryBtn"
+  )
+  .addEventListener(
+    "click",
+    async ()=>{
+
+      const confirmed =
+        confirm(
+          "Clear all MTERMS32 chat history?\n\n" +
+          "This will remove participant messages, " +
+          "bot messages and join/quit notices from " +
+          "#kampung, #mamak and #lagenda."
+        );
+
+
+      if(!confirmed){
+        return;
+      }
+
+
+      const confirmedAgain =
+        confirm(
+          "Are you sure?\n\n" +
+          "This action cannot be undone."
+        );
+
+
+      if(!confirmedAgain){
+        return;
+      }
+
+
+      const button =
+        document.getElementById(
+          "clearMterms32HistoryBtn"
+        );
+
+
+      button.disabled = true;
+      button.textContent =
+        "Clearing…";
+
+
+      try{
+
+        const response =
+          await fetch(
+            `${LIVE_API}/mterms32/history`,
+            {
+              method:"DELETE",
+              headers:{
+                "Content-Type":
+                  "application/json"
+              }
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if(
+          !response.ok ||
+          !data.ok
+        ){
+
+          throw new Error(
+            data.error ||
+            "Unable to clear chat history"
+          );
+
+        }
+
+
+        alert(
+          "MTERMS32 chat history cleared.\n\n" +
+          data.deletedCount +
+          " stored records removed."
+        );
+
+
+      }catch(error){
+
+        console.error(error);
+
+        alert(
+          error.message ||
+          "Unable to clear MTERMS32 chat history."
+        );
+
+
+      }finally{
+
+        button.disabled = false;
+        button.textContent =
+          "Clear Chat History";
 
       }
 
