@@ -5009,6 +5009,44 @@ async function saveConferenceFeedback(
   return data.feedback;
 
 }
+
+async function getUsefulInformation(){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/information`,
+      {
+        method:"GET",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load useful information"
+    );
+
+  }
+
+
+  return data.information || {
+    venue:"",
+    wifi:"",
+    help:"",
+    other:""
+  };
+
+}
   
 function sessionRoomState(room){
 
@@ -6471,32 +6509,213 @@ if(section === "feedback"){
 }
 
 
-  if(section === "info"){
+if(section === "info"){
 
-    target.innerHTML =
-      `
-      <div class="more-panel">
+  target.innerHTML = `
+    <div class="more-panel">
 
-        <h3>Useful Information</h3>
+      <h3>Useful Information</h3>
 
-        <div class="info-placeholder">
+      <div class="info-placeholder">
+        Loading information…
+      </div>
 
-          This section is intentionally being kept
-          as a placeholder for now.
+    </div>
+  `;
 
-          <br><br>
 
-          We can later add venue information,
-          Wi-Fi details, secretariat/help contact,
-          exhibition information and any other
-          conference-day information required.
+  getUsefulInformation()
+    .then(info => {
+
+      const sections = [];
+
+
+      if(info.venue){
+
+        sections.push(`
+          <div
+            style="
+              margin-bottom:16px;
+            "
+          >
+
+            <div
+              style="
+                font-size:11px;
+                font-weight:850;
+                color:var(--blue);
+                text-transform:uppercase;
+                letter-spacing:.06em;
+                margin-bottom:5px;
+              "
+            >
+              Venue Information
+            </div>
+
+            <div
+              style="
+                font-size:13px;
+                line-height:1.55;
+                white-space:pre-wrap;
+              "
+            >
+              ${escapeHTML(info.venue)}
+            </div>
+
+          </div>
+        `);
+
+      }
+
+
+      if(info.wifi){
+
+        sections.push(`
+          <div
+            style="
+              margin-bottom:16px;
+            "
+          >
+
+            <div
+              style="
+                font-size:11px;
+                font-weight:850;
+                color:var(--blue);
+                text-transform:uppercase;
+                letter-spacing:.06em;
+                margin-bottom:5px;
+              "
+            >
+              Wi-Fi
+            </div>
+
+            <div
+              style="
+                font-size:13px;
+                line-height:1.55;
+                white-space:pre-wrap;
+              "
+            >
+              ${escapeHTML(info.wifi)}
+            </div>
+
+          </div>
+        `);
+
+      }
+
+
+      if(info.help){
+
+        sections.push(`
+          <div
+            style="
+              margin-bottom:16px;
+            "
+          >
+
+            <div
+              style="
+                font-size:11px;
+                font-weight:850;
+                color:var(--blue);
+                text-transform:uppercase;
+                letter-spacing:.06em;
+                margin-bottom:5px;
+              "
+            >
+              Secretariat / Help
+            </div>
+
+            <div
+              style="
+                font-size:13px;
+                line-height:1.55;
+                white-space:pre-wrap;
+              "
+            >
+              ${escapeHTML(info.help)}
+            </div>
+
+          </div>
+        `);
+
+      }
+
+
+      if(info.other){
+
+        sections.push(`
+          <div>
+
+            <div
+              style="
+                font-size:11px;
+                font-weight:850;
+                color:var(--blue);
+                text-transform:uppercase;
+                letter-spacing:.06em;
+                margin-bottom:5px;
+              "
+            >
+              Other Information
+            </div>
+
+            <div
+              style="
+                font-size:13px;
+                line-height:1.55;
+                white-space:pre-wrap;
+              "
+            >
+              ${escapeHTML(info.other)}
+            </div>
+
+          </div>
+        `);
+
+      }
+
+
+      target.innerHTML = `
+        <div class="more-panel">
+
+          <h3>Useful Information</h3>
+
+          ${
+            sections.length
+              ? sections.join("")
+              : `
+                <div class="info-placeholder">
+                  Conference information will be updated here.
+                </div>
+              `
+          }
 
         </div>
-
-      </div>
       `;
 
-  }
+    })
+    .catch(error => {
+
+      console.error(error);
+
+      target.innerHTML = `
+        <div class="more-panel">
+
+          <h3>Useful Information</h3>
+
+          <div class="info-placeholder">
+            Unable to load information.
+          </div>
+
+        </div>
+      `;
+
+    });
+
+}
 
 
   if(section === "about"){
