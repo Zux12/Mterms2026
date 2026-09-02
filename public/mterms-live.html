@@ -2054,6 +2054,9 @@ main{
 
 "use strict";
 
+  const LIVE_API =
+  'https://mterm2026-559f9bf571b5.herokuapp.com/api/live';
+
 /* =====================================================
    STORAGE KEYS
 ===================================================== */
@@ -2453,23 +2456,6 @@ const PROGRAMME = [
 ];
 
 
-/* =====================================================
-   SAMPLE ANNOUNCEMENTS
-   Prototype only.
-===================================================== */
-
-const ANNOUNCEMENTS = [
-  {
-    id:"ann-demo-1",
-    time:"10:28 AM",
-    message:"Welcome to MTERMS 2026 LIVE. Important event updates will appear here."
-  },
-  {
-    id:"ann-demo-2",
-    time:"12:35 PM",
-    message:"Poster Rapid Presentation takes place during the Day 1 lunch session."
-  }
-];
 
 
 /* =====================================================
@@ -2855,6 +2841,77 @@ const announcementBadge =
 const envelopeIcon =
   document.getElementById("envelopeIcon");
 
+let liveAnnouncements = [];
+
+async function loadLiveAnnouncements(){
+
+  try{
+
+    const response =
+      await fetch(
+        `${LIVE_API}/announcements`,
+        {
+          method:"GET",
+          headers:{
+            "Content-Type":"application/json"
+          }
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok || !data.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to load announcements"
+      );
+
+    }
+
+
+    liveAnnouncements =
+      Array.isArray(data.announcements)
+        ? data.announcements
+        : [];
+
+
+    renderAnnouncementStatus();
+
+
+    /*
+      If the announcement panel is currently
+      open, refresh its contents as well.
+    */
+    if(
+      !announcementModal
+        .classList
+        .contains("hidden")
+    ){
+
+      renderAnnouncements();
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "MTERMS Live announcement load error:",
+      error
+    );
+
+    /*
+      Do not disturb the participant.
+      Keep the previous announcements if
+      the network temporarily fails.
+    */
+
+  }
+
+}
+
 
 function getReadAnnouncements(){
   return loadJSON(KEYS.announcementsRead,[]);
@@ -2862,59 +2919,153 @@ function getReadAnnouncements(){
 
 function renderAnnouncementStatus(){
 
-  const read = getReadAnnouncements();
+  const read =
+    getReadAnnouncements();
 
-  const unread = ANNOUNCEMENTS.filter(
-    a => !read.includes(a.id)
-  );
+  const unread =
+    liveAnnouncements.filter(
+      announcement =>
+        !read.includes(
+          announcement.id
+        )
+    );
+
 
   if(unread.length){
 
     announcementBadge.textContent =
-      unread.length > 99 ? "99+" : unread.length;
+      unread.length > 99
+        ? "99+"
+        : unread.length;
 
-    announcementBadge.classList.remove("hidden");
+    announcementBadge
+      .classList
+      .remove("hidden");
 
-    envelopeIcon.classList.add("shake-unread");
+    envelopeIcon
+      .classList
+      .add("shake-unread");
 
   }else{
 
-    announcementBadge.classList.add("hidden");
+    announcementBadge
+      .classList
+      .add("hidden");
 
-    envelopeIcon.classList.remove("shake-unread");
+    envelopeIcon
+      .classList
+      .remove("shake-unread");
 
   }
+
 }
 
 function renderAnnouncements(){
 
-  const read = getReadAnnouncements();
+  const read =
+    getReadAnnouncements();
 
-  document.getElementById("announcementList").innerHTML =
-    ANNOUNCEMENTS.map(a => {
+  const target =
+    document.getElementById(
+      "announcementList"
+    );
 
-      const isUnread = !read.includes(a.id);
 
-      return `
-        <div class="announcement-item">
+  if(!liveAnnouncements.length){
 
-          ${
-            isUnread
-            ? `<div class="announcement-new">● New</div>`
-            : ``
-          }
+    target.innerHTML = `
+      <div
+        style="
+          padding:18px 2px;
+          color:var(--muted);
+          font-size:13px;
+        "
+      >
+        No announcements at the moment.
+      </div>
+    `;
 
-          <div class="announcement-time">
-            ${escapeHTML(a.time)}
+    return;
+
+  }
+
+
+  target.innerHTML =
+    liveAnnouncements
+      .map(a => {
+
+        const isUnread =
+          !read.includes(a.id);
+
+        const time =
+          a.publishedAt
+            ? new Date(
+                a.publishedAt
+              ).toLocaleString(
+                "en-MY",
+                {
+                  day:"numeric",
+                  month:"short",
+                  hour:"numeric",
+                  minute:"2-digit",
+                  hour12:true,
+                  timeZone:
+                    "Asia/Kuala_Lumpur"
+                }
+              )
+            : "";
+
+
+        return `
+          <div class="announcement-item">
+
+            ${
+              isUnread
+                ? `
+                  <div class="announcement-new">
+                    ● New
+                  </div>
+                `
+                : ``
+            }
+
+
+            ${
+              a.important
+                ? `
+                  <div
+                    style="
+                      display:inline-flex;
+                      margin-top:5px;
+                      padding:3px 7px;
+                      border-radius:999px;
+                      background:#fff0df;
+                      color:#9d5d00;
+                      font-size:9px;
+                      font-weight:850;
+                    "
+                  >
+                    IMPORTANT
+                  </div>
+                `
+                : ``
+            }
+
+
+            <div class="announcement-time">
+              ${escapeHTML(time)}
+            </div>
+
+
+            <div class="announcement-message">
+              ${escapeHTML(a.message)}
+            </div>
+
           </div>
+        `;
 
-          <div class="announcement-message">
-            ${escapeHTML(a.message)}
-          </div>
-
-        </div>
-      `;
-    }).join("");
+      })
+      .join("");
 
 }
 
@@ -2929,10 +3080,12 @@ function openAnnouncements(){
     announcements as read.
   */
 
-  saveJSON(
-    KEYS.announcementsRead,
-    ANNOUNCEMENTS.map(a => a.id)
-  );
+saveJSON(
+  KEYS.announcementsRead,
+  liveAnnouncements.map(
+    a => a.id
+  )
+);
 
   renderAnnouncementStatus();
 
@@ -5696,7 +5849,7 @@ function initialise(){
 
   updateProfileSummary();
 
-  renderAnnouncementStatus();
+  loadLiveAnnouncements();
 
   renderProgramme();
 
@@ -5729,6 +5882,17 @@ function initialise(){
     renderLive,
     1000
   );
+
+  /*
+  Check the server for new announcements.
+
+  Socket.IO will later replace this polling
+  with immediate real-time delivery.
+*/
+setInterval(
+  loadLiveAnnouncements,
+  10000
+);
 
 }
 
