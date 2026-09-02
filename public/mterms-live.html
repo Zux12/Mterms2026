@@ -2835,9 +2835,29 @@ function formatDiscussionTime(iso){
 
 async function loadAllDiscussions(){
 
-    if(discussionInputActive){
-    return;
-  }
+const mainDraft =
+  document.getElementById("newPostText")
+    ?.value
+    .trim();
+
+const replyDraft =
+  Array.from(
+    document.querySelectorAll(
+      "[data-reply-input]"
+    )
+  )
+  .some(input =>
+    input.value.trim()
+  );
+
+
+if(
+  discussionInputActive ||
+  mainDraft ||
+  replyDraft
+){
+  return;
+}
 
   try{
 
