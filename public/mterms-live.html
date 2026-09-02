@@ -5863,7 +5863,17 @@ async function addReply(
     }
 
 
-    openThreadId = postId;
+/*
+  The reply has been successfully saved.
+
+  Clear the local draft first so that
+  loadAllDiscussions() is allowed to refresh.
+*/
+input.value = "";
+
+discussionInputActive = false;
+
+openThreadId = postId;
 
 await loadAllDiscussions();
 
