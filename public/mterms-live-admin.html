@@ -3518,7 +3518,9 @@ async function renderAnnouncements(){
 let activeAdminRoomId = null;
 
 
-async function renderAdminRooms(){
+async function renderAdminRooms(
+  background = false
+){
 
   activeAdminRoomId = null;
 
@@ -3550,12 +3552,15 @@ async function renderAdminRooms(){
       );
 
 
+if(!background){
+
   target.innerHTML = `
     <div class="empty">
       Loading discussions…
     </div>
   `;
 
+}
 
   try{
 
@@ -3759,7 +3764,9 @@ document
   );
 
 
-async function renderAdminPosts(){
+async function renderAdminPosts(
+  background = false
+){
 
   const target =
     document
@@ -3768,11 +3775,15 @@ async function renderAdminPosts(){
       );
 
 
+if(!background){
+
   target.innerHTML = `
     <div class="empty">
       Loading posts…
     </div>
   `;
+
+}
 
 
   try{
@@ -4751,34 +4762,26 @@ setInterval(
       Refresh DISCUSSIONS when that
       admin tab is currently open.
     */
-    if(
-      document
-        .getElementById(
-          "page-discussions"
-        )
-        .classList
-        .contains("active")
-    ){
+if(
+  document
+    .getElementById(
+      "page-discussions"
+    )
+    .classList
+    .contains("active")
+){
 
-      if(activeAdminRoomId){
+  if(activeAdminRoomId){
 
-        /*
-          Admin is currently inside
-          a particular discussion room.
-        */
-        renderAdminPosts();
+    renderAdminPosts(true);
 
-      }else{
+  }else{
 
-        /*
-          Admin is looking at the
-          discussion-room list.
-        */
-        renderAdminRooms();
+    renderAdminRooms(true);
 
-      }
+  }
 
-    }
+}
 
   },
   5000
