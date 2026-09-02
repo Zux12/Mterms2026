@@ -760,6 +760,109 @@ main{
   display:block;
 }
 
+.session-feedback{
+  margin:12px 0;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+}
+
+.session-feedback-live{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:var(--red);
+  font-size:12px;
+  font-weight:850;
+}
+
+.session-feedback-live-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.session-feedback-ended{
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.session-feedback-title{
+  margin-top:8px;
+  font-size:15px;
+  font-weight:800;
+}
+
+.session-rating{
+  display:flex;
+  gap:4px;
+  margin-top:8px;
+}
+
+.session-rating-star{
+  border:0;
+  background:transparent;
+  font-size:30px;
+  line-height:1;
+  padding:3px;
+  color:#cbd2dc;
+}
+
+.session-rating-star.active{
+  color:#e9a000;
+}
+
+.session-feedback-expand{
+  margin-top:10px;
+}
+
+.session-feedback-comment{
+  width:100%;
+  min-height:72px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px;
+  font-size:16px;
+}
+
+.session-feedback-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.session-feedback-saved{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.session-feedback-saved-main{
+  min-width:0;
+}
+
+.session-feedback-check{
+  color:var(--green);
+  font-size:12px;
+  font-weight:850;
+}
+
+.session-feedback-rating-text{
+  margin-top:4px;
+  font-size:14px;
+  font-weight:800;
+  color:#9a6800;
+}
+
 .back-link{
   border:0;
   background:transparent;
@@ -1537,12 +1640,14 @@ main{
       ← All discussions
     </button>
 
-    <h1 class="page-title" id="roomTitle"></h1>
+<h1 class="page-title" id="roomTitle"></h1>
 
-    <div class="page-sub" id="roomSub"></div>
+<div class="page-sub" id="roomSub"></div>
+
+<div id="sessionFeedbackArea"></div>
 
 
-    <div class="compose">
+<div class="compose">
 
       <textarea
         id="newPostText"
@@ -1918,10 +2023,10 @@ const KEYS = {
   schedule: "mtermsLiveScheduleV1",
   announcementsRead: "mtermsLiveAnnouncementsReadV1",
   discussions: "mtermsLivePrototypeDiscussionsV1",
-  feedback: "mtermsLiveFeedbackPrototypeV1"
+  feedback: "mtermsLiveFeedbackPrototypeV1",
+  sessionFeedback: "mtermsLiveSessionFeedbackV1"
 };
-
-
+  
 /* =====================================================
    CONFERENCE PROGRAMME
    Malaysia UTC+8
@@ -4194,6 +4299,386 @@ function goToDiscussionRoom(roomId){
   },0);
 
 }
+
+function getSessionFeedback(){
+
+  return loadJSON(
+    KEYS.sessionFeedback,
+    {}
+  );
+
+}
+
+
+function saveSessionFeedback(data){
+
+  saveJSON(
+    KEYS.sessionFeedback,
+    data
+  );
+
+}
+
+
+function sessionRoomState(room){
+
+  const now =
+    malaysiaNowComparable();
+
+  const start =
+    malaysiaTimestamp(
+      room.date,
+      room.start
+    );
+
+  const end =
+    malaysiaTimestamp(
+      room.date,
+      room.end
+    );
+
+  if(now < start){
+    return "upcoming";
+  }
+
+  if(now >= start && now < end){
+    return "live";
+  }
+
+  return "ended";
+
+}
+
+
+function renderSessionFeedback(room){
+
+  const target =
+    document.getElementById(
+      "sessionFeedbackArea"
+    );
+
+  if(!target || !room){
+    return;
+  }
+
+  const state =
+    sessionRoomState(room);
+
+
+  /*
+    Upcoming sessions:
+    show no feedback card.
+  */
+  if(state === "upcoming"){
+
+    target.innerHTML = "";
+    return;
+
+  }
+
+
+  /*
+    Live session:
+    show compact live status only.
+  */
+  if(state === "live"){
+
+    const end =
+      malaysiaTimestamp(
+        room.date,
+        room.end
+      );
+
+    const remaining =
+      durationText(
+        end -
+        malaysiaNowComparable()
+      );
+
+    target.innerHTML = `
+      <div class="session-feedback">
+
+        <div class="session-feedback-live">
+
+          <span class="session-feedback-live-dot"></span>
+
+          <span>
+            LIVE NOW · ${escapeHTML(remaining)} remaining
+          </span>
+
+        </div>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  /*
+    Ended session:
+    load any feedback already stored.
+  */
+
+  const allFeedback =
+    getSessionFeedback();
+
+  const existing =
+    allFeedback[room.id] || null;
+
+
+  if(existing){
+
+    const stars =
+      "★".repeat(existing.rating) +
+      "☆".repeat(5 - existing.rating);
+
+    target.innerHTML = `
+      <div class="session-feedback">
+
+        <div class="session-feedback-saved">
+
+          <div class="session-feedback-saved-main">
+
+            <div class="session-feedback-check">
+              ✓ Feedback submitted
+            </div>
+
+            <div class="session-feedback-rating-text">
+              ${escapeHTML(stars)}
+            </div>
+
+          </div>
+
+          <button
+            class="btn btn-outline"
+            type="button"
+            id="editSessionFeedbackBtn"
+            style="
+              min-height:38px;
+              padding:0 11px;
+              font-size:12px;
+            "
+          >
+            Edit
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+
+    document
+      .getElementById(
+        "editSessionFeedbackBtn"
+      )
+      .addEventListener(
+        "click",
+        ()=>{
+
+          renderSessionFeedbackForm(
+            room,
+            existing.rating,
+            existing.comment || ""
+          );
+
+        }
+      );
+
+    return;
+
+  }
+
+
+  renderSessionFeedbackForm(
+    room,
+    0,
+    ""
+  );
+
+}
+
+
+function renderSessionFeedbackForm(
+  room,
+  initialRating = 0,
+  initialComment = ""
+){
+
+  const target =
+    document.getElementById(
+      "sessionFeedbackArea"
+    );
+
+  let selectedRating =
+    Number(initialRating || 0);
+
+
+  target.innerHTML = `
+    <div class="session-feedback">
+
+      <div class="session-feedback-ended">
+        Session Ended
+      </div>
+
+      <div class="session-feedback-title">
+        How was this session?
+      </div>
+
+      <div
+        class="session-rating"
+        id="sessionRatingRow"
+      >
+
+        ${[1,2,3,4,5].map(i => `
+          <button
+            class="
+              session-rating-star
+              ${i <= selectedRating ? "active" : ""}
+            "
+            type="button"
+            data-session-rating="${i}"
+            aria-label="Rate ${i} out of 5"
+          >
+            ★
+          </button>
+        `).join("")}
+
+      </div>
+
+
+      <div
+        class="
+          session-feedback-expand
+          ${selectedRating ? "" : "hidden"}
+        "
+        id="sessionFeedbackExpand"
+      >
+
+        <textarea
+          class="session-feedback-comment"
+          id="sessionFeedbackComment"
+          maxlength="1000"
+          placeholder="Optional comment..."
+        >${escapeHTML(initialComment)}</textarea>
+
+        <div class="session-feedback-actions">
+
+          <button
+            class="btn btn-primary"
+            type="button"
+            id="submitSessionFeedbackBtn"
+          >
+            Submit Feedback
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+
+  const ratingButtons =
+    target.querySelectorAll(
+      "[data-session-rating]"
+    );
+
+
+  ratingButtons.forEach(button => {
+
+    button.addEventListener(
+      "click",
+      ()=>{
+
+        selectedRating =
+          Number(
+            button.dataset.sessionRating
+          );
+
+        ratingButtons.forEach(star => {
+
+          star.classList.toggle(
+            "active",
+            Number(
+              star.dataset.sessionRating
+            ) <= selectedRating
+          );
+
+        });
+
+
+        document
+          .getElementById(
+            "sessionFeedbackExpand"
+          )
+          .classList
+          .remove("hidden");
+
+      }
+    );
+
+  });
+
+
+  document
+    .getElementById(
+      "submitSessionFeedbackBtn"
+    )
+    .addEventListener(
+      "click",
+      ()=>{
+
+        if(!selectedRating){
+
+          alert(
+            "Please select a rating."
+          );
+
+          return;
+        }
+
+
+        const allFeedback =
+          getSessionFeedback();
+
+
+        allFeedback[room.id] = {
+
+          rating:
+            selectedRating,
+
+          comment:
+            document
+              .getElementById(
+                "sessionFeedbackComment"
+              )
+              .value
+              .trim()
+              .slice(0,1000),
+
+          submittedAt:
+            new Date().toISOString()
+
+        };
+
+
+        saveSessionFeedback(
+          allFeedback
+        );
+
+
+        renderSessionFeedback(
+          room
+        );
+
+      }
+    );
+
+}
   
 function openDiscussionRoom(roomId){
 
@@ -4222,15 +4707,21 @@ function openDiscussionRoom(roomId){
   document.getElementById("roomTitle")
     .textContent = room.title;
 
-  document.getElementById("roomSub")
-    .textContent =
-      "Day " + room.day +
-      " · " +
-      formatTime24to12(room.start) +
-      " – " +
-      formatTime24to12(room.end);
+ document.getElementById("roomSub")
+  .textContent =
+    "Day " + room.day +
+    " · " +
+    formatTime24to12(room.start) +
+    " – " +
+    formatTime24to12(room.end);
 
-  renderPosts();
+
+renderSessionFeedback(
+  room
+);
+
+
+renderPosts();
 
 }
 
