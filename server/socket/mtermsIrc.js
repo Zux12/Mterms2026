@@ -100,15 +100,41 @@ function setupMtermsIrc(io){
             Automatically join all three
             nostalgic channels.
           */
-          CHANNELS.forEach(
-            channel => {
+CHANNELS.forEach(
+  channel => {
 
-              socket.join(
-                channel
-              );
+    socket.join(
+      channel
+    );
 
-            }
-          );
+
+    /*
+      Tell everyone else in this channel
+      that this participant has joined.
+
+      The participant who just connected
+      does not need to see their own
+      join notice.
+    */
+    socket
+      .to(channel)
+      .emit(
+        'irc:presence',
+        {
+          channel,
+          messageType:'join',
+          nickname,
+          message:
+            nickname +
+            ' has joined ' +
+            channel,
+          createdAt:
+            new Date().toISOString()
+        }
+      );
+
+  }
+);
 
 
           /*
@@ -301,16 +327,53 @@ function setupMtermsIrc(io){
       );
 
 
-      socket.on(
-        'disconnect',
-        async ()=>{
+socket.on(
+  'disconnect',
+  async ()=>{
 
-          await emitAllNickLists(
-            irc
-          );
+    const nickname =
+      socket.data.nickname;
+
+
+    /*
+      Minimize does NOT disconnect,
+      so this only occurs when MTERMS32
+      is actually closed, connection is
+      lost, or the browser leaves.
+    */
+    if(nickname){
+
+      CHANNELS.forEach(
+        channel => {
+
+          socket
+            .to(channel)
+            .emit(
+              'irc:presence',
+              {
+                channel,
+                messageType:'leave',
+                nickname,
+                message:
+                  nickname +
+                  ' has quit IRC',
+                createdAt:
+                  new Date().toISOString()
+              }
+            );
 
         }
       );
+
+    }
+
+
+    await emitAllNickLists(
+      irc
+    );
+
+  }
+);
 
     }
   );
