@@ -89,13 +89,18 @@ const MtermsLiveMessageSchema = new mongoose.Schema({
     maxlength: 1000
   },
 
-  likes: {
-    type: Number,
-    default: 0,
-    min: 0
-  },
+likes: {
+  type: Number,
+  default: 0,
+  min: 0
+},
 
-  participantId: {
+likedBy: {
+  type: [String],
+  default: []
+},
+
+participantId: {
     type: String,
     trim: true,
     maxlength: 200,
