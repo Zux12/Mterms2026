@@ -1754,6 +1754,9 @@ textarea.form-control{
 
 "use strict";
 
+const LIVE_API =
+  'https://mterm2026-559f9bf571b5.herokuapp.com/api/live';
+
 
 /* =====================================================
    IMPORTANT:
@@ -1842,23 +1845,95 @@ function saveJSON(key,value){
 
 const AdminStore = {
 
-  getAnnouncements(){
+async getAnnouncements(){
 
-    return loadJSON(
-      KEYS.announcements,
-      []
+  const response =
+    await fetch(
+      `${LIVE_API}/announcements`,
+      {
+        method:'GET',
+        headers:{
+          'Content-Type':'application/json'
+        }
+      }
     );
 
-  },
+  const data =
+    await response.json();
 
-  saveAnnouncements(data){
+  if(!response.ok || !data.ok){
 
-    saveJSON(
-      KEYS.announcements,
-      data
+    throw new Error(
+      data.error ||
+      'Unable to load announcements'
     );
 
-  },
+  }
+
+  return data.announcements || [];
+
+},
+
+
+async createAnnouncement(payload){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/announcements`,
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify(payload)
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      'Unable to publish announcement'
+    );
+
+  }
+
+  return data.announcement;
+
+},
+
+
+async deleteAnnouncement(id){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/announcements/${encodeURIComponent(id)}`,
+      {
+        method:'DELETE',
+        headers:{
+          'Content-Type':'application/json'
+        }
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      'Unable to delete announcement'
+    );
+
+  }
+
+  return true;
+
+},
 
 
   getDiscussions(){
@@ -2523,8 +2598,8 @@ function goToPage(pageName){
   }
 
   if(pageName === "announcements"){
-    renderAnnouncements();
-  }
+  renderAnnouncements();
+}
 
   if(pageName === "discussions"){
     renderAdminRooms();
@@ -3029,7 +3104,12 @@ document
   )
   .addEventListener(
     "click",
-    ()=>{
+    async ()=>{
+
+      const button =
+        document.getElementById(
+          "publishAnnouncementBtn"
+        );
 
       const message =
         document
@@ -3058,53 +3138,53 @@ document
       }
 
 
-      const announcements =
-        AdminStore
-          .getAnnouncements();
+      button.disabled = true;
+      button.textContent =
+        "Publishing…";
 
 
-      announcements.unshift({
+      try{
 
-        id:
-          "ann-" +
-          Date.now() +
-          "-" +
-          Math.random()
-            .toString(36)
-            .slice(2,7),
-
-        message:
-          message.slice(0,1000),
-
-        important,
-
-        createdAt:
-          new Date().toISOString()
-
-      });
+        await AdminStore
+          .createAnnouncement({
+            message,
+            important
+          });
 
 
-      AdminStore
-        .saveAnnouncements(
-          announcements
+        document
+          .getElementById(
+            "announcementMessage"
+          )
+          .value = "";
+
+
+        document
+          .getElementById(
+            "announcementImportant"
+          )
+          .checked = false;
+
+
+        await renderAnnouncements();
+
+
+      }catch(error){
+
+        console.error(error);
+
+        alert(
+          error.message ||
+          "Unable to publish announcement."
         );
 
+      }finally{
 
-      document
-        .getElementById(
-          "announcementMessage"
-        )
-        .value = "";
+        button.disabled = false;
+        button.textContent =
+          "Publish Announcement";
 
-
-      document
-        .getElementById(
-          "announcementImportant"
-        )
-        .checked = false;
-
-
-      renderAnnouncements();
+      }
 
     }
   );
@@ -3138,11 +3218,7 @@ function formatAnnouncementTime(
 }
 
 
-function renderAnnouncements(){
-
-  const announcements =
-    AdminStore
-      .getAnnouncements();
+async function renderAnnouncements(){
 
   const target =
     document
@@ -3151,119 +3227,162 @@ function renderAnnouncements(){
       );
 
 
-  if(!announcements.length){
+  target.innerHTML =
+    `
+    <div class="empty">
+      Loading announcements…
+    </div>
+    `;
+
+
+  try{
+
+    const announcements =
+      await AdminStore
+        .getAnnouncements();
+
+
+    if(!announcements.length){
+
+      target.innerHTML =
+        `
+        <div class="empty">
+          No announcements have been published yet.
+        </div>
+        `;
+
+      return;
+
+    }
+
 
     target.innerHTML =
-      `
-      <div class="empty">
-        No announcements have been published yet.
-      </div>
-      `;
+      announcements
+        .map(item => `
+          <div class="announcement">
 
-    return;
+            <div class="announcement-head">
 
-  }
+              <div class="announcement-main">
 
+                ${
+                  item.important
+                    ? `
+                      <div class="announcement-important">
+                        IMPORTANT
+                      </div>
+                    `
+                    : ``
+                }
 
-  target.innerHTML =
-    announcements
-      .map(item => `
-        <div class="announcement">
+                <div class="announcement-time">
+                  ${escapeHTML(
+                    formatAnnouncementTime(
+                      item.publishedAt
+                    )
+                  )}
+                </div>
 
-          <div class="announcement-head">
+                <div class="announcement-message">
+                  ${escapeHTML(item.message)}
+                </div>
 
-            <div class="announcement-main">
-
-              ${
-                item.important
-                  ? `
-                    <div class="announcement-important">
-                      IMPORTANT
-                    </div>
-                  `
-                  : ``
-              }
-
-              <div class="announcement-time">
-                ${escapeHTML(
-                  formatAnnouncementTime(
-                    item.createdAt
-                  )
-                )}
-              </div>
-
-              <div class="announcement-message">
-                ${escapeHTML(item.message)}
               </div>
 
             </div>
 
+
+            <div class="item-actions">
+
+              <button
+                class="btn btn-danger btn-small"
+                type="button"
+                data-delete-announcement="${escapeHTML(item.id)}"
+              >
+                Delete
+              </button>
+
+            </div>
+
           </div>
+        `)
+        .join("");
 
 
-          <div class="item-actions">
+    target
+      .querySelectorAll(
+        "[data-delete-announcement]"
+      )
+      .forEach(button => {
 
-            <button
-              class="btn btn-danger btn-small"
-              type="button"
-              data-delete-announcement="${escapeHTML(item.id)}"
-            >
-              Delete
-            </button>
+        button.addEventListener(
+          "click",
+          async ()=>{
 
-          </div>
-
-        </div>
-      `)
-      .join("");
-
-
-  target
-    .querySelectorAll(
-      "[data-delete-announcement]"
-    )
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        ()=>{
-
-          const id =
-            button
-              .dataset
-              .deleteAnnouncement;
+            const id =
+              button
+                .dataset
+                .deleteAnnouncement;
 
 
-          if(
-            !confirm(
-              "Delete this announcement?"
-            )
-          ){
-            return;
-          }
+            if(
+              !confirm(
+                "Delete this announcement?"
+              )
+            ){
+              return;
+            }
 
 
-          const updated =
-            AdminStore
-              .getAnnouncements()
-              .filter(
-                item =>
-                  item.id !== id
+            button.disabled = true;
+            button.textContent =
+              "Deleting…";
+
+
+            try{
+
+              await AdminStore
+                .deleteAnnouncement(
+                  id
+                );
+
+
+              await renderAnnouncements();
+
+
+            }catch(error){
+
+              console.error(error);
+
+              alert(
+                error.message ||
+                "Unable to delete announcement."
               );
 
+              button.disabled = false;
+              button.textContent =
+                "Delete";
 
-          AdminStore
-            .saveAnnouncements(
-              updated
-            );
+            }
+
+          }
+        );
+
+      });
 
 
-          renderAnnouncements();
+  }catch(error){
 
-        }
-      );
+    console.error(error);
 
-    });
+    target.innerHTML =
+      `
+      <div class="empty">
+        Unable to load announcements.
+      </div>
+      `;
+
+  }
 
 }
 
