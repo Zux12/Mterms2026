@@ -4714,6 +4714,70 @@ function initialise(){
     1000
   );
 
+  /*
+  Temporary real-time refresh for
+  admin discussions and questions.
+
+  Socket.IO will replace this later.
+*/
+setInterval(
+  ()=>{
+
+    /*
+      Refresh QUESTIONS when that
+      admin tab is currently open.
+    */
+    if(
+      document
+        .getElementById(
+          "page-questions"
+        )
+        .classList
+        .contains("active")
+    ){
+
+      renderQuestions();
+
+    }
+
+
+    /*
+      Refresh DISCUSSIONS when that
+      admin tab is currently open.
+    */
+    if(
+      document
+        .getElementById(
+          "page-discussions"
+        )
+        .classList
+        .contains("active")
+    ){
+
+      if(activeAdminRoomId){
+
+        /*
+          Admin is currently inside
+          a particular discussion room.
+        */
+        renderAdminPosts();
+
+      }else{
+
+        /*
+          Admin is looking at the
+          discussion-room list.
+        */
+        renderAdminRooms();
+
+      }
+
+    }
+
+  },
+  5000
+);
+
 }
 
 
