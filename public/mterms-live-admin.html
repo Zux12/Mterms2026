@@ -1,0 +1,4347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+
+<meta name="theme-color" content="#071a2c">
+
+<title>MTERMS 2026 LIVE Admin</title>
+
+<style>
+
+:root{
+  --navy:#071a2c;
+  --navy2:#0c2943;
+  --blue:#1677ff;
+  --blueSoft:#eaf3ff;
+  --red:#e53935;
+  --green:#138a5b;
+  --amber:#d88700;
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --text:#172033;
+  --muted:#6d7788;
+  --line:#e3e8ef;
+  --soft:#f7f9fc;
+  --shadow:0 8px 30px rgba(15,35,60,.09);
+  --bottom-nav-height:72px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  min-width:320px;
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background:var(--bg);
+  color:var(--text);
+}
+
+button,
+input,
+textarea,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+  outline:3px solid rgba(22,119,255,.22);
+  outline-offset:2px;
+}
+
+.hidden{
+  display:none !important;
+}
+
+
+/* =====================================================
+   APP
+===================================================== */
+
+.app{
+  padding-bottom:calc(
+    var(--bottom-nav-height) + 20px
+  );
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:60;
+
+  background:rgba(7,26,44,.97);
+  backdrop-filter:blur(10px);
+
+  color:#fff;
+  padding:12px 14px;
+
+  box-shadow:
+    0 2px 16px rgba(0,0,0,.12);
+}
+
+.topbar-inner{
+  max-width:1150px;
+  margin:0 auto;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand{
+  min-width:0;
+  flex:1;
+}
+
+.brand-kicker{
+  font-size:10px;
+  font-weight:750;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  opacity:.7;
+}
+
+.brand-title{
+  margin-top:2px;
+  font-size:18px;
+  line-height:1.15;
+  font-weight:850;
+}
+
+.brand-sub{
+  margin-top:3px;
+  font-size:11px;
+  opacity:.7;
+}
+
+.participant-btn{
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:11px;
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  padding:0 11px;
+  font-size:11px;
+  font-weight:800;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main{
+  max-width:1150px;
+  margin:0 auto;
+  padding:14px;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.page-title{
+  margin:0;
+  font-size:23px;
+  line-height:1.2;
+}
+
+.page-sub{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.section-label{
+  margin:20px 2px 9px;
+
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+
+  color:var(--muted);
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:17px;
+  box-shadow:var(--shadow);
+}
+
+.btn{
+  min-height:44px;
+  border:0;
+  border-radius:11px;
+  padding:0 14px;
+  font-weight:800;
+}
+
+.btn-primary{
+  background:var(--blue);
+  color:#fff;
+}
+
+.btn-soft{
+  background:var(--blueSoft);
+  color:#075aba;
+}
+
+.btn-outline{
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--line);
+}
+
+.btn-danger{
+  background:#fff0f0;
+  color:#b82323;
+}
+
+.btn-small{
+  min-height:36px;
+  padding:0 10px;
+  font-size:11px;
+}
+
+
+/* =====================================================
+   OVERVIEW HERO
+===================================================== */
+
+.live-hero{
+  overflow:hidden;
+}
+
+.live-hero-head{
+  padding:18px;
+
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(19,184,200,.22),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      var(--navy),
+      var(--navy2)
+    );
+
+  color:#fff;
+}
+
+.live-state{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.live-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.current-title{
+  margin-top:14px;
+  font-size:22px;
+  font-weight:850;
+  line-height:1.25;
+}
+
+.current-meta{
+  margin-top:7px;
+  font-size:13px;
+  line-height:1.45;
+  opacity:.78;
+}
+
+.next-box{
+  padding:14px 17px;
+}
+
+.next-label{
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.next-time{
+  margin-top:6px;
+  color:var(--blue);
+  font-size:12px;
+  font-weight:850;
+}
+
+.next-title{
+  margin-top:3px;
+  font-size:15px;
+  line-height:1.4;
+  font-weight:800;
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.stat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.stat-value{
+  margin-top:5px;
+  font-size:22px;
+  line-height:1;
+  font-weight:850;
+}
+
+.stat-note{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+
+/* =====================================================
+   QR
+===================================================== */
+
+.qr-card{
+  padding:16px;
+}
+
+.qr-layout{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+
+.qr-placeholder{
+  width:190px;
+  max-width:70%;
+  aspect-ratio:1/1;
+
+  border:2px dashed #b8c2cf;
+  border-radius:16px;
+
+  display:grid;
+  place-items:center;
+
+  padding:16px;
+  background:#fafbfd;
+  color:var(--muted);
+}
+
+.qr-placeholder strong{
+  display:block;
+  color:var(--navy);
+  font-size:15px;
+  margin-bottom:4px;
+}
+
+.qr-title{
+  margin-top:13px;
+  font-size:16px;
+  font-weight:850;
+}
+
+.qr-sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.qr-actions{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:12px;
+}
+
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.admin-timeline{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:5px 13px;
+}
+
+.timeline-item{
+  display:grid;
+  grid-template-columns:58px 22px 1fr;
+  gap:7px;
+  padding:12px 0;
+  position:relative;
+}
+
+.timeline-item:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  left:68px;
+  top:33px;
+  bottom:-12px;
+  width:2px;
+  background:#e5eaf0;
+}
+
+.timeline-time{
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.timeline-dot{
+  width:11px;
+  height:11px;
+  margin:2px auto 0;
+  border-radius:50%;
+  background:#c5ccd6;
+  position:relative;
+  z-index:2;
+
+  border:3px solid #fff;
+  box-shadow:0 0 0 2px #c5ccd6;
+}
+
+.timeline-item.done{
+  opacity:.55;
+}
+
+.timeline-item.done .timeline-dot{
+  background:var(--green);
+  box-shadow:0 0 0 2px var(--green);
+}
+
+.timeline-item.current .timeline-dot{
+  background:var(--red);
+  box-shadow:
+    0 0 0 2px var(--red),
+    0 0 0 6px rgba(229,57,53,.08);
+}
+
+.timeline-title{
+  font-size:13px;
+  line-height:1.4;
+  font-weight:780;
+}
+
+.timeline-tag{
+  display:inline-flex;
+  margin-top:5px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#ffeded;
+  color:#c32323;
+  font-size:9px;
+  font-weight:850;
+}
+
+
+/* =====================================================
+   FORMS
+===================================================== */
+
+.form-card{
+  padding:15px;
+}
+
+.form-group{
+  margin-top:13px;
+}
+
+.form-group:first-child{
+  margin-top:0;
+}
+
+.form-label{
+  display:block;
+  margin-bottom:6px;
+  font-size:11px;
+  font-weight:850;
+}
+
+.form-control{
+  width:100%;
+  min-height:47px;
+
+  border:1px solid var(--line);
+  border-radius:11px;
+
+  background:#fff;
+
+  padding:0 11px;
+  font-size:16px;
+}
+
+textarea.form-control{
+  min-height:95px;
+  padding:10px 11px;
+  resize:vertical;
+}
+
+.form-help{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.4;
+}
+
+.form-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:13px;
+}
+
+
+/* =====================================================
+   ANNOUNCEMENTS
+===================================================== */
+
+.announcement{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+  margin-bottom:9px;
+}
+
+.announcement-head{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+
+.announcement-main{
+  flex:1;
+  min-width:0;
+}
+
+.announcement-time{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:750;
+}
+
+.announcement-important{
+  display:inline-flex;
+  margin-bottom:5px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#fff0df;
+  color:#9d5d00;
+  font-size:9px;
+  font-weight:850;
+}
+
+.announcement-message{
+  margin-top:5px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.item-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:9px;
+}
+
+
+/* =====================================================
+   DISCUSSIONS
+===================================================== */
+
+.room{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+  margin-bottom:9px;
+}
+
+.room.live-room{
+  border-color:#ffc9c9;
+}
+
+.room-status{
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:850;
+  color:var(--muted);
+}
+
+.room-status.live{
+  color:var(--red);
+}
+
+.room-title{
+  margin-top:5px;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.4;
+}
+
+.room-stats{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.post{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:8px;
+}
+
+.post-head{
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.post-head strong{
+  color:var(--text);
+}
+
+.post-message{
+  margin-top:6px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.post-type{
+  display:inline-flex;
+  margin-top:7px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#edf4ff;
+  color:#175fae;
+  font-size:9px;
+  font-weight:850;
+}
+
+.post-replies{
+  margin-top:8px;
+  padding-left:10px;
+  border-left:2px solid #e8ecf1;
+}
+
+.reply{
+  padding:8px 0;
+  border-bottom:1px solid #edf0f3;
+}
+
+.reply:last-child{
+  border-bottom:0;
+}
+
+.reply-head{
+  font-size:10px;
+  color:var(--muted);
+}
+
+.reply-body{
+  margin-top:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
+
+.question{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+  margin-bottom:9px;
+}
+
+.question-top{
+  display:flex;
+  gap:10px;
+}
+
+.question-votes{
+  width:42px;
+  flex:0 0 auto;
+  text-align:center;
+}
+
+.vote-number{
+  color:var(--blue);
+  font-size:18px;
+  font-weight:850;
+}
+
+.vote-label{
+  font-size:9px;
+  color:var(--muted);
+}
+
+.question-main{
+  min-width:0;
+  flex:1;
+}
+
+.question-room{
+  color:var(--blue);
+  font-size:10px;
+  font-weight:850;
+}
+
+.question-message{
+  margin-top:4px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.question-author{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+
+/* =====================================================
+   FEEDBACK
+===================================================== */
+
+.feedback-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.feedback-stat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+}
+
+.feedback-rating{
+  margin-top:5px;
+  font-size:24px;
+  font-weight:850;
+  color:#a66e00;
+}
+
+.feedback-session{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+  margin-bottom:9px;
+}
+
+.feedback-session-head{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.feedback-session-main{
+  flex:1;
+  min-width:0;
+}
+
+.feedback-session-title{
+  font-size:13px;
+  font-weight:800;
+  line-height:1.4;
+}
+
+.feedback-session-rating{
+  margin-top:5px;
+  font-size:13px;
+  color:#a66e00;
+  font-weight:850;
+}
+
+.feedback-count{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.comment{
+  margin-top:8px;
+  padding:9px 10px;
+  border-radius:10px;
+  background:#f7f9fc;
+  font-size:11px;
+  line-height:1.45;
+}
+
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+.saved-notice{
+  display:none;
+  margin-top:10px;
+
+  background:#eaf8f1;
+  color:#10673f;
+  border:1px solid #bfe7d3;
+
+  border-radius:10px;
+  padding:9px 10px;
+
+  font-size:11px;
+  font-weight:800;
+}
+
+.saved-notice.show{
+  display:block;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty{
+  background:#fff;
+  border:1px dashed #ccd4df;
+  border-radius:15px;
+
+  padding:22px 16px;
+
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+.bottom-nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:100;
+
+  min-height:var(--bottom-nav-height);
+
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(12px);
+
+  border-top:1px solid #dfe5ed;
+
+  padding-bottom:
+    env(safe-area-inset-bottom);
+}
+
+.bottom-nav-scroll{
+  display:flex;
+  max-width:850px;
+  margin:0 auto;
+
+  overflow-x:auto;
+
+  scrollbar-width:none;
+}
+
+.bottom-nav-scroll::-webkit-scrollbar{
+  display:none;
+}
+
+.nav-btn{
+  flex:0 0 88px;
+
+  min-height:68px;
+
+  border:0;
+  background:transparent;
+  color:#808a99;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+
+.nav-btn.active{
+  color:var(--blue);
+}
+
+.nav-icon{
+  font-size:17px;
+}
+
+.nav-text{
+  font-size:8px;
+  font-weight:850;
+}
+
+
+/* =====================================================
+   DESKTOP
+===================================================== */
+
+@media(min-width:760px){
+
+  main{
+    padding:22px;
+  }
+
+  .overview-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.3fr) minmax(310px,.7fr);
+    gap:16px;
+    align-items:start;
+  }
+
+  .stats-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .desktop-sticky{
+    position:sticky;
+    top:88px;
+  }
+
+  .bottom-nav{
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:min(820px,calc(100% - 30px));
+
+    bottom:12px;
+
+    border:1px solid #dce2ea;
+    border-radius:20px;
+
+    box-shadow:
+      0 10px 35px rgba(0,0,0,.13);
+
+    overflow:hidden;
+  }
+
+  .bottom-nav-scroll{
+    justify-content:center;
+    overflow:visible;
+  }
+
+  .nav-btn{
+    flex:1 1 0;
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header class="topbar">
+
+  <div class="topbar-inner">
+
+    <div class="brand">
+
+      <div class="brand-kicker">
+        MTERMS 2026 LIVE
+      </div>
+
+      <div class="brand-title">
+        Control Centre
+      </div>
+
+      <div class="brand-sub">
+        Admin Prototype · UTC+8
+      </div>
+
+    </div>
+
+
+    <button
+      class="participant-btn"
+      type="button"
+      id="topParticipantBtn"
+    >
+      ↗ Participant
+    </button>
+
+  </div>
+
+</header>
+
+
+<main>
+
+<!-- =====================================================
+     OVERVIEW
+===================================================== -->
+
+<section
+  class="page active"
+  id="page-overview"
+>
+
+  <div class="overview-grid">
+
+    <div>
+
+      <div class="card live-hero">
+
+        <div class="live-hero-head">
+
+          <div
+            class="live-state"
+            id="adminLiveState"
+          >
+            <span class="live-dot"></span>
+            Checking status
+          </div>
+
+          <div
+            class="current-title"
+            id="adminCurrentTitle"
+          >
+            MTERMS 2026
+          </div>
+
+          <div
+            class="current-meta"
+            id="adminCurrentMeta"
+          >
+            Loading programme status…
+          </div>
+
+        </div>
+
+
+        <div class="next-box">
+
+          <div class="next-label">
+            Up Next
+          </div>
+
+          <div
+            class="next-time"
+            id="adminNextTime"
+          >
+            —
+          </div>
+
+          <div
+            class="next-title"
+            id="adminNextTitle"
+          >
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="section-label">
+        Operational Overview
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Discussion Topics
+          </div>
+
+          <div
+            class="stat-value"
+            id="overviewTopics"
+          >
+            0
+          </div>
+
+          <div class="stat-note">
+            Prototype data
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Questions
+          </div>
+
+          <div
+            class="stat-value"
+            id="overviewQuestions"
+          >
+            0
+          </div>
+
+          <div class="stat-note">
+            Questions for speakers
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Session Feedback
+          </div>
+
+          <div
+            class="stat-value"
+            id="overviewFeedback"
+          >
+            0
+          </div>
+
+          <div class="stat-note">
+            Stored on this prototype
+          </div>
+
+        </div>
+
+
+        <div class="stat">
+
+          <div class="stat-label">
+            Participants Online
+          </div>
+
+          <div class="stat-value">
+            —
+          </div>
+
+          <div class="stat-note">
+            Available after live backend
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="section-label">
+        Programme Status
+      </div>
+
+      <div
+        class="admin-timeline"
+        id="adminTimeline"
+      ></div>
+
+    </div>
+
+
+    <div class="desktop-sticky">
+
+      <div class="section-label">
+        Participant Access
+      </div>
+
+      <div class="card qr-card">
+
+        <div class="qr-layout">
+
+          <div class="qr-placeholder">
+
+            <div>
+
+              <strong>
+                QR PLACEHOLDER
+              </strong>
+
+              Upload the final MTERMS LIVE QR image here later.
+
+            </div>
+
+          </div>
+
+
+          <div class="qr-title">
+            MTERMS 2026 LIVE
+          </div>
+
+          <div class="qr-sub">
+            Participants scan this QR to access the live conference companion.
+          </div>
+
+
+          <div class="qr-actions">
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              id="openParticipantBtn"
+            >
+              ↗ Open Participant Page
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     ANNOUNCEMENTS
+===================================================== -->
+
+<section
+  class="page"
+  id="page-announcements"
+>
+
+  <h1 class="page-title">
+    Announcements
+  </h1>
+
+  <div class="page-sub">
+    Create conference-day messages for participants.
+  </div>
+
+
+  <div class="section-label">
+    New Announcement
+  </div>
+
+  <div class="card form-card">
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="announcementMessage"
+      >
+        Message
+      </label>
+
+      <textarea
+        class="form-control"
+        id="announcementMessage"
+        maxlength="1000"
+        placeholder="Example: S1, S2 and S3 will begin at 11:00 AM."
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label
+        style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+          font-size:12px;
+          font-weight:750;
+        "
+      >
+
+        <input
+          type="checkbox"
+          id="announcementImportant"
+        >
+
+        Mark as important
+
+      </label>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        id="publishAnnouncementBtn"
+      >
+        Publish Announcement
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="section-label">
+    Published Announcements
+  </div>
+
+  <div id="adminAnnouncementList"></div>
+
+</section>
+
+
+<!-- =====================================================
+     DISCUSSIONS
+===================================================== -->
+
+<section
+  class="page"
+  id="page-discussions"
+>
+
+  <div id="discussionRoomOverview">
+
+    <h1 class="page-title">
+      Discussions
+    </h1>
+
+    <div class="page-sub">
+      View session rooms and moderate discussion content.
+    </div>
+
+    <div id="adminRoomList"></div>
+
+  </div>
+
+
+  <div
+    id="adminRoomDetail"
+    class="hidden"
+  >
+
+    <button
+      class="btn btn-outline btn-small"
+      type="button"
+      id="backToAdminRooms"
+    >
+      ← All Rooms
+    </button>
+
+    <div style="height:12px;"></div>
+
+    <h1
+      class="page-title"
+      id="adminRoomTitle"
+    ></h1>
+
+    <div
+      class="page-sub"
+      id="adminRoomMeta"
+    ></div>
+
+    <div style="height:14px;"></div>
+
+    <div id="adminPostList"></div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUESTIONS
+===================================================== -->
+
+<section
+  class="page"
+  id="page-questions"
+>
+
+  <h1 class="page-title">
+    Questions
+  </h1>
+
+  <div class="page-sub">
+    Questions submitted specifically for speakers.
+  </div>
+
+
+  <div style="height:14px;"></div>
+
+
+  <select
+    class="form-control"
+    id="questionSort"
+  >
+    <option value="votes">
+      Most Liked
+    </option>
+
+    <option value="latest">
+      Latest
+    </option>
+  </select>
+
+
+  <div style="height:12px;"></div>
+
+  <div id="questionList"></div>
+
+</section>
+
+
+<!-- =====================================================
+     FEEDBACK
+===================================================== -->
+
+<section
+  class="page"
+  id="page-feedback"
+>
+
+  <h1 class="page-title">
+    Feedback
+  </h1>
+
+  <div class="page-sub">
+    Review individual session and overall conference feedback.
+  </div>
+
+
+  <div class="section-label">
+    Feedback Overview
+  </div>
+
+
+  <div class="feedback-summary">
+
+    <div class="feedback-stat">
+
+      <div class="stat-label">
+        Session Responses
+      </div>
+
+      <div
+        class="stat-value"
+        id="feedbackResponseCount"
+      >
+        0
+      </div>
+
+    </div>
+
+
+    <div class="feedback-stat">
+
+      <div class="stat-label">
+        Overall Conference
+      </div>
+
+      <div
+        class="feedback-rating"
+        id="overallConferenceRating"
+      >
+        —
+      </div>
+
+      <div
+        class="stat-note"
+        id="overallConferenceNote"
+      >
+        No response yet
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="section-label">
+    Session Feedback
+  </div>
+
+  <div id="sessionFeedbackAdminList"></div>
+
+
+  <div class="section-label">
+    Overall Conference Comments
+  </div>
+
+  <div id="overallFeedbackComments"></div>
+
+</section>
+
+
+<!-- =====================================================
+     INFORMATION
+===================================================== -->
+
+<section
+  class="page"
+  id="page-information"
+>
+
+  <h1 class="page-title">
+    Useful Information
+  </h1>
+
+  <div class="page-sub">
+    Content shown later in the participant MORE section.
+  </div>
+
+
+  <div class="section-label">
+    Participant Information
+  </div>
+
+  <div class="card form-card">
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="infoVenue"
+      >
+        Venue Information
+      </label>
+
+      <textarea
+        class="form-control"
+        id="infoVenue"
+        placeholder="Add venue or room information later."
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="infoWifi"
+      >
+        Wi-Fi Information
+      </label>
+
+      <textarea
+        class="form-control"
+        id="infoWifi"
+        placeholder="Add Wi-Fi details later."
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="infoHelp"
+      >
+        Secretariat / Help
+      </label>
+
+      <textarea
+        class="form-control"
+        id="infoHelp"
+        placeholder="Add secretariat contact or help information later."
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="infoOther"
+      >
+        Other Information
+      </label>
+
+      <textarea
+        class="form-control"
+        id="infoOther"
+        placeholder="Add any other participant information."
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        id="saveInfoBtn"
+      >
+        Save Information
+      </button>
+
+    </div>
+
+
+    <div
+      class="saved-notice"
+      id="infoSavedNotice"
+    >
+      ✓ Information saved.
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<!-- =====================================================
+     MOBILE NAV
+===================================================== -->
+
+<nav class="bottom-nav">
+
+  <div class="bottom-nav-scroll">
+
+    <button
+      class="nav-btn active"
+      data-page="overview"
+      type="button"
+    >
+      <span class="nav-icon">●</span>
+      <span class="nav-text">OVERVIEW</span>
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="announcements"
+      type="button"
+    >
+      <span class="nav-icon">✉</span>
+      <span class="nav-text">ANNOUNCE</span>
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="discussions"
+      type="button"
+    >
+      <span class="nav-icon">💬</span>
+      <span class="nav-text">DISCUSS</span>
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="questions"
+      type="button"
+    >
+      <span class="nav-icon">?</span>
+      <span class="nav-text">QUESTIONS</span>
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="feedback"
+      type="button"
+    >
+      <span class="nav-icon">★</span>
+      <span class="nav-text">FEEDBACK</span>
+    </button>
+
+
+    <button
+      class="nav-btn"
+      data-page="information"
+      type="button"
+    >
+      <span class="nav-icon">ℹ</span>
+      <span class="nav-text">INFO</span>
+    </button>
+
+  </div>
+
+</nav>
+
+</div>
+
+
+<script>
+(function(){
+
+"use strict";
+
+
+/* =====================================================
+   IMPORTANT:
+   DATA ACCESS LAYER
+
+   For the prototype these functions use localStorage.
+
+   When MongoDB is connected later, this is the main
+   area that will be replaced by calls such as:
+
+   GET    /api/live/announcements
+   POST   /api/live/announcements
+   DELETE /api/live/announcements/:id
+
+   GET    /api/live/discussions
+   DELETE /api/live/messages/:id
+
+   GET    /api/live/feedback
+   PUT    /api/live/information
+
+   The UI does not need to be redesigned.
+===================================================== */
+
+const KEYS = {
+
+  announcements:
+    "mtermsLiveAdminAnnouncementsV1",
+
+  information:
+    "mtermsLiveAdminInformationV1",
+
+  /*
+    These keys deliberately match the participant
+    prototype so the admin page can inspect prototype
+    data when both pages use the same browser/origin.
+  */
+
+  discussions:
+    "mtermsLivePrototypeDiscussionsV1",
+
+  sessionFeedback:
+    "mtermsLiveSessionFeedbackV1",
+
+  conferenceFeedback:
+    "mtermsLiveFeedbackPrototypeV1"
+
+};
+
+
+function loadJSON(key,fallback){
+
+  try{
+
+    const value =
+      localStorage.getItem(key);
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
+
+  }catch{
+
+    return fallback;
+
+  }
+
+}
+
+
+function saveJSON(key,value){
+
+  localStorage.setItem(
+    key,
+    JSON.stringify(value)
+  );
+
+}
+
+
+/*
+  ADMIN DATA ADAPTER
+
+  Later we can convert these functions to async
+  fetch() functions without changing the page design.
+*/
+
+const AdminStore = {
+
+  getAnnouncements(){
+
+    return loadJSON(
+      KEYS.announcements,
+      []
+    );
+
+  },
+
+  saveAnnouncements(data){
+
+    saveJSON(
+      KEYS.announcements,
+      data
+    );
+
+  },
+
+
+  getDiscussions(){
+
+    return loadJSON(
+      KEYS.discussions,
+      {}
+    );
+
+  },
+
+  saveDiscussions(data){
+
+    saveJSON(
+      KEYS.discussions,
+      data
+    );
+
+  },
+
+
+  getSessionFeedback(){
+
+    return loadJSON(
+      KEYS.sessionFeedback,
+      {}
+    );
+
+  },
+
+
+  getConferenceFeedback(){
+
+    return loadJSON(
+      KEYS.conferenceFeedback,
+      {}
+    );
+
+  },
+
+
+  getInformation(){
+
+    return loadJSON(
+      KEYS.information,
+      {
+        venue:"",
+        wifi:"",
+        help:"",
+        other:""
+      }
+    );
+
+  },
+
+  saveInformation(data){
+
+    saveJSON(
+      KEYS.information,
+      data
+    );
+
+  }
+
+};
+
+
+/* =====================================================
+   PROGRAMME
+===================================================== */
+
+const PROGRAMME = [
+
+{
+  id:"d1-registration",
+  day:1,
+  date:"2026-09-07",
+  start:"07:30",
+  end:"08:30",
+  title:"Registration",
+  type:"General"
+},
+
+{
+  id:"d1-opening",
+  day:1,
+  date:"2026-09-07",
+  start:"08:30",
+  end:"09:00",
+  title:"Opening Ceremony",
+  type:"Ceremony"
+},
+
+{
+  id:"d1-opening-keynote",
+  day:1,
+  date:"2026-09-07",
+  start:"09:00",
+  end:"10:00",
+  title:"Opening Keynote",
+  type:"Keynote"
+},
+
+{
+  id:"d1-plenary1",
+  day:1,
+  date:"2026-09-07",
+  start:"10:00",
+  end:"10:30",
+  title:"Plenary 1",
+  type:"Plenary"
+},
+
+{
+  id:"d1-tea1",
+  day:1,
+  date:"2026-09-07",
+  start:"10:30",
+  end:"11:00",
+  title:"Tea Break, Exhibition & Poster Viewing",
+  type:"Break"
+},
+
+{
+  id:"d1-symposium123",
+  day:1,
+  date:"2026-09-07",
+  start:"11:00",
+  end:"12:15",
+  title:"Symposium",
+  type:"Parallel",
+  parallel:[
+    {
+      id:"d1-s1",
+      label:"S1",
+      title:"Functional Biomaterials for Regenerative Medicine"
+    },
+    {
+      id:"d1-s2",
+      label:"S2",
+      title:"Cell-Free Therapies: Secretome, Exosomes, and Conditioned Media"
+    },
+    {
+      id:"d1-s3",
+      label:"S3",
+      title:"iPSC: Innovations Toward Clinical Translation"
+    }
+  ]
+},
+
+{
+  id:"d1-industry1",
+  day:1,
+  date:"2026-09-07",
+  start:"12:15",
+  end:"12:45",
+  title:"Industrial Talk 1",
+  type:"Industrial Talk"
+},
+
+{
+  id:"d1-lunch",
+  day:1,
+  date:"2026-09-07",
+  start:"12:45",
+  end:"14:00",
+  title:"Lunch, Exhibition & Poster Rapid Presentation",
+  type:"Break"
+},
+
+{
+  id:"d1-op",
+  day:1,
+  date:"2026-09-07",
+  start:"14:00",
+  end:"15:00",
+  title:"Oral Presentation",
+  type:"Parallel",
+  parallel:[
+    {
+      id:"d1-op1",
+      label:"Theme 1",
+      title:"Stem Cell Innovations and Clinical Applications"
+    },
+    {
+      id:"d1-op2",
+      label:"Theme 2",
+      title:"Biomaterials and Tissue Scaffolds"
+    },
+    {
+      id:"d1-op3",
+      label:"Theme 3",
+      title:"Extracellular Vesicle and Disease Remodeling"
+    }
+  ]
+},
+
+{
+  id:"d1-tea2",
+  day:1,
+  date:"2026-09-07",
+  start:"15:00",
+  end:"15:10",
+  title:"Tea Break, Exhibition & Poster Viewing",
+  type:"Break"
+},
+
+{
+  id:"d1-syis",
+  day:1,
+  date:"2026-09-07",
+  start:"15:10",
+  end:"16:30",
+  title:"Student and Young Investigator Symposium",
+  type:"Parallel",
+  parallel:[
+    {
+      id:"d1-syis1",
+      label:"Theme 1",
+      title:"Stem Cell Innovations and Clinical Applications"
+    },
+    {
+      id:"d1-syis2",
+      label:"Theme 2",
+      title:"Hydrogels and Biomaterials"
+    },
+    {
+      id:"d1-syis3",
+      label:"Theme 3",
+      title:"Innovations in Bioscaffolds for Tissue Engineering"
+    }
+  ]
+},
+
+{
+  id:"d1-plenary2",
+  day:1,
+  date:"2026-09-07",
+  start:"16:30",
+  end:"17:00",
+  title:"Plenary 2",
+  type:"Plenary"
+},
+
+{
+  id:"d1-keynote2",
+  day:1,
+  date:"2026-09-07",
+  start:"17:00",
+  end:"18:00",
+  title:"Keynote Talk",
+  type:"Keynote"
+},
+
+{
+  id:"d1-adjourn",
+  day:1,
+  date:"2026-09-07",
+  start:"18:00",
+  end:"18:01",
+  title:"Adjourn Day 1",
+  type:"General"
+},
+
+
+{
+  id:"d2-registration",
+  day:2,
+  date:"2026-09-08",
+  start:"08:30",
+  end:"09:00",
+  title:"Registration",
+  type:"General"
+},
+
+{
+  id:"d2-plenary3",
+  day:2,
+  date:"2026-09-08",
+  start:"09:00",
+  end:"09:30",
+  title:"Plenary 3",
+  type:"Plenary"
+},
+
+{
+  id:"d2-forum",
+  day:2,
+  date:"2026-09-08",
+  start:"09:30",
+  end:"10:45",
+  title:"Distinguished Expert Forum",
+  type:"Forum"
+},
+
+{
+  id:"d2-tea1",
+  day:2,
+  date:"2026-09-08",
+  start:"10:45",
+  end:"11:00",
+  title:"Tea Break, Exhibition & Poster Viewing",
+  type:"Break"
+},
+
+{
+  id:"d2-s456",
+  day:2,
+  date:"2026-09-08",
+  start:"11:00",
+  end:"12:15",
+  title:"Symposium",
+  type:"Parallel",
+  parallel:[
+    {
+      id:"d2-s4",
+      label:"S4",
+      title:"Translational Biofabrication in Regenerative Medicine"
+    },
+    {
+      id:"d2-s5",
+      label:"S5",
+      title:"TERM Research"
+    },
+    {
+      id:"d2-s6",
+      label:"S6",
+      title:"Vascular Regenerative and Reparative Medicine - A Frontier"
+    }
+  ]
+},
+
+{
+  id:"d2-agm",
+  day:2,
+  date:"2026-09-08",
+  start:"12:15",
+  end:"13:15",
+  title:"22nd TESMA Annual General Meeting (AGM) 2026",
+  type:"Meeting"
+},
+
+{
+  id:"d2-lunch",
+  day:2,
+  date:"2026-09-08",
+  start:"13:15",
+  end:"14:00",
+  title:"Lunch, Exhibition & Poster Viewing",
+  type:"Break"
+},
+
+{
+  id:"d2-s789",
+  day:2,
+  date:"2026-09-08",
+  start:"14:00",
+  end:"15:15",
+  title:"Symposium",
+  type:"Parallel",
+  parallel:[
+    {
+      id:"d2-s7",
+      label:"S7",
+      title:"Nerve Regeneration"
+    },
+    {
+      id:"d2-s8",
+      label:"S8",
+      title:"Smart Technology for Medical Applications"
+    },
+    {
+      id:"d2-s9",
+      label:"S9",
+      title:"Clinical Trial Innovations"
+    }
+  ]
+},
+
+{
+  id:"d2-tea2",
+  day:2,
+  date:"2026-09-08",
+  start:"15:15",
+  end:"15:45",
+  title:"Tea Break, Exhibition & Poster Viewing",
+  type:"Break"
+},
+
+{
+  id:"d2-closing-keynote",
+  day:2,
+  date:"2026-09-08",
+  start:"15:45",
+  end:"16:45",
+  title:"Closing Keynote",
+  type:"Keynote"
+},
+
+{
+  id:"d2-closing",
+  day:2,
+  date:"2026-09-08",
+  start:"16:45",
+  end:"17:15",
+  title:"Closing and Award Giving Ceremony",
+  type:"Ceremony"
+},
+
+{
+  id:"d2-end",
+  day:2,
+  date:"2026-09-08",
+  start:"17:15",
+  end:"17:16",
+  title:"End of MTERMS 2026",
+  type:"General"
+}
+
+];
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function malaysiaParts(){
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:"Asia/Kuala_Lumpur",
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+        hour12:false
+      }
+    )
+    .formatToParts(
+      new Date()
+    );
+
+  const map = {};
+
+  parts.forEach(p => {
+
+    if(p.type !== "literal"){
+      map[p.type] = p.value;
+    }
+
+  });
+
+  return {
+    year:Number(map.year),
+    month:Number(map.month),
+    day:Number(map.day),
+    hour:Number(map.hour),
+    minute:Number(map.minute),
+    second:Number(map.second)
+  };
+
+}
+
+
+function malaysiaNowComparable(){
+
+  const p =
+    malaysiaParts();
+
+  return Date.UTC(
+    p.year,
+    p.month - 1,
+    p.day,
+    p.hour,
+    p.minute,
+    p.second
+  );
+
+}
+
+
+function malaysiaTimestamp(
+  dateString,
+  timeString
+){
+
+  const [year,month,day] =
+    dateString
+      .split("-")
+      .map(Number);
+
+  const [hour,minute] =
+    timeString
+      .split(":")
+      .map(Number);
+
+  return Date.UTC(
+    year,
+    month - 1,
+    day,
+    hour,
+    minute,
+    0
+  );
+
+}
+
+
+function formatTime(time){
+
+  const [h,m] =
+    time
+      .split(":")
+      .map(Number);
+
+  const suffix =
+    h >= 12
+      ? "PM"
+      : "AM";
+
+  const hour =
+    h % 12 || 12;
+
+  return (
+    hour +
+    ":" +
+    String(m).padStart(2,"0") +
+    " " +
+    suffix
+  );
+
+}
+
+
+function hasDiscussionRoom(item){
+
+  return [
+    "Keynote",
+    "Plenary",
+    "Industrial Talk",
+    "Forum"
+  ].includes(item.type);
+
+}
+
+
+function discussionRoomDefinitions(){
+
+  const rooms = [];
+
+  PROGRAMME.forEach(item => {
+
+    if(item.parallel){
+
+      item.parallel.forEach(p => {
+
+        rooms.push({
+
+          id:p.id,
+          parentId:item.id,
+          day:item.day,
+          date:item.date,
+          start:item.start,
+          end:item.end,
+          title:
+            p.label +
+            " — " +
+            p.title
+
+        });
+
+      });
+
+    }
+
+    else if(
+      hasDiscussionRoom(item)
+    ){
+
+      rooms.push({
+
+        id:item.id,
+        parentId:item.id,
+        day:item.day,
+        date:item.date,
+        start:item.start,
+        end:item.end,
+        title:item.title
+
+      });
+
+    }
+
+  });
+
+  return rooms;
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goToPage(pageName){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page => {
+
+      page.classList.remove(
+        "active"
+      );
+
+    });
+
+
+  document
+    .getElementById(
+      "page-" + pageName
+    )
+    ?.classList
+    .add("active");
+
+
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach(btn => {
+
+      btn.classList.toggle(
+        "active",
+        btn.dataset.page === pageName
+      );
+
+    });
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+
+  if(pageName === "overview"){
+    renderOverview();
+  }
+
+  if(pageName === "announcements"){
+    renderAnnouncements();
+  }
+
+  if(pageName === "discussions"){
+    renderAdminRooms();
+  }
+
+  if(pageName === "questions"){
+    renderQuestions();
+  }
+
+  if(pageName === "feedback"){
+    renderFeedbackAdmin();
+  }
+
+  if(pageName === "information"){
+    loadInformationForm();
+  }
+
+}
+
+
+document
+  .querySelectorAll(".nav-btn")
+  .forEach(btn => {
+
+    btn.addEventListener(
+      "click",
+      ()=>{
+
+        goToPage(
+          btn.dataset.page
+        );
+
+      }
+    );
+
+  });
+
+
+/* =====================================================
+   PARTICIPANT PAGE BUTTON
+===================================================== */
+
+function openParticipantPage(){
+
+  window.open(
+    "/mterms-live.html",
+    "_blank"
+  );
+
+}
+
+
+document
+  .getElementById(
+    "topParticipantBtn"
+  )
+  .addEventListener(
+    "click",
+    openParticipantPage
+  );
+
+
+document
+  .getElementById(
+    "openParticipantBtn"
+  )
+  .addEventListener(
+    "click",
+    openParticipantPage
+  );
+
+
+/* =====================================================
+   OVERVIEW
+===================================================== */
+
+function currentConferenceState(){
+
+  const now =
+    malaysiaNowComparable();
+
+  const first =
+    malaysiaTimestamp(
+      "2026-09-07",
+      "07:30"
+    );
+
+  const day1End =
+    malaysiaTimestamp(
+      "2026-09-07",
+      "18:01"
+    );
+
+  const day2Start =
+    malaysiaTimestamp(
+      "2026-09-08",
+      "08:30"
+    );
+
+  const final =
+    malaysiaTimestamp(
+      "2026-09-08",
+      "17:16"
+    );
+
+
+  if(now < first){
+
+    return {
+      mode:"before",
+      day:1,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= first &&
+    now < day1End
+  ){
+
+    return {
+      mode:"live",
+      day:1,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= day1End &&
+    now < day2Start
+  ){
+
+    return {
+      mode:"between",
+      day:2,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= day2Start &&
+    now < final
+  ){
+
+    return {
+      mode:"live",
+      day:2,
+      now
+    };
+
+  }
+
+
+  return {
+    mode:"ended",
+    day:2,
+    now
+  };
+
+}
+
+
+function renderOverview(){
+
+  const state =
+    currentConferenceState();
+
+  const list =
+    PROGRAMME.filter(
+      item =>
+        item.day === state.day
+    );
+
+
+  let current = null;
+  let next = null;
+
+
+  list.forEach((item,index) => {
+
+    const start =
+      malaysiaTimestamp(
+        item.date,
+        item.start
+      );
+
+    const end =
+      malaysiaTimestamp(
+        item.date,
+        item.end
+      );
+
+
+    if(
+      state.now >= start &&
+      state.now < end
+    ){
+
+      current = item;
+
+      next =
+        list[index + 1] || null;
+
+    }
+
+
+    if(
+      !current &&
+      !next &&
+      state.now < start
+    ){
+
+      next = item;
+
+    }
+
+  });
+
+
+  const stateEl =
+    document.getElementById(
+      "adminLiveState"
+    );
+
+  const titleEl =
+    document.getElementById(
+      "adminCurrentTitle"
+    );
+
+  const metaEl =
+    document.getElementById(
+      "adminCurrentMeta"
+    );
+
+
+  if(state.mode === "before"){
+
+    stateEl.innerHTML =
+      `<span
+        class="live-dot"
+        style="
+          background:#7d8998;
+        "
+      ></span>
+      Before Conference`;
+
+    titleEl.textContent =
+      "MTERMS 2026";
+
+    metaEl.textContent =
+      "Conference begins on 7 September 2026.";
+
+  }
+
+  else if(state.mode === "between"){
+
+    stateEl.innerHTML =
+      `<span
+        class="live-dot"
+        style="
+          background:#e49a00;
+        "
+      ></span>
+      Day 1 Complete`;
+
+    titleEl.textContent =
+      "Between Conference Days";
+
+    metaEl.textContent =
+      "Day 2 begins with registration at 8:30 AM.";
+
+  }
+
+  else if(state.mode === "ended"){
+
+    stateEl.innerHTML =
+      `<span
+        class="live-dot"
+        style="
+          background:#138a5b;
+        "
+      ></span>
+      Conference Complete`;
+
+    titleEl.textContent =
+      "MTERMS 2026 Complete";
+
+    metaEl.textContent =
+      "The participant page remains available.";
+
+  }
+
+  else if(current){
+
+    stateEl.innerHTML =
+      `<span class="live-dot"></span>
+       Live Now · Day ${state.day}`;
+
+    titleEl.textContent =
+      current.title;
+
+    metaEl.textContent =
+      (
+        formatTime(current.start) +
+        " – " +
+        formatTime(current.end)
+      );
+
+  }
+
+
+  if(next){
+
+    document
+      .getElementById(
+        "adminNextTime"
+      )
+      .textContent =
+        formatTime(next.start);
+
+    document
+      .getElementById(
+        "adminNextTitle"
+      )
+      .textContent =
+        next.title;
+
+  }else{
+
+    document
+      .getElementById(
+        "adminNextTime"
+      )
+      .textContent = "—";
+
+    document
+      .getElementById(
+        "adminNextTitle"
+      )
+      .textContent =
+        "No further programme item";
+
+  }
+
+
+  renderAdminTimeline(
+    list,
+    state.now
+  );
+
+  renderOverviewStats();
+
+}
+
+
+function renderAdminTimeline(
+  list,
+  now
+){
+
+  document
+    .getElementById(
+      "adminTimeline"
+    )
+    .innerHTML =
+      list.map(item => {
+
+        const start =
+          malaysiaTimestamp(
+            item.date,
+            item.start
+          );
+
+        const end =
+          malaysiaTimestamp(
+            item.date,
+            item.end
+          );
+
+        const current =
+          now >= start &&
+          now < end;
+
+        const done =
+          now >= end;
+
+
+        return `
+          <div
+            class="
+              timeline-item
+              ${current ? "current" : ""}
+              ${done ? "done" : ""}
+            "
+          >
+
+            <div class="timeline-time">
+              ${formatTime(item.start)}
+            </div>
+
+            <div class="timeline-dot"></div>
+
+            <div>
+
+              <div class="timeline-title">
+                ${escapeHTML(item.title)}
+              </div>
+
+              ${
+                current
+                  ? `
+                    <span class="timeline-tag">
+                      LIVE NOW
+                    </span>
+                  `
+                  : ``
+              }
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+}
+
+
+function renderOverviewStats(){
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+  let topics = 0;
+  let questions = 0;
+
+
+  Object.values(discussions)
+    .forEach(posts => {
+
+      topics += posts.length;
+
+      posts.forEach(post => {
+
+        if(post.type === "Question"){
+          questions++;
+        }
+
+      });
+
+    });
+
+
+  const sessionFeedback =
+    AdminStore.getSessionFeedback();
+
+  const feedbackCount =
+    Object.keys(
+      sessionFeedback
+    ).length;
+
+
+  document
+    .getElementById(
+      "overviewTopics"
+    )
+    .textContent =
+      topics;
+
+
+  document
+    .getElementById(
+      "overviewQuestions"
+    )
+    .textContent =
+      questions;
+
+
+  document
+    .getElementById(
+      "overviewFeedback"
+    )
+    .textContent =
+      feedbackCount;
+
+}
+
+
+/* =====================================================
+   ANNOUNCEMENTS
+===================================================== */
+
+document
+  .getElementById(
+    "publishAnnouncementBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      const message =
+        document
+          .getElementById(
+            "announcementMessage"
+          )
+          .value
+          .trim();
+
+      const important =
+        document
+          .getElementById(
+            "announcementImportant"
+          )
+          .checked;
+
+
+      if(!message){
+
+        alert(
+          "Please enter an announcement."
+        );
+
+        return;
+
+      }
+
+
+      const announcements =
+        AdminStore
+          .getAnnouncements();
+
+
+      announcements.unshift({
+
+        id:
+          "ann-" +
+          Date.now() +
+          "-" +
+          Math.random()
+            .toString(36)
+            .slice(2,7),
+
+        message:
+          message.slice(0,1000),
+
+        important,
+
+        createdAt:
+          new Date().toISOString()
+
+      });
+
+
+      AdminStore
+        .saveAnnouncements(
+          announcements
+        );
+
+
+      document
+        .getElementById(
+          "announcementMessage"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "announcementImportant"
+        )
+        .checked = false;
+
+
+      renderAnnouncements();
+
+    }
+  );
+
+
+function formatAnnouncementTime(
+  iso
+){
+
+  try{
+
+    return new Date(iso)
+      .toLocaleString(
+        "en-MY",
+        {
+          day:"numeric",
+          month:"short",
+          hour:"numeric",
+          minute:"2-digit",
+          hour12:true,
+          timeZone:"Asia/Kuala_Lumpur"
+        }
+      );
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+function renderAnnouncements(){
+
+  const announcements =
+    AdminStore
+      .getAnnouncements();
+
+  const target =
+    document
+      .getElementById(
+        "adminAnnouncementList"
+      );
+
+
+  if(!announcements.length){
+
+    target.innerHTML =
+      `
+      <div class="empty">
+        No announcements have been published yet.
+      </div>
+      `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    announcements
+      .map(item => `
+        <div class="announcement">
+
+          <div class="announcement-head">
+
+            <div class="announcement-main">
+
+              ${
+                item.important
+                  ? `
+                    <div class="announcement-important">
+                      IMPORTANT
+                    </div>
+                  `
+                  : ``
+              }
+
+              <div class="announcement-time">
+                ${escapeHTML(
+                  formatAnnouncementTime(
+                    item.createdAt
+                  )
+                )}
+              </div>
+
+              <div class="announcement-message">
+                ${escapeHTML(item.message)}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="item-actions">
+
+            <button
+              class="btn btn-danger btn-small"
+              type="button"
+              data-delete-announcement="${escapeHTML(item.id)}"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+      `)
+      .join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-delete-announcement]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          const id =
+            button
+              .dataset
+              .deleteAnnouncement;
+
+
+          if(
+            !confirm(
+              "Delete this announcement?"
+            )
+          ){
+            return;
+          }
+
+
+          const updated =
+            AdminStore
+              .getAnnouncements()
+              .filter(
+                item =>
+                  item.id !== id
+              );
+
+
+          AdminStore
+            .saveAnnouncements(
+              updated
+            );
+
+
+          renderAnnouncements();
+
+        }
+      );
+
+    });
+
+}
+
+
+/* =====================================================
+   DISCUSSIONS
+===================================================== */
+
+let activeAdminRoomId = null;
+
+
+function renderAdminRooms(){
+
+  activeAdminRoomId = null;
+
+  document
+    .getElementById(
+      "discussionRoomOverview"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "adminRoomDetail"
+    )
+    .classList
+    .add("hidden");
+
+
+  const rooms =
+    discussionRoomDefinitions();
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+  const now =
+    malaysiaNowComparable();
+
+
+  const target =
+    document
+      .getElementById(
+        "adminRoomList"
+      );
+
+
+  target.innerHTML =
+    rooms.map(room => {
+
+      const posts =
+        discussions[room.id] || [];
+
+      const replies =
+        posts.reduce(
+          (sum,post) =>
+            sum +
+            (
+              post.replies || []
+            ).length,
+          0
+        );
+
+      const start =
+        malaysiaTimestamp(
+          room.date,
+          room.start
+        );
+
+      const end =
+        malaysiaTimestamp(
+          room.date,
+          room.end
+        );
+
+      const live =
+        now >= start &&
+        now < end;
+
+
+      return `
+        <div
+          class="
+            room
+            ${live ? "live-room" : ""}
+          "
+        >
+
+          <div
+            class="
+              room-status
+              ${live ? "live" : ""}
+            "
+          >
+            ${
+              live
+                ? "● LIVE NOW"
+                : "SESSION ROOM"
+            }
+          </div>
+
+          <div class="room-title">
+            ${escapeHTML(room.title)}
+          </div>
+
+          <div class="room-stats">
+            ${posts.length} topics
+            ·
+            ${replies} replies
+          </div>
+
+          <div class="item-actions">
+
+            <button
+              class="btn btn-soft btn-small"
+              type="button"
+              data-admin-room="${escapeHTML(room.id)}"
+            >
+              View Discussion
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-admin-room]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          openAdminRoom(
+            button.dataset.adminRoom
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+function openAdminRoom(roomId){
+
+  const room =
+    discussionRoomDefinitions()
+      .find(
+        r => r.id === roomId
+      );
+
+  if(!room){
+    return;
+  }
+
+
+  activeAdminRoomId =
+    roomId;
+
+
+  document
+    .getElementById(
+      "discussionRoomOverview"
+    )
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById(
+      "adminRoomDetail"
+    )
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById(
+      "adminRoomTitle"
+    )
+    .textContent =
+      room.title;
+
+
+  document
+    .getElementById(
+      "adminRoomMeta"
+    )
+    .textContent =
+      (
+        "Day " +
+        room.day +
+        " · " +
+        formatTime(room.start) +
+        " – " +
+        formatTime(room.end)
+      );
+
+
+  renderAdminPosts();
+
+}
+
+
+document
+  .getElementById(
+    "backToAdminRooms"
+  )
+  .addEventListener(
+    "click",
+    renderAdminRooms
+  );
+
+
+function renderAdminPosts(){
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+  const posts =
+    discussions[
+      activeAdminRoomId
+    ] || [];
+
+  const target =
+    document
+      .getElementById(
+        "adminPostList"
+      );
+
+
+  if(!posts.length){
+
+    target.innerHTML =
+      `
+      <div class="empty">
+        No posts in this session yet.
+      </div>
+      `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    posts.map(post => {
+
+      const identity =
+        [
+          post.title,
+          post.author
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+      const affiliation =
+        post.affiliation
+          ? " · " +
+            post.affiliation
+          : "";
+
+      return `
+        <div class="post">
+
+          <div class="post-head">
+
+            <strong>
+              ${escapeHTML(identity)}
+            </strong>
+
+            ${escapeHTML(affiliation)}
+
+            ·
+            ${escapeHTML(post.time || "")}
+
+          </div>
+
+
+          <div class="post-message">
+            ${escapeHTML(post.message)}
+          </div>
+
+
+          ${
+            post.type === "Question"
+              ? `
+                <div class="post-type">
+                  QUESTION
+                </div>
+              `
+              : ``
+          }
+
+
+          <div class="item-actions">
+
+            <button
+              class="btn btn-danger btn-small"
+              type="button"
+              data-delete-post="${escapeHTML(post.id)}"
+            >
+              Delete Post
+            </button>
+
+          </div>
+
+
+          ${
+            (post.replies || []).length
+              ? `
+                <div class="post-replies">
+
+                  ${(post.replies || [])
+                    .map((reply,index) => {
+
+                      const replyIdentity =
+                        [
+                          reply.title,
+                          reply.author
+                        ]
+                        .filter(Boolean)
+                        .join(" ");
+
+                      return `
+                        <div class="reply">
+
+                          <div class="reply-head">
+
+                            <strong>
+                              ${escapeHTML(replyIdentity)}
+                            </strong>
+
+                            ${
+                              reply.affiliation
+                                ? " · " +
+                                  escapeHTML(reply.affiliation)
+                                : ""
+                            }
+
+                            ·
+                            ${escapeHTML(reply.time || "")}
+
+                          </div>
+
+                          <div class="reply-body">
+                            ${escapeHTML(reply.message)}
+                          </div>
+
+                          <div class="item-actions">
+
+                            <button
+                              class="btn btn-danger btn-small"
+                              type="button"
+                              data-delete-reply-post="${escapeHTML(post.id)}"
+                              data-delete-reply-index="${index}"
+                            >
+                              Delete Reply
+                            </button>
+
+                          </div>
+
+                        </div>
+                      `;
+
+                    })
+                    .join("")}
+
+                </div>
+              `
+              : ``
+          }
+
+        </div>
+      `;
+
+    }).join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-delete-post]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          deleteAdminPost(
+            button.dataset.deletePost
+          );
+
+        }
+      );
+
+    });
+
+
+  target
+    .querySelectorAll(
+      "[data-delete-reply-post]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        ()=>{
+
+          deleteAdminReply(
+            button.dataset.deleteReplyPost,
+            Number(
+              button.dataset.deleteReplyIndex
+            )
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+function deleteAdminPost(postId){
+
+  if(
+    !confirm(
+      "Delete this discussion post?"
+    )
+  ){
+    return;
+  }
+
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+
+  discussions[
+    activeAdminRoomId
+  ] =
+    (
+      discussions[
+        activeAdminRoomId
+      ] || []
+    )
+    .filter(
+      post =>
+        post.id !== postId
+    );
+
+
+  AdminStore
+    .saveDiscussions(
+      discussions
+    );
+
+
+  renderAdminPosts();
+  renderOverviewStats();
+
+}
+
+
+function deleteAdminReply(
+  postId,
+  replyIndex
+){
+
+  if(
+    !confirm(
+      "Delete this reply?"
+    )
+  ){
+    return;
+  }
+
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+  const posts =
+    discussions[
+      activeAdminRoomId
+    ] || [];
+
+  const post =
+    posts.find(
+      p => p.id === postId
+    );
+
+
+  if(!post){
+    return;
+  }
+
+
+  post.replies =
+    (
+      post.replies || []
+    )
+    .filter(
+      (_,index) =>
+        index !== replyIndex
+    );
+
+
+  AdminStore
+    .saveDiscussions(
+      discussions
+    );
+
+
+  renderAdminPosts();
+
+}
+
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
+
+document
+  .getElementById(
+    "questionSort"
+  )
+  .addEventListener(
+    "change",
+    renderQuestions
+  );
+
+
+function renderQuestions(){
+
+  const discussions =
+    AdminStore.getDiscussions();
+
+  const rooms =
+    discussionRoomDefinitions();
+
+  const questions = [];
+
+
+  Object.entries(
+    discussions
+  )
+  .forEach(
+    ([roomId,posts]) => {
+
+      const room =
+        rooms.find(
+          r => r.id === roomId
+        );
+
+      posts.forEach(post => {
+
+        if(
+          post.type === "Question"
+        ){
+
+          questions.push({
+
+            roomTitle:
+              room
+                ? room.title
+                : "Session",
+
+            author:
+              [
+                post.title,
+                post.author
+              ]
+              .filter(Boolean)
+              .join(" "),
+
+            affiliation:
+              post.affiliation || "",
+
+            message:
+              post.message,
+
+            likes:
+              Number(
+                post.likes || 0
+              ),
+
+            time:
+              post.time || ""
+
+          });
+
+        }
+
+      });
+
+    }
+  );
+
+
+  const sort =
+    document
+      .getElementById(
+        "questionSort"
+      )
+      .value;
+
+
+  if(sort === "votes"){
+
+    questions.sort(
+      (a,b) =>
+        b.likes - a.likes
+    );
+
+  }
+
+
+  const target =
+    document
+      .getElementById(
+        "questionList"
+      );
+
+
+  if(!questions.length){
+
+    target.innerHTML =
+      `
+      <div class="empty">
+        No questions have been submitted yet.
+      </div>
+      `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    questions.map(q => `
+      <div class="question">
+
+        <div class="question-top">
+
+          <div class="question-votes">
+
+            <div class="vote-number">
+              ${q.likes}
+            </div>
+
+            <div class="vote-label">
+              LIKES
+            </div>
+
+          </div>
+
+
+          <div class="question-main">
+
+            <div class="question-room">
+              ${escapeHTML(q.roomTitle)}
+            </div>
+
+            <div class="question-message">
+              ${escapeHTML(q.message)}
+            </div>
+
+            <div class="question-author">
+
+              ${escapeHTML(q.author)}
+
+              ${
+                q.affiliation
+                  ? " · " +
+                    escapeHTML(q.affiliation)
+                  : ""
+              }
+
+              ${
+                q.time
+                  ? " · " +
+                    escapeHTML(q.time)
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    `).join("");
+
+}
+
+
+/* =====================================================
+   FEEDBACK
+===================================================== */
+
+function renderFeedbackAdmin(){
+
+  const feedback =
+    AdminStore.getSessionFeedback();
+
+  const rooms =
+    discussionRoomDefinitions();
+
+  const rows = [];
+
+
+  Object.entries(
+    feedback
+  )
+  .forEach(
+    ([roomId,item]) => {
+
+      const room =
+        rooms.find(
+          r => r.id === roomId
+        );
+
+      rows.push({
+
+        roomId,
+
+        title:
+          room
+            ? room.title
+            : roomId,
+
+        rating:
+          Number(
+            item.rating || 0
+          ),
+
+        comment:
+          item.comment || ""
+
+      });
+
+    }
+  );
+
+
+  document
+    .getElementById(
+      "feedbackResponseCount"
+    )
+    .textContent =
+      rows.length;
+
+
+  document
+    .getElementById(
+      "sessionFeedbackAdminList"
+    )
+    .innerHTML =
+      rows.length
+        ? rows
+            .map(row => `
+              <div class="feedback-session">
+
+                <div class="feedback-session-head">
+
+                  <div class="feedback-session-main">
+
+                    <div class="feedback-session-title">
+                      ${escapeHTML(row.title)}
+                    </div>
+
+                    <div class="feedback-session-rating">
+
+                      ${"★".repeat(row.rating)}
+                      ${"☆".repeat(5 - row.rating)}
+
+                    </div>
+
+                    <div class="feedback-count">
+                      Prototype response
+                    </div>
+
+                  </div>
+
+                </div>
+
+                ${
+                  row.comment
+                    ? `
+                      <div class="comment">
+                        ${escapeHTML(row.comment)}
+                      </div>
+                    `
+                    : ``
+                }
+
+              </div>
+            `)
+            .join("")
+        : `
+          <div class="empty">
+            No session feedback has been submitted yet.
+          </div>
+        `;
+
+
+  const conference =
+    AdminStore
+      .getConferenceFeedback();
+
+
+  if(
+    conference &&
+    conference.rating
+  ){
+
+    document
+      .getElementById(
+        "overallConferenceRating"
+      )
+      .textContent =
+        Number(
+          conference.rating
+        ).toFixed(1) +
+        " ★";
+
+
+    document
+      .getElementById(
+        "overallConferenceNote"
+      )
+      .textContent =
+        "Prototype response";
+
+
+    document
+      .getElementById(
+        "overallFeedbackComments"
+      )
+      .innerHTML =
+        conference.comment
+          ? `
+            <div class="comment">
+              ${escapeHTML(
+                conference.comment
+              )}
+            </div>
+          `
+          : `
+            <div class="empty">
+              No comment was provided.
+            </div>
+          `;
+
+  }else{
+
+    document
+      .getElementById(
+        "overallConferenceRating"
+      )
+      .textContent =
+        "—";
+
+
+    document
+      .getElementById(
+        "overallConferenceNote"
+      )
+      .textContent =
+        "No response yet";
+
+
+    document
+      .getElementById(
+        "overallFeedbackComments"
+      )
+      .innerHTML =
+        `
+        <div class="empty">
+          No overall conference feedback yet.
+        </div>
+        `;
+
+  }
+
+}
+
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+function loadInformationForm(){
+
+  const info =
+    AdminStore
+      .getInformation();
+
+
+  document
+    .getElementById(
+      "infoVenue"
+    )
+    .value =
+      info.venue || "";
+
+
+  document
+    .getElementById(
+      "infoWifi"
+    )
+    .value =
+      info.wifi || "";
+
+
+  document
+    .getElementById(
+      "infoHelp"
+    )
+    .value =
+      info.help || "";
+
+
+  document
+    .getElementById(
+      "infoOther"
+    )
+    .value =
+      info.other || "";
+
+}
+
+
+document
+  .getElementById(
+    "saveInfoBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      const info = {
+
+        venue:
+          document
+            .getElementById(
+              "infoVenue"
+            )
+            .value
+            .trim()
+            .slice(0,3000),
+
+        wifi:
+          document
+            .getElementById(
+              "infoWifi"
+            )
+            .value
+            .trim()
+            .slice(0,3000),
+
+        help:
+          document
+            .getElementById(
+              "infoHelp"
+            )
+            .value
+            .trim()
+            .slice(0,3000),
+
+        other:
+          document
+            .getElementById(
+              "infoOther"
+            )
+            .value
+            .trim()
+            .slice(0,3000)
+
+      };
+
+
+      AdminStore
+        .saveInformation(
+          info
+        );
+
+
+      const notice =
+        document
+          .getElementById(
+            "infoSavedNotice"
+          );
+
+
+      notice
+        .classList
+        .add("show");
+
+
+      setTimeout(
+        ()=>{
+
+          notice
+            .classList
+            .remove("show");
+
+        },
+        1800
+      );
+
+    }
+  );
+
+
+/* =====================================================
+   INITIALISE
+===================================================== */
+
+function initialise(){
+
+  renderOverview();
+
+  renderAnnouncements();
+
+  renderAdminRooms();
+
+  renderQuestions();
+
+  renderFeedbackAdmin();
+
+  loadInformationForm();
+
+
+  /*
+    Refresh only time-sensitive display.
+
+    MongoDB / Socket.IO will later replace much
+    of this with true real-time events.
+  */
+
+  setInterval(
+    ()=>{
+
+      if(
+        document
+          .getElementById(
+            "page-overview"
+          )
+          .classList
+          .contains("active")
+      ){
+
+        renderOverview();
+
+      }
+
+    },
+    1000
+  );
+
+}
+
+
+initialise();
+
+})();
+</script>
+
+</body>
+</html>
