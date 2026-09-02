@@ -29,10 +29,8 @@ function cleanString(
 function setupMtermsIrc(io){
 
   /*
-    Dedicated namespace.
-
-    This keeps MTERMS32 isolated
-    from any future socket features.
+    Dedicated namespace for MTERMS32.
+    Core MTERMS LIVE functions remain separate.
   */
   const irc =
     io.of('/mterms32');
@@ -42,113 +40,138 @@ function setupMtermsIrc(io){
     'connection',
     socket => {
 
-      /*
-        Client tells us who they are
-        after connection.
-      */
+
+      /* =====================================================
+         IDENTIFY
+      ===================================================== */
+
       socket.on(
         'irc:identify',
         async payload => {
 
-          const nickname =
-            cleanString(
-              payload?.nickname,
-              50
+          try{
+
+            const nickname =
+              cleanString(
+                payload?.nickname,
+                50
+              );
+
+            const title =
+              cleanString(
+                payload?.title,
+                30
+              );
+
+            const affiliation =
+              cleanString(
+                payload?.affiliation,
+                80
+              );
+
+            const participantId =
+              cleanString(
+                payload?.participantId,
+                200
+              );
+
+
+            if(
+              !nickname ||
+              !participantId
+            ){
+              return;
+            }
+
+
+            socket.data.nickname =
+              nickname;
+
+            socket.data.title =
+              title;
+
+            socket.data.affiliation =
+              affiliation;
+
+            socket.data.participantId =
+              participantId;
+
+
+            /*
+              Automatically join all
+              three nostalgic channels.
+            */
+            for(
+              const channel
+              of CHANNELS
+            ){
+
+              socket.join(
+                channel
+              );
+
+
+              /*
+                Save join notice into MongoDB
+                so it remains in channel history.
+              */
+              const created =
+                await MtermsIrcMessage
+                  .create({
+                    channel,
+                    messageType:'join',
+                    nickname,
+                    title,
+                    affiliation,
+                    participantId,
+                    message:
+                      nickname +
+                      ' has joined ' +
+                      channel
+                  });
+
+
+              /*
+                Everyone except the joining
+                participant sees the notice.
+              */
+              socket
+                .to(channel)
+                .emit(
+                  'irc:presence',
+                  serializeMessage(
+                    created
+                  )
+                );
+
+            }
+
+
+            /*
+              Update nick lists after joining.
+            */
+            await emitAllNickLists(
+              irc
             );
 
-          const title =
-            cleanString(
-              payload?.title,
-              30
+
+          }catch(error){
+
+            console.error(
+              'MTERMS32 identify error:',
+              error
             );
 
-          const affiliation =
-            cleanString(
-              payload?.affiliation,
-              80
-            );
-
-          const participantId =
-            cleanString(
-              payload?.participantId,
-              200
-            );
-
-
-          if(
-            !nickname ||
-            !participantId
-          ){
-            return;
           }
-
-
-          socket.data.nickname =
-            nickname;
-
-          socket.data.title =
-            title;
-
-          socket.data.affiliation =
-            affiliation;
-
-          socket.data.participantId =
-            participantId;
-
-
-          /*
-            Automatically join all three
-            nostalgic channels.
-          */
-for(const channel of CHANNELS){
-
-  socket.join(
-    channel
-  );
-
-
-  const created =
-    await MtermsIrcMessage.create({
-      channel,
-      messageType:'join',
-      nickname,
-      title,
-      affiliation,
-      participantId,
-      message:
-        nickname +
-        ' has joined ' +
-        channel
-    });
-
-
-  socket
-    .to(channel)
-    .emit(
-      'irc:presence',
-      serializeMessage(
-        created
-      )
-    );
-
-}
-
-
-          /*
-            Return current nick lists.
-          */
-          await emitAllNickLists(
-            irc
-          );
 
         }
       );
 
 
-      /*
-        Client requests recent history
-        for one channel.
-      */
+      /* =====================================================
+         HISTORY
+      ===================================================== */
+
       socket.on(
         'irc:history',
         async payload => {
@@ -177,7 +200,7 @@ for(const channel of CHANNELS){
                   channel
                 })
                 .sort({
-                  createdAt: -1
+                  createdAt:-1
                 })
                 .limit(100)
                 .lean();
@@ -211,9 +234,10 @@ for(const channel of CHANNELS){
       );
 
 
-      /*
-        New participant chat message.
-      */
+      /* =====================================================
+         CHAT MESSAGE
+      ===================================================== */
+
       socket.on(
         'irc:message',
         async payload => {
@@ -291,13 +315,10 @@ for(const channel of CHANNELS){
       );
 
 
-      /*
-        Client switches visible channel.
+      /* =====================================================
+         ACTIVE CHANNEL
+      ===================================================== */
 
-        They are already joined to all
-        channels. This only helps us track
-        what is currently active.
-      */
       socket.on(
         'irc:active-channel',
         payload => {
@@ -324,87 +345,100 @@ for(const channel of CHANNELS){
       );
 
 
-socket.on(
-  'disconnect',
-  async ()=>{
+      /* =====================================================
+         DISCONNECT / QUIT
+      ===================================================== */
 
-    const nickname =
-      socket.data.nickname;
+      socket.on(
+        'disconnect',
+        async ()=>{
 
-    const title =
-      socket.data.title || '';
+          const nickname =
+            socket.data.nickname;
 
-    const affiliation =
-      socket.data.affiliation || '';
+          const title =
+            socket.data.title || '';
 
-    const participantId =
-      socket.data.participantId || '';
+          const affiliation =
+            socket.data.affiliation || '';
 
-
-    if(nickname){
-
-      for(const channel of CHANNELS){
-
-        try{
-
-          const created =
-            await MtermsIrcMessage.create({
-              channel,
-              messageType:'leave',
-              nickname,
-              title,
-              affiliation,
-              participantId,
-              message:
-                nickname +
-                ' has quit IRC'
-            });
+          const participantId =
+            socket.data.participantId || '';
 
 
-          socket
-            .to(channel)
-            .emit(
-              'irc:presence',
-              serializeMessage(
-                created
-              )
-            );
+          if(nickname){
+
+            for(
+              const channel
+              of CHANNELS
+            ){
+
+              try{
+
+                /*
+                  Save quit notice into MongoDB
+                  so it remains in history.
+                */
+                const created =
+                  await MtermsIrcMessage
+                    .create({
+                      channel,
+                      messageType:'leave',
+                      nickname,
+                      title,
+                      affiliation,
+                      participantId,
+                      message:
+                        nickname +
+                        ' has quit IRC'
+                    });
 
 
-        }catch(error){
+                socket
+                  .to(channel)
+                  .emit(
+                    'irc:presence',
+                    serializeMessage(
+                      created
+                    )
+                  );
 
-          console.error(
-            'MTERMS32 quit notice error:',
-            error
+
+              }catch(error){
+
+                console.error(
+                  'MTERMS32 quit notice error:',
+                  error
+                );
+
+              }
+
+            }
+
+          }
+
+
+          /*
+            Remove disconnected participant
+            from the nick lists.
+          */
+          await emitAllNickLists(
+            irc
           );
 
         }
+      );
 
-      }
-
-    }
-
-
-    await emitAllNickLists(
-      irc
-    );
-
-  }
-);
-
-
-    await emitAllNickLists(
-      irc
-    );
-
-  }
-);
 
     }
   );
 
 }
 
+
+/* =====================================================
+   SERIALIZE MESSAGE
+===================================================== */
 
 function serializeMessage(
   item
@@ -442,6 +476,10 @@ function serializeMessage(
 
 }
 
+
+/* =====================================================
+   NICK LISTS
+===================================================== */
 
 async function emitAllNickLists(
   namespace
@@ -482,13 +520,13 @@ async function emitAllNickLists(
 
 
     /*
-      Because everybody automatically
-      joins all three channels for this
-      nostalgic version, the same active
-      socket list is used for each room.
+      Everyone automatically joins all
+      three channels, so the same active
+      participant list currently appears
+      in each channel.
 
-      The bots will be added later by
-      the frontend/backend bot layer.
+      Bots are added separately by the
+      MTERMS32 interface.
     */
     CHANNELS.forEach(
       channel => {
