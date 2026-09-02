@@ -4135,20 +4135,26 @@ document
   );
 
 
-async function renderQuestions(){
+async function renderQuestions(
+  background = false
+){
 
-  const target =
-    document
-      .getElementById(
-        "questionList"
-      );
+const target =
+  document
+    .getElementById(
+      "questionList"
+    );
 
+
+if(!background){
 
   target.innerHTML = `
     <div class="empty">
       Loading questions…
     </div>
   `;
+
+}
 
 
   try{
@@ -4736,7 +4742,7 @@ setInterval(
         .contains("active")
     ){
 
-      renderQuestions();
+      renderQuestions(true);
 
     }
 
