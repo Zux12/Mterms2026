@@ -100,41 +100,38 @@ function setupMtermsIrc(io){
             Automatically join all three
             nostalgic channels.
           */
-CHANNELS.forEach(
-  channel => {
+for(const channel of CHANNELS){
 
-    socket.join(
-      channel
+  socket.join(
+    channel
+  );
+
+
+  const created =
+    await MtermsIrcMessage.create({
+      channel,
+      messageType:'join',
+      nickname,
+      title,
+      affiliation,
+      participantId,
+      message:
+        nickname +
+        ' has joined ' +
+        channel
+    });
+
+
+  socket
+    .to(channel)
+    .emit(
+      'irc:presence',
+      serializeMessage(
+        created
+      )
     );
 
-
-    /*
-      Tell everyone else in this channel
-      that this participant has joined.
-
-      The participant who just connected
-      does not need to see their own
-      join notice.
-    */
-    socket
-      .to(channel)
-      .emit(
-        'irc:presence',
-        {
-          channel,
-          messageType:'join',
-          nickname,
-          message:
-            nickname +
-            ' has joined ' +
-            channel,
-          createdAt:
-            new Date().toISOString()
-        }
-      );
-
-  }
-);
+}
 
 
           /*
@@ -334,38 +331,66 @@ socket.on(
     const nickname =
       socket.data.nickname;
 
+    const title =
+      socket.data.title || '';
 
-    /*
-      Minimize does NOT disconnect,
-      so this only occurs when MTERMS32
-      is actually closed, connection is
-      lost, or the browser leaves.
-    */
+    const affiliation =
+      socket.data.affiliation || '';
+
+    const participantId =
+      socket.data.participantId || '';
+
+
     if(nickname){
 
-      CHANNELS.forEach(
-        channel => {
+      for(const channel of CHANNELS){
+
+        try{
+
+          const created =
+            await MtermsIrcMessage.create({
+              channel,
+              messageType:'leave',
+              nickname,
+              title,
+              affiliation,
+              participantId,
+              message:
+                nickname +
+                ' has quit IRC'
+            });
+
 
           socket
             .to(channel)
             .emit(
               'irc:presence',
-              {
-                channel,
-                messageType:'leave',
-                nickname,
-                message:
-                  nickname +
-                  ' has quit IRC',
-                createdAt:
-                  new Date().toISOString()
-              }
+              serializeMessage(
+                created
+              )
             );
 
+
+        }catch(error){
+
+          console.error(
+            'MTERMS32 quit notice error:',
+            error
+          );
+
         }
-      );
+
+      }
 
     }
+
+
+    await emitAllNickLists(
+      irc
+    );
+
+  }
+);
 
 
     await emitAllNickLists(
