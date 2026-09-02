@@ -2655,6 +2655,35 @@ function programmeForDay(day){
   return PROGRAMME.filter(x => x.day === day);
 }
 
+
+function hasDiscussionRoom(item){
+
+  /*
+    Parallel blocks do not have one parent
+    discussion room. Their individual
+    sessions have their own rooms.
+  */
+  if(
+    Array.isArray(item.parallel) &&
+    item.parallel.length
+  ){
+    return false;
+  }
+
+
+  /*
+    Only scientific / interactive sessions
+    receive discussion and feedback rooms.
+  */
+  return [
+    "Keynote",
+    "Plenary",
+    "Industrial Talk",
+    "Forum"
+  ].includes(item.type);
+
+}
+  
 function sessionSearchText(item){
   const parallel = (item.parallel || [])
     .map(x => x.label + " " + x.title)
@@ -2670,6 +2699,8 @@ function sessionSearchText(item){
     parallel
   ).toLowerCase();
 }
+
+  
 
 function getProfile(){
   return loadJSON(KEYS.profile,null);
@@ -3366,7 +3397,7 @@ ${
       </button>
     `
     : (
-        !["Break","General"].includes(item.type)
+        hasDiscussionRoom(item)
           ? `
             <button
               class="timeline-discuss-btn"
@@ -3489,8 +3520,7 @@ function renderProgramme(){
               }
 
               ${
-  !isParallel &&
-  !["Break","General"].includes(item.type)
+hasDiscussionRoom(item)
     ? `
       <button
         class="program-discuss-btn"
@@ -3766,7 +3796,7 @@ list.push({
   parentTitle:"",
   isParallel:false,
   hasDiscussion:
-    !["Break","General"].includes(item.type)
+  hasDiscussionRoom(item)
 });
 
     }
@@ -4060,21 +4090,21 @@ function discussionRoomDefinitions(){
 
       });
 
-    }else if(
-      !["Break","General"].includes(item.type)
-    ){
+}else if(
+  hasDiscussionRoom(item)
+){
 
-      rooms.push({
-        id:item.id,
-        parentId:item.id,
-        day:item.day,
-        date:item.date,
-        start:item.start,
-        end:item.end,
-        title:item.title
-      });
+  rooms.push({
+    id:item.id,
+    parentId:item.id,
+    day:item.day,
+    date:item.date,
+    start:item.start,
+    end:item.end,
+    title:item.title
+  });
 
-    }
+}
 
   });
 
