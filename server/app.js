@@ -1,7 +1,9 @@
 // server/app.js
 require('dotenv').config();
 const path = require('path');
+const http = require('http');
 const express = require('express');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -18,7 +20,35 @@ const analyticsRouter = require('./routes/analytics');
 const mtermsAIRouter = require('./routes/mtermsAI');
 const liveRouter = require('./routes/live');
 
+const {
+  setupMtermsIrc
+} = require('./socket/mtermsIrc');
+
 const app = express();
+const server =
+  http.createServer(
+    app
+  );
+
+
+const io =
+  new Server(
+    server,
+    {
+      cors:{
+        origin:[
+          'https://www.mterms2026.com',
+          'https://mterms2026.com'
+        ],
+        credentials:true
+      }
+    }
+  );
+
+
+setupMtermsIrc(
+  io
+);
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
@@ -93,12 +123,35 @@ app.get('/', (req, res) => {
 
 /* Start */
 const PORT = process.env.PORT || 3000;
-mongoose.connect(process.env.MTERM2026_DB_URI)
+mongoose.connect(
+  process.env.MTERM2026_DB_URI
+)
   .then(() => {
-    console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`Server listening on :${PORT}`));
+
+    console.log(
+      'MongoDB connected'
+    );
+
+
+    server.listen(
+      PORT,
+      () => {
+
+        console.log(
+          `Server listening on :${PORT}`
+        );
+
+      }
+    );
+
   })
   .catch(err => {
-    console.error('Mongo connection error:', err);
+
+    console.error(
+      'Mongo connection error:',
+      err
+    );
+
     process.exit(1);
+
   });
