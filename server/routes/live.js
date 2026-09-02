@@ -9,6 +9,9 @@ const MtermsLiveMessage =
 const MtermsLiveFeedback =
   require('../models/MtermsLiveFeedback');
 
+const MtermsLiveInformation =
+  require('../models/MtermsLiveInformation');
+
 const router = express.Router();
 
 
@@ -1291,6 +1294,180 @@ router.get(
   }
 );
 
+
+/* =====================================================
+   USEFUL INFORMATION
+===================================================== */
+
+
+/*
+  GET /api/live/information
+
+  Public endpoint.
+  Participant page uses this.
+*/
+
+router.get(
+  '/information',
+  async (req, res) => {
+
+    try {
+
+      const information =
+        await MtermsLiveInformation
+          .findOne({
+            key: 'main'
+          })
+          .lean();
+
+
+      res.json({
+        ok: true,
+
+        information:
+          information
+            ? {
+                venue:
+                  information.venue || '',
+
+                wifi:
+                  information.wifi || '',
+
+                help:
+                  information.help || '',
+
+                other:
+                  information.other || '',
+
+                updatedAt:
+                  information.updatedAt
+              }
+            : {
+                venue:'',
+                wifi:'',
+                help:'',
+                other:'',
+                updatedAt:null
+              }
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live information GET error:',
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        error: 'Unable to load useful information'
+      });
+
+    }
+
+  }
+);
+
+
+/*
+  PUT /api/live/information
+
+  Admin creates or updates the
+  single conference information record.
+*/
+
+router.put(
+  '/information',
+  async (req, res) => {
+
+    try {
+
+      const venue =
+        String(req.body?.venue || '')
+          .trim()
+          .slice(0,3000);
+
+      const wifi =
+        String(req.body?.wifi || '')
+          .trim()
+          .slice(0,3000);
+
+      const help =
+        String(req.body?.help || '')
+          .trim()
+          .slice(0,3000);
+
+      const other =
+        String(req.body?.other || '')
+          .trim()
+          .slice(0,3000);
+
+
+      const information =
+        await MtermsLiveInformation
+          .findOneAndUpdate(
+            {
+              key:'main'
+            },
+            {
+              $set:{
+                venue,
+                wifi,
+                help,
+                other
+              },
+
+              $setOnInsert:{
+                key:'main'
+              }
+            },
+            {
+              new:true,
+              upsert:true,
+              runValidators:true
+            }
+          );
+
+
+      res.json({
+        ok:true,
+
+        information:{
+          venue:
+            information.venue || '',
+
+          wifi:
+            information.wifi || '',
+
+          help:
+            information.help || '',
+
+          other:
+            information.other || '',
+
+          updatedAt:
+            information.updatedAt
+        }
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS Live information PUT error:',
+        error
+      );
+
+      res.status(500).json({
+        ok:false,
+        error:'Unable to save useful information'
+      });
+
+    }
+
+  }
+);
 
 module.exports = router;
 
