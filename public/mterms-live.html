@@ -4935,6 +4935,81 @@ async function saveSessionFeedback(
 }
 
 
+async function getConferenceFeedback(){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/conference?participantId=${encodeURIComponent(getParticipantId())}`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load conference feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+
+
+async function saveConferenceFeedback(
+  rating,
+  comment
+){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/feedback/conference`,
+      {
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:JSON.stringify({
+
+          participantId:
+            getParticipantId(),
+
+          rating,
+
+          comment
+
+        })
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to save conference feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+  
 function sessionRoomState(room){
 
   const now =
@@ -6168,124 +6243,232 @@ if(section === "discussions"){
 }
 
 
-  if(section === "feedback"){
+if(section === "feedback"){
 
-    const existing =
-      loadJSON(KEYS.feedback,{});
+  target.innerHTML = `
+    <div class="more-panel">
 
-    const rating =
-      Number(existing.rating || 0);
+      <h3>Conference Feedback</h3>
 
-    target.innerHTML =
-      `
-      <div class="more-panel">
-
-        <h3>Conference Feedback</h3>
-
-        <div class="page-sub">
-          How would you rate your MTERMS 2026 experience?
-        </div>
-
-        <div
-          class="rating-row"
-          id="ratingRow"
-          style="margin-top:10px;"
-        >
-
-          ${[1,2,3,4,5].map(i => `
-            <button
-              class="rating-star ${i <= rating ? "active" : ""}"
-              type="button"
-              data-rating="${i}"
-            >
-              ★
-            </button>
-          `).join("")}
-
-        </div>
-
-        <textarea
-          class="feedback-text"
-          id="feedbackComment"
-          placeholder="Optional comment…"
-        >${escapeHTML(existing.comment || "")}</textarea>
-
-        <button
-          class="btn btn-primary"
-          id="saveFeedbackBtn"
-          type="button"
-          style="margin-top:9px;"
-        >
-          Save Feedback
-        </button>
-
+      <div class="page-sub">
+        Loading your feedback…
       </div>
+
+    </div>
+  `;
+
+
+  getConferenceFeedback()
+    .then(existing => {
+
+      const rating =
+        Number(
+          existing?.rating || 0
+        );
+
+
+      target.innerHTML = `
+        <div class="more-panel">
+
+          <h3>Conference Feedback</h3>
+
+          <div class="page-sub">
+            How would you rate your MTERMS 2026 experience?
+          </div>
+
+          <div
+            class="rating-row"
+            id="ratingRow"
+            style="margin-top:10px;"
+          >
+
+            ${[1,2,3,4,5].map(i => `
+              <button
+                class="
+                  rating-star
+                  ${i <= rating ? "active" : ""}
+                "
+                type="button"
+                data-rating="${i}"
+              >
+                ★
+              </button>
+            `).join("")}
+
+          </div>
+
+
+          <textarea
+            class="feedback-text"
+            id="feedbackComment"
+            placeholder="Optional comment…"
+          >${escapeHTML(existing?.comment || "")}</textarea>
+
+
+          <button
+            class="btn btn-primary"
+            id="saveFeedbackBtn"
+            type="button"
+            style="margin-top:9px;"
+          >
+            ${
+              existing
+                ? "Update Feedback"
+                : "Submit Feedback"
+            }
+          </button>
+
+        </div>
       `;
 
 
-    let selectedRating =
-      rating;
+      let selectedRating =
+        rating;
 
 
-    target
-      .querySelectorAll("[data-rating]")
-      .forEach(button => {
+      target
+        .querySelectorAll(
+          "[data-rating]"
+        )
+        .forEach(button => {
 
-        button.addEventListener("click",()=>{
+          button.addEventListener(
+            "click",
+            ()=>{
 
-          selectedRating =
-            Number(button.dataset.rating);
+              selectedRating =
+                Number(
+                  button.dataset.rating
+                );
 
-          target
-            .querySelectorAll("[data-rating]")
-            .forEach(star => {
 
-              star.classList.toggle(
-                "active",
-                Number(star.dataset.rating)
-                  <= selectedRating
-              );
+              target
+                .querySelectorAll(
+                  "[data-rating]"
+                )
+                .forEach(star => {
 
-            });
+                  star.classList.toggle(
+                    "active",
+                    Number(
+                      star.dataset.rating
+                    ) <= selectedRating
+                  );
+
+                });
+
+            }
+          );
 
         });
 
-      });
+
+      document
+        .getElementById(
+          "saveFeedbackBtn"
+        )
+        .addEventListener(
+          "click",
+          async ()=>{
+
+            if(!selectedRating){
+
+              alert(
+                "Please select a rating first."
+              );
+
+              return;
+
+            }
 
 
-    document
-      .getElementById("saveFeedbackBtn")
-      .addEventListener("click",()=>{
+            const button =
+              document.getElementById(
+                "saveFeedbackBtn"
+              );
 
-        if(!selectedRating){
 
-          alert(
-            "Please select a rating first."
-          );
-
-          return;
-        }
-
-        saveJSON(
-          KEYS.feedback,
-          {
-            rating:selectedRating,
-            comment:
+            const comment =
               document
                 .getElementById(
                   "feedbackComment"
                 )
                 .value
                 .trim()
-                .slice(0,1000)
+                .slice(0,1000);
+
+
+            button.disabled = true;
+
+            button.textContent =
+              "Saving…";
+
+
+            try{
+
+              await saveConferenceFeedback(
+                selectedRating,
+                comment
+              );
+
+
+              button.textContent =
+                "✓ Feedback Saved";
+
+
+              setTimeout(
+                ()=>{
+
+                  renderMorePanel(
+                    "feedback"
+                  );
+
+                },
+                900
+              );
+
+
+            }catch(error){
+
+              console.error(error);
+
+              alert(
+                error.message ||
+                "Unable to save feedback."
+              );
+
+
+              button.disabled = false;
+
+              button.textContent =
+                "Submit Feedback";
+
+            }
+
           }
         );
 
-        alert("Feedback saved on this device.");
 
-      });
+    })
+    .catch(error => {
 
-  }
+      console.error(error);
+
+      target.innerHTML = `
+        <div class="more-panel">
+
+          <h3>Conference Feedback</h3>
+
+          <div class="info-placeholder">
+            Unable to load feedback.
+          </div>
+
+        </div>
+      `;
+
+    });
+
+}
 
 
   if(section === "info"){
