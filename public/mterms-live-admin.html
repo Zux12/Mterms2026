@@ -2109,28 +2109,80 @@ async getConferenceFeedback(){
 },
 
 
-  getInformation(){
+async getInformation(){
 
-    return loadJSON(
-      KEYS.information,
+  const response =
+    await fetch(
+      `${LIVE_API}/information`,
       {
-        venue:"",
-        wifi:"",
-        help:"",
-        other:""
+        method:"GET",
+        headers:{
+          "Content-Type":
+            "application/json"
+        }
       }
     );
 
-  },
 
-  saveInformation(data){
+  const data =
+    await response.json();
 
-    saveJSON(
-      KEYS.information,
-      data
+
+  if(!response.ok || !data.ok){
+
+    throw new Error(
+      data.error ||
+      "Unable to load useful information"
     );
 
   }
+
+
+  return data.information || {
+    venue:"",
+    wifi:"",
+    help:"",
+    other:""
+  };
+
+},
+
+
+async saveInformation(data){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/information`,
+      {
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:JSON.stringify(data)
+      }
+    );
+
+
+  const result =
+    await response.json();
+
+
+  if(!response.ok || !result.ok){
+
+    throw new Error(
+      result.error ||
+      "Unable to save useful information"
+    );
+
+  }
+
+
+  return result.information;
+
+}
 
 };
 
@@ -4824,46 +4876,58 @@ try{
    INFORMATION
 ===================================================== */
 
-function loadInformationForm(){
+async function loadInformationForm(){
 
-  const info =
-    AdminStore
-      .getInformation();
+  try{
 
-
-  document
-    .getElementById(
-      "infoVenue"
-    )
-    .value =
-      info.venue || "";
+    const info =
+      await AdminStore
+        .getInformation();
 
 
-  document
-    .getElementById(
-      "infoWifi"
-    )
-    .value =
-      info.wifi || "";
+    document
+      .getElementById(
+        "infoVenue"
+      )
+      .value =
+        info.venue || "";
 
 
-  document
-    .getElementById(
-      "infoHelp"
-    )
-    .value =
-      info.help || "";
+    document
+      .getElementById(
+        "infoWifi"
+      )
+      .value =
+        info.wifi || "";
 
 
-  document
-    .getElementById(
-      "infoOther"
-    )
-    .value =
-      info.other || "";
+    document
+      .getElementById(
+        "infoHelp"
+      )
+      .value =
+        info.help || "";
+
+
+    document
+      .getElementById(
+        "infoOther"
+      )
+      .value =
+        info.other || "";
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Unable to load useful information."
+    );
+
+  }
 
 }
-
 
 document
   .getElementById(
@@ -4871,7 +4935,14 @@ document
   )
   .addEventListener(
     "click",
-    ()=>{
+    async ()=>{
+
+      const button =
+        document
+          .getElementById(
+            "saveInfoBtn"
+          );
+
 
       const info = {
 
@@ -4914,34 +4985,59 @@ document
       };
 
 
-      AdminStore
-        .saveInformation(
-          info
-        );
+      button.disabled = true;
+      button.textContent = "Saving…";
 
 
-      const notice =
-        document
-          .getElementById(
-            "infoSavedNotice"
+      try{
+
+        await AdminStore
+          .saveInformation(
+            info
           );
 
 
-      notice
-        .classList
-        .add("show");
+        const notice =
+          document
+            .getElementById(
+              "infoSavedNotice"
+            );
 
 
-      setTimeout(
-        ()=>{
+        notice
+          .classList
+          .add("show");
 
-          notice
-            .classList
-            .remove("show");
 
-        },
-        1800
-      );
+        setTimeout(
+          ()=>{
+
+            notice
+              .classList
+              .remove("show");
+
+          },
+          1800
+        );
+
+
+      }catch(error){
+
+        console.error(error);
+
+        alert(
+          error.message ||
+          "Unable to save information."
+        );
+
+
+      }finally{
+
+        button.disabled = false;
+        button.textContent =
+          "Save Information";
+
+      }
 
     }
   );
