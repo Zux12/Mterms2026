@@ -49,9 +49,6 @@ const BOT_NICKS = {
 
 
 const STORAGE = {
-  welcomed:
-    "mterms32WelcomedV1",
-
   lastChannel:
     "mterms32LastChannelV1"
 };
@@ -73,6 +70,7 @@ let socket = null;
 let opened = false;
 let minimized = false;
 let maximized = false;
+   let sessionStarted = false;
 
 let activeTab =
   localStorage.getItem(
@@ -705,32 +703,28 @@ function bindInterface(){
     );
 
 
-  document
-    .getElementById(
-      "m32-welcome-ok"
-    )
-    .addEventListener(
-      "click",
-      ()=>{
+ document
+  .getElementById(
+    "m32-welcome-ok"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
 
-        localStorage.setItem(
-          STORAGE.welcomed,
-          "1"
-        );
-
-        document
-          .getElementById(
-            "m32-welcome"
-          )
-          .classList
-          .add("m32-hidden");
+      document
+        .getElementById(
+          "m32-welcome"
+        )
+        .classList
+        .add("m32-hidden");
 
 
-        runConnectionSequence();
+      sessionStarted = true;
 
-      }
-    );
+      runConnectionSequence();
 
+    }
+  );
 
   document
     .getElementById(
@@ -849,33 +843,30 @@ function openMterms32(){
   }
 
 
-  const welcomed =
-    localStorage.getItem(
-      STORAGE.welcomed
-    ) === "1";
+/*
+  A new MTERMS32 session shows
+  the nostalgic welcome dialog.
 
+  Restoring from Minimize does not.
+*/
+if(!sessionStarted){
 
-  if(!welcomed){
+  switchTab("status");
 
-    switchTab("status");
+  document
+    .getElementById(
+      "m32-welcome"
+    )
+    .classList
+    .remove("m32-hidden");
 
-    document
-      .getElementById(
-        "m32-welcome"
-      )
-      .classList
-      .remove("m32-hidden");
+}else{
 
-  }else{
+  switchTab(
+    activeTab
+  );
 
-    switchTab(
-      activeTab === "status"
-        ? "#kampung"
-        : activeTab
-    );
-
-  }
-
+}
 }
 
 
@@ -935,6 +926,7 @@ function closeMterms32(){
 
   opened = false;
   minimized = false;
+   sessionStarted = false;
 
 
   /*
