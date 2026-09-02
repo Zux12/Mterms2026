@@ -214,9 +214,12 @@ function buildMterms32(){
 
       <div class="m32-titlebar">
 
-        <div class="m32-title-icon">
-          M
-        </div>
+<div class="m32-title-icon">
+  <img
+    src="/public/mirc2.png"
+    alt=""
+  >
+</div>
 
         <div
           class="m32-title-text"
