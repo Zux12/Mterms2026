@@ -1,0 +1,758 @@
+/* =========================================================
+   MTERMS32
+   Retro IRC / Windows-style social chat
+   Completely isolated from MTERMS LIVE core
+========================================================= */
+
+#m32-root{
+  --m32-grey:#c0c0c0;
+  --m32-light:#ffffff;
+  --m32-mid:#808080;
+  --m32-dark:#000000;
+  --m32-blue:#000080;
+  --m32-chat:#ffffff;
+  --m32-green:#008000;
+  --m32-red:#800000;
+  --m32-purple:#800080;
+  --m32-teal:#008080;
+
+  font-family:Arial,"MS Sans Serif",sans-serif;
+  position:relative;
+  z-index:100000;
+}
+
+
+/* =========================================================
+   FLOATING ICON
+========================================================= */
+
+#m32-launcher{
+  position:fixed;
+  right:18px;
+  bottom:92px;
+
+  width:58px;
+  height:58px;
+
+  border:2px outset #fff;
+  background:#c0c0c0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+  z-index:100001;
+
+  box-shadow:2px 2px 0 rgba(0,0,0,.35);
+
+  padding:0;
+  border-radius:3px;
+}
+
+#m32-launcher .m32-launch-icon{
+  width:44px;
+  height:44px;
+
+  background:#fff;
+  border:1px solid #000;
+
+  display:grid;
+  place-items:center;
+
+  font-family:"Courier New",monospace;
+  font-size:22px;
+  font-weight:bold;
+
+  color:#000080;
+}
+
+#m32-launcher.m32-activity{
+  animation:m32LauncherFlash 1s steps(2,end) infinite;
+}
+
+@keyframes m32LauncherFlash{
+  0%,49%{
+    background:#c0c0c0;
+  }
+
+  50%,100%{
+    background:#ffff00;
+  }
+}
+
+
+/* =========================================================
+   MAIN WINDOW
+========================================================= */
+
+#m32-window{
+  position:fixed;
+
+  left:50%;
+  top:50%;
+
+  transform:translate(-50%,-50%);
+
+  width:min(94vw,760px);
+  height:min(78vh,620px);
+
+  min-width:310px;
+  min-height:440px;
+
+  background:var(--m32-grey);
+
+  border:
+    2px outset
+    var(--m32-light);
+
+  box-shadow:
+    4px 4px 0
+    rgba(0,0,0,.45);
+
+  z-index:100002;
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+}
+
+#m32-window.m32-hidden{
+  display:none;
+}
+
+#m32-window.m32-maximized{
+  left:4px;
+  top:4px;
+
+  transform:none;
+
+  width:calc(100vw - 8px);
+  height:calc(100dvh - 8px);
+
+  max-width:none;
+  max-height:none;
+}
+
+
+/* =========================================================
+   TITLE BAR
+========================================================= */
+
+.m32-titlebar{
+  min-height:24px;
+
+  background:var(--m32-blue);
+  color:#fff;
+
+  display:flex;
+  align-items:center;
+
+  padding:2px 3px 2px 5px;
+
+  user-select:none;
+}
+
+.m32-title-icon{
+  width:17px;
+  height:17px;
+
+  background:#fff;
+  color:#000080;
+
+  border:1px solid #000;
+
+  display:grid;
+  place-items:center;
+
+  font-family:"Courier New",monospace;
+  font-size:10px;
+  font-weight:bold;
+
+  margin-right:5px;
+}
+
+.m32-title-text{
+  flex:1;
+  min-width:0;
+
+  font-size:11px;
+  font-weight:bold;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.m32-window-buttons{
+  display:flex;
+  gap:2px;
+}
+
+.m32-win-btn{
+  width:21px;
+  height:19px;
+
+  padding:0;
+
+  border:2px outset #fff;
+  background:#c0c0c0;
+
+  color:#000;
+
+  font-family:Arial,sans-serif;
+  font-size:11px;
+  font-weight:bold;
+
+  line-height:14px;
+
+  display:grid;
+  place-items:center;
+}
+
+.m32-win-btn:active{
+  border-style:inset;
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.m32-menu{
+  min-height:25px;
+
+  display:flex;
+  align-items:center;
+
+  border-bottom:1px solid #808080;
+
+  padding:1px 5px;
+
+  background:#c0c0c0;
+
+  overflow-x:auto;
+  white-space:nowrap;
+
+  scrollbar-width:none;
+}
+
+.m32-menu::-webkit-scrollbar{
+  display:none;
+}
+
+.m32-menu-item{
+  border:0;
+  background:transparent;
+
+  padding:4px 7px;
+
+  color:#000;
+
+  font-size:10px;
+}
+
+.m32-menu-item:active{
+  border:1px inset #fff;
+  padding:3px 6px;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.m32-toolbar{
+  min-height:31px;
+
+  display:flex;
+  align-items:center;
+  gap:3px;
+
+  padding:3px 4px;
+
+  border-top:1px solid #fff;
+  border-bottom:1px solid #808080;
+
+  background:#c0c0c0;
+}
+
+.m32-tool{
+  width:27px;
+  height:24px;
+
+  border:2px outset #fff;
+  background:#c0c0c0;
+
+  display:grid;
+  place-items:center;
+
+  padding:0;
+
+  font-size:12px;
+}
+
+.m32-tool:active{
+  border-style:inset;
+}
+
+.m32-tool-separator{
+  width:1px;
+  height:20px;
+  background:#808080;
+  box-shadow:1px 0 #fff;
+  margin:0 3px;
+}
+
+
+/* =========================================================
+   CHANNEL TABS
+========================================================= */
+
+.m32-tabs{
+  min-height:28px;
+
+  display:flex;
+  align-items:flex-end;
+
+  padding:3px 4px 0;
+
+  gap:2px;
+
+  overflow-x:auto;
+  white-space:nowrap;
+
+  background:#c0c0c0;
+
+  scrollbar-width:none;
+}
+
+.m32-tabs::-webkit-scrollbar{
+  display:none;
+}
+
+.m32-tab{
+  min-height:23px;
+
+  border:2px outset #fff;
+  border-bottom:0;
+
+  background:#c0c0c0;
+
+  padding:3px 8px;
+
+  font-size:11px;
+
+  color:#000;
+
+  white-space:nowrap;
+}
+
+.m32-tab.m32-active{
+  background:#fff;
+
+  border-left:2px outset #fff;
+  border-top:2px outset #fff;
+  border-right:2px solid #808080;
+
+  font-weight:bold;
+}
+
+.m32-tab.m32-tab-activity{
+  color:#c00000;
+  font-weight:bold;
+}
+
+
+/* =========================================================
+   INNER WINDOW TITLE
+========================================================= */
+
+.m32-child-title{
+  min-height:21px;
+
+  margin:0 4px;
+
+  padding:3px 5px;
+
+  background:#000080;
+  color:#fff;
+
+  font-size:10px;
+  font-weight:bold;
+}
+
+
+/* =========================================================
+   CHAT AREA
+========================================================= */
+
+.m32-body{
+  flex:1;
+  min-height:0;
+
+  display:flex;
+
+  margin:0 4px 4px;
+
+  border:2px inset #fff;
+
+  background:#fff;
+}
+
+.m32-chat-pane{
+  flex:1;
+  min-width:0;
+
+  display:flex;
+  flex-direction:column;
+
+  background:#fff;
+}
+
+.m32-chat-scroll{
+  flex:1;
+  min-height:0;
+
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  padding:5px 6px;
+
+  background:#fff;
+
+  font-family:"Courier New",Courier,monospace;
+  font-size:13px;
+  line-height:1.25;
+
+  color:#000;
+}
+
+.m32-line{
+  margin:0 0 2px;
+  word-break:break-word;
+}
+
+.m32-line-chat{
+  color:#000;
+}
+
+.m32-line-system{
+  color:var(--m32-teal);
+}
+
+.m32-line-join{
+  color:var(--m32-green);
+}
+
+.m32-line-leave{
+  color:var(--m32-red);
+}
+
+.m32-line-bot{
+  color:var(--m32-purple);
+}
+
+.m32-line-status{
+  color:#000080;
+}
+
+.m32-nick{
+  font-weight:normal;
+}
+
+
+/* =========================================================
+   NICK LIST
+========================================================= */
+
+.m32-nicks{
+  width:28%;
+  min-width:92px;
+  max-width:165px;
+
+  border-left:2px inset #fff;
+
+  background:#fff;
+
+  overflow-y:auto;
+
+  padding:3px 2px;
+
+  font-family:Arial,"MS Sans Serif",sans-serif;
+  font-size:11px;
+
+  color:#000;
+}
+
+.m32-nicks.m32-nicks-hidden{
+  display:none;
+}
+
+.m32-nick-title{
+  padding:3px 4px;
+
+  font-weight:bold;
+
+  border-bottom:1px solid #c0c0c0;
+
+  margin-bottom:2px;
+}
+
+.m32-nick-item{
+  min-height:19px;
+  padding:2px 4px;
+
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.m32-nick-item:hover{
+  background:#000080;
+  color:#fff;
+}
+
+.m32-nick-bot{
+  color:#800080;
+  font-weight:bold;
+}
+
+
+/* =========================================================
+   MESSAGE INPUT
+========================================================= */
+
+.m32-inputbar{
+  margin:0 4px 4px;
+
+  display:flex;
+  gap:3px;
+
+  min-height:31px;
+}
+
+#m32-input{
+  flex:1;
+  min-width:0;
+
+  border:2px inset #fff;
+  border-radius:0;
+
+  background:#fff;
+  color:#000;
+
+  padding:3px 5px;
+
+  font-family:"Courier New",Courier,monospace;
+
+  /*
+    16px avoids automatic iOS zoom.
+  */
+  font-size:16px;
+
+  outline:none;
+}
+
+#m32-send{
+  min-width:55px;
+
+  border:2px outset #fff;
+  border-radius:0;
+
+  background:#c0c0c0;
+
+  color:#000;
+
+  font-size:11px;
+  font-weight:normal;
+}
+
+#m32-send:active{
+  border-style:inset;
+}
+
+.m32-inputbar.m32-input-disabled{
+  display:none;
+}
+
+
+/* =========================================================
+   STATUS BAR
+========================================================= */
+
+.m32-statusbar{
+  min-height:23px;
+
+  display:flex;
+  align-items:center;
+
+  gap:3px;
+
+  padding:2px 4px;
+
+  border-top:1px solid #fff;
+
+  background:#c0c0c0;
+
+  font-size:9px;
+
+  overflow:hidden;
+}
+
+.m32-status-cell{
+  border:1px inset #fff;
+
+  padding:2px 5px;
+
+  white-space:nowrap;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.m32-status-cell:first-child{
+  flex:1;
+}
+
+
+/* =========================================================
+   WELCOME / ABOUT DIALOG
+========================================================= */
+
+.m32-dialog-backdrop{
+  position:absolute;
+  inset:0;
+
+  z-index:20;
+
+  background:rgba(0,0,0,.12);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:18px;
+}
+
+.m32-dialog-backdrop.m32-hidden{
+  display:none;
+}
+
+.m32-dialog{
+  width:min(310px,92%);
+
+  background:#c0c0c0;
+
+  border:2px outset #fff;
+
+  box-shadow:3px 3px 0 rgba(0,0,0,.4);
+}
+
+.m32-dialog-title{
+  min-height:22px;
+
+  display:flex;
+  align-items:center;
+
+  background:#000080;
+  color:#fff;
+
+  padding:3px 5px;
+
+  font-size:11px;
+  font-weight:bold;
+}
+
+.m32-dialog-content{
+  padding:20px 16px;
+
+  color:#000;
+
+  font-size:12px;
+  line-height:1.5;
+}
+
+.m32-dialog-actions{
+  display:flex;
+  justify-content:center;
+
+  padding:0 12px 14px;
+}
+
+.m32-dialog-button{
+  min-width:74px;
+  min-height:27px;
+
+  border:2px outset #fff;
+  background:#c0c0c0;
+
+  font-size:11px;
+}
+
+.m32-dialog-button:active{
+  border-style:inset;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:600px){
+
+  #m32-window{
+    width:94vw;
+    height:76dvh;
+  }
+
+  #m32-window.m32-maximized{
+    width:calc(100vw - 4px);
+    height:calc(100dvh - 4px);
+
+    left:2px;
+    top:2px;
+  }
+
+  .m32-menu-item{
+    font-size:10px;
+    padding-left:5px;
+    padding-right:5px;
+  }
+
+  .m32-tab{
+    font-size:11px;
+    padding-left:6px;
+    padding-right:6px;
+  }
+
+  .m32-chat-scroll{
+    font-size:13px;
+  }
+
+  .m32-nicks{
+    width:29%;
+    min-width:92px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+========================================================= */
+
+@media(max-width:360px){
+
+  .m32-chat-scroll{
+    font-size:12px;
+  }
+
+  .m32-nicks{
+    width:28%;
+    min-width:82px;
+    font-size:10px;
+  }
+
+}
