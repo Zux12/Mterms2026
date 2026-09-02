@@ -1137,6 +1137,91 @@ function connectSocket(){
   );
 
 
+socket.on(
+  "irc:presence",
+  message => {
+
+    if(
+      !message ||
+      !CHANNELS[
+        message.channel
+      ]
+    ){
+      return;
+    }
+
+
+    channelMessages[
+      message.channel
+    ]
+    .push(message);
+
+
+    if(
+      channelMessages[
+        message.channel
+      ].length > 150
+    ){
+
+      channelMessages[
+        message.channel
+      ] =
+        channelMessages[
+          message.channel
+        ]
+        .slice(-150);
+
+    }
+
+
+    /*
+      If we're currently looking at
+      this room, display immediately.
+    */
+    if(
+      activeTab ===
+        message.channel &&
+      opened
+    ){
+
+      renderActiveTab();
+
+    }else{
+
+      /*
+        Otherwise highlight that
+        channel's tab.
+      */
+      markChannelActivity(
+        message.channel
+      );
+
+    }
+
+
+    /*
+      If MTERMS32 is minimized,
+      flash the launcher.
+    */
+    if(
+      minimized ||
+      !opened
+    ){
+
+      document
+        .getElementById(
+          "m32-launcher"
+        )
+        .classList
+        .add(
+          "m32-activity"
+        );
+
+    }
+
+  }
+);
+   
   socket.on(
     "irc:nicks",
     payload => {
