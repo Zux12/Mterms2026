@@ -1,0 +1,175 @@
+/* ==========================================
+   MTERMS 2026 LIVE Floating Button
+   ========================================== */
+
+.mterms-live-float{
+  position: fixed;
+
+  /* Adjusted to sit in the floating-button stack */
+  right: 30px;
+  bottom: 195px;
+
+  height: 42px;
+  padding: 0 15px 0 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background: #050505;
+  color: #ffffff;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+
+  text-decoration: none;
+
+  font-family: Inter, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .12em;
+
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.25),
+    inset 0 0 0 1px rgba(255,255,255,.03);
+
+  cursor: pointer;
+
+  z-index: 10001;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+
+/* Hover */
+.mterms-live-float:hover{
+  transform: translateY(-2px) scale(1.03);
+
+  background: #111111;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.32),
+    0 0 18px rgba(255,0,0,.10);
+}
+
+
+/* =========================
+   LIVE red recording dot
+   ========================= */
+
+.mterms-live-dot{
+  position: relative;
+
+  width: 9px;
+  height: 9px;
+
+  flex: 0 0 9px;
+
+  background: #ff1f1f;
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 5px rgba(255,0,0,.95),
+    0 0 10px rgba(255,0,0,.55);
+
+  animation: mtermsLiveDotPulse 1.4s ease-in-out infinite;
+}
+
+
+/* Outer animated glow */
+.mterms-live-dot::after{
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: rgba(255,0,0,.45);
+
+  transform: translate(-50%, -50%) scale(1);
+
+  animation: mtermsLiveRing 1.4s ease-out infinite;
+}
+
+
+@keyframes mtermsLiveDotPulse{
+  0%, 100%{
+    opacity: 1;
+    box-shadow:
+      0 0 5px rgba(255,0,0,.95),
+      0 0 10px rgba(255,0,0,.55);
+  }
+
+  50%{
+    opacity: .65;
+    box-shadow:
+      0 0 8px rgba(255,0,0,1),
+      0 0 18px rgba(255,0,0,.85);
+  }
+}
+
+
+@keyframes mtermsLiveRing{
+  0%{
+    transform: translate(-50%, -50%) scale(1);
+    opacity: .7;
+  }
+
+  100%{
+    transform: translate(-50%, -50%) scale(2.8);
+    opacity: 0;
+  }
+}
+
+
+/* LIVE text */
+.mterms-live-text{
+  line-height: 1;
+}
+
+
+/* =========================
+   Mobile
+   ========================= */
+
+@media (max-width: 600px){
+
+  .mterms-live-float{
+    right: 18px;
+
+    /*
+      Keep same vertical stack principle,
+      but slightly more compact on mobile
+    */
+    bottom: 185px;
+
+    height: 38px;
+
+    padding: 0 12px 0 10px;
+
+    gap: 7px;
+
+    font-size: 11px;
+  }
+
+  .mterms-live-dot{
+    width: 8px;
+    height: 8px;
+    flex-basis: 8px;
+  }
+
+  .mterms-live-dot::after{
+    width: 8px;
+    height: 8px;
+  }
+}
