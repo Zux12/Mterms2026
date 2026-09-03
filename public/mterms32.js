@@ -553,24 +553,68 @@ function buildMterms32(){
             About MTERMS32
           </div>
 
-          <div class="m32-dialog-content">
+<div class="m32-dialog-content">
 
-            <strong>
-              MTERMS32
-            </strong>
+  <div
+    style="
+      text-align:center;
+      line-height:1.45;
+    "
+  >
 
-            <br>
+    <strong
+      style="
+        font-size:16px;
+      "
+    >
+      MTERMS32
+    </strong>
 
-            Internet Relay Chat
-            Conference Edition
+    <br>
 
-            <br><br>
+    Internet Relay Chat — Conference Edition
 
-            MTERMS 2026
-            <br>
-            7–8 September 2026
+    <br>
 
-          </div>
+    Version 1.0
+
+    <br><br>
+
+    Part of the
+    <strong>MTERMS 2026 Digital Platform</strong>
+
+    <br><br>
+
+    Developed by
+
+    <br>
+
+    <strong>
+      IgniteInno Ventures Sdn Bhd
+    </strong>
+
+    <br>
+
+    MTERMS 2026 Digital Platform Provider
+
+    <br><br>
+
+    <span
+      style="
+        font-size:10px;
+      "
+    >
+      Copyright © 2026
+      IgniteInno Ventures Sdn Bhd
+
+      <br>
+
+      All Rights Reserved.
+    </span>
+
+  </div>
+
+</div>
 
           <div class="m32-dialog-actions">
 
