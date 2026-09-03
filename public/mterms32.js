@@ -1326,30 +1326,38 @@ function runConnectionSequence(){
   statusLines = [];
 
 
-  const sequence = [
+const sequence = [
 
-    "*** Connecting to MTERMSnet...",
+  "*** Connecting to MTERMSnet...",
 
-    "*** Looking up your hostname...",
+  "*** Looking up your hostname...",
 
-    "*** Found your hostname",
+  "*** Found your hostname",
 
-    "*** Connected to irc.mterms2026.net",
+  "*** Contacting IgniteInno Digital Network...",
 
-    "*** Welcome to the MTERMS Internet Relay Chat Network",
+  "*** Link established",
 
-    "*** Your nickname is " +
-      profileNick(),
+  "*** irc.mterms2026.net running on IgniteInno Digital Services",
 
-    "*** MOTD: Welcome back. It's been a while.",
+  "*** Connected to irc.mterms2026.net",
 
-    "*** Joining #kampung...",
+  "*** Welcome to the MTERMS Internet Relay Chat Network",
 
-    "*** Joining #mamak...",
+  "*** Network services by IgniteInno Ventures Sdn Bhd",
 
-    "*** Joining #lagenda..."
+  "*** Your nickname is " +
+    profileNick(),
 
-  ];
+  "*** MOTD: Welcome back. It's been a while.",
+
+  "*** Joining #kampung...",
+
+  "*** Joining #mamak...",
+
+  "*** Joining #lagenda..."
+
+];
 
 
   let index = 0;
