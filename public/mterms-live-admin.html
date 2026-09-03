@@ -394,6 +394,19 @@ main{
   color:var(--muted);
 }
 
+.qr-placeholder.qr-live{
+  padding:10px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+
+.qr-placeholder.qr-live img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+  
 .qr-placeholder strong{
   display:block;
   color:var(--navy);
@@ -1230,20 +1243,14 @@ textarea.form-control{
       <div class="card qr-card">
 
         <div class="qr-layout">
+<div class="qr-placeholder qr-live">
 
-          <div class="qr-placeholder">
+  <img
+    src="/public/mterms-live-qr.png"
+    alt="QR Code for MTERMS 2026 LIVE"
+  >
 
-            <div>
-
-              <strong>
-                QR PLACEHOLDER
-              </strong>
-
-              Upload the final MTERMS LIVE QR image here later.
-
-            </div>
-
-          </div>
+</div>
 
 
           <div class="qr-title">
