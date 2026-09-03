@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>MTERMS 2026 — Exhibitor ID Card Print Manager</title>
+
+  <link rel="stylesheet" href="exhibitor-card-manager.css">
+</head>
+
+<body>
+
+  <div class="page-shell">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+    <header class="top-header">
+
+      <div class="brand-area">
+
+        <div class="brand-logo">
+          <img
+            src="public/mterm.jpg"
+            alt="MTERMS 2026">
+        </div>
+
+        <div>
+          <h1>MTERMS 2026 — Exhibitor ID Card Print Manager</h1>
+
+          <p>
+            Add exhibitors, prepare identification cards,
+            arrange A4 print sheets and export for printing.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="window.location.href='admin.html'">
+          ← Back to Admin
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================
+         ADD EXHIBITOR
+    ========================== -->
+    <section class="panel no-print">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Add Exhibitor</h2>
+
+          <p>
+            Enter the exhibitor details below.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="exhibitor-form">
+
+        <label>
+          Name
+          <input
+            id="exhibitorName"
+            type="text"
+            placeholder="Full name">
+        </label>
+
+
+        <label>
+          Company / Organisation
+          <input
+            id="exhibitorCompany"
+            type="text"
+            placeholder="Company or organisation">
+        </label>
+
+
+        <label>
+          Designation
+          <input
+            id="exhibitorDesignation"
+            type="text"
+            placeholder="Optional">
+        </label>
+
+
+        <label>
+          Exhibitor Type
+          <select id="exhibitorType">
+
+            <option value="Exhibitor">
+              Exhibitor
+            </option>
+
+            <option value="Sponsor">
+              Sponsor
+            </option>
+
+            <option value="Industry Partner">
+              Industry Partner
+            </option>
+
+            <option value="Booth Crew">
+              Booth Crew
+            </option>
+
+            <option value="Others">
+              Others
+            </option>
+
+          </select>
+        </label>
+
+
+        <label
+          id="otherTypeWrapper"
+          class="hidden-field">
+
+          Specify Type
+
+          <input
+            id="exhibitorOtherType"
+            type="text"
+            placeholder="Enter exhibitor type">
+
+        </label>
+
+
+        <div class="form-button-wrap">
+
+          <button
+            id="addExhibitorBtn"
+            type="button"
+            class="btn btn-primary">
+            + Add Exhibitor
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="editingNotice"
+        class="editing-notice"
+        hidden>
+
+        <span>
+          Editing:
+          <strong id="editingName"></strong>
+        </span>
+
+        <button
+          id="cancelEditBtn"
+          type="button"
+          class="btn btn-secondary">
+          Cancel Edit
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         FILTERS
+    ========================== -->
+    <section class="panel no-print">
+
+      <div class="toolbar">
+
+        <label>
+          Search Exhibitor
+          <input
+            id="searchBox"
+            type="text"
+            placeholder="Name, company, designation or type">
+        </label>
+
+
+        <label>
+          Exhibitor Type
+          <select id="typeFilter">
+            <option value="">
+              All Types
+            </option>
+          </select>
+        </label>
+
+
+        <button
+          id="clearAllBtn"
+          type="button"
+          class="btn btn-danger">
+          Delete All Exhibitors
+        </button>
+
+      </div>
+
+
+      <div class="summary-row">
+
+        <div class="summary-pill">
+          Loaded:
+          <strong id="totalLoaded">0</strong>
+        </div>
+
+        <div class="summary-pill">
+          Showing:
+          <strong id="totalShowing">0</strong>
+        </div>
+
+        <div class="summary-pill">
+          Selected:
+          <strong id="totalSelected">0</strong>
+        </div>
+
+        <div class="summary-pill">
+          A4 Pages:
+          <strong id="totalPages">0</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         EXHIBITOR SELECTOR
+    ========================== -->
+    <section class="panel no-print">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Select Exhibitors</h2>
+
+          <p>
+            Select exhibitors whose ID cards you want to prepare.
+          </p>
+        </div>
+
+
+        <div class="section-actions">
+
+          <button
+            id="selectVisibleBtn"
+            type="button"
+            class="btn btn-secondary">
+            Select Visible
+          </button>
+
+          <button
+            id="clearSelectionBtn"
+            type="button"
+            class="btn btn-danger">
+            Clear Selection
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="exhibitorList"
+        class="participant-list">
+
+        <div class="empty-state">
+          No exhibitors have been added yet.
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         CARD WORKSPACE
+    ========================== -->
+    <section
+      id="cardWorkspaceSection"
+      class="panel no-print">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>ID Card Preview</h2>
+
+          <p>
+            Review the selected exhibitor ID cards before printing.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        id="cardWorkspace"
+        class="card-workspace">
+
+        <div class="empty-state">
+          Select exhibitors above to prepare ID cards.
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PRINT CONTROLS
+    ========================== -->
+    <section class="panel no-print">
+
+      <div class="print-control-bar">
+
+        <div>
+
+          <h2>A4 Print Layout</h2>
+
+          <p>
+            ID Card Size:
+            <strong>55 mm × 85 mm</strong>
+            · Maximum:
+            <strong>9 cards per A4 page</strong>
+          </p>
+
+        </div>
+
+
+        <div class="print-buttons">
+
+          <button
+            id="previewPrintBtn"
+            type="button"
+            class="btn btn-secondary">
+            Preview A4
+          </button>
+
+
+          <button
+            id="printPdfBtn"
+            type="button"
+            class="btn btn-primary">
+            Print / Export PDF
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         A4 PRINT AREA
+    ========================== -->
+    <section
+      id="printPreviewSection"
+      class="print-preview-section">
+
+      <div
+        id="a4Pages"
+        class="a4-pages">
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- =========================
+       IGNITE FOOTER
+  ========================== -->
+  <footer class="ignite-footer no-print">
+
+    <div class="ignite-footer-inner">
+
+      <img
+        src="public/ignite%20logo-white.png"
+        alt="IgniteInno Ventures">
+
+      <div>
+
+        <strong>
+          MTERMS 2026 Card Printing System
+        </strong>
+
+        <span>
+          Powered by IgniteInno Digital Technology
+        </span>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <script src="exhibitor-card-manager.js"></script>
+
+</body>
+</html>
