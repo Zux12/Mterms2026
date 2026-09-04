@@ -902,7 +902,7 @@
     target="_blank"
     rel="noopener">
 
-    LIST OF ORAL SPEAKERS
+    LIST OF ORAL SESSIONS
 
   </a>
 
@@ -912,7 +912,17 @@
     target="_blank"
     rel="noopener">
 
-    SYMPOSIUM SESSION GUIDELINE
+    SYMPOSIUM SESSIONS
+
+  </a>
+
+    <a
+    class="mterms-countdown-agenda"
+    href="public/List%20of%20the%20Oral%20Speakers%20MTERMS%202026.pdf"
+    target="_blank"
+    rel="noopener">
+
+    LIST OF POSTER SESSIONS
 
   </a>
 </div>
