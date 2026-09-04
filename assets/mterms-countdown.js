@@ -893,6 +893,24 @@
 
 </a>
 
+<a
+  class="btn"
+  href="public/List%20of%20the%20Oral%20Speakers%20MTERMS%202026.pdf"
+  target="_blank"
+  rel="noopener"
+>
+  List of Oral Speakers
+</a>
+
+<a
+  class="btn"
+  href="public/MTERM%202026_Guideline%20for%20Symposium%20Sessionl.pdf"
+  target="_blank"
+  rel="noopener"
+>
+  Symposium Session Guideline
+</a>
+
 </div>
 
     </div>
