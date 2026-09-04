@@ -883,33 +883,39 @@
     Already attending MTERMS 2026?
   </div>
 
-<a
-  class="mterms-countdown-agenda"
-  href="public/mterms%20final%20schedule.pdf"
-  target="_blank"
-  rel="noopener">
+<div>
+  <a
+    class="mterms-countdown-agenda"
+    href="public/mterms%20final%20schedule.pdf"
+    target="_blank"
+    rel="noopener">
 
-  DOWNLOAD CONFERENCE AGENDA
+    DOWNLOAD CONFERENCE AGENDA
 
-</a>
+  </a>
+</div>
 
-<a
-  class="btn"
-  href="public/List%20of%20the%20Oral%20Speakers%20MTERMS%202026.pdf"
-  target="_blank"
-  rel="noopener"
->
-  List of Oral Speakers
-</a>
+<div style="margin-top:10px;">
+  <a
+    class="mterms-countdown-agenda"
+    href="public/List%20of%20the%20Oral%20Speakers%20MTERMS%202026.pdf"
+    target="_blank"
+    rel="noopener">
 
-<a
-  class="btn"
-  href="public/MTERM%202026_Guideline%20for%20Symposium%20Sessionl.pdf"
-  target="_blank"
-  rel="noopener"
->
-  Symposium Session Guideline
-</a>
+    LIST OF ORAL SPEAKERS
+
+  </a>
+
+  <a
+    class="mterms-countdown-agenda"
+    href="public/MTERM%202026_Guideline%20for%20Symposium%20Sessionl.pdf"
+    target="_blank"
+    rel="noopener">
+
+    SYMPOSIUM SESSION GUIDELINE
+
+  </a>
+</div>
 
 </div>
 
