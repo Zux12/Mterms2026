@@ -1,0 +1,11147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+
+<meta
+  name="theme-color"
+  content="#071a2c"
+>
+
+<title>MTERMS 2026 LIVE V2</title>
+
+
+<!-- MTERMS32 -->
+<link
+  rel="stylesheet"
+  href="/public/mterms32.css?v=4"
+>
+
+
+<style>
+
+:root{
+
+  --navy:#071a2c;
+  --navy2:#0c2943;
+
+  --blue:#1677ff;
+  --blueSoft:#eaf3ff;
+
+  --cyan:#13b8c8;
+
+  --red:#e53935;
+
+  --green:#138a5b;
+
+  --amber:#d88700;
+
+  --bg:#f4f7fb;
+
+  --surface:#ffffff;
+
+  --text:#172033;
+
+  --muted:#6d7788;
+
+  --line:#e3e8ef;
+
+  --soft:#f7f9fc;
+
+  --shadow:
+    0 8px 30px
+    rgba(15,35,60,.09);
+
+  --bottom-nav-height:72px;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+html{
+  scroll-behavior:smooth;
+}
+
+
+body{
+
+  margin:0;
+
+  min-width:320px;
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background:var(--bg);
+
+  color:var(--text);
+
+}
+
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+
+  outline:
+    3px solid
+    rgba(22,119,255,.22);
+
+  outline-offset:2px;
+
+}
+
+
+.hidden{
+  display:none !important;
+}
+
+
+
+/* =====================================================
+   APP
+===================================================== */
+
+.app{
+
+  min-height:100vh;
+
+  padding-bottom:
+    calc(
+      var(--bottom-nav-height) + 20px
+    );
+
+}
+
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.topbar{
+
+  position:sticky;
+
+  top:0;
+
+  z-index:80;
+
+  background:
+    rgba(7,26,44,.97);
+
+  backdrop-filter:
+    blur(10px);
+
+  color:#fff;
+
+  padding:
+    11px 14px;
+
+  box-shadow:
+    0 2px 16px
+    rgba(0,0,0,.12);
+
+}
+
+
+.topbar-inner{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+}
+
+
+.brand{
+
+  flex:1;
+
+  min-width:0;
+
+}
+
+
+.brand-kicker{
+
+  font-size:10px;
+
+  letter-spacing:.14em;
+
+  text-transform:uppercase;
+
+  opacity:.7;
+
+}
+
+
+.brand-title{
+
+  margin-top:2px;
+
+  font-size:18px;
+
+  font-weight:850;
+
+  line-height:1.15;
+
+}
+
+
+.brand-sub{
+
+  margin-top:3px;
+
+  font-size:11px;
+
+  opacity:.72;
+
+}
+
+
+.top-actions{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:6px;
+
+}
+
+
+.icon-btn{
+
+  width:44px;
+
+  height:44px;
+
+  border:0;
+
+  border-radius:50%;
+
+  background:
+    rgba(255,255,255,.1);
+
+  color:#fff;
+
+  display:grid;
+
+  place-items:center;
+
+  position:relative;
+
+}
+
+
+.envelope{
+  font-size:21px;
+}
+
+
+.unread-badge{
+
+  position:absolute;
+
+  right:-2px;
+
+  top:-3px;
+
+  min-width:19px;
+
+  height:19px;
+
+  padding:0 5px;
+
+  border-radius:999px;
+
+  background:var(--red);
+
+  color:#fff;
+
+  font-size:10px;
+
+  font-weight:850;
+
+  display:grid;
+
+  place-items:center;
+
+  border:
+    2px solid
+    var(--navy);
+
+}
+
+
+.shake-unread{
+
+  animation:
+    shakeEnvelope
+    .7s ease-in-out
+    infinite;
+
+  transform-origin:
+    50% 25%;
+
+}
+
+
+@keyframes shakeEnvelope{
+
+  0%,100%{
+    transform:rotate(0);
+  }
+
+  15%{
+    transform:rotate(-10deg);
+  }
+
+  30%{
+    transform:rotate(9deg);
+  }
+
+  45%{
+    transform:rotate(-7deg);
+  }
+
+  60%{
+    transform:rotate(6deg);
+  }
+
+  75%{
+    transform:rotate(-3deg);
+  }
+
+}
+
+
+
+/* =====================================================
+   FULLY DIGITAL IDENTITY
+===================================================== */
+
+.digital-strip{
+
+  background:
+    linear-gradient(
+      90deg,
+      #eef6ff,
+      #f8fbff
+    );
+
+  border-bottom:
+    1px solid #dce8f5;
+
+}
+
+
+.digital-strip-inner{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:
+    10px 14px;
+
+  text-align:center;
+
+}
+
+
+.digital-kicker{
+
+  font-size:9px;
+
+  font-weight:900;
+
+  letter-spacing:.13em;
+
+  text-transform:uppercase;
+
+  color:var(--blue);
+
+}
+
+
+.digital-title{
+
+  margin-top:3px;
+
+  font-size:12px;
+
+  font-weight:850;
+
+  color:var(--navy);
+
+}
+
+
+.digital-features{
+
+  margin-top:3px;
+
+  font-size:9px;
+
+  line-height:1.4;
+
+  color:var(--muted);
+
+}
+
+
+.digital-provider{
+
+  margin-top:3px;
+
+  font-size:9px;
+
+  color:#7a8493;
+
+}
+
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:14px;
+
+}
+
+
+.page{
+  display:none;
+}
+
+
+.page.active{
+  display:block;
+}
+
+
+.page-title{
+
+  margin:0;
+
+  font-size:23px;
+
+  line-height:1.2;
+
+}
+
+
+.page-sub{
+
+  margin-top:5px;
+
+  color:var(--muted);
+
+  font-size:13px;
+
+  line-height:1.5;
+
+}
+
+
+.section-label{
+
+  margin:
+    20px 2px 9px;
+
+  font-size:10px;
+
+  font-weight:850;
+
+  letter-spacing:.12em;
+
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+}
+
+
+.card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:18px;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.btn{
+
+  min-height:44px;
+
+  border:0;
+
+  border-radius:12px;
+
+  padding:0 14px;
+
+  font-weight:800;
+
+}
+
+
+.btn-primary{
+
+  background:var(--blue);
+
+  color:#fff;
+
+}
+
+
+.btn-light{
+
+  background:#fff;
+
+  color:var(--navy);
+
+}
+
+
+.btn-soft{
+
+  background:var(--blueSoft);
+
+  color:#075aba;
+
+}
+
+
+.btn-outline{
+
+  background:#fff;
+
+  color:var(--text);
+
+  border:
+    1px solid
+    var(--line);
+
+}
+
+
+.btn-danger-soft{
+
+  background:#fff0f0;
+
+  color:#b82323;
+
+}
+
+
+.btn-small{
+
+  min-height:36px;
+
+  padding:0 10px;
+
+  font-size:11px;
+
+}
+
+
+
+/* =====================================================
+   LIVE HERO
+===================================================== */
+
+.live-hero{
+  overflow:hidden;
+}
+
+
+.live-hero-head{
+
+  padding:18px;
+
+  background:
+
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(19,184,200,.22),
+      transparent 35%
+    ),
+
+    linear-gradient(
+      145deg,
+      var(--navy),
+      var(--navy2)
+    );
+
+  color:#fff;
+
+}
+
+
+.live-status{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  font-size:11px;
+
+  font-weight:850;
+
+  letter-spacing:.08em;
+
+  text-transform:uppercase;
+
+}
+
+
+.live-dot{
+
+  width:9px;
+
+  height:9px;
+
+  border-radius:50%;
+
+  background:#ff4a4a;
+
+  box-shadow:
+    0 0 0 5px
+    rgba(255,74,74,.15);
+
+}
+
+
+.live-title{
+
+  margin-top:14px;
+
+  font-size:23px;
+
+  font-weight:850;
+
+  line-height:1.18;
+
+}
+
+
+.live-meta{
+
+  margin-top:8px;
+
+  font-size:14px;
+
+  opacity:.8;
+
+  line-height:1.45;
+
+}
+
+
+.live-countdown{
+
+  margin-top:14px;
+
+  font-size:13px;
+
+  font-weight:750;
+
+  color:#cfeaff;
+
+}
+
+
+.hero-actions{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-top:15px;
+
+}
+
+
+.hero-actions .btn{
+
+  min-height:42px;
+
+  font-size:12px;
+
+}
+
+
+.btn-moment{
+
+  background:#fff2d8;
+
+  color:#845700;
+
+}
+
+
+.next-panel{
+
+  padding:
+    16px 18px;
+
+}
+
+
+.next-label{
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  font-weight:850;
+
+  text-transform:uppercase;
+
+  letter-spacing:.1em;
+
+}
+
+
+.next-time{
+
+  color:var(--blue);
+
+  font-size:12px;
+
+  font-weight:850;
+
+  margin-top:6px;
+
+}
+
+
+.next-title{
+
+  font-size:17px;
+
+  font-weight:850;
+
+  margin-top:4px;
+
+  line-height:1.35;
+
+}
+
+
+.next-meta{
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  margin-top:4px;
+
+}
+
+
+
+/* =====================================================
+   HAPPENING SOON
+===================================================== */
+
+.soon-list{
+
+  display:grid;
+
+  gap:8px;
+
+}
+
+
+.soon-item{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:14px;
+
+  padding:
+    12px 14px;
+
+  display:flex;
+
+  gap:13px;
+
+}
+
+
+.soon-time{
+
+  min-width:52px;
+
+  font-weight:850;
+
+  color:var(--blue);
+
+  font-size:12px;
+
+}
+
+
+.soon-title{
+
+  font-weight:780;
+
+  line-height:1.4;
+
+  font-size:14px;
+
+}
+
+
+.soon-sub{
+
+  color:var(--muted);
+
+  font-size:11px;
+
+  margin-top:3px;
+
+  line-height:1.4;
+
+}
+
+
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.timeline{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:18px;
+
+  padding:
+    7px 14px;
+
+}
+
+
+.timeline-item{
+
+  position:relative;
+
+  display:grid;
+
+  grid-template-columns:
+    62px
+    24px
+    1fr;
+
+  gap:7px;
+
+  padding:
+    13px 0;
+
+}
+
+
+.timeline-item:not(:last-child)::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:37px;
+
+  bottom:-14px;
+
+  left:73px;
+
+  width:2px;
+
+  background:#e6ebf1;
+
+}
+
+
+.timeline-time{
+
+  font-size:11px;
+
+  font-weight:850;
+
+  color:var(--muted);
+
+  padding-top:2px;
+
+}
+
+
+.timeline-marker{
+
+  position:relative;
+
+  z-index:2;
+
+  width:13px;
+
+  height:13px;
+
+  border-radius:50%;
+
+  margin:
+    3px auto 0;
+
+  background:#c8d0db;
+
+  border:
+    3px solid #fff;
+
+  box-shadow:
+    0 0 0 2px #c8d0db;
+
+}
+
+
+.timeline-item.current
+.timeline-marker{
+
+  background:var(--red);
+
+  box-shadow:
+    0 0 0 2px var(--red),
+    0 0 0 7px rgba(229,57,53,.08);
+
+}
+
+
+.timeline-item.done{
+  opacity:.58;
+}
+
+
+.timeline-item.done
+.timeline-marker{
+
+  background:var(--green);
+
+  box-shadow:
+    0 0 0 2px var(--green);
+
+}
+
+
+.timeline-title{
+
+  font-weight:780;
+
+  font-size:14px;
+
+  line-height:1.35;
+
+}
+
+
+.timeline-desc{
+
+  margin-top:4px;
+
+  font-size:11px;
+
+  color:var(--muted);
+
+  line-height:1.45;
+
+}
+
+
+.timeline-tags{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:5px;
+
+  margin-top:7px;
+
+}
+
+
+.tag{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  min-height:24px;
+
+  padding:0 8px;
+
+  border-radius:999px;
+
+  background:#eef2f7;
+
+  color:#576174;
+
+  font-size:9px;
+
+  font-weight:800;
+
+}
+
+
+.tag.live{
+
+  background:#ffeded;
+
+  color:#c32323;
+
+}
+
+
+.tag.saved{
+
+  background:#fff4d9;
+
+  color:#8d5c00;
+
+}
+
+
+
+/* =====================================================
+   PROGRAMME
+===================================================== */
+
+.day-toggle{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:6px;
+
+  padding:5px;
+
+  background:#e9edf3;
+
+  border-radius:14px;
+
+  margin-bottom:12px;
+
+}
+
+
+.day-btn{
+
+  min-height:43px;
+
+  border:0;
+
+  border-radius:10px;
+
+  background:transparent;
+
+  font-weight:850;
+
+  color:#687386;
+
+}
+
+
+.day-btn.active{
+
+  background:#fff;
+
+  color:var(--navy);
+
+  box-shadow:
+    0 2px 7px
+    rgba(0,0,0,.08);
+
+}
+
+
+.search-box{
+
+  position:relative;
+
+  margin-bottom:12px;
+
+}
+
+
+.search-box input{
+
+  width:100%;
+
+  min-height:48px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:14px;
+
+  padding:
+    0 45px 0 14px;
+
+  background:#fff;
+
+  font-size:16px;
+
+}
+
+
+.search-symbol{
+
+  position:absolute;
+
+  right:15px;
+
+  top:50%;
+
+  transform:
+    translateY(-50%);
+
+  color:var(--muted);
+
+}
+
+
+.program-block{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:16px;
+
+  margin-bottom:10px;
+
+  overflow:hidden;
+
+}
+
+
+.program-main{
+
+  display:grid;
+
+  grid-template-columns:
+    58px
+    1fr
+    auto;
+
+  gap:10px;
+
+  align-items:start;
+
+  padding:14px;
+
+}
+
+
+.program-time{
+
+  font-size:11px;
+
+  font-weight:850;
+
+  color:var(--blue);
+
+  padding-top:2px;
+
+}
+
+
+.program-name{
+
+  font-size:14px;
+
+  font-weight:850;
+
+  line-height:1.4;
+
+}
+
+
+.program-detail{
+
+  margin-top:5px;
+
+  font-size:11px;
+
+  color:var(--muted);
+
+  line-height:1.5;
+
+}
+
+
+.program-room{
+
+  margin-top:6px;
+
+  font-size:10px;
+
+  font-weight:850;
+
+  color:#536174;
+
+}
+
+
+.star-btn{
+
+  width:42px;
+
+  height:42px;
+
+  border-radius:50%;
+
+  border:
+    1px solid
+    var(--line);
+
+  background:#fff;
+
+  color:#aab2bf;
+
+  font-size:20px;
+
+}
+
+
+.star-btn.saved{
+
+  color:#e49a00;
+
+  background:#fff7e3;
+
+  border-color:#ffe2a1;
+
+}
+
+
+.parallel-list{
+
+  padding:
+    0 14px 14px 72px;
+
+  display:grid;
+
+  gap:8px;
+
+}
+
+
+.parallel-session{
+
+  background:#f7f9fc;
+
+  border:
+    1px solid #e8ecf2;
+
+  padding:
+    11px;
+
+  border-radius:12px;
+
+}
+
+
+.parallel-top{
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    42px;
+
+  gap:8px;
+
+}
+
+
+.parallel-label{
+
+  font-size:10px;
+
+  color:var(--blue);
+
+  font-weight:900;
+
+  text-transform:uppercase;
+
+}
+
+
+.parallel-title{
+
+  font-size:13px;
+
+  font-weight:780;
+
+  margin-top:3px;
+
+  line-height:1.4;
+
+}
+
+
+.parallel-meta{
+
+  margin-top:5px;
+
+  font-size:10px;
+
+  color:var(--muted);
+
+  line-height:1.45;
+
+}
+
+
+.parallel-star{
+
+  width:40px;
+
+  height:40px;
+
+  border-radius:50%;
+
+  border:
+    1px solid
+    var(--line);
+
+  background:#fff;
+
+  color:#aab2bf;
+
+  font-size:19px;
+
+}
+
+
+.parallel-star.saved{
+
+  color:#e49a00;
+
+  background:#fff7e3;
+
+  border-color:#ffe2a1;
+
+}
+
+
+.expand-session-btn{
+
+  width:100%;
+
+  margin-top:10px;
+
+  min-height:39px;
+
+  border:
+    1px solid #d7e4f3;
+
+  border-radius:10px;
+
+  background:#fff;
+
+  color:#075aba;
+
+  font-size:11px;
+
+  font-weight:850;
+
+}
+
+
+.session-extra{
+
+  margin-top:10px;
+
+  padding-top:10px;
+
+  border-top:
+    1px solid #e2e7ee;
+
+}
+
+
+.session-info-box{
+
+  padding:
+    10px 11px;
+
+  border-radius:10px;
+
+  background:#fff;
+
+  border:
+    1px solid #e4e9ef;
+
+  margin-bottom:9px;
+
+}
+
+
+.session-info-label{
+
+  font-size:9px;
+
+  color:var(--muted);
+
+  font-weight:850;
+
+  text-transform:uppercase;
+
+  letter-spacing:.07em;
+
+}
+
+
+.session-info-value{
+
+  margin-top:3px;
+
+  font-size:11px;
+
+  line-height:1.45;
+
+  font-weight:700;
+
+}
+
+
+
+/* =====================================================
+   SPEAKER / PRESENTER CARD
+===================================================== */
+
+.presenter-card{
+
+  background:#fff;
+
+  border:
+    1px solid #e2e7ee;
+
+  border-radius:12px;
+
+  padding:12px;
+
+  margin-top:8px;
+
+}
+
+
+.presenter-time{
+
+  color:var(--blue);
+
+  font-size:10px;
+
+  font-weight:850;
+
+}
+
+
+.presenter-name{
+
+  margin-top:4px;
+
+  font-size:13px;
+
+  font-weight:850;
+
+  line-height:1.4;
+
+}
+
+
+.presenter-affiliation{
+
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  line-height:1.45;
+
+}
+
+
+.presenter-title{
+
+  margin-top:8px;
+
+  font-size:11px;
+
+  line-height:1.5;
+
+  color:#303b4d;
+
+}
+
+
+.presenter-actions{
+
+  margin-top:10px;
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:7px;
+
+}
+
+
+.presenter-action-btn{
+
+  min-height:37px;
+
+  border-radius:9px;
+
+  border:
+    1px solid #d8e3ef;
+
+  padding:
+    0 10px;
+
+  background:#f8fbff;
+
+  color:#075aba;
+
+  font-size:10px;
+
+  font-weight:850;
+
+}
+
+
+.presenter-action-btn.bio{
+
+  background:#fff;
+
+  color:#4a5769;
+
+}
+
+
+
+/*
+  PHOTO SUPPORT IS PREPARED BUT DISABLED.
+
+  If later enabled, uncomment matching
+  HTML generation in renderPresenterCard().
+*/
+
+/*
+.presenter-photo{
+
+  width:80px;
+
+  height:80px;
+
+  border-radius:12px;
+
+  overflow:hidden;
+
+  margin-bottom:10px;
+
+}
+
+.presenter-photo img{
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:cover;
+
+}
+*/
+
+
+
+/* =====================================================
+   PRESENTER FEEDBACK
+===================================================== */
+
+.presenter-feedback{
+
+  margin-top:10px;
+
+  padding-top:10px;
+
+  border-top:
+    1px dashed #d9dfe7;
+
+}
+
+
+.feedback-loading{
+
+  color:var(--muted);
+
+  font-size:11px;
+
+}
+
+
+.feedback-label{
+
+  font-size:11px;
+
+  font-weight:850;
+
+}
+
+
+.feedback-help{
+
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  line-height:1.4;
+
+}
+
+
+.rating-row{
+
+  display:flex;
+
+  gap:4px;
+
+  margin-top:7px;
+
+}
+
+
+.rating-star{
+
+  border:0;
+
+  background:transparent;
+
+  font-size:29px;
+
+  line-height:1;
+
+  padding:2px;
+
+  color:#cdd3dc;
+
+}
+
+
+.rating-star.active{
+
+  color:#e9a000;
+
+}
+
+
+.feedback-text{
+
+  width:100%;
+
+  min-height:76px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:10px;
+
+  margin-top:9px;
+
+  padding:10px;
+
+  resize:vertical;
+
+  font-size:16px;
+
+}
+
+
+.feedback-saved{
+
+  background:#eaf8f1;
+
+  border:
+    1px solid #c7e7d6;
+
+  border-radius:10px;
+
+  padding:10px;
+
+}
+
+
+.feedback-saved-title{
+
+  font-size:11px;
+
+  font-weight:850;
+
+  color:#10673f;
+
+}
+
+
+.feedback-saved-stars{
+
+  margin-top:4px;
+
+  color:#a66e00;
+
+  font-size:14px;
+
+  font-weight:850;
+
+}
+
+
+.feedback-saved-comment{
+
+  margin-top:5px;
+
+  color:#4d5968;
+
+  font-size:11px;
+
+  line-height:1.45;
+
+}
+
+
+
+/* =====================================================
+   DISCUSS
+===================================================== */
+
+.discuss-header{
+  margin-bottom:13px;
+}
+
+
+.room{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:16px;
+
+  padding:14px;
+
+  margin-bottom:10px;
+
+}
+
+
+.room.live-room{
+
+  border-color:#ffc5c5;
+
+  box-shadow:
+    0 7px 24px
+    rgba(229,57,53,.07);
+
+}
+
+
+.room-status{
+
+  font-size:9px;
+
+  text-transform:uppercase;
+
+  letter-spacing:.1em;
+
+  font-weight:850;
+
+  color:var(--muted);
+
+}
+
+
+.room-status.live{
+  color:var(--red);
+}
+
+
+.room-title{
+
+  margin-top:6px;
+
+  font-size:14px;
+
+  line-height:1.4;
+
+  font-weight:850;
+
+}
+
+
+.room-stats{
+
+  color:var(--muted);
+
+  font-size:11px;
+
+  margin-top:6px;
+
+}
+
+
+.discussion-room{
+  display:none;
+}
+
+
+.discussion-room.active{
+  display:block;
+}
+
+
+.back-link{
+
+  border:0;
+
+  background:transparent;
+
+  color:var(--blue);
+
+  font-weight:850;
+
+  padding:
+    8px 0;
+
+}
+
+
+.compose{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:16px;
+
+  padding:12px;
+
+  margin:
+    12px 0;
+
+}
+
+
+.compose textarea{
+
+  width:100%;
+
+  min-height:82px;
+
+  resize:vertical;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:12px;
+
+  padding:11px;
+
+  font-size:16px;
+
+}
+
+
+.compose-actions{
+
+  margin-top:8px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:8px;
+
+}
+
+
+.type-select{
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:10px;
+
+  min-height:42px;
+
+  background:#fff;
+
+  padding:
+    0 10px;
+
+}
+
+
+.chat-post{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:13px;
+
+  margin-bottom:9px;
+
+}
+
+
+.chat-head{
+
+  font-size:11px;
+
+  line-height:1.4;
+
+  color:var(--muted);
+
+}
+
+
+.chat-head strong{
+
+  color:var(--text);
+
+  font-size:12px;
+
+}
+
+
+.chat-message{
+
+  margin-top:7px;
+
+  font-size:14px;
+
+  line-height:1.5;
+
+  white-space:pre-wrap;
+
+}
+
+
+.chat-type{
+
+  display:inline-flex;
+
+  margin-top:8px;
+
+  padding:
+    4px 8px;
+
+  border-radius:999px;
+
+  background:#edf4ff;
+
+  color:#175fae;
+
+  font-size:9px;
+
+  font-weight:850;
+
+}
+
+
+.chat-actions{
+
+  margin-top:10px;
+
+  display:flex;
+
+  gap:14px;
+
+  align-items:center;
+
+  flex-wrap:wrap;
+
+}
+
+
+.chat-action{
+
+  border:0;
+
+  background:transparent;
+
+  color:#647083;
+
+  padding:0;
+
+  min-height:32px;
+
+  font-size:11px;
+
+  font-weight:750;
+
+}
+
+
+.chat-action.liked{
+  color:var(--blue);
+}
+
+
+.thread{
+
+  margin-top:10px;
+
+  margin-left:11px;
+
+  padding-left:11px;
+
+  border-left:
+    2px solid #e6eaf0;
+
+}
+
+
+.thread.hidden-thread{
+  display:none;
+}
+
+
+.reply{
+
+  padding:
+    9px 0;
+
+  border-bottom:
+    1px solid #edf0f4;
+
+}
+
+
+.reply:last-child{
+  border-bottom:0;
+}
+
+
+.reply-head{
+
+  font-size:10px;
+
+  color:var(--muted);
+
+}
+
+
+.reply-head strong{
+  color:var(--text);
+}
+
+
+.reply-body{
+
+  margin-top:4px;
+
+  font-size:12px;
+
+  line-height:1.45;
+
+}
+
+
+.reply-form{
+
+  display:flex;
+
+  gap:7px;
+
+  margin-top:9px;
+
+}
+
+
+.reply-form input{
+
+  min-width:0;
+
+  flex:1;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:10px;
+
+  min-height:42px;
+
+  padding:
+    0 10px;
+
+  font-size:16px;
+
+}
+
+
+
+/* =====================================================
+   MY SCHEDULE
+===================================================== */
+
+.empty-state{
+
+  background:#fff;
+
+  border:
+    1px dashed #ccd4df;
+
+  border-radius:16px;
+
+  padding:
+    26px 18px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  line-height:1.5;
+
+}
+
+
+.empty-icon{
+
+  font-size:28px;
+
+  margin-bottom:7px;
+
+}
+
+
+.schedule-item{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:13px;
+
+  margin-bottom:9px;
+
+}
+
+
+.schedule-date{
+
+  font-size:9px;
+
+  text-transform:uppercase;
+
+  font-weight:850;
+
+  color:var(--muted);
+
+}
+
+
+.schedule-title{
+
+  margin-top:5px;
+
+  font-size:14px;
+
+  font-weight:850;
+
+  line-height:1.4;
+
+}
+
+
+.schedule-time{
+
+  color:var(--blue);
+
+  font-size:11px;
+
+  font-weight:850;
+
+  margin-top:5px;
+
+}
+
+
+.schedule-warning{
+
+  margin-top:9px;
+
+  padding:
+    8px 10px;
+
+  border-radius:10px;
+
+  background:#fff4df;
+
+  border:
+    1px solid #f2d39a;
+
+  color:#8b5a00;
+
+  font-size:10px;
+
+  font-weight:750;
+
+  line-height:1.4;
+
+}
+
+
+
+/* =====================================================
+   MORE
+===================================================== */
+
+.more-list{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:17px;
+
+  overflow:hidden;
+
+}
+
+
+.more-button{
+
+  width:100%;
+
+  min-height:60px;
+
+  border:0;
+
+  background:#fff;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:13px;
+
+  padding:
+    10px 14px;
+
+  text-align:left;
+
+  border-bottom:
+    1px solid
+    var(--line);
+
+}
+
+
+.more-button:last-child{
+  border-bottom:0;
+}
+
+
+.more-icon{
+
+  width:36px;
+
+  height:36px;
+
+  border-radius:10px;
+
+  background:#eef4fb;
+
+  display:grid;
+
+  place-items:center;
+
+  font-size:17px;
+
+  flex:0 0 auto;
+
+}
+
+
+.more-text{
+
+  flex:1;
+
+  min-width:0;
+
+}
+
+
+.more-title{
+
+  font-weight:800;
+
+  font-size:14px;
+
+}
+
+
+.more-sub{
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  margin-top:2px;
+
+}
+
+
+.more-arrow{
+  color:#a4adba;
+}
+
+
+.more-panel{
+
+  margin-top:12px;
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:17px;
+
+  padding:15px;
+
+}
+
+
+.more-panel h3{
+
+  margin:
+    0 0 12px;
+
+  font-size:17px;
+
+}
+
+
+.info-placeholder{
+
+  padding:14px;
+
+  border-radius:13px;
+
+  background:#f6f8fb;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  line-height:1.55;
+
+}
+
+
+
+/* =====================================================
+   MOMENTS
+===================================================== */
+
+.moments-head{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+}
+
+
+.moments-tabs{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:5px;
+
+  margin-top:12px;
+
+  padding:4px;
+
+  background:#edf1f6;
+
+  border-radius:11px;
+
+}
+
+
+.moments-tab{
+
+  min-height:38px;
+
+  border:0;
+
+  border-radius:8px;
+
+  background:transparent;
+
+  font-size:11px;
+
+  font-weight:850;
+
+  color:var(--muted);
+
+}
+
+
+.moments-tab.active{
+
+  background:#fff;
+
+  color:var(--navy);
+
+  box-shadow:
+    0 2px 7px
+    rgba(0,0,0,.07);
+
+}
+
+
+.moments-dev-note{
+
+  margin-top:12px;
+
+  padding:12px;
+
+  border-radius:12px;
+
+  background:#fff8e6;
+
+  border:
+    1px solid #f2d796;
+
+  color:#755000;
+
+  font-size:11px;
+
+  line-height:1.5;
+
+}
+
+
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+.bottom-nav{
+
+  position:fixed;
+
+  z-index:100;
+
+  left:0;
+
+  right:0;
+
+  bottom:0;
+
+  min-height:
+    var(--bottom-nav-height);
+
+  background:
+    rgba(255,255,255,.97);
+
+  border-top:
+    1px solid #dfe5ed;
+
+  backdrop-filter:
+    blur(12px);
+
+  padding-bottom:
+    env(safe-area-inset-bottom);
+
+}
+
+
+.bottom-nav-inner{
+
+  max-width:750px;
+
+  margin:0 auto;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(5,1fr);
+
+}
+
+
+.nav-btn{
+
+  min-width:0;
+
+  min-height:68px;
+
+  border:0;
+
+  background:transparent;
+
+  color:#808a99;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:4px;
+
+  position:relative;
+
+}
+
+
+.nav-btn.active{
+  color:var(--blue);
+}
+
+
+.nav-icon{
+
+  font-size:18px;
+
+  line-height:1;
+
+}
+
+
+.nav-text{
+
+  font-size:8px;
+
+  font-weight:850;
+
+}
+
+
+.nav-dot{
+
+  position:absolute;
+
+  top:9px;
+
+  right:24%;
+
+  width:7px;
+
+  height:7px;
+
+  border-radius:50%;
+
+  background:var(--red);
+
+}
+
+
+
+/* =====================================================
+   MODALS
+===================================================== */
+
+.modal-backdrop{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:150;
+
+  background:
+    rgba(5,18,32,.58);
+
+  display:flex;
+
+  align-items:flex-end;
+
+  justify-content:center;
+
+}
+
+
+.modal{
+
+  width:100%;
+
+  max-width:600px;
+
+  max-height:88vh;
+
+  overflow:auto;
+
+  background:#fff;
+
+  border-radius:
+    22px 22px 0 0;
+
+  padding:18px;
+
+  box-shadow:
+    0 -10px 50px
+    rgba(0,0,0,.2);
+
+}
+
+
+.modal-head{
+
+  display:flex;
+
+  align-items:flex-start;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+}
+
+
+.modal-title{
+
+  font-size:20px;
+
+  font-weight:850;
+
+}
+
+
+.modal-close{
+
+  width:42px;
+
+  height:42px;
+
+  border:0;
+
+  border-radius:50%;
+
+  background:#eef1f5;
+
+  font-size:20px;
+
+}
+
+
+.form-group{
+  margin-top:14px;
+}
+
+
+.form-label{
+
+  display:block;
+
+  font-size:11px;
+
+  font-weight:850;
+
+  margin-bottom:6px;
+
+}
+
+
+.form-help{
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  margin-top:4px;
+
+}
+
+
+.form-control{
+
+  width:100%;
+
+  min-height:48px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:12px;
+
+  padding:
+    0 12px;
+
+  background:#fff;
+
+  font-size:16px;
+
+}
+
+
+.modal-actions{
+
+  display:flex;
+
+  gap:8px;
+
+  margin-top:17px;
+
+}
+
+
+.modal-actions .btn{
+  flex:1;
+}
+
+
+.bio-name{
+
+  margin-top:15px;
+
+  font-size:17px;
+
+  font-weight:850;
+
+}
+
+
+.bio-affiliation{
+
+  margin-top:3px;
+
+  color:var(--blue);
+
+  font-size:11px;
+
+  font-weight:750;
+
+  line-height:1.45;
+
+}
+
+
+.bio-text{
+
+  margin-top:14px;
+
+  font-size:13px;
+
+  line-height:1.65;
+
+  color:#3e4a5b;
+
+}
+
+
+.announcement-item{
+
+  padding:
+    13px 2px;
+
+  border-bottom:
+    1px solid
+    var(--line);
+
+}
+
+
+.announcement-new{
+
+  font-size:9px;
+
+  color:var(--red);
+
+  font-weight:850;
+
+  letter-spacing:.08em;
+
+  text-transform:uppercase;
+
+}
+
+
+.announcement-time{
+
+  margin-top:3px;
+
+  font-size:10px;
+
+  color:var(--muted);
+
+}
+
+
+.announcement-message{
+
+  margin-top:6px;
+
+  font-size:13px;
+
+  line-height:1.5;
+
+}
+
+
+
+/* =====================================================
+   DESKTOP
+===================================================== */
+
+@media(min-width:760px){
+
+  main{
+    padding:22px;
+  }
+
+
+  .home-grid{
+
+    display:grid;
+
+    grid-template-columns:
+      minmax(0,1.45fr)
+      minmax(280px,.75fr);
+
+    gap:16px;
+
+    align-items:start;
+
+  }
+
+
+  .desktop-side{
+
+    position:sticky;
+
+    top:120px;
+
+  }
+
+
+  .parallel-list{
+
+    grid-template-columns:
+      repeat(3,1fr);
+
+    padding-left:72px;
+
+  }
+
+
+  .bottom-nav{
+
+    left:50%;
+
+    right:auto;
+
+    transform:
+      translateX(-50%);
+
+    width:
+      min(
+        720px,
+        calc(100% - 30px)
+      );
+
+    bottom:12px;
+
+    border:
+      1px solid #dce2ea;
+
+    border-radius:20px;
+
+    box-shadow:
+      0 10px 35px
+      rgba(0,0,0,.13);
+
+    overflow:hidden;
+
+  }
+
+
+  .modal-backdrop{
+
+    align-items:center;
+
+    padding:20px;
+
+  }
+
+
+  .modal{
+
+    border-radius:22px;
+
+    max-height:85vh;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<header class="topbar">
+
+  <div class="topbar-inner">
+
+    <div class="brand">
+
+      <div class="brand-kicker">
+        10th MTERMS Scientific Conference
+      </div>
+
+      <div class="brand-title">
+        MTERMS 2026 LIVE
+      </div>
+
+      <div class="brand-sub">
+        7–8 September 2026 · UTC+8
+      </div>
+
+    </div>
+
+
+    <div class="top-actions">
+
+      <button
+        class="icon-btn"
+        id="announcementBtn"
+        type="button"
+        aria-label="Announcements"
+      >
+
+        <span
+          class="envelope"
+          id="envelopeIcon"
+        >
+          ✉
+        </span>
+
+        <span
+          class="unread-badge hidden"
+          id="announcementBadge"
+        >
+          0
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     DIGITAL IDENTITY
+===================================================== -->
+
+<div class="digital-strip">
+
+  <div class="digital-strip-inner">
+
+    <div class="digital-kicker">
+      First Fully Digital MTERMS Experience
+    </div>
+
+    <div class="digital-title">
+      A connected conference experience for MTERMS 2026
+    </div>
+
+    <div class="digital-features">
+      Programme · Live Updates · Discussions ·
+      Speaker Feedback · Digital Engagement
+    </div>
+
+    <div class="digital-provider">
+      Digital Platform by IgniteInno Ventures Sdn Bhd
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<main>
+
+
+<!-- =====================================================
+     LIVE
+===================================================== -->
+
+<section
+  class="page active"
+  id="page-live"
+>
+
+  <div class="home-grid">
+
+    <div>
+
+
+      <div class="card live-hero">
+
+        <div class="live-hero-head">
+
+          <div
+            class="live-status"
+            id="liveStatus"
+          >
+
+            <span class="live-dot"></span>
+
+            <span>
+              Checking conference status
+            </span>
+
+          </div>
+
+
+          <div
+            class="live-title"
+            id="liveTitle"
+          >
+            MTERMS 2026
+          </div>
+
+
+          <div
+            class="live-meta"
+            id="liveMeta"
+          >
+            Loading conference timeline…
+          </div>
+
+
+          <div
+            class="live-countdown"
+            id="liveCountdown"
+          ></div>
+
+
+          <div class="hero-actions">
+
+            <button
+              class="btn btn-light"
+              id="heroProgrammeBtn"
+              type="button"
+            >
+              View Programme
+            </button>
+
+
+            <button
+              class="btn btn-primary"
+              id="heroDiscussBtn"
+              type="button"
+            >
+              Discuss
+            </button>
+
+
+            <button
+              class="btn btn-moment"
+              id="heroMomentBtn"
+              type="button"
+            >
+              Share a Moment
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="next-panel">
+
+          <div class="next-label">
+            Up Next
+          </div>
+
+          <div
+            class="next-time"
+            id="nextTime"
+          >
+            —
+          </div>
+
+          <div
+            class="next-title"
+            id="nextTitle"
+          >
+            —
+          </div>
+
+          <div
+            class="next-meta"
+            id="nextMeta"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="section-label">
+        Happening Soon
+      </div>
+
+      <div
+        class="soon-list"
+        id="soonList"
+      ></div>
+
+
+
+      <div class="section-label">
+        Live Timeline
+      </div>
+
+      <div
+        class="timeline"
+        id="liveTimeline"
+      ></div>
+
+
+    </div>
+
+
+
+    <div class="desktop-side">
+
+      <div class="section-label">
+        Your Conference
+      </div>
+
+
+      <div
+        class="card"
+        style="padding:15px;"
+      >
+
+        <div
+          style="
+            font-size:12px;
+            color:var(--muted);
+          "
+        >
+          Signed in as
+        </div>
+
+
+        <div
+          id="profileSummary"
+          style="
+            font-size:16px;
+            font-weight:850;
+            margin-top:4px;
+          "
+        >
+          Guest
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-top:12px;
+          "
+        >
+
+          <button
+            class="btn btn-soft"
+            id="editProfileQuick"
+            type="button"
+          >
+            Edit Profile
+          </button>
+
+
+          <button
+            class="btn btn-outline"
+            id="myScheduleQuick"
+            type="button"
+          >
+            My Schedule
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PROGRAMME
+===================================================== -->
+
+<section
+  class="page"
+  id="page-programme"
+>
+
+  <h1 class="page-title">
+    Programme
+  </h1>
+
+  <div class="page-sub">
+    Save sessions to My Schedule.
+    Expand scientific sessions to view speakers,
+    presenters and provide individual feedback.
+  </div>
+
+
+  <div style="height:14px;"></div>
+
+
+  <div class="day-toggle">
+
+    <button
+      class="day-btn active"
+      id="day1Btn"
+      data-day="1"
+      type="button"
+    >
+      Day 1 · 7 Sep
+    </button>
+
+
+    <button
+      class="day-btn"
+      id="day2Btn"
+      data-day="2"
+      type="button"
+    >
+      Day 2 · 8 Sep
+    </button>
+
+  </div>
+
+
+  <div class="search-box">
+
+    <input
+      id="programmeSearch"
+      type="search"
+      placeholder="Search speaker, presenter, topic or session…"
+    >
+
+    <span class="search-symbol">
+      ⌕
+    </span>
+
+  </div>
+
+
+  <div id="programmeList"></div>
+
+</section>
+
+
+
+<!-- =====================================================
+     DISCUSS
+===================================================== -->
+
+<section
+  class="page"
+  id="page-discuss"
+>
+
+  <div id="discussionHub">
+
+    <div class="discuss-header">
+
+      <h1 class="page-title">
+        Discuss
+      </h1>
+
+      <div class="page-sub">
+        Join a scientific discussion,
+        ask a question or continue a thread.
+      </div>
+
+    </div>
+
+    <div id="roomList"></div>
+
+  </div>
+
+
+
+  <div
+    class="discussion-room"
+    id="discussionRoom"
+  >
+
+    <button
+      class="back-link"
+      id="backToRooms"
+      type="button"
+    >
+      ← All discussions
+    </button>
+
+
+    <h1
+      class="page-title"
+      id="roomTitle"
+    ></h1>
+
+
+    <div
+      class="page-sub"
+      id="roomSub"
+    ></div>
+
+
+
+    <div class="compose">
+
+      <textarea
+        id="newPostText"
+        maxlength="1000"
+        placeholder="Write a comment or question…"
+      ></textarea>
+
+
+      <div class="compose-actions">
+
+        <select
+          class="type-select"
+          id="postType"
+        >
+
+          <option value="Discussion">
+            Discussion
+          </option>
+
+          <option value="Question">
+            Question for speaker
+          </option>
+
+        </select>
+
+
+        <button
+          class="btn btn-primary"
+          id="postMessageBtn"
+          type="button"
+        >
+          Post
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="postsList"></div>
+
+  </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MY SCHEDULE
+===================================================== -->
+
+<section
+  class="page"
+  id="page-schedule"
+>
+
+  <h1 class="page-title">
+    My Schedule
+  </h1>
+
+  <div class="page-sub">
+    Your saved sessions are stored on this device.
+  </div>
+
+
+  <div style="height:14px;"></div>
+
+
+  <div id="myScheduleList"></div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MORE
+===================================================== -->
+
+<section
+  class="page"
+  id="page-more"
+>
+
+  <h1 class="page-title">
+    More
+  </h1>
+
+
+  <div style="height:14px;"></div>
+
+
+  <div class="more-list">
+
+
+    <button
+      class="more-button"
+      data-more="profile"
+      type="button"
+    >
+
+      <span class="more-icon">
+        👤
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          My Profile
+        </span>
+
+        <span class="more-sub">
+          Edit your display name, title or affiliation
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="more-button"
+      data-more="moments"
+      type="button"
+    >
+
+      <span class="more-icon">
+        ◉
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          MTERMS Moments
+        </span>
+
+        <span class="more-sub">
+          Conference photo wall and shared memories
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="more-button"
+      data-more="discussions"
+      type="button"
+    >
+
+      <span class="more-icon">
+        💬
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          My Discussions
+        </span>
+
+        <span class="more-sub">
+          Posts and threads you participated in
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="more-button"
+      data-more="feedback"
+      type="button"
+    >
+
+      <span class="more-icon">
+        ★
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          Overall Conference Feedback
+        </span>
+
+        <span class="more-sub">
+          Rate your overall MTERMS 2026 experience
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="more-button"
+      data-more="info"
+      type="button"
+    >
+
+      <span class="more-icon">
+        ℹ
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          Useful Information
+        </span>
+
+        <span class="more-sub">
+          Venue, Wi-Fi, help and conference information
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="more-button"
+      data-more="about"
+      type="button"
+    >
+
+      <span class="more-icon">
+        M
+      </span>
+
+      <span class="more-text">
+
+        <span class="more-title">
+          About MTERMS 2026
+        </span>
+
+        <span class="more-sub">
+          Conference information
+        </span>
+
+      </span>
+
+      <span class="more-arrow">
+        ›
+      </span>
+
+    </button>
+
+
+  </div>
+
+
+  <div id="morePanel"></div>
+
+</section>
+
+
+
+</main>
+
+
+
+<!-- =====================================================
+     BOTTOM NAV
+===================================================== -->
+
+<nav class="bottom-nav">
+
+  <div class="bottom-nav-inner">
+
+
+    <button
+      class="nav-btn active"
+      data-page="live"
+      type="button"
+    >
+
+      <span class="nav-icon">
+        ●
+      </span>
+
+      <span class="nav-text">
+        LIVE
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="nav-btn"
+      data-page="programme"
+      type="button"
+    >
+
+      <span class="nav-icon">
+        ☷
+      </span>
+
+      <span class="nav-text">
+        PROGRAMME
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="nav-btn"
+      data-page="discuss"
+      type="button"
+    >
+
+      <span class="nav-icon">
+        💬
+      </span>
+
+      <span
+        class="nav-dot hidden"
+        id="discussionUnreadDot"
+      ></span>
+
+      <span class="nav-text">
+        DISCUSS
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="nav-btn"
+      data-page="schedule"
+      type="button"
+    >
+
+      <span class="nav-icon">
+        ★
+      </span>
+
+      <span class="nav-text">
+        MY SCHEDULE
+      </span>
+
+    </button>
+
+
+
+    <button
+      class="nav-btn"
+      data-page="more"
+      type="button"
+    >
+
+      <span class="nav-icon">
+        •••
+      </span>
+
+      <span class="nav-text">
+        MORE
+      </span>
+
+    </button>
+
+
+  </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     PROFILE MODAL
+===================================================== -->
+
+<div
+  class="modal-backdrop hidden"
+  id="profileModal"
+  role="dialog"
+  aria-modal="true"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <div class="modal-title">
+          Join MTERMS Live
+        </div>
+
+        <div class="page-sub">
+          Your profile is remembered on this device.
+        </div>
+
+      </div>
+
+
+      <button
+        class="modal-close"
+        id="profileClose"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="profileName"
+      >
+        Display name / nickname *
+      </label>
+
+      <input
+        class="form-control"
+        id="profileName"
+        maxlength="50"
+        placeholder="Your name or nickname"
+      >
+
+    </div>
+
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="profileTitle"
+      >
+        Title
+      </label>
+
+      <input
+        class="form-control"
+        id="profileTitle"
+        maxlength="30"
+        placeholder="Prof., Dr., Ir., Ts., Mr., Ms. etc."
+      >
+
+      <div class="form-help">
+        Optional
+      </div>
+
+    </div>
+
+
+
+    <div class="form-group">
+
+      <label
+        class="form-label"
+        for="profileAffiliation"
+      >
+        Affiliation
+      </label>
+
+      <input
+        class="form-control"
+        id="profileAffiliation"
+        maxlength="80"
+        placeholder="University, company or organisation"
+      >
+
+      <div class="form-help">
+        Optional
+      </div>
+
+    </div>
+
+
+
+    <div class="modal-actions">
+
+      <button
+        class="btn btn-primary"
+        id="saveProfileBtn"
+        type="button"
+      >
+        Save Profile
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ANNOUNCEMENT MODAL
+===================================================== -->
+
+<div
+  class="modal-backdrop hidden"
+  id="announcementModal"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <div class="modal-title">
+          Announcements
+        </div>
+
+        <div class="page-sub">
+          Latest information from MTERMS 2026.
+        </div>
+
+      </div>
+
+
+      <button
+        class="modal-close"
+        id="announcementClose"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="announcementList"></div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     BIO MODAL
+===================================================== -->
+
+<div
+  class="modal-backdrop hidden"
+  id="bioModal"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div class="modal-title">
+        Speaker Bio
+      </div>
+
+
+      <button
+        class="modal-close"
+        id="bioClose"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!--
+    SPEAKER PHOTO SUPPORT
+
+    Enable later if required.
+
+    <div class="presenter-photo">
+      <img id="bioPhoto" src="" alt="">
+    </div>
+    -->
+
+
+    <div
+      class="bio-name"
+      id="bioName"
+    ></div>
+
+
+    <div
+      class="bio-affiliation"
+      id="bioAffiliation"
+    ></div>
+
+
+    <div
+      class="bio-text"
+      id="bioText"
+    ></div>
+
+
+    <div
+      class="modal-actions"
+    >
+
+      <button
+        class="btn btn-primary"
+        id="bioOkBtn"
+        type="button"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MASTER V2 PROGRAMME DATA
+===================================================== -->
+
+<script
+  src="/public/mterms-programme-v2.js?v=1"
+></script>
+
+
+
+<script>
+
+(function(){
+
+"use strict";
+
+
+/* =====================================================
+   APIs
+===================================================== */
+
+const LIVE_API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/live";
+
+
+const PRESENTER_FEEDBACK_API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/presenter-feedback";
+
+
+/* =====================================================
+   MASTER PROGRAMME
+===================================================== */
+
+const MASTER =
+  window.MTERMS_PROGRAMME_V2;
+
+
+if(!MASTER){
+
+  alert(
+    "MTERMS programme data could not be loaded."
+  );
+
+  return;
+
+}
+
+
+const PROGRAMME =
+  MASTER.programme;
+
+
+/* =====================================================
+   STORAGE
+===================================================== */
+
+const KEYS = {
+
+  profile:
+    "mtermsLiveProfileV1",
+
+  schedule:
+    "mtermsLiveScheduleV1",
+
+  announcementsRead:
+    "mtermsLiveAnnouncementsReadV1",
+
+  participantId:
+    "mtermsLiveParticipantIdV1"
+
+};
+
+
+
+/* =====================================================
+   BASIC HELPERS
+===================================================== */
+
+function loadJSON(
+  key,
+  fallback
+){
+
+  try{
+
+    const value =
+      localStorage.getItem(
+        key
+      );
+
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
+
+
+  }catch{
+
+    return fallback;
+
+  }
+
+}
+
+
+
+function saveJSON(
+  key,
+  value
+){
+
+  localStorage.setItem(
+    key,
+    JSON.stringify(value)
+  );
+
+}
+
+
+
+function escapeHTML(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+
+function getParticipantId(){
+
+  let id =
+    localStorage.getItem(
+      KEYS.participantId
+    );
+
+
+  if(id){
+    return id;
+  }
+
+
+  if(
+    window.crypto &&
+    typeof crypto.randomUUID ===
+    "function"
+  ){
+
+    id =
+      crypto.randomUUID();
+
+  }else{
+
+    id =
+      "participant-" +
+      Date.now() +
+      "-" +
+      Math.random()
+        .toString(36)
+        .slice(2,12);
+
+  }
+
+
+  localStorage.setItem(
+    KEYS.participantId,
+    id
+  );
+
+
+  return id;
+
+}
+
+
+
+function getProfile(){
+
+  return loadJSON(
+    KEYS.profile,
+    null
+  );
+
+}
+
+
+
+function getSchedule(){
+
+  return loadJSON(
+    KEYS.schedule,
+    []
+  );
+
+}
+
+
+
+function saveSchedule(
+  ids
+){
+
+  saveJSON(
+    KEYS.schedule,
+    ids
+  );
+
+}
+
+
+
+function formatDisplayName(
+  profile
+){
+
+  if(
+    !profile ||
+    !profile.name
+  ){
+
+    return "Guest";
+
+  }
+
+
+  const title =
+    profile.title
+      ? profile.title.trim() +
+        " "
+      : "";
+
+
+  const affiliation =
+    profile.affiliation
+      ? " · " +
+        profile.affiliation.trim()
+      : "";
+
+
+  return (
+    title +
+    profile.name.trim() +
+    affiliation
+  );
+
+}
+
+
+
+/* =====================================================
+   MALAYSIA TIME
+===================================================== */
+
+function malaysiaParts(){
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Kuala_Lumpur",
+
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+
+        hour12:false
+      }
+    )
+    .formatToParts(
+      new Date()
+    );
+
+
+  const map = {};
+
+
+  parts.forEach(
+    part => {
+
+      if(
+        part.type !==
+        "literal"
+      ){
+
+        map[
+          part.type
+        ] =
+          part.value;
+
+      }
+
+    }
+  );
+
+
+  return {
+
+    year:
+      Number(map.year),
+
+    month:
+      Number(map.month),
+
+    day:
+      Number(map.day),
+
+    hour:
+      Number(map.hour),
+
+    minute:
+      Number(map.minute),
+
+    second:
+      Number(map.second)
+
+  };
+
+}
+
+
+
+function malaysiaNowComparable(){
+
+  const p =
+    malaysiaParts();
+
+
+  return Date.UTC(
+
+    p.year,
+
+    p.month - 1,
+
+    p.day,
+
+    p.hour,
+
+    p.minute,
+
+    p.second
+
+  );
+
+}
+
+
+
+function malaysiaTimestamp(
+  dateString,
+  timeString
+){
+
+  const [
+    year,
+    month,
+    day
+  ] =
+    dateString
+      .split("-")
+      .map(Number);
+
+
+  const [
+    hour,
+    minute
+  ] =
+    timeString
+      .split(":")
+      .map(Number);
+
+
+  return Date.UTC(
+
+    year,
+
+    month - 1,
+
+    day,
+
+    hour,
+
+    minute,
+
+    0
+
+  );
+
+}
+
+
+
+function formatTime(
+  time
+){
+
+  if(!time){
+    return "";
+  }
+
+
+  const [
+    hourValue,
+    minute
+  ] =
+    time
+      .split(":")
+      .map(Number);
+
+
+  const suffix =
+    hourValue >= 12
+      ? "PM"
+      : "AM";
+
+
+  const hour =
+    hourValue % 12 || 12;
+
+
+  return (
+    hour +
+    ":" +
+    String(minute)
+      .padStart(
+        2,
+        "0"
+      ) +
+    " " +
+    suffix
+  );
+
+}
+
+
+
+function durationText(
+  milliseconds
+){
+
+  if(
+    milliseconds <= 0
+  ){
+
+    return "Starting now";
+
+  }
+
+
+  const totalSeconds =
+    Math.floor(
+      milliseconds /
+      1000
+    );
+
+
+  const days =
+    Math.floor(
+      totalSeconds /
+      86400
+    );
+
+
+  const hours =
+    Math.floor(
+      (
+        totalSeconds %
+        86400
+      ) /
+      3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (
+        totalSeconds %
+        3600
+      ) /
+      60
+    );
+
+
+  const seconds =
+    totalSeconds %
+    60;
+
+
+  if(days > 0){
+
+    return (
+      days +
+      "d " +
+      hours +
+      "h " +
+      minutes +
+      "m"
+    );
+
+  }
+
+
+  if(hours > 0){
+
+    return (
+      hours +
+      "h " +
+      minutes +
+      "m " +
+      seconds +
+      "s"
+    );
+
+  }
+
+
+  return (
+    minutes +
+    "m " +
+    String(seconds)
+      .padStart(
+        2,
+        "0"
+      ) +
+    "s"
+  );
+
+}
+
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+const profileModal =
+  document.getElementById(
+    "profileModal"
+  );
+
+
+const profileName =
+  document.getElementById(
+    "profileName"
+  );
+
+
+const profileTitle =
+  document.getElementById(
+    "profileTitle"
+  );
+
+
+const profileAffiliation =
+  document.getElementById(
+    "profileAffiliation"
+  );
+
+
+
+function openProfile(){
+
+  const profile =
+    getProfile() || {};
+
+
+  profileName.value =
+    profile.name || "";
+
+
+  profileTitle.value =
+    profile.title || "";
+
+
+  profileAffiliation.value =
+    profile.affiliation || "";
+
+
+  profileModal
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  setTimeout(
+    ()=>{
+
+      profileName.focus();
+
+    },
+    50
+  );
+
+}
+
+
+
+function closeProfile(){
+
+  profileModal
+    .classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+
+function updateProfileSummary(){
+
+  document
+    .getElementById(
+      "profileSummary"
+    )
+    .textContent =
+      formatDisplayName(
+        getProfile()
+      );
+
+}
+
+
+
+document
+  .getElementById(
+    "profileClose"
+  )
+  .addEventListener(
+    "click",
+    closeProfile
+  );
+
+
+
+document
+  .getElementById(
+    "saveProfileBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      const name =
+        profileName
+          .value
+          .trim();
+
+
+      if(!name){
+
+        alert(
+          "Please enter a display name or nickname."
+        );
+
+        profileName.focus();
+
+        return;
+
+      }
+
+
+      saveJSON(
+        KEYS.profile,
+        {
+
+          name:
+            name.slice(
+              0,
+              50
+            ),
+
+          title:
+            profileTitle
+              .value
+              .trim()
+              .slice(
+                0,
+                30
+              ),
+
+          affiliation:
+            profileAffiliation
+              .value
+              .trim()
+              .slice(
+                0,
+                80
+              )
+
+        }
+      );
+
+
+      updateProfileSummary();
+
+      closeProfile();
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "editProfileQuick"
+  )
+  .addEventListener(
+    "click",
+    openProfile
+  );
+
+
+
+/* =====================================================
+   ANNOUNCEMENTS
+===================================================== */
+
+const announcementModal =
+  document.getElementById(
+    "announcementModal"
+  );
+
+
+const announcementBadge =
+  document.getElementById(
+    "announcementBadge"
+  );
+
+
+const envelopeIcon =
+  document.getElementById(
+    "envelopeIcon"
+  );
+
+
+let liveAnnouncements = [];
+
+
+
+function getReadAnnouncements(){
+
+  return loadJSON(
+    KEYS.announcementsRead,
+    []
+  );
+
+}
+
+
+
+async function loadAnnouncements(){
+
+  try{
+
+    const response =
+      await fetch(
+        `${LIVE_API}/announcements`
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to load announcements"
+      );
+
+    }
+
+
+    liveAnnouncements =
+      data.announcements ||
+      [];
+
+
+    renderAnnouncementStatus();
+
+
+    if(
+      !announcementModal
+        .classList
+        .contains(
+          "hidden"
+        )
+    ){
+
+      renderAnnouncements();
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+}
+
+
+
+function renderAnnouncementStatus(){
+
+  const read =
+    getReadAnnouncements();
+
+
+  const unread =
+    liveAnnouncements
+      .filter(
+        item =>
+          !read.includes(
+            item.id
+          )
+      );
+
+
+  if(
+    unread.length
+  ){
+
+    announcementBadge
+      .textContent =
+        unread.length > 99
+          ? "99+"
+          : unread.length;
+
+
+    announcementBadge
+      .classList
+      .remove(
+        "hidden"
+      );
+
+
+    envelopeIcon
+      .classList
+      .add(
+        "shake-unread"
+      );
+
+
+  }else{
+
+    announcementBadge
+      .classList
+      .add(
+        "hidden"
+      );
+
+
+    envelopeIcon
+      .classList
+      .remove(
+        "shake-unread"
+      );
+
+  }
+
+}
+
+
+
+function renderAnnouncements(){
+
+  const read =
+    getReadAnnouncements();
+
+
+  const target =
+    document.getElementById(
+      "announcementList"
+    );
+
+
+  if(
+    !liveAnnouncements.length
+  ){
+
+    target.innerHTML = `
+      <div
+        class="info-placeholder"
+        style="margin-top:14px;"
+      >
+        No announcements at the moment.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    liveAnnouncements
+      .map(
+        item => {
+
+          const isUnread =
+            !read.includes(
+              item.id
+            );
+
+
+          const time =
+            item.publishedAt
+              ? new Date(
+                  item.publishedAt
+                )
+                .toLocaleString(
+                  "en-MY",
+                  {
+                    day:"numeric",
+                    month:"short",
+                    hour:"numeric",
+                    minute:"2-digit",
+                    hour12:true,
+                    timeZone:
+                      "Asia/Kuala_Lumpur"
+                  }
+                )
+              : "";
+
+
+          return `
+            <div class="announcement-item">
+
+              ${
+                isUnread
+                  ? `
+                    <div class="announcement-new">
+                      ● New
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              ${
+                item.important
+                  ? `
+                    <div
+                      style="
+                        display:inline-flex;
+                        margin-top:5px;
+                        padding:3px 7px;
+                        border-radius:999px;
+                        background:#fff0df;
+                        color:#9d5d00;
+                        font-size:9px;
+                        font-weight:850;
+                      "
+                    >
+                      IMPORTANT
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              <div class="announcement-time">
+                ${escapeHTML(time)}
+              </div>
+
+
+              <div class="announcement-message">
+                ${escapeHTML(
+                  item.message
+                )}
+              </div>
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+
+function openAnnouncements(){
+
+  renderAnnouncements();
+
+
+  announcementModal
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  saveJSON(
+
+    KEYS.announcementsRead,
+
+    liveAnnouncements.map(
+      item =>
+        item.id
+    )
+
+  );
+
+
+  renderAnnouncementStatus();
+
+}
+
+
+
+function closeAnnouncements(){
+
+  announcementModal
+    .classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+
+document
+  .getElementById(
+    "announcementBtn"
+  )
+  .addEventListener(
+    "click",
+    openAnnouncements
+  );
+
+
+
+document
+  .getElementById(
+    "announcementClose"
+  )
+  .addEventListener(
+    "click",
+    closeAnnouncements
+  );
+
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goToPage(
+  pageName
+){
+
+  document
+    .querySelectorAll(
+      ".page"
+    )
+    .forEach(
+      page => {
+
+        page
+          .classList
+          .remove(
+            "active"
+          );
+
+      }
+    );
+
+
+  document
+    .getElementById(
+      "page-" +
+      pageName
+    )
+    ?.classList
+    .add(
+      "active"
+    );
+
+
+  document
+    .querySelectorAll(
+      ".nav-btn"
+    )
+    .forEach(
+      button => {
+
+        button
+          .classList
+          .toggle(
+            "active",
+            button.dataset.page ===
+            pageName
+          );
+
+      }
+    );
+
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+
+  if(
+    pageName ===
+    "programme"
+  ){
+
+    renderProgramme();
+
+  }
+
+
+  if(
+    pageName ===
+    "schedule"
+  ){
+
+    renderMySchedule();
+
+  }
+
+
+  if(
+    pageName ===
+    "discuss"
+  ){
+
+    showDiscussionHub();
+
+    renderDiscussionRooms();
+
+  }
+
+}
+
+
+
+document
+  .querySelectorAll(
+    ".nav-btn"
+  )
+  .forEach(
+    button => {
+
+      button
+        .addEventListener(
+          "click",
+          ()=>{
+
+            goToPage(
+              button.dataset.page
+            );
+
+          }
+        );
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "heroProgrammeBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      goToPage(
+        "programme"
+      );
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "heroDiscussBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      goToPage(
+        "discuss"
+      );
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "myScheduleQuick"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      goToPage(
+        "schedule"
+      );
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "heroMomentBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      goToPage(
+        "more"
+      );
+
+
+      setTimeout(
+        ()=>{
+
+          renderMorePanel(
+            "moments"
+          );
+
+        },
+        0
+      );
+
+    }
+  );
+
+
+
+/* =====================================================
+   LIVE STATUS
+===================================================== */
+
+function currentConferenceState(){
+
+  const now =
+    malaysiaNowComparable();
+
+
+  const first =
+    malaysiaTimestamp(
+      "2026-09-07",
+      "07:30"
+    );
+
+
+  const day1End =
+    malaysiaTimestamp(
+      "2026-09-07",
+      "18:01"
+    );
+
+
+  const day2Start =
+    malaysiaTimestamp(
+      "2026-09-08",
+      "08:30"
+    );
+
+
+  const final =
+    malaysiaTimestamp(
+      "2026-09-08",
+      "17:16"
+    );
+
+
+  if(
+    now < first
+  ){
+
+    return {
+      mode:"before",
+      day:1,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= first &&
+    now < day1End
+  ){
+
+    return {
+      mode:"live",
+      day:1,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= day1End &&
+    now < day2Start
+  ){
+
+    return {
+      mode:"between",
+      day:2,
+      now
+    };
+
+  }
+
+
+  if(
+    now >= day2Start &&
+    now < final
+  ){
+
+    return {
+      mode:"live",
+      day:2,
+      now
+    };
+
+  }
+
+
+  return {
+    mode:"ended",
+    day:2,
+    now
+  };
+
+}
+
+
+
+function currentAndNext(
+  day,
+  now
+){
+
+  const list =
+    MASTER
+      .getProgrammeForDay(
+        day
+      );
+
+
+  let current =
+    null;
+
+
+  let next =
+    null;
+
+
+  for(
+    let i = 0;
+    i < list.length;
+    i++
+  ){
+
+    const item =
+      list[i];
+
+
+    const start =
+      malaysiaTimestamp(
+        item.date,
+        item.start
+      );
+
+
+    const end =
+      malaysiaTimestamp(
+        item.date,
+        item.end
+      );
+
+
+    if(
+      now >= start &&
+      now < end
+    ){
+
+      current =
+        item;
+
+
+      next =
+        list[
+          i + 1
+        ] || null;
+
+
+      break;
+
+    }
+
+
+    if(
+      now < start
+    ){
+
+      next =
+        item;
+
+      break;
+
+    }
+
+  }
+
+
+  return {
+    current,
+    next,
+    list
+  };
+
+}
+
+
+
+function renderLive(){
+
+  const state =
+    currentConferenceState();
+
+
+  const {
+    current,
+    next,
+    list
+  } =
+    currentAndNext(
+      state.day,
+      state.now
+    );
+
+
+  const liveStatus =
+    document.getElementById(
+      "liveStatus"
+    );
+
+
+  const liveTitle =
+    document.getElementById(
+      "liveTitle"
+    );
+
+
+  const liveMeta =
+    document.getElementById(
+      "liveMeta"
+    );
+
+
+  const liveCountdown =
+    document.getElementById(
+      "liveCountdown"
+    );
+
+
+
+  if(
+    state.mode ===
+    "before"
+  ){
+
+    const eventStart =
+      malaysiaTimestamp(
+        "2026-09-07",
+        "07:30"
+      );
+
+
+    liveStatus.innerHTML = `
+      <span
+        class="live-dot"
+        style="
+          background:#7c8a9b;
+          box-shadow:none;
+        "
+      ></span>
+      <span>
+        Conference begins soon
+      </span>
+    `;
+
+
+    liveTitle.textContent =
+      "MTERMS 2026";
+
+
+    liveMeta.textContent =
+      "7–8 September 2026 · Concorde Hotel Shah Alam";
+
+
+    liveCountdown.textContent =
+      "Conference begins in " +
+      durationText(
+        eventStart -
+        state.now
+      );
+
+
+  }else if(
+    state.mode ===
+    "between"
+  ){
+
+    const tomorrow =
+      malaysiaTimestamp(
+        "2026-09-08",
+        "08:30"
+      );
+
+
+    liveStatus.innerHTML = `
+      <span
+        class="live-dot"
+        style="
+          background:#e49a00;
+          box-shadow:none;
+        "
+      ></span>
+      <span>
+        Day 1 complete
+      </span>
+    `;
+
+
+    liveTitle.textContent =
+      "Thank you for joining Day 1";
+
+
+    liveMeta.textContent =
+      "Day 2 begins with registration at 8:30 AM.";
+
+
+    liveCountdown.textContent =
+      "Day 2 begins in " +
+      durationText(
+        tomorrow -
+        state.now
+      );
+
+
+  }else if(
+    state.mode ===
+    "ended"
+  ){
+
+    liveStatus.innerHTML = `
+      <span
+        class="live-dot"
+        style="
+          background:#138a5b;
+          box-shadow:none;
+        "
+      ></span>
+      <span>
+        Conference complete
+      </span>
+    `;
+
+
+    liveTitle.textContent =
+      "Thank you for joining MTERMS 2026";
+
+
+    liveMeta.textContent =
+      "Programme, discussions and digital conference content remain available.";
+
+
+    liveCountdown.textContent =
+      "";
+
+
+  }else if(
+    current
+  ){
+
+    const end =
+      malaysiaTimestamp(
+        current.date,
+        current.end
+      );
+
+
+    liveStatus.innerHTML = `
+      <span class="live-dot"></span>
+      <span>
+        Live now · Day ${state.day}
+      </span>
+    `;
+
+
+    liveTitle.textContent =
+      current.title;
+
+
+    liveMeta.textContent =
+      current.detail ||
+      (
+        current.parallel
+          ? "Multiple scientific sessions are currently running."
+          : "MTERMS 2026"
+      );
+
+
+    liveCountdown.textContent =
+      durationText(
+        end -
+        state.now
+      ) +
+      " remaining";
+
+
+  }else{
+
+    liveStatus.innerHTML = `
+      <span
+        class="live-dot"
+        style="
+          background:#e49a00;
+          box-shadow:none;
+        "
+      ></span>
+      <span>
+        Between sessions
+      </span>
+    `;
+
+
+    liveTitle.textContent =
+      "MTERMS 2026 LIVE";
+
+
+    liveMeta.textContent =
+      "The next programme item will begin shortly.";
+
+
+    liveCountdown.textContent =
+      "";
+
+  }
+
+
+
+  if(next){
+
+    document
+      .getElementById(
+        "nextTime"
+      )
+      .textContent =
+        formatTime(
+          next.start
+        );
+
+
+    document
+      .getElementById(
+        "nextTitle"
+      )
+      .textContent =
+        next.title;
+
+
+    document
+      .getElementById(
+        "nextMeta"
+      )
+      .textContent =
+        next.detail ||
+        (
+          next.parallel
+            ? "Parallel sessions"
+            : ""
+        );
+
+
+  }else{
+
+    document
+      .getElementById(
+        "nextTime"
+      )
+      .textContent =
+        "—";
+
+
+    document
+      .getElementById(
+        "nextTitle"
+      )
+      .textContent =
+        state.mode ===
+        "ended"
+          ? "Conference completed"
+          : "No further session";
+
+
+    document
+      .getElementById(
+        "nextMeta"
+      )
+      .textContent =
+        "";
+
+  }
+
+
+  renderSoon(
+    list,
+    state.now
+  );
+
+
+  renderTimeline(
+    list,
+    state.now
+  );
+
+}
+
+
+
+function renderSoon(
+  list,
+  now
+){
+
+  const future =
+    list
+      .filter(
+        item =>
+          malaysiaTimestamp(
+            item.date,
+            item.start
+          ) > now
+      )
+      .slice(
+        0,
+        3
+      );
+
+
+  const target =
+    document.getElementById(
+      "soonList"
+    );
+
+
+  if(
+    !future.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          ✓
+        </div>
+        No additional programme items are scheduled.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    future
+      .map(
+        item => `
+          <div class="soon-item">
+
+            <div class="soon-time">
+              ${escapeHTML(
+                formatTime(
+                  item.start
+                )
+              )}
+            </div>
+
+            <div>
+
+              <div class="soon-title">
+                ${escapeHTML(
+                  item.title
+                )}
+              </div>
+
+              ${
+                item.detail
+                  ? `
+                    <div class="soon-sub">
+                      ${escapeHTML(
+                        item.detail
+                      )}
+                    </div>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </div>
+        `
+      )
+      .join("");
+
+}
+
+
+
+function renderTimeline(
+  list,
+  now
+){
+
+  const saved =
+    getSchedule();
+
+
+  document
+    .getElementById(
+      "liveTimeline"
+    )
+    .innerHTML =
+      list
+        .map(
+          item => {
+
+            const start =
+              malaysiaTimestamp(
+                item.date,
+                item.start
+              );
+
+
+            const end =
+              malaysiaTimestamp(
+                item.date,
+                item.end
+              );
+
+
+            const current =
+              now >= start &&
+              now < end;
+
+
+            const done =
+              now >= end;
+
+
+            let savedLabel =
+              "";
+
+
+            if(
+              item.parallel
+            ){
+
+              const selected =
+                item.parallel
+                  .filter(
+                    session =>
+                      saved.includes(
+                        session.id
+                      )
+                  );
+
+
+              if(
+                selected.length
+              ){
+
+                savedLabel =
+                  selected
+                    .map(
+                      session =>
+                        session.label
+                    )
+                    .join(", ");
+
+              }
+
+
+            }else if(
+              saved.includes(
+                item.id
+              )
+            ){
+
+              savedLabel =
+                "MY SCHEDULE";
+
+            }
+
+
+            return `
+              <div
+                class="
+                  timeline-item
+                  ${current ? "current" : ""}
+                  ${done ? "done" : ""}
+                "
+              >
+
+                <div class="timeline-time">
+                  ${escapeHTML(
+                    formatTime(
+                      item.start
+                    )
+                  )}
+                </div>
+
+
+                <div class="timeline-marker"></div>
+
+
+                <div>
+
+                  <div class="timeline-title">
+                    ${escapeHTML(
+                      item.title
+                    )}
+                  </div>
+
+
+                  ${
+                    item.detail
+                      ? `
+                        <div class="timeline-desc">
+                          ${escapeHTML(
+                            item.detail
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+
+                  <div class="timeline-tags">
+
+                    ${
+                      current
+                        ? `
+                          <span class="tag live">
+                            LIVE NOW
+                          </span>
+                        `
+                        : ""
+                    }
+
+
+                    ${
+                      savedLabel
+                        ? `
+                          <span class="tag saved">
+                            ★ ${escapeHTML(savedLabel)}
+                          </span>
+                        `
+                        : ""
+                    }
+
+
+                    ${
+                      item.parallel
+                        ? `
+                          <span class="tag">
+                            ${item.parallel.length}
+                            PARALLEL SESSIONS
+                          </span>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+                </div>
+
+              </div>
+            `;
+
+          }
+        )
+        .join("");
+
+}
+
+
+
+/* =====================================================
+   PROGRAMME SEARCH
+===================================================== */
+
+function itemSearchText(
+  item
+){
+
+  let text =
+    [
+      item.title,
+      item.detail,
+      item.type,
+      item.room
+    ]
+    .filter(Boolean)
+    .join(" ");
+
+
+  (
+    item.speakers ||
+    []
+  )
+  .forEach(
+    speaker => {
+
+      text +=
+        " " +
+        [
+          speaker.name,
+          speaker.affiliation,
+          speaker.presentationTitle
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+    }
+  );
+
+
+  (
+    item.parallel ||
+    []
+  )
+  .forEach(
+    session => {
+
+      text +=
+        " " +
+        [
+          session.label,
+          session.title,
+          session.room,
+          session.chair,
+          session.chairAffiliation
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+
+      (
+        session.speakers ||
+        []
+      )
+      .forEach(
+        speaker => {
+
+          text +=
+            " " +
+            [
+              speaker.name,
+              speaker.affiliation,
+              speaker.presentationTitle,
+              speaker.abstractId
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+        }
+      );
+
+    }
+  );
+
+
+  return text
+    .toLowerCase();
+
+}
+
+
+
+/* =====================================================
+   PROGRAMME
+===================================================== */
+
+let selectedProgrammeDay =
+  1;
+
+
+const expandedSessions =
+  new Set();
+
+
+
+function renderProgramme(){
+
+  const query =
+    document
+      .getElementById(
+        "programmeSearch"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const saved =
+    getSchedule();
+
+
+  const list =
+    MASTER
+      .getProgrammeForDay(
+        selectedProgrammeDay
+      )
+      .filter(
+        item =>
+          !query ||
+          itemSearchText(
+            item
+          )
+          .includes(
+            query
+          )
+      );
+
+
+  const target =
+    document.getElementById(
+      "programmeList"
+    );
+
+
+  if(
+    !list.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty-state">
+        No programme item matches your search.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    list
+      .map(
+        item => {
+
+          const isParallel =
+            Array.isArray(
+              item.parallel
+            ) &&
+            item.parallel.length;
+
+
+          const isSaved =
+            saved.includes(
+              item.id
+            );
+
+
+          const hasSpeakers =
+            Array.isArray(
+              item.speakers
+            ) &&
+            item.speakers.length;
+
+
+          return `
+            <div class="program-block">
+
+
+              <div class="program-main">
+
+                <div class="program-time">
+                  ${escapeHTML(
+                    formatTime(
+                      item.start
+                    )
+                  )}
+                </div>
+
+
+                <div>
+
+                  <div class="program-name">
+                    ${escapeHTML(
+                      item.title
+                    )}
+                  </div>
+
+
+                  ${
+                    item.detail
+                      ? `
+                        <div class="program-detail">
+                          ${escapeHTML(
+                            item.detail
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+
+                  ${
+                    item.room
+                      ? `
+                        <div class="program-room">
+                          ${escapeHTML(
+                            item.room
+                          )}
+                          ·
+                          ${escapeHTML(
+                            formatTime(item.start)
+                          )}
+                          –
+                          ${escapeHTML(
+                            formatTime(item.end)
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+
+                  ${
+                    hasSpeakers
+                      ? renderSingleSessionExpand(
+                          item
+                        )
+                      : ""
+                  }
+
+                </div>
+
+
+                ${
+                  !isParallel
+                    ? `
+                      <button
+                        class="
+                          star-btn
+                          ${isSaved ? "saved" : ""}
+                        "
+                        type="button"
+                        data-save="${escapeHTML(item.id)}"
+                      >
+                        ${isSaved ? "★" : "☆"}
+                      </button>
+                    `
+                    : `<div></div>`
+                }
+
+              </div>
+
+
+
+              ${
+                isParallel
+                  ? `
+                    <div class="parallel-list">
+
+                      ${
+                        item.parallel
+                          .map(
+                            session =>
+                              renderParallelSession(
+                                item,
+                                session,
+                                saved
+                              )
+                          )
+                          .join("")
+                      }
+
+                    </div>
+                  `
+                  : ""
+              }
+
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
+
+
+  bindProgrammeActions();
+
+}
+
+
+
+/* =====================================================
+   SINGLE FEATURED SESSION
+===================================================== */
+
+function renderSingleSessionExpand(
+  item
+){
+
+  const expanded =
+    expandedSessions
+      .has(
+        item.id
+      );
+
+
+  return `
+
+    <button
+      class="expand-session-btn"
+      type="button"
+      data-expand-session="${escapeHTML(item.id)}"
+    >
+      ${
+        expanded
+          ? "Hide Speaker ▲"
+          : "View Speaker & Provide Feedback ▼"
+      }
+    </button>
+
+
+    ${
+      expanded
+        ? `
+          <div class="session-extra">
+
+            ${
+              item.speakers
+                .map(
+                  speaker =>
+                    renderPresenterCard(
+                      item,
+                      item,
+                      speaker
+                    )
+                )
+                .join("")
+            }
+
+          </div>
+        `
+        : ""
+    }
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   PARALLEL SESSION
+===================================================== */
+
+function renderParallelSession(
+  parent,
+  session,
+  saved
+){
+
+  const expanded =
+    expandedSessions
+      .has(
+        session.id
+      );
+
+
+  const sessionSaved =
+    saved.includes(
+      session.id
+    );
+
+
+  const peopleLabel =
+    session.peopleLabel ||
+    "Speakers";
+
+
+  return `
+
+    <div class="parallel-session">
+
+
+      <div class="parallel-top">
+
+        <div>
+
+          <div class="parallel-label">
+            ${escapeHTML(
+              session.label
+            )}
+          </div>
+
+
+          <div class="parallel-title">
+            ${escapeHTML(
+              session.title
+            )}
+          </div>
+
+
+          <div class="parallel-meta">
+
+            ${escapeHTML(
+              session.room || ""
+            )}
+
+            ${
+              session.room
+                ? " · "
+                : ""
+            }
+
+            ${escapeHTML(
+              formatTime(
+                parent.start
+              )
+            )}
+
+            –
+
+            ${escapeHTML(
+              formatTime(
+                parent.end
+              )
+            )}
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="
+            parallel-star
+            ${sessionSaved ? "saved" : ""}
+          "
+          type="button"
+          data-save="${escapeHTML(session.id)}"
+        >
+          ${sessionSaved ? "★" : "☆"}
+        </button>
+
+      </div>
+
+
+
+      <button
+        class="expand-session-btn"
+        type="button"
+        data-expand-session="${escapeHTML(session.id)}"
+      >
+
+        ${
+          expanded
+            ? `Hide ${escapeHTML(peopleLabel)} ▲`
+            : `View ${escapeHTML(peopleLabel)} & Provide Feedback ▼`
+        }
+
+      </button>
+
+
+
+      ${
+        expanded
+          ? renderParallelExtra(
+              parent,
+              session
+            )
+          : ""
+      }
+
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   PARALLEL EXTRA
+===================================================== */
+
+function renderParallelExtra(
+  parent,
+  session
+){
+
+  return `
+
+    <div class="session-extra">
+
+
+      ${
+        session.chair
+          ? `
+            <div class="session-info-box">
+
+              <div class="session-info-label">
+                Session Chair
+              </div>
+
+              <div class="session-info-value">
+                ${escapeHTML(
+                  session.chair
+                )}
+
+                ${
+                  session.chairAffiliation
+                    ? `
+                      <br>
+                      <span
+                        style="
+                          font-weight:500;
+                          color:var(--muted);
+                        "
+                      >
+                        ${escapeHTML(
+                          session.chairAffiliation
+                        )}
+                      </span>
+                    `
+                    : ""
+                }
+
+              </div>
+
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        session.format
+          ? `
+            <div class="session-info-box">
+
+              <div class="session-info-label">
+                Presentation Format
+              </div>
+
+              <div class="session-info-value">
+                ${escapeHTML(
+                  session.format
+                )}
+              </div>
+
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        Array.isArray(
+          session.judges
+        ) &&
+        session.judges.length
+          ? `
+            <div class="session-info-box">
+
+              <div class="session-info-label">
+                Judges
+              </div>
+
+              <div class="session-info-value">
+                ${
+                  session.judges
+                    .map(
+                      judge =>
+                        escapeHTML(
+                          judge
+                        )
+                    )
+                    .join("<br>")
+                }
+              </div>
+
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        (
+          session.speakers ||
+          []
+        )
+        .map(
+          speaker =>
+            renderPresenterCard(
+              parent,
+              session,
+              speaker
+            )
+        )
+        .join("")
+      }
+
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   PRESENTER CARD
+===================================================== */
+
+function renderPresenterCard(
+  parent,
+  session,
+  speaker
+){
+
+  const feedbackTargetId =
+    "feedback-" +
+    speaker.presenterId;
+
+
+  return `
+
+    <div class="presenter-card">
+
+
+      <!--
+      FUTURE PHOTO SUPPORT
+
+      <div class="presenter-photo">
+        <img
+          src=""
+          alt="${escapeHTML(speaker.name)}"
+        >
+      </div>
+      -->
+
+
+      ${
+        speaker.start
+          ? `
+            <div class="presenter-time">
+              ${escapeHTML(
+                formatTime(
+                  speaker.start
+                )
+              )}
+              –
+              ${escapeHTML(
+                formatTime(
+                  speaker.end
+                )
+              )}
+            </div>
+          `
+          : ""
+      }
+
+
+      <div class="presenter-name">
+        ${escapeHTML(
+          speaker.name
+        )}
+      </div>
+
+
+      ${
+        speaker.affiliation
+          ? `
+            <div class="presenter-affiliation">
+              ${escapeHTML(
+                speaker.affiliation
+              )}
+            </div>
+          `
+          : ""
+      }
+
+
+      <div class="presenter-title">
+        ${escapeHTML(
+          speaker.presentationTitle ||
+          ""
+        )}
+      </div>
+
+
+      <div class="presenter-actions">
+
+
+        ${
+          speaker.bioId
+            ? `
+              <button
+                class="presenter-action-btn bio"
+                type="button"
+                data-bio="${escapeHTML(
+                  speaker.bioId
+                )}"
+              >
+                Speaker Bio
+              </button>
+            `
+            : ""
+        }
+
+
+        <button
+          class="presenter-action-btn"
+          type="button"
+          data-feedback-presenter="${escapeHTML(
+            speaker.presenterId
+          )}"
+          data-feedback-session="${escapeHTML(
+            session.id
+          )}"
+        >
+          Provide Feedback
+        </button>
+
+
+      </div>
+
+
+      <div
+        class="presenter-feedback hidden"
+        id="${escapeHTML(feedbackTargetId)}"
+      ></div>
+
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   PROGRAMME ACTIONS
+===================================================== */
+
+function bindProgrammeActions(){
+
+
+  document
+    .querySelectorAll(
+      "[data-save]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              toggleSchedule(
+                button.dataset.save
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+
+  document
+    .querySelectorAll(
+      "[data-expand-session]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              const id =
+                button.dataset
+                  .expandSession;
+
+
+              if(
+                expandedSessions
+                  .has(id)
+              ){
+
+                expandedSessions
+                  .delete(id);
+
+              }else{
+
+                expandedSessions
+                  .add(id);
+
+              }
+
+
+              renderProgramme();
+
+            }
+          );
+
+      }
+    );
+
+
+
+  document
+    .querySelectorAll(
+      "[data-bio]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              openBio(
+                button.dataset.bio
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+
+  document
+    .querySelectorAll(
+      "[data-feedback-presenter]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              openPresenterFeedback(
+
+                button.dataset
+                  .feedbackPresenter,
+
+                button.dataset
+                  .feedbackSession
+
+              );
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+
+/* =====================================================
+   DAY TOGGLE
+===================================================== */
+
+document
+  .getElementById(
+    "day1Btn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      selectedProgrammeDay =
+        1;
+
+
+      document
+        .getElementById(
+          "day1Btn"
+        )
+        .classList
+        .add(
+          "active"
+        );
+
+
+      document
+        .getElementById(
+          "day2Btn"
+        )
+        .classList
+        .remove(
+          "active"
+        );
+
+
+      renderProgramme();
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "day2Btn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      selectedProgrammeDay =
+        2;
+
+
+      document
+        .getElementById(
+          "day2Btn"
+        )
+        .classList
+        .add(
+          "active"
+        );
+
+
+      document
+        .getElementById(
+          "day1Btn"
+        )
+        .classList
+        .remove(
+          "active"
+        );
+
+
+      renderProgramme();
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "programmeSearch"
+  )
+  .addEventListener(
+    "input",
+    renderProgramme
+  );
+
+
+
+/* =====================================================
+   SCHEDULE
+===================================================== */
+
+function toggleSchedule(
+  id
+){
+
+  let saved =
+    getSchedule();
+
+
+  if(
+    saved.includes(
+      id
+    )
+  ){
+
+    saved =
+      saved.filter(
+        item =>
+          item !== id
+      );
+
+
+  }else{
+
+    saved.push(
+      id
+    );
+
+  }
+
+
+  saveSchedule(
+    saved
+  );
+
+
+  renderProgramme();
+
+  renderMySchedule();
+
+  renderLive();
+
+}
+
+
+
+/* =====================================================
+   SCHEDULE ENTRY
+===================================================== */
+
+function scheduleEntries(){
+
+  const ids =
+    getSchedule();
+
+
+  const list = [];
+
+
+  PROGRAMME.forEach(
+    item => {
+
+
+      if(
+        !item.parallel &&
+        ids.includes(
+          item.id
+        )
+      ){
+
+        list.push({
+
+          id:item.id,
+
+          day:item.day,
+
+          date:item.date,
+
+          start:item.start,
+
+          end:item.end,
+
+          title:item.title,
+
+          room:
+            item.room || "",
+
+          parentTitle:"",
+
+          hasDiscussion:
+            MASTER
+              .getDiscussionRoomDefinitions()
+              .some(
+                room =>
+                  room.id ===
+                  item.id
+              )
+
+        });
+
+      }
+
+
+      if(
+        Array.isArray(
+          item.parallel
+        )
+      ){
+
+        item.parallel
+          .forEach(
+            session => {
+
+              if(
+                ids.includes(
+                  session.id
+                )
+              ){
+
+                list.push({
+
+                  id:
+                    session.id,
+
+                  day:
+                    item.day,
+
+                  date:
+                    item.date,
+
+                  start:
+                    item.start,
+
+                  end:
+                    item.end,
+
+                  title:
+                    session.label +
+                    " — " +
+                    session.title,
+
+                  room:
+                    session.room || "",
+
+                  parentTitle:
+                    item.title,
+
+                  hasDiscussion:
+                    true
+
+                });
+
+              }
+
+            }
+          );
+
+      }
+
+    }
+  );
+
+
+  list.sort(
+    (a,b)=>
+      malaysiaTimestamp(
+        a.date,
+        a.start
+      ) -
+      malaysiaTimestamp(
+        b.date,
+        b.start
+      )
+  );
+
+
+  return list;
+
+}
+
+
+
+/* =====================================================
+   SCHEDULE OVERLAPS
+===================================================== */
+
+function findScheduleOverlaps(
+  list
+){
+
+  const overlaps =
+    new Set();
+
+
+  for(
+    let i = 0;
+    i < list.length;
+    i++
+  ){
+
+    for(
+      let j = i + 1;
+      j < list.length;
+      j++
+    ){
+
+      const a =
+        list[i];
+
+
+      const b =
+        list[j];
+
+
+      if(
+        a.date !==
+        b.date
+      ){
+
+        continue;
+
+      }
+
+
+      const aStart =
+        malaysiaTimestamp(
+          a.date,
+          a.start
+        );
+
+
+      const aEnd =
+        malaysiaTimestamp(
+          a.date,
+          a.end
+        );
+
+
+      const bStart =
+        malaysiaTimestamp(
+          b.date,
+          b.start
+        );
+
+
+      const bEnd =
+        malaysiaTimestamp(
+          b.date,
+          b.end
+        );
+
+
+      if(
+        aStart < bEnd &&
+        bStart < aEnd
+      ){
+
+        overlaps.add(
+          a.id
+        );
+
+        overlaps.add(
+          b.id
+        );
+
+      }
+
+    }
+
+  }
+
+
+  return overlaps;
+
+}
+
+
+
+/* =====================================================
+   MY SCHEDULE
+===================================================== */
+
+function renderMySchedule(){
+
+  const list =
+    scheduleEntries();
+
+
+  const overlaps =
+    findScheduleOverlaps(
+      list
+    );
+
+
+  const target =
+    document.getElementById(
+      "myScheduleList"
+    );
+
+
+  if(
+    !list.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          ☆
+        </div>
+
+        You have not saved any sessions yet.
+
+        <div style="margin-top:12px;">
+
+          <button
+            class="btn btn-primary"
+            id="emptyProgrammeBtn"
+            type="button"
+          >
+            Browse Programme
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+
+    document
+      .getElementById(
+        "emptyProgrammeBtn"
+      )
+      ?.addEventListener(
+        "click",
+        ()=>{
+
+          goToPage(
+            "programme"
+          );
+
+        }
+      );
+
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    list
+      .map(
+        item => `
+
+          <div class="schedule-item">
+
+
+            <div class="schedule-date">
+
+              Day ${item.day}
+
+              ·
+
+              ${
+                item.date ===
+                "2026-09-07"
+                  ? "7 September"
+                  : "8 September"
+              }
+
+            </div>
+
+
+            ${
+              item.parentTitle
+                ? `
+                  <div
+                    style="
+                      margin-top:5px;
+                      font-size:9px;
+                      color:var(--muted);
+                      font-weight:850;
+                      text-transform:uppercase;
+                    "
+                  >
+                    ${escapeHTML(
+                      item.parentTitle
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+
+            <div class="schedule-title">
+              ${escapeHTML(
+                item.title
+              )}
+            </div>
+
+
+            <div class="schedule-time">
+
+              ${escapeHTML(
+                formatTime(
+                  item.start
+                )
+              )}
+
+              –
+
+              ${escapeHTML(
+                formatTime(
+                  item.end
+                )
+              )}
+
+              ${
+                item.room
+                  ? " · " +
+                    escapeHTML(
+                      item.room
+                    )
+                  : ""
+              }
+
+            </div>
+
+
+            ${
+              overlaps.has(
+                item.id
+              )
+                ? `
+                  <div class="schedule-warning">
+
+                    <strong>
+                      ⚠ Schedule overlap
+                    </strong>
+
+                    <br>
+
+                    This session overlaps with another
+                    saved session.
+
+                  </div>
+                `
+                : ""
+            }
+
+
+            <div
+              style="
+                margin-top:9px;
+                display:flex;
+                gap:7px;
+                flex-wrap:wrap;
+              "
+            >
+
+
+              ${
+                item.hasDiscussion
+                  ? `
+                    <button
+                      class="btn btn-soft"
+                      type="button"
+                      data-schedule-discuss="${escapeHTML(
+                        item.id
+                      )}"
+                      style="
+                        min-height:38px;
+                        font-size:11px;
+                      "
+                    >
+                      💬 Open Discussion
+                    </button>
+                  `
+                  : ""
+              }
+
+
+              <button
+                class="btn btn-outline"
+                type="button"
+                data-remove-schedule="${escapeHTML(
+                  item.id
+                )}"
+                style="
+                  min-height:38px;
+                  font-size:11px;
+                "
+              >
+                Remove
+              </button>
+
+
+            </div>
+
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-remove-schedule]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              toggleSchedule(
+                button.dataset
+                  .removeSchedule
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  target
+    .querySelectorAll(
+      "[data-schedule-discuss]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              goToDiscussionRoom(
+                button.dataset
+                  .scheduleDiscuss
+              );
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+
+/* =====================================================
+   BIO
+===================================================== */
+
+const bioModal =
+  document.getElementById(
+    "bioModal"
+  );
+
+
+
+function openBio(
+  bioId
+){
+
+  const bio =
+    MASTER.featuredBios[
+      bioId
+    ];
+
+
+  if(!bio){
+    return;
+  }
+
+
+  document
+    .getElementById(
+      "bioName"
+    )
+    .textContent =
+      bio.name || "";
+
+
+  document
+    .getElementById(
+      "bioAffiliation"
+    )
+    .textContent =
+      bio.affiliation || "";
+
+
+  document
+    .getElementById(
+      "bioText"
+    )
+    .textContent =
+      bio.bio || "";
+
+
+  bioModal
+    .classList
+    .remove(
+      "hidden"
+    );
+
+}
+
+
+
+function closeBio(){
+
+  bioModal
+    .classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+
+document
+  .getElementById(
+    "bioClose"
+  )
+  .addEventListener(
+    "click",
+    closeBio
+  );
+
+
+
+document
+  .getElementById(
+    "bioOkBtn"
+  )
+  .addEventListener(
+    "click",
+    closeBio
+  );
+
+
+
+/* =====================================================
+   PRESENTER FEEDBACK API
+===================================================== */
+
+async function getPresenterFeedback(
+  presenterId
+){
+
+  const response =
+    await fetch(
+
+      `${PRESENTER_FEEDBACK_API}/${encodeURIComponent(
+        presenterId
+      )}?participantId=${encodeURIComponent(
+        getParticipantId()
+      )}`
+
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+
+
+
+async function savePresenterFeedback(
+  presenterId,
+  sessionId,
+  rating,
+  comment
+){
+
+  const response =
+    await fetch(
+
+      `${PRESENTER_FEEDBACK_API}/${encodeURIComponent(
+        presenterId
+      )}`,
+
+      {
+
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+
+            participantId:
+              getParticipantId(),
+
+            sessionId,
+
+            rating,
+
+            comment
+
+          })
+
+      }
+
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to save feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+
+
+
+/* =====================================================
+   OPEN PRESENTER FEEDBACK
+===================================================== */
+
+async function openPresenterFeedback(
+  presenterId,
+  sessionId
+){
+
+  const target =
+    document.getElementById(
+      "feedback-" +
+      presenterId
+    );
+
+
+  if(!target){
+    return;
+  }
+
+
+  if(
+    !target
+      .classList
+      .contains(
+        "hidden"
+      )
+  ){
+
+    target
+      .classList
+      .add(
+        "hidden"
+      );
+
+    target.innerHTML =
+      "";
+
+    return;
+
+  }
+
+
+  target
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  target.innerHTML = `
+    <div class="feedback-loading">
+      Loading your feedback…
+    </div>
+  `;
+
+
+  try{
+
+    const existing =
+      await getPresenterFeedback(
+        presenterId
+      );
+
+
+    if(existing){
+
+      renderSavedPresenterFeedback(
+        target,
+        presenterId,
+        sessionId,
+        existing
+      );
+
+
+    }else{
+
+      renderPresenterFeedbackForm(
+        target,
+        presenterId,
+        sessionId,
+        0,
+        ""
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    target.innerHTML = `
+      <div class="info-placeholder">
+        Unable to load presenter feedback.
+      </div>
+    `;
+
+  }
+
+}
+
+
+
+/* =====================================================
+   SAVED PRESENTER FEEDBACK
+===================================================== */
+
+function renderSavedPresenterFeedback(
+  target,
+  presenterId,
+  sessionId,
+  feedback
+){
+
+  const stars =
+    "★".repeat(
+      feedback.rating
+    ) +
+    "☆".repeat(
+      5 -
+      feedback.rating
+    );
+
+
+  target.innerHTML = `
+
+    <div class="feedback-saved">
+
+      <div class="feedback-saved-title">
+        ✓ Your feedback has been saved
+      </div>
+
+
+      <div class="feedback-saved-stars">
+        ${escapeHTML(stars)}
+      </div>
+
+
+      ${
+        feedback.comment
+          ? `
+            <div class="feedback-saved-comment">
+              ${escapeHTML(
+                feedback.comment
+              )}
+            </div>
+          `
+          : ""
+      }
+
+
+      <button
+        class="btn btn-outline btn-small"
+        type="button"
+        id="edit-feedback-${escapeHTML(
+          presenterId
+        )}"
+        style="margin-top:9px;"
+      >
+        Edit Feedback
+      </button>
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById(
+      "edit-feedback-" +
+      presenterId
+    )
+    ?.addEventListener(
+      "click",
+      ()=>{
+
+        renderPresenterFeedbackForm(
+
+          target,
+
+          presenterId,
+
+          sessionId,
+
+          feedback.rating,
+
+          feedback.comment || ""
+
+        );
+
+      }
+    );
+
+}
+
+
+
+/* =====================================================
+   PRESENTER FEEDBACK FORM
+===================================================== */
+
+function renderPresenterFeedbackForm(
+  target,
+  presenterId,
+  sessionId,
+  initialRating,
+  initialComment
+){
+
+  let selectedRating =
+    Number(
+      initialRating || 0
+    );
+
+
+  target.innerHTML = `
+
+    <div class="feedback-label">
+      How would you rate this presentation?
+    </div>
+
+
+    <div class="feedback-help">
+      Feedback is available throughout the conference
+      and can be edited later.
+    </div>
+
+
+    <div
+      class="rating-row"
+      id="rating-${escapeHTML(
+        presenterId
+      )}"
+    >
+
+      ${
+        [1,2,3,4,5]
+          .map(
+            rating => `
+              <button
+                class="
+                  rating-star
+                  ${
+                    rating <=
+                    selectedRating
+                      ? "active"
+                      : ""
+                  }
+                "
+                type="button"
+                data-presenter-rating="${rating}"
+              >
+                ★
+              </button>
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+
+    <textarea
+      class="feedback-text"
+      id="comment-${escapeHTML(
+        presenterId
+      )}"
+      maxlength="1000"
+      placeholder="Optional comment…"
+    >${escapeHTML(
+      initialComment || ""
+    )}</textarea>
+
+
+    <button
+      class="btn btn-primary btn-small"
+      type="button"
+      id="save-presenter-feedback-${escapeHTML(
+        presenterId
+      )}"
+      style="margin-top:8px;"
+    >
+      ${
+        initialRating
+          ? "Update Feedback"
+          : "Submit Feedback"
+      }
+    </button>
+
+  `;
+
+
+  const stars =
+    target
+      .querySelectorAll(
+        "[data-presenter-rating]"
+      );
+
+
+  stars.forEach(
+    star => {
+
+      star
+        .addEventListener(
+          "click",
+          ()=>{
+
+            selectedRating =
+              Number(
+                star.dataset
+                  .presenterRating
+              );
+
+
+            stars.forEach(
+              item => {
+
+                item
+                  .classList
+                  .toggle(
+
+                    "active",
+
+                    Number(
+                      item.dataset
+                        .presenterRating
+                    ) <=
+                    selectedRating
+
+                  );
+
+              }
+            );
+
+          }
+        );
+
+    }
+  );
+
+
+
+  document
+    .getElementById(
+      "save-presenter-feedback-" +
+      presenterId
+    )
+    ?.addEventListener(
+      "click",
+      async ()=>{
+
+        if(
+          !selectedRating
+        ){
+
+          alert(
+            "Please select a rating."
+          );
+
+          return;
+
+        }
+
+
+        const button =
+          document.getElementById(
+            "save-presenter-feedback-" +
+            presenterId
+          );
+
+
+        const comment =
+          document
+            .getElementById(
+              "comment-" +
+              presenterId
+            )
+            .value
+            .trim()
+            .slice(
+              0,
+              1000
+            );
+
+
+        button.disabled =
+          true;
+
+
+        button.textContent =
+          "Saving…";
+
+
+        try{
+
+          const saved =
+            await savePresenterFeedback(
+
+              presenterId,
+
+              sessionId,
+
+              selectedRating,
+
+              comment
+
+            );
+
+
+          renderSavedPresenterFeedback(
+
+            target,
+
+            presenterId,
+
+            sessionId,
+
+            saved
+
+          );
+
+
+        }catch(error){
+
+          console.error(
+            error
+          );
+
+
+          alert(
+            error.message ||
+            "Unable to save feedback."
+          );
+
+
+          button.disabled =
+            false;
+
+
+          button.textContent =
+            "Submit Feedback";
+
+        }
+
+      }
+    );
+
+}
+
+
+
+/* =====================================================
+   DISCUSSIONS
+===================================================== */
+
+let liveDiscussions = {};
+
+let activeRoomId =
+  null;
+
+let discussionInputActive =
+  false;
+
+let openThreadId =
+  null;
+
+
+
+function discussionRooms(){
+
+  return MASTER
+    .getDiscussionRoomDefinitions();
+
+}
+
+
+
+function formatDiscussionTime(
+  iso
+){
+
+  if(!iso){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      iso
+    )
+    .toLocaleTimeString(
+      "en-MY",
+      {
+        hour:"numeric",
+        minute:"2-digit",
+        hour12:true,
+        timeZone:
+          "Asia/Kuala_Lumpur"
+      }
+    );
+
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+
+/* =====================================================
+   LOAD DISCUSSIONS
+===================================================== */
+
+async function loadAllDiscussions(){
+
+  const mainDraft =
+    document
+      .getElementById(
+        "newPostText"
+      )
+      ?.value
+      .trim();
+
+
+  const replyDraft =
+    Array.from(
+      document
+        .querySelectorAll(
+          "[data-reply-input]"
+        )
+    )
+    .some(
+      input =>
+        input.value.trim()
+    );
+
+
+  if(
+    discussionInputActive ||
+    mainDraft ||
+    replyDraft
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${LIVE_API}/messages`
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to load discussions"
+      );
+
+    }
+
+
+    const participantId =
+      getParticipantId();
+
+
+    const grouped = {};
+
+
+    (
+      data.messages ||
+      []
+    )
+    .forEach(
+      item => {
+
+        if(
+          !grouped[
+            item.sessionId
+          ]
+        ){
+
+          grouped[
+            item.sessionId
+          ] = [];
+
+        }
+
+
+        grouped[
+          item.sessionId
+        ]
+        .push({
+
+          id:
+            item.id,
+
+          author:
+            item.author,
+
+          title:
+            item.title || "",
+
+          affiliation:
+            item.affiliation || "",
+
+          time:
+            formatDiscussionTime(
+              item.createdAt
+            ),
+
+          type:
+            item.type,
+
+          message:
+            item.message,
+
+          likes:
+            Number(
+              item.likes || 0
+            ),
+
+          liked:
+            Array.isArray(
+              item.likedBy
+            ) &&
+            item.likedBy
+              .includes(
+                participantId
+              ),
+
+          mine:
+            item.participantId ===
+            participantId,
+
+          replies:
+            (
+              item.replies ||
+              []
+            )
+            .map(
+              reply => ({
+
+                id:
+                  reply.id,
+
+                author:
+                  reply.author,
+
+                title:
+                  reply.title || "",
+
+                affiliation:
+                  reply.affiliation || "",
+
+                time:
+                  formatDiscussionTime(
+                    reply.createdAt
+                  ),
+
+                message:
+                  reply.message,
+
+                mine:
+                  reply.participantId ===
+                  participantId
+
+              })
+            )
+
+        });
+
+      }
+    );
+
+
+    liveDiscussions =
+      grouped;
+
+
+    renderDiscussionRooms();
+
+
+    if(
+      activeRoomId
+    ){
+
+      renderPosts();
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   DISCUSSION ROOM LIST
+===================================================== */
+
+function renderDiscussionRooms(){
+
+  const rooms =
+    discussionRooms();
+
+
+  const now =
+    malaysiaNowComparable();
+
+
+  rooms.sort(
+    (a,b)=>
+      malaysiaTimestamp(
+        a.date,
+        a.start
+      ) -
+      malaysiaTimestamp(
+        b.date,
+        b.start
+      )
+  );
+
+
+  const currentRooms =
+    rooms
+      .filter(
+        room => {
+
+          const start =
+            malaysiaTimestamp(
+              room.date,
+              room.start
+            );
+
+
+          const end =
+            malaysiaTimestamp(
+              room.date,
+              room.end
+            );
+
+
+          return (
+            now >= start &&
+            now < end
+          );
+
+        }
+      );
+
+
+  const pastRooms =
+    rooms
+      .filter(
+        room =>
+          now >=
+          malaysiaTimestamp(
+            room.date,
+            room.end
+          )
+      )
+      .reverse()
+      .slice(
+        0,
+        12
+      );
+
+
+  const futureRooms =
+    rooms
+      .filter(
+        room =>
+          now <
+          malaysiaTimestamp(
+            room.date,
+            room.start
+          )
+      )
+      .slice(
+        0,
+        12
+      );
+
+
+  let html =
+    "";
+
+
+  if(
+    currentRooms.length
+  ){
+
+    html += `
+      <div class="section-label">
+        Live Now
+      </div>
+    `;
+
+
+    html +=
+      currentRooms
+        .map(
+          room =>
+            roomCardHTML(
+              room,
+              true,
+              false
+            )
+        )
+        .join("");
+
+  }
+
+
+  if(
+    pastRooms.length
+  ){
+
+    html += `
+      <div class="section-label">
+        Earlier Discussions
+      </div>
+    `;
+
+
+    html +=
+      pastRooms
+        .map(
+          room =>
+            roomCardHTML(
+              room,
+              false,
+              false
+            )
+        )
+        .join("");
+
+  }
+
+
+  if(
+    !currentRooms.length &&
+    !pastRooms.length
+  ){
+
+    html += `
+      <div class="section-label">
+        Upcoming Discussion Rooms
+      </div>
+    `;
+
+
+    html +=
+      futureRooms
+        .map(
+          room =>
+            roomCardHTML(
+              room,
+              false,
+              true
+            )
+        )
+        .join("");
+
+  }
+
+
+  document
+    .getElementById(
+      "roomList"
+    )
+    .innerHTML =
+      html ||
+      `
+        <div class="empty-state">
+          No discussion rooms are available.
+        </div>
+      `;
+
+
+  document
+    .querySelectorAll(
+      "[data-room-open]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              openDiscussionRoom(
+                button.dataset.roomOpen
+              );
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+
+/* =====================================================
+   DISCUSSION ROOM CARD
+===================================================== */
+
+function roomCardHTML(
+  room,
+  isLive,
+  upcoming
+){
+
+  const posts =
+    liveDiscussions[
+      room.id
+    ] || [];
+
+
+  const replies =
+    posts.reduce(
+      (
+        sum,
+        post
+      ) =>
+        sum +
+        (
+          post.replies ||
+          []
+        ).length,
+      0
+    );
+
+
+  return `
+
+    <div
+      class="
+        room
+        ${isLive ? "live-room" : ""}
+      "
+    >
+
+      <div
+        class="
+          room-status
+          ${isLive ? "live" : ""}
+        "
+      >
+
+        ${
+          isLive
+            ? "● LIVE NOW"
+            : (
+                upcoming
+                  ? "UPCOMING"
+                  : "SESSION ROOM"
+              )
+        }
+
+      </div>
+
+
+      <div class="room-title">
+        ${escapeHTML(
+          room.title
+        )}
+      </div>
+
+
+      <div class="room-stats">
+
+        ${
+          room.room
+            ? escapeHTML(
+                room.room
+              ) +
+              " · "
+            : ""
+        }
+
+        ${posts.length}
+        topics
+
+        ·
+
+        ${replies}
+        replies
+
+      </div>
+
+
+      <button
+        class="
+          btn
+          ${
+            isLive
+              ? "btn-primary"
+              : "btn-outline"
+          }
+          btn-small
+        "
+        type="button"
+        data-room-open="${escapeHTML(
+          room.id
+        )}"
+        style="margin-top:10px;"
+      >
+        ${
+          isLive
+            ? "Join Discussion"
+            : "Open Discussion"
+        }
+      </button>
+
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   SHOW / OPEN DISCUSSION
+===================================================== */
+
+function showDiscussionHub(){
+
+  document
+    .getElementById(
+      "discussionHub"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "discussionRoom"
+    )
+    .classList
+    .remove(
+      "active"
+    );
+
+
+  activeRoomId =
+    null;
+
+}
+
+
+
+function goToDiscussionRoom(
+  roomId
+){
+
+  goToPage(
+    "discuss"
+  );
+
+
+  setTimeout(
+    ()=>{
+
+      openDiscussionRoom(
+        roomId
+      );
+
+    },
+    0
+  );
+
+}
+
+
+
+function openDiscussionRoom(
+  roomId
+){
+
+  if(
+    !getProfile()
+  ){
+
+    openProfile();
+
+    return;
+
+  }
+
+
+  const room =
+    discussionRooms()
+      .find(
+        item =>
+          item.id ===
+          roomId
+      );
+
+
+  if(!room){
+    return;
+  }
+
+
+  activeRoomId =
+    roomId;
+
+
+  document
+    .getElementById(
+      "discussionHub"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "discussionRoom"
+    )
+    .classList
+    .add(
+      "active"
+    );
+
+
+  document
+    .getElementById(
+      "roomTitle"
+    )
+    .textContent =
+      room.title;
+
+
+  document
+    .getElementById(
+      "roomSub"
+    )
+    .textContent =
+      "Day " +
+      room.day +
+      " · " +
+      formatTime(
+        room.start
+      ) +
+      " – " +
+      formatTime(
+        room.end
+      ) +
+      (
+        room.room
+          ? " · " +
+            room.room
+          : ""
+      );
+
+
+  renderPosts();
+
+}
+
+
+
+document
+  .getElementById(
+    "backToRooms"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      showDiscussionHub();
+
+      renderDiscussionRooms();
+
+    }
+  );
+
+
+
+/* =====================================================
+   POST NEW DISCUSSION
+===================================================== */
+
+document
+  .getElementById(
+    "newPostText"
+  )
+  .addEventListener(
+    "focus",
+    ()=>{
+
+      discussionInputActive =
+        true;
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "newPostText"
+  )
+  .addEventListener(
+    "blur",
+    ()=>{
+
+      discussionInputActive =
+        false;
+
+    }
+  );
+
+
+
+document
+  .getElementById(
+    "postMessageBtn"
+  )
+  .addEventListener(
+    "click",
+    async ()=>{
+
+      if(
+        !activeRoomId
+      ){
+
+        return;
+
+      }
+
+
+      const profile =
+        getProfile();
+
+
+      if(!profile){
+
+        openProfile();
+
+        return;
+
+      }
+
+
+      const textarea =
+        document.getElementById(
+          "newPostText"
+        );
+
+
+      const message =
+        textarea
+          .value
+          .trim();
+
+
+      if(!message){
+
+        alert(
+          "Please write a message first."
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById(
+          "postMessageBtn"
+        );
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "Posting…";
+
+
+      try{
+
+        const response =
+          await fetch(
+            `${LIVE_API}/messages`,
+            {
+
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+
+                  sessionId:
+                    activeRoomId,
+
+                  author:
+                    profile.name,
+
+                  title:
+                    profile.title || "",
+
+                  affiliation:
+                    profile.affiliation || "",
+
+                  type:
+                    document
+                      .getElementById(
+                        "postType"
+                      )
+                      .value,
+
+                  message,
+
+                  participantId:
+                    getParticipantId()
+
+                })
+
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if(
+          !response.ok ||
+          !data.ok
+        ){
+
+          throw new Error(
+            data.error ||
+            "Unable to post message"
+          );
+
+        }
+
+
+        textarea.value =
+          "";
+
+
+        discussionInputActive =
+          false;
+
+
+        await loadAllDiscussions();
+
+
+      }catch(error){
+
+        console.error(
+          error
+        );
+
+
+        alert(
+          error.message ||
+          "Unable to post message."
+        );
+
+
+      }finally{
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "Post";
+
+      }
+
+    }
+  );
+
+
+
+/* =====================================================
+   RENDER POSTS
+===================================================== */
+
+function renderPosts(){
+
+  const posts =
+    liveDiscussions[
+      activeRoomId
+    ] || [];
+
+
+  const target =
+    document.getElementById(
+      "postsList"
+    );
+
+
+  if(
+    !posts.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          💬
+        </div>
+
+        No discussion yet.
+
+        <br>
+
+        Start the first topic or question.
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    posts
+      .map(
+        post => {
+
+          const identity =
+            [
+              post.title,
+              post.author
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+
+          const affiliation =
+            post.affiliation
+              ? " · " +
+                post.affiliation
+              : "";
+
+
+          const replies =
+            post.replies ||
+            [];
+
+
+          return `
+
+            <div
+              class="chat-post"
+              data-post="${escapeHTML(
+                post.id
+              )}"
+            >
+
+              <div class="chat-head">
+
+                <strong>
+                  ${escapeHTML(
+                    identity
+                  )}
+                </strong>
+
+                ${escapeHTML(
+                  affiliation
+                )}
+
+                ${
+                  post.time
+                    ? " · " +
+                      escapeHTML(
+                        post.time
+                      )
+                    : ""
+                }
+
+              </div>
+
+
+              <div class="chat-message">
+                ${escapeHTML(
+                  post.message
+                )}
+              </div>
+
+
+              ${
+                post.type ===
+                "Question"
+                  ? `
+                    <div class="chat-type">
+                      ❓ QUESTION
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              <div class="chat-actions">
+
+                <button
+                  class="
+                    chat-action
+                    ${post.liked ? "liked" : ""}
+                  "
+                  type="button"
+                  data-like="${escapeHTML(
+                    post.id
+                  )}"
+                >
+                  👍 ${post.likes || 0}
+                </button>
+
+
+                <button
+                  class="chat-action"
+                  type="button"
+                  data-thread="${escapeHTML(
+                    post.id
+                  )}"
+                >
+                  💬
+                  ${replies.length}
+                  ${
+                    replies.length ===
+                    1
+                      ? "reply"
+                      : "replies"
+                  }
+                </button>
+
+              </div>
+
+
+              <div
+                class="thread hidden-thread"
+                id="thread-${escapeHTML(
+                  post.id
+                )}"
+              >
+
+
+                ${
+                  replies
+                    .map(
+                      reply => {
+
+                        const replyIdentity =
+                          [
+                            reply.title,
+                            reply.author
+                          ]
+                          .filter(Boolean)
+                          .join(" ");
+
+
+                        return `
+
+                          <div class="reply">
+
+                            <div class="reply-head">
+
+                              <strong>
+                                ${escapeHTML(
+                                  replyIdentity
+                                )}
+                              </strong>
+
+                              ${
+                                reply.affiliation
+                                  ? " · " +
+                                    escapeHTML(
+                                      reply.affiliation
+                                    )
+                                  : ""
+                              }
+
+                              ${
+                                reply.time
+                                  ? " · " +
+                                    escapeHTML(
+                                      reply.time
+                                    )
+                                  : ""
+                              }
+
+                            </div>
+
+
+                            <div class="reply-body">
+                              ${escapeHTML(
+                                reply.message
+                              )}
+                            </div>
+
+                          </div>
+
+                        `;
+
+                      }
+                    )
+                    .join("")
+                }
+
+
+                <div class="reply-form">
+
+                  <input
+                    type="text"
+                    maxlength="400"
+                    placeholder="Reply to this thread…"
+                    data-reply-input="${escapeHTML(
+                      post.id
+                    )}"
+                  >
+
+
+                  <button
+                    class="btn btn-soft btn-small"
+                    type="button"
+                    data-reply-send="${escapeHTML(
+                      post.id
+                    )}"
+                  >
+                    Reply
+                  </button>
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  target
+    .querySelectorAll(
+      "[data-like]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              togglePostLike(
+                button.dataset.like
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  target
+    .querySelectorAll(
+      "[data-thread]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              const id =
+                button.dataset.thread;
+
+
+              const thread =
+                document.getElementById(
+                  "thread-" +
+                  id
+                );
+
+
+              const opening =
+                thread
+                  .classList
+                  .contains(
+                    "hidden-thread"
+                  );
+
+
+              thread
+                .classList
+                .toggle(
+                  "hidden-thread"
+                );
+
+
+              openThreadId =
+                opening
+                  ? id
+                  : null;
+
+            }
+          );
+
+      }
+    );
+
+
+  target
+    .querySelectorAll(
+      "[data-reply-input]"
+    )
+    .forEach(
+      input => {
+
+        input
+          .addEventListener(
+            "focus",
+            ()=>{
+
+              discussionInputActive =
+                true;
+
+            }
+          );
+
+
+        input
+          .addEventListener(
+            "blur",
+            ()=>{
+
+              discussionInputActive =
+                false;
+
+            }
+          );
+
+      }
+    );
+
+
+  target
+    .querySelectorAll(
+      "[data-reply-send]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              addReply(
+                button.dataset
+                  .replySend
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  if(
+    openThreadId
+  ){
+
+    document
+      .getElementById(
+        "thread-" +
+        openThreadId
+      )
+      ?.classList
+      .remove(
+        "hidden-thread"
+      );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   LIKE
+===================================================== */
+
+async function togglePostLike(
+  postId
+){
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${LIVE_API}/messages/${encodeURIComponent(
+          postId
+        )}/like`,
+
+        {
+
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              participantId:
+                getParticipantId()
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to update like"
+      );
+
+    }
+
+
+    await loadAllDiscussions();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to update like."
+    );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   ADD REPLY
+===================================================== */
+
+async function addReply(
+  postId
+){
+
+  const profile =
+    getProfile();
+
+
+  if(!profile){
+
+    openProfile();
+
+    return;
+
+  }
+
+
+  const input =
+    document.querySelector(
+      `[data-reply-input="${CSS.escape(
+        postId
+      )}"]`
+    );
+
+
+  if(!input){
+    return;
+  }
+
+
+  const message =
+    input
+      .value
+      .trim();
+
+
+  if(!message){
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${LIVE_API}/messages/${encodeURIComponent(
+          postId
+        )}/replies`,
+
+        {
+
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              author:
+                profile.name,
+
+              title:
+                profile.title || "",
+
+              affiliation:
+                profile.affiliation || "",
+
+              message,
+
+              participantId:
+                getParticipantId()
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to post reply"
+      );
+
+    }
+
+
+    input.value =
+      "";
+
+
+    discussionInputActive =
+      false;
+
+
+    openThreadId =
+      postId;
+
+
+    await loadAllDiscussions();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to post reply."
+    );
+
+  }
+
+}
+
+
+
+/* =====================================================
+   OVERALL CONFERENCE FEEDBACK
+===================================================== */
+
+async function getConferenceFeedback(){
+
+  const response =
+    await fetch(
+
+      `${LIVE_API}/feedback/conference?participantId=${encodeURIComponent(
+        getParticipantId()
+      )}`
+
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load conference feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+
+
+
+async function saveConferenceFeedback(
+  rating,
+  comment
+){
+
+  const response =
+    await fetch(
+
+      `${LIVE_API}/feedback/conference`,
+
+      {
+
+        method:"PUT",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+
+            participantId:
+              getParticipantId(),
+
+            rating,
+
+            comment
+
+          })
+
+      }
+
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to save conference feedback"
+    );
+
+  }
+
+
+  return data.feedback;
+
+}
+
+
+
+/* =====================================================
+   USEFUL INFORMATION
+===================================================== */
+
+async function getUsefulInformation(){
+
+  const response =
+    await fetch(
+      `${LIVE_API}/information`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load information"
+    );
+
+  }
+
+
+  return (
+    data.information ||
+    {
+      venue:"",
+      wifi:"",
+      help:"",
+      other:""
+    }
+  );
+
+}
+
+
+
+/* =====================================================
+   MORE BUTTONS
+===================================================== */
+
+document
+  .querySelectorAll(
+    "[data-more]"
+  )
+  .forEach(
+    button => {
+
+      button
+        .addEventListener(
+          "click",
+          ()=>{
+
+            const section =
+              button.dataset.more;
+
+
+            if(
+              section ===
+              "profile"
+            ){
+
+              openProfile();
+
+              return;
+
+            }
+
+
+            renderMorePanel(
+              section
+            );
+
+          }
+        );
+
+    }
+  );
+
+
+
+/* =====================================================
+   MORE PANEL
+===================================================== */
+
+function renderMorePanel(
+  section
+){
+
+  const target =
+    document.getElementById(
+      "morePanel"
+    );
+
+
+
+  /* -------------------------------------------------
+     MOMENTS
+  ------------------------------------------------- */
+
+  if(
+    section ===
+    "moments"
+  ){
+
+    target.innerHTML = `
+
+      <div class="more-panel">
+
+        <div class="moments-head">
+
+          <div>
+
+            <h3 style="margin:0;">
+              MTERMS Moments
+            </h3>
+
+            <div class="page-sub">
+              Share and explore moments from MTERMS 2026.
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn btn-primary btn-small"
+            type="button"
+            id="shareMomentDevelopmentBtn"
+          >
+            + Share a Moment
+          </button>
+
+        </div>
+
+
+        <div class="moments-tabs">
+
+          <button
+            class="moments-tab active"
+            type="button"
+          >
+            Feed
+          </button>
+
+          <button
+            class="moments-tab"
+            type="button"
+          >
+            Gallery
+          </button>
+
+        </div>
+
+
+        <div class="moments-dev-note">
+
+          MTERMS Moments has been prepared in the
+          V2 participant interface.
+
+          <br><br>
+
+          Photo upload, camera access, captions,
+          Feed, Gallery and comments will be
+          connected to MongoDB in the next
+          development stage.
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document
+      .getElementById(
+        "shareMomentDevelopmentBtn"
+      )
+      ?.addEventListener(
+        "click",
+        ()=>{
+
+          alert(
+            "MTERMS Moments upload will be activated in the next V2 backend step."
+          );
+
+        }
+      );
+
+
+    return;
+
+  }
+
+
+
+  /* -------------------------------------------------
+     MY DISCUSSIONS
+  ------------------------------------------------- */
+
+  if(
+    section ===
+    "discussions"
+  ){
+
+    const profile =
+      getProfile();
+
+
+    const rooms =
+      discussionRooms();
+
+
+    const myPosts = [];
+
+
+    Object
+      .entries(
+        liveDiscussions
+      )
+      .forEach(
+        (
+          [
+            roomId,
+            posts
+          ]
+        ) => {
+
+          const room =
+            rooms.find(
+              item =>
+                item.id ===
+                roomId
+            );
+
+
+          posts.forEach(
+            post => {
+
+
+              if(
+                post.mine ||
+                (
+                  profile &&
+                  post.author ===
+                  profile.name
+                )
+              ){
+
+                myPosts.push({
+
+                  roomId,
+
+                  postId:
+                    post.id,
+
+                  roomTitle:
+                    room
+                      ? room.title
+                      : "Session Discussion",
+
+                  message:
+                    post.message,
+
+                  type:
+                    post.type ||
+                    "Discussion"
+
+                });
+
+              }
+
+
+              (
+                post.replies ||
+                []
+              )
+              .forEach(
+                reply => {
+
+                  if(
+                    reply.mine ||
+                    (
+                      profile &&
+                      reply.author ===
+                      profile.name
+                    )
+                  ){
+
+                    myPosts.push({
+
+                      roomId,
+
+                      postId:
+                        post.id,
+
+                      roomTitle:
+                        room
+                          ? room.title
+                          : "Session Discussion",
+
+                      message:
+                        reply.message,
+
+                      type:
+                        "Reply"
+
+                    });
+
+                  }
+
+                }
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+    target.innerHTML = `
+
+      <div class="more-panel">
+
+        <h3>
+          My Discussions
+        </h3>
+
+
+        ${
+          myPosts.length
+            ? myPosts
+                .map(
+                  item => `
+
+                    <button
+                      class="more-button"
+                      type="button"
+                      data-my-discussion-room="${escapeHTML(
+                        item.roomId
+                      )}"
+                      data-my-discussion-post="${escapeHTML(
+                        item.postId
+                      )}"
+                    >
+
+                      <span class="more-text">
+
+                        <span class="more-title">
+                          ${escapeHTML(
+                            item.type
+                          )}
+                        </span>
+
+                        <span class="more-sub">
+                          ${escapeHTML(
+                            item.roomTitle
+                          )}
+                          ·
+                          ${escapeHTML(
+                            item.message
+                          )}
+                        </span>
+
+                      </span>
+
+                      <span class="more-arrow">
+                        ›
+                      </span>
+
+                    </button>
+
+                  `
+                )
+                .join("")
+            : `
+              <div class="info-placeholder">
+                You have not participated in any discussions yet.
+              </div>
+            `
+        }
+
+      </div>
+
+    `;
+
+
+    target
+      .querySelectorAll(
+        "[data-my-discussion-room]"
+      )
+      .forEach(
+        button => {
+
+          button
+            .addEventListener(
+              "click",
+              ()=>{
+
+                goToDiscussionRoom(
+                  button.dataset
+                    .myDiscussionRoom
+                );
+
+              }
+            );
+
+        }
+      );
+
+
+    return;
+
+  }
+
+
+
+  /* -------------------------------------------------
+     OVERALL FEEDBACK
+  ------------------------------------------------- */
+
+  if(
+    section ===
+    "feedback"
+  ){
+
+    target.innerHTML = `
+
+      <div class="more-panel">
+
+        <h3>
+          Overall Conference Feedback
+        </h3>
+
+        <div class="page-sub">
+          Loading your feedback…
+        </div>
+
+      </div>
+
+    `;
+
+
+    getConferenceFeedback()
+      .then(
+        existing => {
+
+          const rating =
+            Number(
+              existing?.rating ||
+              0
+            );
+
+
+          target.innerHTML = `
+
+            <div class="more-panel">
+
+              <h3>
+                Overall Conference Feedback
+              </h3>
+
+
+              <div class="page-sub">
+                How would you rate your overall
+                MTERMS 2026 experience?
+              </div>
+
+
+              <div
+                class="rating-row"
+                id="conferenceRatingRow"
+              >
+
+                ${
+                  [1,2,3,4,5]
+                    .map(
+                      value => `
+                        <button
+                          class="
+                            rating-star
+                            ${
+                              value <=
+                              rating
+                                ? "active"
+                                : ""
+                            }
+                          "
+                          type="button"
+                          data-conference-rating="${value}"
+                        >
+                          ★
+                        </button>
+                      `
+                    )
+                    .join("")
+                }
+
+              </div>
+
+
+              <textarea
+                class="feedback-text"
+                id="conferenceFeedbackComment"
+                maxlength="1000"
+                placeholder="Optional comment…"
+              >${escapeHTML(
+                existing?.comment ||
+                ""
+              )}</textarea>
+
+
+              <button
+                class="btn btn-primary"
+                id="saveConferenceFeedbackBtn"
+                type="button"
+                style="margin-top:9px;"
+              >
+                ${
+                  existing
+                    ? "Update Feedback"
+                    : "Submit Feedback"
+                }
+              </button>
+
+
+            </div>
+
+          `;
+
+
+          let selectedRating =
+            rating;
+
+
+          target
+            .querySelectorAll(
+              "[data-conference-rating]"
+            )
+            .forEach(
+              button => {
+
+                button
+                  .addEventListener(
+                    "click",
+                    ()=>{
+
+                      selectedRating =
+                        Number(
+                          button.dataset
+                            .conferenceRating
+                        );
+
+
+                      target
+                        .querySelectorAll(
+                          "[data-conference-rating]"
+                        )
+                        .forEach(
+                          star => {
+
+                            star
+                              .classList
+                              .toggle(
+
+                                "active",
+
+                                Number(
+                                  star.dataset
+                                    .conferenceRating
+                                ) <=
+                                selectedRating
+
+                              );
+
+                          }
+                        );
+
+                    }
+                  );
+
+              }
+            );
+
+
+          document
+            .getElementById(
+              "saveConferenceFeedbackBtn"
+            )
+            .addEventListener(
+              "click",
+              async ()=>{
+
+                if(
+                  !selectedRating
+                ){
+
+                  alert(
+                    "Please select a rating."
+                  );
+
+                  return;
+
+                }
+
+
+                const button =
+                  document.getElementById(
+                    "saveConferenceFeedbackBtn"
+                  );
+
+
+                button.disabled =
+                  true;
+
+
+                button.textContent =
+                  "Saving…";
+
+
+                try{
+
+                  await saveConferenceFeedback(
+
+                    selectedRating,
+
+                    document
+                      .getElementById(
+                        "conferenceFeedbackComment"
+                      )
+                      .value
+                      .trim()
+                      .slice(
+                        0,
+                        1000
+                      )
+
+                  );
+
+
+                  button.textContent =
+                    "✓ Feedback Saved";
+
+
+                  setTimeout(
+                    ()=>{
+
+                      renderMorePanel(
+                        "feedback"
+                      );
+
+                    },
+                    900
+                  );
+
+
+                }catch(error){
+
+                  console.error(
+                    error
+                  );
+
+
+                  alert(
+                    error.message ||
+                    "Unable to save feedback."
+                  );
+
+
+                  button.disabled =
+                    false;
+
+
+                  button.textContent =
+                    "Submit Feedback";
+
+                }
+
+              }
+            );
+
+        }
+      )
+      .catch(
+        error => {
+
+          console.error(
+            error
+          );
+
+
+          target.innerHTML = `
+            <div class="more-panel">
+
+              <h3>
+                Overall Conference Feedback
+              </h3>
+
+              <div class="info-placeholder">
+                Unable to load feedback.
+              </div>
+
+            </div>
+          `;
+
+        }
+      );
+
+
+    return;
+
+  }
+
+
+
+  /* -------------------------------------------------
+     USEFUL INFORMATION
+  ------------------------------------------------- */
+
+  if(
+    section ===
+    "info"
+  ){
+
+    target.innerHTML = `
+
+      <div class="more-panel">
+
+        <h3>
+          Useful Information
+        </h3>
+
+        <div class="info-placeholder">
+          Loading information…
+        </div>
+
+      </div>
+
+    `;
+
+
+    getUsefulInformation()
+      .then(
+        info => {
+
+          const sections =
+            [];
+
+
+          [
+            [
+              "Venue Information",
+              info.venue
+            ],
+
+            [
+              "Wi-Fi",
+              info.wifi
+            ],
+
+            [
+              "Secretariat / Help",
+              info.help
+            ],
+
+            [
+              "Other Information",
+              info.other
+            ]
+
+          ]
+          .forEach(
+            (
+              [
+                label,
+                value
+              ]
+            ) => {
+
+              if(value){
+
+                sections.push(`
+
+                  <div
+                    style="
+                      margin-bottom:16px;
+                    "
+                  >
+
+                    <div
+                      style="
+                        font-size:10px;
+                        font-weight:850;
+                        color:var(--blue);
+                        text-transform:uppercase;
+                        letter-spacing:.06em;
+                        margin-bottom:5px;
+                      "
+                    >
+                      ${escapeHTML(label)}
+                    </div>
+
+                    <div
+                      style="
+                        font-size:13px;
+                        line-height:1.55;
+                        white-space:pre-wrap;
+                      "
+                    >
+                      ${escapeHTML(value)}
+                    </div>
+
+                  </div>
+
+                `);
+
+              }
+
+            }
+          );
+
+
+          target.innerHTML = `
+
+            <div class="more-panel">
+
+              <h3>
+                Useful Information
+              </h3>
+
+              ${
+                sections.length
+                  ? sections.join("")
+                  : `
+                    <div class="info-placeholder">
+                      Conference information will be updated here.
+                    </div>
+                  `
+              }
+
+            </div>
+
+          `;
+
+        }
+      )
+      .catch(
+        error => {
+
+          console.error(
+            error
+          );
+
+
+          target.innerHTML = `
+
+            <div class="more-panel">
+
+              <h3>
+                Useful Information
+              </h3>
+
+              <div class="info-placeholder">
+                Unable to load information.
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      );
+
+
+    return;
+
+  }
+
+
+
+  /* -------------------------------------------------
+     ABOUT
+  ------------------------------------------------- */
+
+  if(
+    section ===
+    "about"
+  ){
+
+    target.innerHTML = `
+
+      <div class="more-panel">
+
+        <h3>
+          About MTERMS 2026
+        </h3>
+
+
+        <div
+          style="
+            font-size:13px;
+            line-height:1.65;
+          "
+        >
+
+          <strong>
+            10th Malaysian Tissue Engineering &
+            Regenerative Medicine Scientific Meeting
+            (MTERMS) 2026
+          </strong>
+
+          <br><br>
+
+          <strong>
+            Theme
+          </strong>
+
+          <br>
+
+          From Discovery to Therapy:
+          Advances in Tissue Engineering
+          and Regenerative Medicine
+
+          <br><br>
+
+          7–8 September 2026
+
+          <br>
+
+          Concorde Hotel Shah Alam
+
+          <br><br>
+
+          <span
+            style="
+              color:var(--muted);
+              font-size:11px;
+            "
+          >
+            Digital Platform by IgniteInno Ventures Sdn Bhd
+          </span>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+/* =====================================================
+   BACKDROP CLOSE
+===================================================== */
+
+profileModal
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        profileModal
+      ){
+
+        closeProfile();
+
+      }
+
+    }
+  );
+
+
+announcementModal
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        announcementModal
+      ){
+
+        closeAnnouncements();
+
+      }
+
+    }
+  );
+
+
+bioModal
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        bioModal
+      ){
+
+        closeBio();
+
+      }
+
+    }
+  );
+
+
+
+/* =====================================================
+   INITIALISE
+===================================================== */
+
+function initialise(){
+
+  updateProfileSummary();
+
+
+  renderProgramme();
+
+
+  renderMySchedule();
+
+
+  renderLive();
+
+
+  loadAnnouncements();
+
+
+  loadAllDiscussions();
+
+
+  if(
+    !getProfile()
+  ){
+
+    setTimeout(
+      ()=>{
+
+        openProfile();
+
+      },
+      500
+    );
+
+  }
+
+
+  setInterval(
+    renderLive,
+    1000
+  );
+
+
+  setInterval(
+    loadAnnouncements,
+    10000
+  );
+
+
+  setInterval(
+    loadAllDiscussions,
+    5000
+  );
+
+}
+
+
+
+initialise();
+
+
+})();
+
+</script>
+
+
+
+<!-- =====================================================
+     MTERMS32
+===================================================== -->
+
+<script
+  src="https://mterm2026-559f9bf571b5.herokuapp.com/socket.io/socket.io.js"
+></script>
+
+
+<script
+  src="/public/mterms32.js?v=4"
+></script>
+
+
+</body>
+
+</html>
