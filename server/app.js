@@ -19,6 +19,7 @@ const igniteAIRouter = require('./routes/igniteAI');
 const analyticsRouter = require('./routes/analytics');
 const mtermsAIRouter = require('./routes/mtermsAI');
 const liveRouter = require('./routes/live');
+const presenterFeedbackRouter = require('./routes/mtermsPresenterFeedback');
 
 const {
   setupMtermsIrc
@@ -115,6 +116,7 @@ app.use('/api/reviewer', reviewerRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/mterms-ai', mtermsAIRouter);
 app.use('/api/live', liveRouter);
+app.use('/api/presenter-feedback', presenterFeedbackRouter);
 
 /* Friendly root */
 app.get('/', (req, res) => {
