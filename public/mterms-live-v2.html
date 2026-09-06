@@ -11759,144 +11759,151 @@ function renderMomentsContent(){
    FEED
 ----------------------------------------------------- */
 
-function renderMomentsFeed(
-  target
+function momentCardHTML(
+  moment
 ){
 
   const participantId =
     getParticipantId();
 
 
+  const mine =
+    moment.participantId ===
+    participantId;
+
+
+  return `
+
+    <article
+      class="moment-card"
+      id="moment-card-${escapeHTML(
+        moment.id
+      )}"
+    >
+
+
+      <button
+        class="moment-photo-button"
+        type="button"
+        data-view-moment="${escapeHTML(
+          moment.id
+        )}"
+      >
+
+        <img
+          class="moment-photo"
+          src="${escapeHTML(
+            getMomentImageUrl(
+              moment
+            )
+          )}"
+          alt="MTERMS Moment"
+          loading="lazy"
+        >
+
+      </button>
+
+
+      <div class="moment-body">
+
+
+        <div class="moment-author-row">
+
+          <div class="moment-author">
+
+            <div class="moment-author-name">
+              ${escapeHTML(
+                momentIdentity(
+                  moment
+                )
+              )}
+            </div>
+
+
+            ${
+              moment.affiliation
+                ? `
+                  <div class="moment-author-affiliation">
+                    ${escapeHTML(
+                      moment.affiliation
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          <div class="moment-time">
+            ${escapeHTML(
+              formatMomentTime(
+                moment.createdAt
+              )
+            )}
+          </div>
+
+        </div>
+
+
+        ${
+          moment.message
+            ? `
+              <div class="moment-message">
+                ${escapeHTML(
+                  moment.message
+                )}
+              </div>
+            `
+            : ""
+        }
+
+
+        ${renderMomentComments(
+          moment
+        )}
+
+
+        ${
+          mine
+            ? `
+              <div class="moment-owner-actions">
+
+                <button
+                  class="moment-delete-link"
+                  type="button"
+                  data-delete-moment="${escapeHTML(
+                    moment.id
+                  )}"
+                >
+                  Delete my Moment
+                </button>
+
+              </div>
+            `
+            : ""
+        }
+
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+  
+function renderMomentsFeed(
+  target
+){
+
   target.innerHTML =
     momentsData
       .map(
-        moment => {
-
-          const mine =
-            moment.participantId ===
-            participantId;
-
-
-          return `
-
-            <article
-              class="moment-card"
-              id="moment-card-${escapeHTML(
-                moment.id
-              )}"
-            >
-
-
-              <button
-                class="moment-photo-button"
-                type="button"
-                data-view-moment="${escapeHTML(
-                  moment.id
-                )}"
-              >
-
-                <img
-                  class="moment-photo"
-                  src="${escapeHTML(
-                    getMomentImageUrl(
-                      moment
-                    )
-                  )}"
-                  alt="MTERMS Moment"
-                  loading="lazy"
-                >
-
-              </button>
-
-
-              <div class="moment-body">
-
-
-                <div class="moment-author-row">
-
-                  <div class="moment-author">
-
-                    <div class="moment-author-name">
-                      ${escapeHTML(
-                        momentIdentity(
-                          moment
-                        )
-                      )}
-                    </div>
-
-
-                    ${
-                      moment.affiliation
-                        ? `
-                          <div class="moment-author-affiliation">
-                            ${escapeHTML(
-                              moment.affiliation
-                            )}
-                          </div>
-                        `
-                        : ""
-                    }
-
-                  </div>
-
-
-                  <div class="moment-time">
-                    ${escapeHTML(
-                      formatMomentTime(
-                        moment.createdAt
-                      )
-                    )}
-                  </div>
-
-                </div>
-
-
-                ${
-                  moment.message
-                    ? `
-                      <div class="moment-message">
-                        ${escapeHTML(
-                          moment.message
-                        )}
-                      </div>
-                    `
-                    : ""
-                }
-
-
-                ${renderMomentComments(
-                  moment
-                )}
-
-
-                ${
-                  mine
-                    ? `
-                      <div class="moment-owner-actions">
-
-                        <button
-                          class="moment-delete-link"
-                          type="button"
-                          data-delete-moment="${escapeHTML(
-                            moment.id
-                          )}"
-                        >
-                          Delete my Moment
-                        </button>
-
-                      </div>
-                    `
-                    : ""
-                }
-
-
-              </div>
-
-            </article>
-
-          `;
-
-        }
+        moment =>
+          momentCardHTML(
+            moment
+          )
       )
       .join("");
 
@@ -13898,161 +13905,361 @@ setInterval(
          NEW OR REMOVED MOMENT
       ================================================= */
 
-      if(
-        currentIds !==
-        latestIds
-      ){
+/* =================================================
+   CASE 1
+   NEW OR REMOVED MOMENT
 
-        /*
-          If we are in Feed view, remember
-          which card the participant is
-          currently looking at.
-        */
+   IMPORTANT:
+   Do NOT rebuild the whole Feed.
 
-        let anchorMomentId =
-          null;
+   New Moments are inserted individually so
+   existing photos are never destroyed/reloaded.
+================================================= */
 
+if(
+  currentIds !==
+  latestIds
+){
 
-        let anchorOffset =
-          null;
-
-
-        if(
-          momentsView ===
-          "feed"
-        ){
-
-          const cards =
-            Array.from(
-              document.querySelectorAll(
-                ".moment-card"
-              )
-            );
+  const currentIdSet =
+    new Set(
+      momentsData.map(
+        moment =>
+          moment.id
+      )
+    );
 
 
-          let closestDistance =
-            Infinity;
+  const latestIdSet =
+    new Set(
+      latestMoments.map(
+        moment =>
+          moment.id
+      )
+    );
 
 
-          cards.forEach(
-            card => {
+  /*
+    Find genuinely NEW Moments.
+  */
 
-              const rect =
-                card.getBoundingClientRect();
-
-
-              if(
-                rect.bottom <= 0
-              ){
-                return;
-              }
-
-
-              const distance =
-                Math.abs(
-                  rect.top
-                );
+  const newMoments =
+    latestMoments.filter(
+      moment =>
+        !currentIdSet.has(
+          moment.id
+        )
+    );
 
 
-              if(
-                distance <
-                closestDistance
-              ){
+  /*
+    Find Moments that were removed.
+  */
 
-                closestDistance =
-                  distance;
+  const removedIds =
+    momentsData
+      .filter(
+        moment =>
+          !latestIdSet.has(
+            moment.id
+          )
+      )
+      .map(
+        moment =>
+          moment.id
+      );
 
 
-                anchorMomentId =
-                  card.id.replace(
-                    "moment-card-",
-                    ""
-                  );
+  /*
+    Update our local data first.
+  */
+
+  momentsData =
+    latestMoments;
 
 
-                anchorOffset =
-                  rect.top;
+  /* =================================================
+     FEED VIEW
+  ================================================= */
 
-              }
+  if(
+    momentsView ===
+    "feed"
+  ){
 
-            }
-          );
+    const content =
+      document.getElementById(
+        "momentsContent"
+      );
+
+
+    if(content){
+
+      /*
+        Remove deleted Moment cards only.
+      */
+
+      removedIds.forEach(
+        momentId => {
+
+          document
+            .getElementById(
+              "moment-card-" +
+              momentId
+            )
+            ?.remove();
 
         }
+      );
 
 
-        const previousScrollY =
-          window.scrollY;
+      /*
+        Remember current document height.
+
+        This lets us compensate after inserting
+        new cards ABOVE what the participant is
+        currently looking at.
+      */
+
+      const oldHeight =
+        document.documentElement
+          .scrollHeight;
 
 
-        momentsData =
-          latestMoments;
+      /*
+        Insert only the NEW Moment cards.
 
+        latestMoments is newest-first, so reverse
+        before prepend to preserve correct order.
+      */
 
-        renderMomentsContent();
+      [...newMoments]
+        .reverse()
+        .forEach(
+          moment => {
 
-
-        /*
-          Restore position after the new
-          Moment has been inserted.
-        */
-
-        requestAnimationFrame(
-          ()=>{
-
-            if(
-              anchorMomentId &&
-              anchorOffset !== null
-            ){
-
-              const refreshedCard =
-                document.getElementById(
-                  "moment-card-" +
-                  anchorMomentId
-                );
-
-
-              if(
-                refreshedCard
-              ){
-
-                const newRect =
-                  refreshedCard
-                    .getBoundingClientRect();
-
-
-                window.scrollBy({
-                  top:
-                    newRect.top -
-                    anchorOffset,
-
-                  behavior:
-                    "auto"
-                });
-
-
-                return;
-
-              }
-
-            }
-
-
-            window.scrollTo({
-              top:
-                previousScrollY,
-
-              behavior:
-                "auto"
-            });
+            content.insertAdjacentHTML(
+              "afterbegin",
+              momentCardHTML(
+                moment
+              )
+            );
 
           }
         );
 
 
-        return;
+      /*
+        Bind controls ONLY on the new cards.
+      */
+
+      newMoments.forEach(
+        moment => {
+
+          const newCard =
+            document.getElementById(
+              "moment-card-" +
+              moment.id
+            );
+
+
+          if(newCard){
+
+            bindMomentActions(
+              newCard
+            );
+
+          }
+
+        }
+      );
+
+
+      /*
+        If participant is already scrolled down,
+        compensate for the height added above.
+
+        This keeps the same content in the exact
+        same visual position.
+      */
+
+      if(
+        newMoments.length &&
+        window.scrollY > 0
+      ){
+
+        requestAnimationFrame(
+          ()=>{
+
+            const newHeight =
+              document.documentElement
+                .scrollHeight;
+
+
+            const addedHeight =
+              newHeight -
+              oldHeight;
+
+
+            if(
+              addedHeight > 0
+            ){
+
+              window.scrollBy({
+                top:
+                  addedHeight,
+
+                behavior:
+                  "auto"
+              });
+
+            }
+
+          }
+        );
 
       }
+
+    }
+
+  }
+
+
+  /* =================================================
+     GALLERY VIEW
+
+     Gallery thumbnails are small, so we can insert
+     new thumbnails individually too.
+  ================================================= */
+
+  if(
+    momentsView ===
+    "gallery"
+  ){
+
+    const gallery =
+      document.querySelector(
+        ".moments-gallery"
+      );
+
+
+    if(gallery){
+
+      /*
+        Remove deleted thumbnails.
+      */
+
+      removedIds.forEach(
+        momentId => {
+
+          gallery
+            .querySelector(
+              `[data-view-moment="${CSS.escape(
+                momentId
+              )}"]`
+            )
+            ?.remove();
+
+        }
+      );
+
+
+      /*
+        Insert new thumbnails only.
+      */
+
+      [...newMoments]
+        .reverse()
+        .forEach(
+          moment => {
+
+            gallery.insertAdjacentHTML(
+              "afterbegin",
+              `
+
+                <button
+                  class="moment-gallery-item"
+                  type="button"
+                  data-view-moment="${escapeHTML(
+                    moment.id
+                  )}"
+                >
+
+                  <img
+                    src="${escapeHTML(
+                      getMomentImageUrl(
+                        moment
+                      )
+                    )}"
+                    alt="MTERMS Moment"
+                    loading="lazy"
+                  >
+
+                  ${
+                    (
+                      moment.comments ||
+                      []
+                    ).length
+                      ? `
+                        <span class="moment-gallery-badge">
+                          💬
+                          ${
+                            (
+                              moment.comments ||
+                              []
+                            ).length
+                          }
+                        </span>
+                      `
+                      : ""
+                  }
+
+                </button>
+
+              `
+            );
+
+          }
+        );
+
+
+      newMoments.forEach(
+        moment => {
+
+          const button =
+            gallery.querySelector(
+              `[data-view-moment="${CSS.escape(
+                moment.id
+              )}"]`
+            );
+
+
+          if(button){
+
+            bindMomentActions(
+              button
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+
+
+  /*
+    We handled the Moment-list change
+    without rebuilding existing content.
+
+    Continue no further during this refresh.
+  */
+
+  return;
+
+}
 
 
       /* =================================================
