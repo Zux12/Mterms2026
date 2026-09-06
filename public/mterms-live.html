@@ -2687,6 +2687,46 @@ main{
 
 /* Composer */
 
+.moment-view-feed-btn{
+
+  width:100%;
+
+  min-height:42px;
+
+  margin-top:14px;
+
+  border:
+    1px solid #cfe0f5;
+
+  border-radius:11px;
+
+  background:#eef6ff;
+
+  color:#075aba;
+
+  padding:0 13px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+  font-size:11px;
+
+  font-weight:850;
+
+}
+
+
+.moment-view-feed-btn:hover{
+
+  background:#e3f0ff;
+
+}  
+
 .moment-source-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -11232,6 +11272,56 @@ function resetMomentComposer(){
 }
 
 
+/* -----------------------------------------------------
+   VIEW MOMENTS FROM COMPOSER
+----------------------------------------------------- */
+
+document
+  .getElementById(
+    "viewMomentsFromComposerBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      /*
+        Close the Share a Moment composer.
+      */
+
+      closeMomentComposer();
+
+
+      /*
+        Open MORE.
+      */
+
+      goToPage(
+        "more"
+      );
+
+
+      /*
+        Open MTERMS Moments automatically.
+      */
+
+      setTimeout(
+        ()=>{
+
+          momentsView =
+            "feed";
+
+
+          renderMorePanel(
+            "moments"
+          );
+
+        },
+        0
+      );
+
+    }
+  );
+  
 /* -----------------------------------------------------
    PHOTO SOURCE BUTTONS
 ----------------------------------------------------- */
