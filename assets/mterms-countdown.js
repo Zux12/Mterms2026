@@ -884,6 +884,18 @@
   </div>
 
 <div>
+
+    <a
+    class="mterms-countdown-agenda"
+    href="public/MTERMSABSTRACTBOOKC.pdf"
+    target="_blank"
+    rel="noopener">
+
+    DOWNLOAD ABSTRACT BOOK
+
+  </a>
+
+  
   <a
     class="mterms-countdown-agenda"
     href="public/mterms%20final%20schedule.pdf"
@@ -916,15 +928,7 @@
 
   </a>
 
-    <a
-    class="mterms-countdown-agenda"
-    href="public/MTERMSABSTRACTBOOKC.pdf"
-    target="_blank"
-    rel="noopener">
 
-    DOWNLOAD ABSTRACT BOOK
-
-  </a>
 </div>
 
 </div>
