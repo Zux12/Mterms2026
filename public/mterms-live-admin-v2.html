@@ -1880,6 +1880,11 @@ textarea.form-control{
 </div>
 
 
+<script
+  src="/public/mterms-programme-v2.js?v=1"
+></script>
+
+
 <script>
 (function(){
 
@@ -1888,6 +1893,21 @@ textarea.form-control{
 const LIVE_API =
   'https://mterm2026-559f9bf571b5.herokuapp.com/api/live';
 
+const MASTER =
+  window.MTERMS_PROGRAMME_V2;
+
+
+if(
+  !MASTER
+){
+
+  alert(
+    "MTERMS V2 programme data could not be loaded."
+  );
+
+  return;
+
+}  
 
 /* =====================================================
    IMPORTANT:
@@ -2322,355 +2342,8 @@ async saveInformation(data){
    PROGRAMME
 ===================================================== */
 
-const PROGRAMME = [
-
-{
-  id:"d1-registration",
-  day:1,
-  date:"2026-09-07",
-  start:"07:30",
-  end:"08:30",
-  title:"Registration",
-  type:"General"
-},
-
-{
-  id:"d1-opening",
-  day:1,
-  date:"2026-09-07",
-  start:"08:30",
-  end:"09:00",
-  title:"Opening Ceremony",
-  type:"Ceremony"
-},
-
-{
-  id:"d1-opening-keynote",
-  day:1,
-  date:"2026-09-07",
-  start:"09:00",
-  end:"10:00",
-  title:"Opening Keynote",
-  type:"Keynote"
-},
-
-{
-  id:"d1-plenary1",
-  day:1,
-  date:"2026-09-07",
-  start:"10:00",
-  end:"10:30",
-  title:"Plenary 1",
-  type:"Plenary"
-},
-
-{
-  id:"d1-tea1",
-  day:1,
-  date:"2026-09-07",
-  start:"10:30",
-  end:"11:00",
-  title:"Tea Break, Exhibition & Poster Viewing",
-  type:"Break"
-},
-
-{
-  id:"d1-symposium123",
-  day:1,
-  date:"2026-09-07",
-  start:"11:00",
-  end:"12:15",
-  title:"Symposium",
-  type:"Parallel",
-  parallel:[
-    {
-      id:"d1-s1",
-      label:"S1",
-      title:"Functional Biomaterials for Regenerative Medicine"
-    },
-    {
-      id:"d1-s2",
-      label:"S2",
-      title:"Cell-Free Therapies: Secretome, Exosomes, and Conditioned Media"
-    },
-    {
-      id:"d1-s3",
-      label:"S3",
-      title:"iPSC: Innovations Toward Clinical Translation"
-    }
-  ]
-},
-
-{
-  id:"d1-industry1",
-  day:1,
-  date:"2026-09-07",
-  start:"12:15",
-  end:"12:45",
-  title:"Industrial Talk 1",
-  type:"Industrial Talk"
-},
-
-{
-  id:"d1-lunch",
-  day:1,
-  date:"2026-09-07",
-  start:"12:45",
-  end:"14:00",
-  title:"Lunch, Exhibition & Poster Rapid Presentation",
-  type:"Break"
-},
-
-{
-  id:"d1-op",
-  day:1,
-  date:"2026-09-07",
-  start:"14:00",
-  end:"15:00",
-  title:"Oral Presentation",
-  type:"Parallel",
-  parallel:[
-    {
-      id:"d1-op1",
-      label:"Theme 1",
-      title:"Stem Cell Innovations and Clinical Applications"
-    },
-    {
-      id:"d1-op2",
-      label:"Theme 2",
-      title:"Biomaterials and Tissue Scaffolds"
-    },
-    {
-      id:"d1-op3",
-      label:"Theme 3",
-      title:"Extracellular Vesicle and Disease Remodeling"
-    }
-  ]
-},
-
-{
-  id:"d1-tea2",
-  day:1,
-  date:"2026-09-07",
-  start:"15:00",
-  end:"15:10",
-  title:"Tea Break, Exhibition & Poster Viewing",
-  type:"Break"
-},
-
-{
-  id:"d1-syis",
-  day:1,
-  date:"2026-09-07",
-  start:"15:10",
-  end:"16:30",
-  title:"Student and Young Investigator Symposium",
-  type:"Parallel",
-  parallel:[
-    {
-      id:"d1-syis1",
-      label:"Theme 1",
-      title:"Stem Cell Innovations and Clinical Applications"
-    },
-    {
-      id:"d1-syis2",
-      label:"Theme 2",
-      title:"Hydrogels and Biomaterials"
-    },
-    {
-      id:"d1-syis3",
-      label:"Theme 3",
-      title:"Innovations in Bioscaffolds for Tissue Engineering"
-    }
-  ]
-},
-
-{
-  id:"d1-plenary2",
-  day:1,
-  date:"2026-09-07",
-  start:"16:30",
-  end:"17:00",
-  title:"Plenary 2",
-  type:"Plenary"
-},
-
-{
-  id:"d1-keynote2",
-  day:1,
-  date:"2026-09-07",
-  start:"17:00",
-  end:"18:00",
-  title:"Keynote Talk",
-  type:"Keynote"
-},
-
-{
-  id:"d1-adjourn",
-  day:1,
-  date:"2026-09-07",
-  start:"18:00",
-  end:"18:01",
-  title:"Adjourn Day 1",
-  type:"General"
-},
-
-
-{
-  id:"d2-registration",
-  day:2,
-  date:"2026-09-08",
-  start:"08:30",
-  end:"09:00",
-  title:"Registration",
-  type:"General"
-},
-
-{
-  id:"d2-plenary3",
-  day:2,
-  date:"2026-09-08",
-  start:"09:00",
-  end:"09:30",
-  title:"Plenary 3",
-  type:"Plenary"
-},
-
-{
-  id:"d2-forum",
-  day:2,
-  date:"2026-09-08",
-  start:"09:30",
-  end:"10:45",
-  title:"Distinguished Expert Forum",
-  type:"Forum"
-},
-
-{
-  id:"d2-tea1",
-  day:2,
-  date:"2026-09-08",
-  start:"10:45",
-  end:"11:00",
-  title:"Tea Break, Exhibition & Poster Viewing",
-  type:"Break"
-},
-
-{
-  id:"d2-s456",
-  day:2,
-  date:"2026-09-08",
-  start:"11:00",
-  end:"12:15",
-  title:"Symposium",
-  type:"Parallel",
-  parallel:[
-    {
-      id:"d2-s4",
-      label:"S4",
-      title:"Translational Biofabrication in Regenerative Medicine"
-    },
-    {
-      id:"d2-s5",
-      label:"S5",
-      title:"TERM Research"
-    },
-    {
-      id:"d2-s6",
-      label:"S6",
-      title:"Vascular Regenerative and Reparative Medicine - A Frontier"
-    }
-  ]
-},
-
-{
-  id:"d2-agm",
-  day:2,
-  date:"2026-09-08",
-  start:"12:15",
-  end:"13:15",
-  title:"22nd TESMA Annual General Meeting (AGM) 2026",
-  type:"Meeting"
-},
-
-{
-  id:"d2-lunch",
-  day:2,
-  date:"2026-09-08",
-  start:"13:15",
-  end:"14:00",
-  title:"Lunch, Exhibition & Poster Viewing",
-  type:"Break"
-},
-
-{
-  id:"d2-s789",
-  day:2,
-  date:"2026-09-08",
-  start:"14:00",
-  end:"15:15",
-  title:"Symposium",
-  type:"Parallel",
-  parallel:[
-    {
-      id:"d2-s7",
-      label:"S7",
-      title:"Nerve Regeneration"
-    },
-    {
-      id:"d2-s8",
-      label:"S8",
-      title:"Smart Technology for Medical Applications"
-    },
-    {
-      id:"d2-s9",
-      label:"S9",
-      title:"Clinical Trial Innovations"
-    }
-  ]
-},
-
-{
-  id:"d2-tea2",
-  day:2,
-  date:"2026-09-08",
-  start:"15:15",
-  end:"15:45",
-  title:"Tea Break, Exhibition & Poster Viewing",
-  type:"Break"
-},
-
-{
-  id:"d2-closing-keynote",
-  day:2,
-  date:"2026-09-08",
-  start:"15:45",
-  end:"16:45",
-  title:"Closing Keynote",
-  type:"Keynote"
-},
-
-{
-  id:"d2-closing",
-  day:2,
-  date:"2026-09-08",
-  start:"16:45",
-  end:"17:15",
-  title:"Closing and Award Giving Ceremony",
-  type:"Ceremony"
-},
-
-{
-  id:"d2-end",
-  day:2,
-  date:"2026-09-08",
-  start:"17:15",
-  end:"17:16",
-  title:"End of MTERMS 2026",
-  type:"General"
-}
-
-];
+const PROGRAMME =
+  MASTER.programme;
 
 
 /* =====================================================
@@ -2801,70 +2474,15 @@ function formatTime(time){
 }
 
 
-function hasDiscussionRoom(item){
-
-  return [
-    "Keynote",
-    "Plenary",
-    "Industrial Talk",
-    "Forum"
-  ].includes(item.type);
-
-}
 
 
 function discussionRoomDefinitions(){
 
-  const rooms = [];
-
-  PROGRAMME.forEach(item => {
-
-    if(item.parallel){
-
-      item.parallel.forEach(p => {
-
-        rooms.push({
-
-          id:p.id,
-          parentId:item.id,
-          day:item.day,
-          date:item.date,
-          start:item.start,
-          end:item.end,
-          title:
-            p.label +
-            " — " +
-            p.title
-
-        });
-
-      });
-
-    }
-
-    else if(
-      hasDiscussionRoom(item)
-    ){
-
-      rooms.push({
-
-        id:item.id,
-        parentId:item.id,
-        day:item.day,
-        date:item.date,
-        start:item.start,
-        end:item.end,
-        title:item.title
-
-      });
-
-    }
-
-  });
-
-  return rooms;
+  return MASTER
+    .getDiscussionRoomDefinitions();
 
 }
+
 
 
 function groupMessagesBySession(
