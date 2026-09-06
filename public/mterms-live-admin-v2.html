@@ -1803,6 +1803,52 @@ textarea.form-control{
 
   </div>
 
+  <div class="section-label">
+  Conference Analytics
+</div>
+
+
+<div
+  class="card"
+  style="padding:16px;"
+>
+
+  <div
+    style="
+      font-size:15px;
+      font-weight:850;
+    "
+  >
+    MTERMS 2026 Digital Engagement
+  </div>
+
+
+  <div
+    style="
+      margin-top:5px;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--muted);
+    "
+  >
+    View live participant engagement,
+    programme activity, session popularity,
+    digital interaction, device usage and
+    conference analytics.
+  </div>
+
+
+  <button
+    class="btn btn-primary"
+    id="openAnalyticsDashboardBtn"
+    type="button"
+    style="margin-top:12px;"
+  >
+    ◫ Open Analytics Dashboard
+  </button>
+
+</div>
+
 </section>
 
 </main>
@@ -4810,6 +4856,27 @@ document
     }
   );
 
+
+/* =====================================================
+   LIVE ANALYTICS DASHBOARD
+===================================================== */
+
+document
+  .getElementById(
+    "openAnalyticsDashboardBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.open(
+        "/public/admin-live-analytics.html",
+        "_blank"
+      );
+
+    }
+  );
+  
 /* =====================================================
    INITIALISE
 ===================================================== */
