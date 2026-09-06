@@ -1490,32 +1490,59 @@ textarea.form-control{
   </h1>
 
   <div class="page-sub">
-    Review individual session and overall conference feedback.
+    Review individual presenter feedback and overall conference feedback.
   </div>
 
 
   <div class="section-label">
-    Feedback Overview
+    Presenter Feedback
+  </div>
+
+  <div
+    class="card"
+    style="
+      padding:16px;
+    "
+  >
+
+    <div
+      style="
+        font-size:15px;
+        font-weight:850;
+      "
+    >
+      Individual Presenter Feedback
+    </div>
+
+    <div
+      style="
+        margin-top:5px;
+        font-size:12px;
+        line-height:1.5;
+        color:var(--muted);
+      "
+    >
+      View ratings and written comments for each presenter.
+    </div>
+
+    <button
+      class="btn btn-primary"
+      id="openPresenterFeedbackManagerBtn"
+      type="button"
+      style="margin-top:12px;"
+    >
+      ★ Open Presenter Feedback Manager
+    </button>
+
+  </div>
+
+
+  <div class="section-label">
+    Overall Conference Feedback
   </div>
 
 
   <div class="feedback-summary">
-
-    <div class="feedback-stat">
-
-      <div class="stat-label">
-        Session Responses
-      </div>
-
-      <div
-        class="stat-value"
-        id="feedbackResponseCount"
-      >
-        0
-      </div>
-
-    </div>
-
 
     <div class="feedback-stat">
 
@@ -1543,19 +1570,13 @@ textarea.form-control{
 
 
   <div class="section-label">
-    Session Feedback
-  </div>
-
-  <div id="sessionFeedbackAdminList"></div>
-
-
-  <div class="section-label">
     Overall Conference Comments
   </div>
 
   <div id="overallFeedbackComments"></div>
 
 </section>
+
 
 
 <!-- =====================================================
@@ -4525,336 +4546,123 @@ if(!background){
 
 async function renderFeedbackAdmin(){
 
-  const sessionTarget =
-    document.getElementById(
-      "sessionFeedbackAdminList"
-    );
-
-
-  sessionTarget.innerHTML = `
-    <div class="empty">
-      Loading session feedback…
-    </div>
-  `;
-
-
   try{
 
-    const feedback =
+    const conferenceFeedback =
       await AdminStore
-        .getSessionFeedback();
-
-    const rooms =
-      discussionRoomDefinitions();
-
-    const grouped = {};
+        .getConferenceFeedback();
 
 
-    feedback.forEach(item => {
-
-      if(!grouped[item.sessionId]){
-
-        grouped[item.sessionId] = {
-          ratings:[],
-          comments:[]
-        };
-
-      }
+    const total =
+      conferenceFeedback.length;
 
 
-      grouped[item.sessionId]
-        .ratings
-        .push(
-          Number(item.rating)
-        );
+    const average =
+      total
+        ? conferenceFeedback.reduce(
+            (sum,item) =>
+              sum +
+              Number(
+                item.rating || 0
+              ),
+            0
+          ) / total
+        : 0;
 
 
-      if(item.comment){
+    if(total){
 
-        grouped[item.sessionId]
-          .comments
-          .push(item.comment);
-
-      }
-
-    });
-
-
-    const rows =
-      Object.entries(grouped)
-        .map(([sessionId,data]) => {
-
-          const room =
-            rooms.find(
-              r =>
-                r.id === sessionId
-            );
+      document
+        .getElementById(
+          "overallConferenceRating"
+        )
+        .textContent =
+          average.toFixed(1) +
+          " ★";
 
 
-          const total =
-            data.ratings.length;
+      document
+        .getElementById(
+          "overallConferenceNote"
+        )
+        .textContent =
+          total +
+          (
+            total === 1
+              ? " response"
+              : " responses"
+          );
 
 
-          const average =
-            total
-              ? data.ratings.reduce(
-                  (sum,value) =>
-                    sum + value,
-                  0
-                ) / total
-              : 0;
+      const comments =
+        conferenceFeedback
+          .filter(
+            item =>
+              item.comment
+          );
 
 
-          const distribution = {
-            5:0,
-            4:0,
-            3:0,
-            2:0,
-            1:0
-          };
+      document
+        .getElementById(
+          "overallFeedbackComments"
+        )
+        .innerHTML =
+          comments.length
+            ? comments
+                .map(
+                  item => `
+                    <div class="comment">
+                      ${escapeHTML(
+                        item.comment
+                      )}
+                    </div>
+                  `
+                )
+                .join("")
+            : `
+              <div class="empty">
+                No comments were provided.
+              </div>
+            `;
 
-
-          data.ratings
-            .forEach(rating => {
-
-              if(
-                distribution[rating] !==
-                undefined
-              ){
-
-                distribution[rating]++;
-
-              }
-
-            });
-
-
-          return {
-            sessionId,
-
-            title:
-              room
-                ? room.title
-                : sessionId,
-
-            total,
-            average,
-            distribution,
-            comments:data.comments
-          };
-
-        });
-
-
-    document
-      .getElementById(
-        "feedbackResponseCount"
-      )
-      .textContent =
-        feedback.length;
-
-
-    if(!rows.length){
-
-      sessionTarget.innerHTML = `
-        <div class="empty">
-          No session feedback has been submitted yet.
-        </div>
-      `;
 
     }else{
 
-      sessionTarget.innerHTML =
-        rows.map(row => `
-
-          <div class="feedback-session">
-
-            <div class="feedback-session-head">
-
-              <div class="feedback-session-main">
-
-                <div class="feedback-session-title">
-                  ${escapeHTML(row.title)}
-                </div>
-
-                <div class="feedback-session-rating">
-
-                  ${row.average.toFixed(1)} ★
-
-                </div>
-
-                <div class="feedback-count">
-                  ${row.total}
-                  ${row.total === 1
-                    ? "response"
-                    : "responses"}
-                </div>
-
-              </div>
-
-            </div>
+      document
+        .getElementById(
+          "overallConferenceRating"
+        )
+        .textContent =
+          "—";
 
 
-            <div
-              style="
-                margin-top:10px;
-                font-size:11px;
-                line-height:1.8;
-                color:var(--muted);
-              "
-            >
-
-              <div>
-                ★★★★★ — ${row.distribution[5]}
-              </div>
-
-              <div>
-                ★★★★☆ — ${row.distribution[4]}
-              </div>
-
-              <div>
-                ★★★☆☆ — ${row.distribution[3]}
-              </div>
-
-              <div>
-                ★★☆☆☆ — ${row.distribution[2]}
-              </div>
-
-              <div>
-                ★☆☆☆☆ — ${row.distribution[1]}
-              </div>
-
-            </div>
+      document
+        .getElementById(
+          "overallConferenceNote"
+        )
+        .textContent =
+          "No responses yet";
 
 
-            ${
-              row.comments.length
-                ? `
-                  <div
-                    style="
-                      margin-top:10px;
-                      font-size:10px;
-                      font-weight:850;
-                      color:var(--muted);
-                      text-transform:uppercase;
-                      letter-spacing:.06em;
-                    "
-                  >
-                    Comments
-                  </div>
-
-                  ${row.comments
-                    .map(comment => `
-                      <div class="comment">
-                        ${escapeHTML(comment)}
-                      </div>
-                    `)
-                    .join("")}
-                `
-                : ``
-            }
-
+      document
+        .getElementById(
+          "overallFeedbackComments"
+        )
+        .innerHTML = `
+          <div class="empty">
+            No overall conference feedback yet.
           </div>
-
-        `).join("");
+        `;
 
     }
 
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
-    sessionTarget.innerHTML = `
-      <div class="empty">
-        Unable to load session feedback.
-      </div>
-    `;
-
-  }
-
-/*
-  Overall conference feedback
-  from MongoDB.
-*/
-
-try{
-
-  const conferenceFeedback =
-    await AdminStore
-      .getConferenceFeedback();
-
-
-  const total =
-    conferenceFeedback.length;
-
-
-  const average =
-    total
-      ? conferenceFeedback.reduce(
-          (sum,item) =>
-            sum +
-            Number(item.rating || 0),
-          0
-        ) / total
-      : 0;
-
-
-  if(total){
-
-    document
-      .getElementById(
-        "overallConferenceRating"
-      )
-      .textContent =
-        average.toFixed(1) +
-        " ★";
-
-
-    document
-      .getElementById(
-        "overallConferenceNote"
-      )
-      .textContent =
-        total +
-        (
-          total === 1
-            ? " response"
-            : " responses"
-        );
-
-
-    const comments =
-      conferenceFeedback
-        .filter(
-          item =>
-            item.comment
-        );
-
-
-    document
-      .getElementById(
-        "overallFeedbackComments"
-      )
-      .innerHTML =
-        comments.length
-          ? comments
-              .map(item => `
-                <div class="comment">
-                  ${escapeHTML(
-                    item.comment
-                  )}
-                </div>
-              `)
-              .join("")
-          : `
-            <div class="empty">
-              No comments were provided.
-            </div>
-          `;
-
-
-  }else{
 
     document
       .getElementById(
@@ -4869,7 +4677,7 @@ try{
         "overallConferenceNote"
       )
       .textContent =
-        "No responses yet";
+        "Unable to load";
 
 
     document
@@ -4878,48 +4686,13 @@ try{
       )
       .innerHTML = `
         <div class="empty">
-          No overall conference feedback yet.
+          Unable to load overall conference feedback.
         </div>
       `;
 
   }
 
-
-}catch(error){
-
-  console.error(error);
-
-
-  document
-    .getElementById(
-      "overallConferenceRating"
-    )
-    .textContent =
-      "—";
-
-
-  document
-    .getElementById(
-      "overallConferenceNote"
-    )
-    .textContent =
-      "Unable to load";
-
-
-  document
-    .getElementById(
-      "overallFeedbackComments"
-    )
-    .innerHTML = `
-      <div class="empty">
-        Unable to load overall conference feedback.
-      </div>
-    `;
-
 }
-
-}
-
 
 /* =====================================================
    INFORMATION
@@ -5196,7 +4969,25 @@ document
     }
   );
 
+/* =====================================================
+   V2 PRESENTER FEEDBACK MANAGER
+===================================================== */
 
+document
+  .getElementById(
+    "openPresenterFeedbackManagerBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.open(
+        "/public/admin-presenter-feedback-v2.html",
+        "_blank"
+      );
+
+    }
+  );
 /* =====================================================
    INITIALISE
 ===================================================== */
