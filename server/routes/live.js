@@ -1297,7 +1297,48 @@ router.get(
   }
 );
 
+/* =====================================================
+   TEMP ADMIN CLEANUP
+   CLEAR ALL OVERALL CONFERENCE FEEDBACK
+===================================================== */
 
+router.delete(
+  '/feedback/conference/admin/clear-all',
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await MtermsLiveFeedback.deleteMany({
+          feedbackType: 'conference'
+        });
+
+
+      res.json({
+        ok: true,
+        deletedCount:
+          result.deletedCount || 0
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'MTERMS conference feedback clear error:',
+        error
+      );
+
+
+      res.status(500).json({
+        ok: false,
+        error:
+          'Unable to clear conference feedback'
+      });
+
+    }
+
+  }
+);
 /* =====================================================
    USEFUL INFORMATION
 ===================================================== */
