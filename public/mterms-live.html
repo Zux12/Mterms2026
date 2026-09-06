@@ -4586,6 +4586,9 @@ const PRESENTER_FEEDBACK_API =
 const MOMENTS_API =
   "https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments";
 
+const ANALYTICS_API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/live-analytics";
+
 
 /* =====================================================
    MASTER PROGRAMME
@@ -4630,7 +4633,97 @@ const KEYS = {
 
 };
 
+/* =====================================================
+   ANALYTICS
+===================================================== */
 
+/*
+  Fire-and-forget analytics.
+
+  IMPORTANT:
+  Analytics must never interrupt the participant
+  experience. Any tracking error is silently ignored.
+*/
+
+function trackAnalytics(
+  event,
+  options = {}
+){
+
+  try{
+
+    const payload = {
+
+      participantId:
+        getParticipantId(),
+
+      event:
+        String(
+          event || ""
+        ),
+
+      page:
+        String(
+          options.page || ""
+        ),
+
+      targetId:
+        String(
+          options.targetId || ""
+        ),
+
+      targetType:
+        String(
+          options.targetType || ""
+        ),
+
+      metadata:
+        (
+          options.metadata &&
+          typeof options.metadata ===
+          "object"
+        )
+          ? options.metadata
+          : {}
+
+    };
+
+
+    fetch(
+      `${ANALYTICS_API}/event`,
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+
+        keepalive:true
+
+      }
+    )
+    .catch(
+      ()=>{}
+    );
+
+
+  }catch(error){
+
+    /*
+      Analytics must never affect
+      MTERMS Live functionality.
+    */
+
+  }
+
+}
 
 /* =====================================================
    BASIC HELPERS
@@ -5580,6 +5673,15 @@ function renderAnnouncements(){
 
 function openAnnouncements(){
 
+
+  trackAnalytics(
+  "announcement_open",
+  {
+    page:
+      "live"
+  }
+);
+
   renderAnnouncements();
 
 
@@ -5751,6 +5853,14 @@ if(
 
   }
 
+trackAnalytics(
+  "page_view",
+  {
+    page:
+      pageName
+  }
+);
+  
 }
 
 
@@ -7424,20 +7534,35 @@ function bindProgrammeActions(){
                   .expandSession;
 
 
-              if(
-                expandedSessions
-                  .has(id)
-              ){
+if(
+  expandedSessions
+    .has(id)
+){
 
-                expandedSessions
-                  .delete(id);
+  expandedSessions
+    .delete(id);
 
-              }else{
+}else{
 
-                expandedSessions
-                  .add(id);
+  expandedSessions
+    .add(id);
 
-              }
+
+  trackAnalytics(
+    "session_expand",
+    {
+      page:
+        "programme",
+
+      targetId:
+        id,
+
+      targetType:
+        "session"
+    }
+  );
+
+}
 
 
               renderProgramme();
@@ -7611,26 +7736,56 @@ function toggleSchedule(
     getSchedule();
 
 
-  if(
-    saved.includes(
-      id
-    )
-  ){
+if(
+  saved.includes(
+    id
+  )
+){
 
-    saved =
-      saved.filter(
-        item =>
-          item !== id
-      );
-
-
-  }else{
-
-    saved.push(
-      id
+  saved =
+    saved.filter(
+      item =>
+        item !== id
     );
 
-  }
+
+  trackAnalytics(
+    "schedule_remove",
+    {
+      page:
+        "programme",
+
+      targetId:
+        id,
+
+      targetType:
+        "session"
+    }
+  );
+
+
+}else{
+
+  saved.push(
+    id
+  );
+
+
+  trackAnalytics(
+    "schedule_save",
+    {
+      page:
+        "programme",
+
+      targetId:
+        id,
+
+      targetType:
+        "session"
+    }
+  );
+
+}
 
 
   saveSchedule(
@@ -8186,6 +8341,20 @@ function openBio(
     return;
   }
 
+  trackAnalytics(
+  "bio_view",
+  {
+    page:
+      "programme",
+
+    targetId:
+      bioId,
+
+    targetType:
+      "speaker_bio"
+  }
+);
+
 
   document
     .getElementById(
@@ -8382,6 +8551,25 @@ async function openPresenterFeedback(
   if(!target){
     return;
   }
+
+  trackAnalytics(
+  "feedback_open",
+  {
+    page:
+      "programme",
+
+    targetId:
+      presenterId,
+
+    targetType:
+      "presenter",
+
+    metadata:{
+      sessionId:
+        sessionId
+    }
+  }
+);
 
 
   if(
@@ -9501,6 +9689,20 @@ function openDiscussionRoom(
   if(!room){
     return;
   }
+
+  trackAnalytics(
+  "discussion_open",
+  {
+    page:
+      "discuss",
+
+    targetId:
+      roomId,
+
+    targetType:
+      "discussion_room"
+  }
+);
 
 
   activeRoomId =
@@ -13162,6 +13364,15 @@ if(
   "moments"
 ){
 
+  trackAnalytics(
+    "moments_open",
+    {
+      page:
+        "more"
+    }
+  );
+
+
   renderMomentsPanel(
     target
   );
@@ -13994,6 +14205,14 @@ bioModal
 ===================================================== */
 
 function initialise(){
+
+  trackAnalytics(
+  "app_open",
+  {
+    page:
+      "live"
+  }
+);
 
   updateProfileSummary();
 
