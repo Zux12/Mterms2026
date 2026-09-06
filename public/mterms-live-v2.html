@@ -13791,11 +13791,36 @@ function initialise(){
     5000
   );
 
-  setInterval(
+ setInterval(
   async ()=>{
 
     if(
       !momentsPanelVisible
+    ){
+      return;
+    }
+
+
+    /*
+      Do not refresh while the participant
+      is typing a Moment comment.
+    */
+
+const commentDraftActive =
+  Array.from(
+    document.querySelectorAll(
+      '[id^="moment-comment-"]'
+    )
+  )
+  .some(
+    input =>
+      input === document.activeElement ||
+      input.value.trim()
+  );
+
+
+    if(
+      commentDraftActive
     ){
       return;
     }
