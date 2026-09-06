@@ -4311,7 +4311,191 @@ main{
 
 </div>
 
+<!-- =====================================================
+     MTERMS MOMENTS COMPOSER
+===================================================== -->
 
+<div
+  class="modal-backdrop hidden"
+  id="momentComposerModal"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <div class="modal-title">
+          Share a Moment
+        </div>
+
+        <div class="page-sub">
+          Capture or choose a photo and leave a short message.
+        </div>
+
+      </div>
+
+      <button
+        class="modal-close"
+        id="momentComposerClose"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!--
+      Mobile camera input.
+      capture="environment" requests the rear camera
+      on supported mobile browsers.
+    -->
+
+    <input
+      class="hidden"
+      type="file"
+      id="momentCameraInput"
+      accept="image/*"
+      capture="environment"
+    >
+
+
+    <!--
+      Normal gallery / file chooser.
+    -->
+
+    <input
+      class="hidden"
+      type="file"
+      id="momentLibraryInput"
+      accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+    >
+
+
+    <div class="moment-source-actions">
+
+      <button
+        class="moment-source-btn"
+        id="takeMomentPhotoBtn"
+        type="button"
+      >
+        📷 Take Photo
+      </button>
+
+      <button
+        class="moment-source-btn"
+        id="chooseMomentPhotoBtn"
+        type="button"
+      >
+        ▣ Choose Photo
+      </button>
+
+    </div>
+
+
+    <div
+      class="moment-preview-wrap hidden"
+      id="momentPreviewWrap"
+    >
+
+      <img
+        class="moment-preview"
+        id="momentPreview"
+        alt="Selected Moment"
+      >
+
+      <div
+        class="moment-preview-meta"
+        id="momentPreviewMeta"
+      ></div>
+
+    </div>
+
+
+    <textarea
+      class="moment-caption"
+      id="momentCaption"
+      maxlength="300"
+      placeholder="Leave a short message…"
+    ></textarea>
+
+
+    <div
+      class="moment-upload-status"
+      id="momentUploadStatus"
+    ></div>
+
+
+    <div class="modal-actions">
+
+      <button
+        class="btn btn-outline"
+        id="cancelMomentBtn"
+        type="button"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-primary"
+        id="uploadMomentBtn"
+        type="button"
+      >
+        Share Moment
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MTERMS MOMENT VIEWER
+===================================================== -->
+
+<div
+  class="modal-backdrop hidden"
+  id="momentViewerModal"
+>
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <div class="modal-title">
+          MTERMS Moment
+        </div>
+
+        <div
+          class="page-sub"
+          id="momentViewerAuthor"
+        ></div>
+
+      </div>
+
+      <button
+        class="modal-close"
+        id="momentViewerClose"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="momentViewerContent"></div>
+
+  </div>
+
+</div>
 
 <!-- =====================================================
      MASTER V2 PROGRAMME DATA
@@ -4340,6 +4524,9 @@ const LIVE_API =
 
 const PRESENTER_FEEDBACK_API =
   "https://mterm2026-559f9bf571b5.herokuapp.com/api/presenter-feedback";
+
+const MOMENTS_API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments";
 
 
 /* =====================================================
@@ -5405,6 +5592,16 @@ function goToPage(
   pageName
 ){
 
+  if(
+  pageName !==
+  "more"
+){
+
+  momentsPanelVisible =
+    false;
+
+}
+
   document
     .querySelectorAll(
       ".page"
@@ -5576,21 +5773,7 @@ document
     "click",
     ()=>{
 
-      goToPage(
-        "more"
-      );
-
-
-      setTimeout(
-        ()=>{
-
-          renderMorePanel(
-            "moments"
-          );
-
-        },
-        0
-      );
+      openMomentComposer();
 
     }
   );
@@ -10309,7 +10492,2352 @@ async function getUsefulInformation(){
 
 }
 
+/* =====================================================
+   MTERMS MOMENTS
+===================================================== */
 
+let momentsData = [];
+
+let momentsView =
+  "feed";
+
+let selectedMomentFile =
+  null;
+
+let selectedMomentPreviewUrl =
+  null;
+
+let currentMomentViewerId =
+  null;
+
+let momentsPanelVisible =
+  false;
+
+
+/* -----------------------------------------------------
+   ELEMENTS
+----------------------------------------------------- */
+
+const momentComposerModal =
+  document.getElementById(
+    "momentComposerModal"
+  );
+
+
+const momentViewerModal =
+  document.getElementById(
+    "momentViewerModal"
+  );
+
+
+const momentCameraInput =
+  document.getElementById(
+    "momentCameraInput"
+  );
+
+
+const momentLibraryInput =
+  document.getElementById(
+    "momentLibraryInput"
+  );
+
+
+const momentPreview =
+  document.getElementById(
+    "momentPreview"
+  );
+
+
+const momentPreviewWrap =
+  document.getElementById(
+    "momentPreviewWrap"
+  );
+
+
+const momentPreviewMeta =
+  document.getElementById(
+    "momentPreviewMeta"
+  );
+
+
+const momentCaption =
+  document.getElementById(
+    "momentCaption"
+  );
+
+
+const momentUploadStatus =
+  document.getElementById(
+    "momentUploadStatus"
+  );
+
+
+/* -----------------------------------------------------
+   IMAGE URL
+----------------------------------------------------- */
+
+function getMomentImageUrl(
+  moment
+){
+
+  return (
+    MOMENTS_API +
+    "/" +
+    encodeURIComponent(
+      moment.id
+    ) +
+    "/image"
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   DISPLAY IDENTITY
+----------------------------------------------------- */
+
+function momentIdentity(
+  item
+){
+
+  return [
+    item.title,
+    item.displayName
+  ]
+  .filter(Boolean)
+  .join(" ");
+
+}
+
+
+/* -----------------------------------------------------
+   DATE / TIME
+----------------------------------------------------- */
+
+function formatMomentTime(
+  iso
+){
+
+  if(!iso){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      iso
+    )
+    .toLocaleString(
+      "en-MY",
+      {
+        day:"numeric",
+        month:"short",
+        hour:"numeric",
+        minute:"2-digit",
+        hour12:true,
+        timeZone:
+          "Asia/Kuala_Lumpur"
+      }
+    );
+
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   OPEN COMPOSER
+----------------------------------------------------- */
+
+function openMomentComposer(){
+
+  if(
+    !getProfile()
+  ){
+
+    openProfile();
+
+    return;
+
+  }
+
+
+  resetMomentComposer();
+
+
+  momentComposerModal
+    .classList
+    .remove(
+      "hidden"
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   CLOSE COMPOSER
+----------------------------------------------------- */
+
+function closeMomentComposer(){
+
+  momentComposerModal
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  resetMomentComposer();
+
+}
+
+
+/* -----------------------------------------------------
+   RESET COMPOSER
+----------------------------------------------------- */
+
+function resetMomentComposer(){
+
+  selectedMomentFile =
+    null;
+
+
+  if(
+    selectedMomentPreviewUrl
+  ){
+
+    URL.revokeObjectURL(
+      selectedMomentPreviewUrl
+    );
+
+    selectedMomentPreviewUrl =
+      null;
+
+  }
+
+
+  momentCameraInput.value =
+    "";
+
+
+  momentLibraryInput.value =
+    "";
+
+
+  momentPreview.src =
+    "";
+
+
+  momentPreviewWrap
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  momentPreviewMeta.textContent =
+    "";
+
+
+  momentCaption.value =
+    "";
+
+
+  momentUploadStatus.textContent =
+    "";
+
+
+  const uploadButton =
+    document.getElementById(
+      "uploadMomentBtn"
+    );
+
+
+  if(uploadButton){
+
+    uploadButton.disabled =
+      false;
+
+    uploadButton.textContent =
+      "Share Moment";
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   PHOTO SOURCE BUTTONS
+----------------------------------------------------- */
+
+document
+  .getElementById(
+    "takeMomentPhotoBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      momentCameraInput.click();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "chooseMomentPhotoBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      momentLibraryInput.click();
+
+    }
+  );
+
+
+momentCameraInput
+  .addEventListener(
+    "change",
+    ()=>{
+
+      handleMomentFile(
+        momentCameraInput
+          .files?.[0]
+      );
+
+    }
+  );
+
+
+momentLibraryInput
+  .addEventListener(
+    "change",
+    ()=>{
+
+      handleMomentFile(
+        momentLibraryInput
+          .files?.[0]
+      );
+
+    }
+  );
+
+
+/* -----------------------------------------------------
+   SELECT PHOTO
+----------------------------------------------------- */
+
+function handleMomentFile(
+  file
+){
+
+  if(!file){
+    return;
+  }
+
+
+  if(
+    !String(
+      file.type || ""
+    )
+    .startsWith(
+      "image/"
+    )
+  ){
+
+    alert(
+      "Please choose an image."
+    );
+
+    return;
+
+  }
+
+
+  selectedMomentFile =
+    file;
+
+
+  if(
+    selectedMomentPreviewUrl
+  ){
+
+    URL.revokeObjectURL(
+      selectedMomentPreviewUrl
+    );
+
+  }
+
+
+  selectedMomentPreviewUrl =
+    URL.createObjectURL(
+      file
+    );
+
+
+  momentPreview.src =
+    selectedMomentPreviewUrl;
+
+
+  momentPreviewWrap
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  momentPreviewMeta.textContent =
+    (
+      file.name ||
+      "Selected photo"
+    ) +
+    " · " +
+    Math.max(
+      1,
+      Math.round(
+        file.size /
+        1024
+      )
+    ) +
+    " KB";
+
+
+  momentUploadStatus.textContent =
+    "";
+
+}
+
+
+/* -----------------------------------------------------
+   LOAD IMAGE INTO BROWSER
+----------------------------------------------------- */
+
+function loadMomentImage(
+  file
+){
+
+  return new Promise(
+    (
+      resolve,
+      reject
+    )=>{
+
+      const url =
+        URL.createObjectURL(
+          file
+        );
+
+
+      const image =
+        new Image();
+
+
+      image.onload =
+        ()=>{
+
+          URL.revokeObjectURL(
+            url
+          );
+
+          resolve(
+            image
+          );
+
+        };
+
+
+      image.onerror =
+        ()=>{
+
+          URL.revokeObjectURL(
+            url
+          );
+
+          reject(
+            new Error(
+              "Unable to read this photo."
+            )
+          );
+
+        };
+
+
+      image.src =
+        url;
+
+    }
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   CANVAS TO JPEG BLOB
+----------------------------------------------------- */
+
+function canvasToMomentBlob(
+  canvas,
+  quality
+){
+
+  return new Promise(
+    (
+      resolve,
+      reject
+    )=>{
+
+      canvas.toBlob(
+        blob => {
+
+          if(!blob){
+
+            reject(
+              new Error(
+                "Unable to compress photo."
+              )
+            );
+
+            return;
+
+          }
+
+
+          resolve(
+            blob
+          );
+
+        },
+        "image/jpeg",
+        quality
+      );
+
+    }
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   COMPRESS PHOTO
+
+   Target:
+   - maximum dimension 1600px
+   - JPEG
+   - approximately <= 1.8MB
+
+   This happens on the participant's phone/browser,
+   before the photo is sent to Heroku/MongoDB.
+----------------------------------------------------- */
+
+async function compressMomentImage(
+  file
+){
+
+  const image =
+    await loadMomentImage(
+      file
+    );
+
+
+  const originalWidth =
+    image.naturalWidth ||
+    image.width;
+
+
+  const originalHeight =
+    image.naturalHeight ||
+    image.height;
+
+
+  let width =
+    originalWidth;
+
+
+  let height =
+    originalHeight;
+
+
+  const maxDimension =
+    1600;
+
+
+  if(
+    width >
+    maxDimension ||
+    height >
+    maxDimension
+  ){
+
+    const scale =
+      Math.min(
+        maxDimension /
+        width,
+
+        maxDimension /
+        height
+      );
+
+
+    width =
+      Math.round(
+        width *
+        scale
+      );
+
+
+    height =
+      Math.round(
+        height *
+        scale
+      );
+
+  }
+
+
+  let canvas =
+    document.createElement(
+      "canvas"
+    );
+
+
+  canvas.width =
+    width;
+
+
+  canvas.height =
+    height;
+
+
+  let context =
+    canvas.getContext(
+      "2d"
+    );
+
+
+  context.drawImage(
+    image,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  let quality =
+    .82;
+
+
+  let blob =
+    await canvasToMomentBlob(
+      canvas,
+      quality
+    );
+
+
+  /*
+    Reduce JPEG quality first.
+  */
+
+  while(
+    blob.size >
+    1.8 * 1024 * 1024 &&
+    quality >
+    .56
+  ){
+
+    quality -=
+      .08;
+
+
+    blob =
+      await canvasToMomentBlob(
+        canvas,
+        quality
+      );
+
+  }
+
+
+  /*
+    If the image is still unusually large,
+    reduce dimensions once more.
+  */
+
+  if(
+    blob.size >
+    1.8 * 1024 * 1024
+  ){
+
+    width =
+      Math.round(
+        width *
+        .8
+      );
+
+
+    height =
+      Math.round(
+        height *
+        .8
+      );
+
+
+    const smallerCanvas =
+      document.createElement(
+        "canvas"
+      );
+
+
+    smallerCanvas.width =
+      width;
+
+
+    smallerCanvas.height =
+      height;
+
+
+    const smallerContext =
+      smallerCanvas.getContext(
+        "2d"
+      );
+
+
+    smallerContext.drawImage(
+      canvas,
+      0,
+      0,
+      width,
+      height
+    );
+
+
+    canvas =
+      smallerCanvas;
+
+
+    blob =
+      await canvasToMomentBlob(
+        canvas,
+        .68
+      );
+
+  }
+
+
+  if(
+    blob.size >
+    2 * 1024 * 1024
+  ){
+
+    throw new Error(
+      "The compressed photo is still too large. Please choose another photo."
+    );
+
+  }
+
+
+  return {
+    blob,
+    width,
+    height
+  };
+
+}
+
+
+/* -----------------------------------------------------
+   UPLOAD MOMENT
+----------------------------------------------------- */
+
+document
+  .getElementById(
+    "uploadMomentBtn"
+  )
+  .addEventListener(
+    "click",
+    uploadMoment
+  );
+
+
+async function uploadMoment(){
+
+  const profile =
+    getProfile();
+
+
+  if(!profile){
+
+    openProfile();
+
+    return;
+
+  }
+
+
+  if(
+    !selectedMomentFile
+  ){
+
+    alert(
+      "Please take or choose a photo first."
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "uploadMomentBtn"
+    );
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Preparing…";
+
+
+  momentUploadStatus.textContent =
+    "Compressing photo on this device…";
+
+
+  try{
+
+    const compressed =
+      await compressMomentImage(
+        selectedMomentFile
+      );
+
+
+    momentUploadStatus.textContent =
+      "Uploading your Moment…";
+
+
+    button.textContent =
+      "Uploading…";
+
+
+    const form =
+      new FormData();
+
+
+    form.append(
+      "participantId",
+      getParticipantId()
+    );
+
+
+    form.append(
+      "displayName",
+      profile.name
+    );
+
+
+    form.append(
+      "title",
+      profile.title ||
+      ""
+    );
+
+
+    form.append(
+      "affiliation",
+      profile.affiliation ||
+      ""
+    );
+
+
+    form.append(
+      "message",
+      momentCaption
+        .value
+        .trim()
+        .slice(
+          0,
+          300
+        )
+    );
+
+
+    form.append(
+      "imageWidth",
+      String(
+        compressed.width
+      )
+    );
+
+
+    form.append(
+      "imageHeight",
+      String(
+        compressed.height
+      )
+    );
+
+
+    form.append(
+      "image",
+      compressed.blob,
+      "mterms-moment.jpg"
+    );
+
+
+    const response =
+      await fetch(
+        MOMENTS_API,
+        {
+          method:"POST",
+          body:form
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to share Moment"
+      );
+
+    }
+
+
+    momentUploadStatus.textContent =
+      "✓ Moment shared";
+
+
+    button.textContent =
+      "✓ Shared";
+
+
+    await loadMoments();
+
+
+    setTimeout(
+      ()=>{
+
+        closeMomentComposer();
+
+
+        goToPage(
+          "more"
+        );
+
+
+        setTimeout(
+          ()=>{
+
+            renderMorePanel(
+              "moments"
+            );
+
+          },
+          0
+        );
+
+      },
+      500
+    );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    momentUploadStatus.textContent =
+      error.message ||
+      "Unable to share Moment.";
+
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Share Moment";
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   LOAD MOMENTS
+----------------------------------------------------- */
+
+async function loadMoments(){
+
+  const response =
+    await fetch(
+      `${MOMENTS_API}?limit=200`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load MTERMS Moments"
+    );
+
+  }
+
+
+  momentsData =
+    Array.isArray(
+      data.moments
+    )
+      ? data.moments
+      : [];
+
+
+  return momentsData;
+
+}
+
+
+/* -----------------------------------------------------
+   MOMENTS PANEL
+----------------------------------------------------- */
+
+function renderMomentsPanel(
+  target
+){
+
+  momentsPanelVisible =
+    true;
+
+
+  target.innerHTML = `
+
+    <div class="more-panel">
+
+      <div class="moments-head">
+
+        <div class="moments-head-copy">
+
+          <h3 style="margin:0;">
+            MTERMS Moments
+          </h3>
+
+          <div class="page-sub">
+            Share and explore moments from MTERMS 2026.
+          </div>
+
+        </div>
+
+
+        <button
+          class="btn btn-primary btn-small"
+          type="button"
+          id="shareMomentBtn"
+        >
+          + Share a Moment
+        </button>
+
+      </div>
+
+
+      <div class="moments-tabs">
+
+        <button
+          class="
+            moments-tab
+            ${momentsView === "feed" ? "active" : ""}
+          "
+          type="button"
+          data-moments-view="feed"
+        >
+          Feed
+        </button>
+
+
+        <button
+          class="
+            moments-tab
+            ${momentsView === "gallery" ? "active" : ""}
+          "
+          type="button"
+          data-moments-view="gallery"
+        >
+          Gallery
+        </button>
+
+      </div>
+
+
+      <div
+        id="momentsContent"
+        class="moments-loading"
+      >
+        Loading MTERMS Moments…
+      </div>
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById(
+      "shareMomentBtn"
+    )
+    .addEventListener(
+      "click",
+      openMomentComposer
+    );
+
+
+  target
+    .querySelectorAll(
+      "[data-moments-view]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              momentsView =
+                button.dataset
+                  .momentsView;
+
+
+              renderMomentsPanel(
+                target
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  loadMoments()
+    .then(
+      ()=>{
+
+        renderMomentsContent();
+
+      }
+    )
+    .catch(
+      error => {
+
+        console.error(
+          error
+        );
+
+
+        const content =
+          document.getElementById(
+            "momentsContent"
+          );
+
+
+        if(content){
+
+          content.innerHTML = `
+            <div class="info-placeholder">
+              Unable to load MTERMS Moments.
+            </div>
+          `;
+
+        }
+
+      }
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   MOMENTS CONTENT
+----------------------------------------------------- */
+
+function renderMomentsContent(){
+
+  const target =
+    document.getElementById(
+      "momentsContent"
+    );
+
+
+  if(!target){
+    return;
+  }
+
+
+  target.className =
+    "";
+
+
+  if(
+    !momentsData.length
+  ){
+
+    target.innerHTML = `
+
+      <div
+        class="empty-state"
+        style="margin-top:12px;"
+      >
+
+        <div class="empty-icon">
+          ◉
+        </div>
+
+        No Moments have been shared yet.
+
+        <br>
+
+        Be the first to share a conference memory.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  if(
+    momentsView ===
+    "gallery"
+  ){
+
+    renderMomentsGallery(
+      target
+    );
+
+  }else{
+
+    renderMomentsFeed(
+      target
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   FEED
+----------------------------------------------------- */
+
+function renderMomentsFeed(
+  target
+){
+
+  const participantId =
+    getParticipantId();
+
+
+  target.innerHTML =
+    momentsData
+      .map(
+        moment => {
+
+          const mine =
+            moment.participantId ===
+            participantId;
+
+
+          return `
+
+            <article
+              class="moment-card"
+              id="moment-card-${escapeHTML(
+                moment.id
+              )}"
+            >
+
+
+              <button
+                class="moment-photo-button"
+                type="button"
+                data-view-moment="${escapeHTML(
+                  moment.id
+                )}"
+              >
+
+                <img
+                  class="moment-photo"
+                  src="${escapeHTML(
+                    getMomentImageUrl(
+                      moment
+                    )
+                  )}"
+                  alt="MTERMS Moment"
+                  loading="lazy"
+                >
+
+              </button>
+
+
+              <div class="moment-body">
+
+
+                <div class="moment-author-row">
+
+                  <div class="moment-author">
+
+                    <div class="moment-author-name">
+                      ${escapeHTML(
+                        momentIdentity(
+                          moment
+                        )
+                      )}
+                    </div>
+
+
+                    ${
+                      moment.affiliation
+                        ? `
+                          <div class="moment-author-affiliation">
+                            ${escapeHTML(
+                              moment.affiliation
+                            )}
+                          </div>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+
+                  <div class="moment-time">
+                    ${escapeHTML(
+                      formatMomentTime(
+                        moment.createdAt
+                      )
+                    )}
+                  </div>
+
+                </div>
+
+
+                ${
+                  moment.message
+                    ? `
+                      <div class="moment-message">
+                        ${escapeHTML(
+                          moment.message
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+
+                ${renderMomentComments(
+                  moment
+                )}
+
+
+                ${
+                  mine
+                    ? `
+                      <div class="moment-owner-actions">
+
+                        <button
+                          class="moment-delete-link"
+                          type="button"
+                          data-delete-moment="${escapeHTML(
+                            moment.id
+                          )}"
+                        >
+                          Delete my Moment
+                        </button>
+
+                      </div>
+                    `
+                    : ""
+                }
+
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  bindMomentActions(
+    target
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   COMMENTS HTML
+----------------------------------------------------- */
+
+function renderMomentComments(
+  moment
+){
+
+  const participantId =
+    getParticipantId();
+
+
+  const comments =
+    moment.comments ||
+    [];
+
+
+  return `
+
+    <div class="moment-comments">
+
+      <div class="moment-comments-title">
+
+        ${comments.length}
+
+        ${
+          comments.length ===
+          1
+            ? "Comment"
+            : "Comments"
+        }
+
+      </div>
+
+
+      ${
+        comments
+          .map(
+            comment => {
+
+              const mine =
+                comment.participantId ===
+                participantId;
+
+
+              return `
+
+                <div class="moment-comment">
+
+                  <div class="moment-comment-head">
+
+                    <div class="moment-comment-name">
+
+                      ${escapeHTML(
+                        momentIdentity(
+                          comment
+                        )
+                      )}
+
+                      ${
+                        comment.affiliation
+                          ? `
+                            ·
+                            ${escapeHTML(
+                              comment.affiliation
+                            )}
+                          `
+                          : ""
+                      }
+
+                    </div>
+
+
+                    <div class="moment-comment-time">
+                      ${escapeHTML(
+                        formatMomentTime(
+                          comment.createdAt
+                        )
+                      )}
+                    </div>
+
+                  </div>
+
+
+                  <div class="moment-comment-text">
+                    ${escapeHTML(
+                      comment.message
+                    )}
+                  </div>
+
+
+                  ${
+                    mine
+                      ? `
+                        <div class="moment-comment-actions">
+
+                          <button
+                            class="moment-delete-link"
+                            type="button"
+                            data-delete-comment="${escapeHTML(
+                              comment.id
+                            )}"
+                            data-comment-moment="${escapeHTML(
+                              moment.id
+                            )}"
+                          >
+                            Delete
+                          </button>
+
+                        </div>
+                      `
+                      : ""
+                  }
+
+
+                </div>
+
+              `;
+
+            }
+          )
+          .join("")
+      }
+
+
+      <div class="moment-comment-form">
+
+        <input
+          type="text"
+          maxlength="400"
+          id="moment-comment-${escapeHTML(
+            moment.id
+          )}"
+          placeholder="Write a comment…"
+        >
+
+
+        <button
+          class="btn btn-soft btn-small"
+          type="button"
+          data-post-moment-comment="${escapeHTML(
+            moment.id
+          )}"
+        >
+          Post
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* -----------------------------------------------------
+   GALLERY
+----------------------------------------------------- */
+
+function renderMomentsGallery(
+  target
+){
+
+  target.innerHTML = `
+
+    <div class="moments-gallery">
+
+      ${
+        momentsData
+          .map(
+            moment => `
+
+              <button
+                class="moment-gallery-item"
+                type="button"
+                data-view-moment="${escapeHTML(
+                  moment.id
+                )}"
+              >
+
+                <img
+                  src="${escapeHTML(
+                    getMomentImageUrl(
+                      moment
+                    )
+                  )}"
+                  alt="MTERMS Moment"
+                  loading="lazy"
+                >
+
+                ${
+                  (
+                    moment.comments ||
+                    []
+                  ).length
+                    ? `
+                      <span class="moment-gallery-badge">
+                        💬
+                        ${
+                          (
+                            moment.comments ||
+                            []
+                          ).length
+                        }
+                      </span>
+                    `
+                    : ""
+                }
+
+              </button>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+
+
+  bindMomentActions(
+    target
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   ACTION BINDING
+----------------------------------------------------- */
+
+function bindMomentActions(
+  root
+){
+
+  root
+    .querySelectorAll(
+      "[data-view-moment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              openMomentViewer(
+                button.dataset
+                  .viewMoment
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  root
+    .querySelectorAll(
+      "[data-post-moment-comment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              postMomentComment(
+                button.dataset
+                  .postMomentComment
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  root
+    .querySelectorAll(
+      "[data-delete-moment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              deleteOwnMoment(
+                button.dataset
+                  .deleteMoment
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  root
+    .querySelectorAll(
+      "[data-delete-comment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              deleteOwnMomentComment(
+
+                button.dataset
+                  .commentMoment,
+
+                button.dataset
+                  .deleteComment
+
+              );
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   ADD COMMENT
+----------------------------------------------------- */
+
+async function postMomentComment(
+  momentId,
+  explicitMessage = null
+){
+
+  const profile =
+    getProfile();
+
+
+  if(!profile){
+
+    openProfile();
+
+    return;
+
+  }
+
+
+  let message =
+    explicitMessage;
+
+
+  if(
+    message ===
+    null
+  ){
+
+    const input =
+      document.getElementById(
+        "moment-comment-" +
+        momentId
+      );
+
+
+    if(!input){
+      return;
+    }
+
+
+    message =
+      input
+        .value
+        .trim();
+
+  }
+
+
+  message =
+    String(
+      message || ""
+    )
+    .trim()
+    .slice(
+      0,
+      400
+    );
+
+
+  if(!message){
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${MOMENTS_API}/${encodeURIComponent(
+          momentId
+        )}/comments`,
+
+        {
+
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              participantId:
+                getParticipantId(),
+
+              displayName:
+                profile.name,
+
+              title:
+                profile.title || "",
+
+              affiliation:
+                profile.affiliation || "",
+
+              message
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to post comment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+    renderMomentsContent();
+
+
+    if(
+      currentMomentViewerId ===
+      momentId
+    ){
+
+      renderMomentViewer(
+        momentId
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to post comment."
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   DELETE OWN MOMENT
+----------------------------------------------------- */
+
+async function deleteOwnMoment(
+  momentId
+){
+
+  if(
+    !confirm(
+      "Delete this Moment?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${MOMENTS_API}/${encodeURIComponent(
+          momentId
+        )}`,
+
+        {
+
+          method:"DELETE",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              participantId:
+                getParticipantId()
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to delete Moment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+    renderMomentsContent();
+
+
+    if(
+      currentMomentViewerId ===
+      momentId
+    ){
+
+      closeMomentViewer();
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to delete Moment."
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   DELETE OWN COMMENT
+----------------------------------------------------- */
+
+async function deleteOwnMomentComment(
+  momentId,
+  commentId
+){
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${MOMENTS_API}/${encodeURIComponent(
+          momentId
+        )}/comments/${encodeURIComponent(
+          commentId
+        )}`,
+
+        {
+
+          method:"DELETE",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              participantId:
+                getParticipantId()
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to delete comment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+    renderMomentsContent();
+
+
+    if(
+      currentMomentViewerId ===
+      momentId
+    ){
+
+      renderMomentViewer(
+        momentId
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to delete comment."
+    );
+
+  }
+
+}
+
+
+/* -----------------------------------------------------
+   MOMENT VIEWER
+----------------------------------------------------- */
+
+function openMomentViewer(
+  momentId
+){
+
+  currentMomentViewerId =
+    momentId;
+
+
+  renderMomentViewer(
+    momentId
+  );
+
+
+  momentViewerModal
+    .classList
+    .remove(
+      "hidden"
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   RENDER VIEWER
+----------------------------------------------------- */
+
+function renderMomentViewer(
+  momentId
+){
+
+  const moment =
+    momentsData
+      .find(
+        item =>
+          item.id ===
+          momentId
+      );
+
+
+  if(!moment){
+
+    closeMomentViewer();
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "momentViewerAuthor"
+    )
+    .textContent =
+      momentIdentity(
+        moment
+      ) +
+      (
+        moment.affiliation
+          ? " · " +
+            moment.affiliation
+          : ""
+      );
+
+
+  const target =
+    document.getElementById(
+      "momentViewerContent"
+    );
+
+
+  target.innerHTML = `
+
+    <img
+      class="moment-viewer-photo"
+      src="${escapeHTML(
+        getMomentImageUrl(
+          moment
+        )
+      )}"
+      alt="MTERMS Moment"
+    >
+
+
+    <div
+      class="moment-time"
+      style="margin-top:8px;"
+    >
+      ${escapeHTML(
+        formatMomentTime(
+          moment.createdAt
+        )
+      )}
+    </div>
+
+
+    ${
+      moment.message
+        ? `
+          <div class="moment-viewer-message">
+            ${escapeHTML(
+              moment.message
+            )}
+          </div>
+        `
+        : ""
+    }
+
+
+    ${renderMomentComments(
+      moment
+    )}
+
+
+    ${
+      moment.participantId ===
+      getParticipantId()
+        ? `
+          <div class="moment-owner-actions">
+
+            <button
+              class="moment-delete-link"
+              type="button"
+              data-delete-moment="${escapeHTML(
+                moment.id
+              )}"
+            >
+              Delete my Moment
+            </button>
+
+          </div>
+        `
+        : ""
+    }
+
+  `;
+
+
+  bindMomentActions(
+    target
+  );
+
+}
+
+
+/* -----------------------------------------------------
+   CLOSE VIEWER
+----------------------------------------------------- */
+
+function closeMomentViewer(){
+
+  momentViewerModal
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  currentMomentViewerId =
+    null;
+
+}
+
+
+/* -----------------------------------------------------
+   COMPOSER / VIEWER BUTTONS
+----------------------------------------------------- */
+
+document
+  .getElementById(
+    "momentComposerClose"
+  )
+  .addEventListener(
+    "click",
+    closeMomentComposer
+  );
+
+
+document
+  .getElementById(
+    "cancelMomentBtn"
+  )
+  .addEventListener(
+    "click",
+    closeMomentComposer
+  );
+
+
+document
+  .getElementById(
+    "momentViewerClose"
+  )
+  .addEventListener(
+    "click",
+    closeMomentViewer
+  );
+
+
+momentComposerModal
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        momentComposerModal
+      ){
+
+        closeMomentComposer();
+
+      }
+
+    }
+  );
+
+
+momentViewerModal
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        momentViewerModal
+      ){
+
+        closeMomentViewer();
+
+      }
+
+    }
+  );
 
 /* =====================================================
    MORE BUTTONS
@@ -10374,289 +12902,18 @@ function renderMorePanel(
      MOMENTS
   ------------------------------------------------- */
 
-  if(
-    section ===
-    "moments"
-  ){
-
-    target.innerHTML = `
-
-      <div class="more-panel">
-
-        <div class="moments-head">
-
-          <div>
-
-            <h3 style="margin:0;">
-              MTERMS Moments
-            </h3>
-
-            <div class="page-sub">
-              Share and explore moments from MTERMS 2026.
-            </div>
-
-          </div>
-
-
-          <button
-            class="btn btn-primary btn-small"
-            type="button"
-            id="shareMomentDevelopmentBtn"
-          >
-            + Share a Moment
-          </button>
-
-        </div>
-
-
-        <div class="moments-tabs">
-
-          <button
-            class="moments-tab active"
-            type="button"
-          >
-            Feed
-          </button>
-
-          <button
-            class="moments-tab"
-            type="button"
-          >
-            Gallery
-          </button>
-
-        </div>
-
-<div class="moments-dev-note">
-
-  <strong>Temporary Upload Test</strong>
-
-  <br><br>
-
-  <input
-    type="file"
-    id="momentTestFile"
-    accept="image/jpeg,image/png,image/webp"
-  >
-
-  <br><br>
-
-  <button
-    class="btn btn-primary btn-small"
-    type="button"
-    id="momentTestUploadBtn"
-  >
-    Upload Test Photo
-  </button>
-
-  <div
-    id="momentTestResult"
-    style="
-      margin-top:10px;
-      font-size:11px;
-      line-height:1.5;
-    "
-  ></div>
-
-</div>
-
-      </div>
-
-    `;
-
-
-    document
-      .getElementById(
-        "shareMomentDevelopmentBtn"
-      )
-      ?.addEventListener(
-        "click",
-        ()=>{
-
-          alert(
-            "MTERMS Moments upload will be activated in the next V2 backend step."
-          );
-
-        }
-      );
-
-
-
-
-document
-  .getElementById(
-    "momentTestUploadBtn"
-  )
-  ?.addEventListener(
-    "click",
-    async ()=>{
-
-      const input =
-        document.getElementById(
-          "momentTestFile"
-        );
-
-      const result =
-        document.getElementById(
-          "momentTestResult"
-        );
-
-      const file =
-        input?.files?.[0];
-
-
-      if(!file){
-
-        result.textContent =
-          "Please choose a photo first.";
-
-        return;
-
-      }
-
-
-      if(
-        file.size >
-        2 * 1024 * 1024
-      ){
-
-        result.textContent =
-          "For this test, choose a photo under 2 MB.";
-
-        return;
-
-      }
-
-
-      const form =
-        new FormData();
-
-
-      form.append(
-        "participantId",
-        "MTERMS-MOMENTS-TEST"
-      );
-
-
-      form.append(
-        "displayName",
-        "Test Participant"
-      );
-
-
-      form.append(
-        "title",
-        ""
-      );
-
-
-      form.append(
-        "affiliation",
-        "MTERMS 2026"
-      );
-
-
-      form.append(
-        "message",
-        "Testing MTERMS Moments"
-      );
-
-
-      form.append(
-        "imageWidth",
-        "0"
-      );
-
-
-      form.append(
-        "imageHeight",
-        "0"
-      );
-
-
-      form.append(
-        "image",
-        file
-      );
-
-
-      result.textContent =
-        "Uploading test photo…";
-
-
-      try{
-
-        const response =
-          await fetch(
-            "https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments",
-            {
-              method:"POST",
-              body:form
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if(
-          !response.ok ||
-          !data.ok
-        ){
-
-          throw new Error(
-            data.error ||
-            "Upload failed"
-          );
-
-        }
-
-
-        result.innerHTML = `
-          ✓ Upload successful
-
-          <br>
-
-          Moment ID:
-          ${escapeHTML(
-            data.moment.id
-          )}
-
-          <br><br>
-
-          <a
-            href="https://mterm2026-559f9bf571b5.herokuapp.com${escapeHTML(
-              data.moment.imageUrl
-            )}"
-            target="_blank"
-          >
-            Open uploaded image
-          </a>
-        `;
-
-
-      }catch(error){
-
-        console.error(
-          error
-        );
-
-
-        result.textContent =
-          error.message ||
-          "Unable to upload test photo.";
-
-      }
-
-    }
+if(
+  section ===
+  "moments"
+){
+
+  renderMomentsPanel(
+    target
   );
-    
-    
-    return;
 
-  }
+  return;
 
+}
 
 
   /* -------------------------------------------------
@@ -11533,6 +13790,46 @@ function initialise(){
     loadAllDiscussions,
     5000
   );
+
+  setInterval(
+  async ()=>{
+
+    if(
+      !momentsPanelVisible
+    ){
+      return;
+    }
+
+
+    try{
+
+      await loadMoments();
+
+      renderMomentsContent();
+
+
+      if(
+        currentMomentViewerId
+      ){
+
+        renderMomentViewer(
+          currentMomentViewerId
+        );
+
+      }
+
+    }catch(error){
+
+      console.error(
+        "MTERMS Moments refresh error:",
+        error
+      );
+
+    }
+
+  },
+  15000
+);
 
 }
 
