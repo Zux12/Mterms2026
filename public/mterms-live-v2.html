@@ -10578,6 +10578,19 @@ let currentMomentViewerId =
 let momentsPanelVisible =
   false;
 
+
+/*
+  Latest server data waiting to be shown.
+
+  When a new Moment arrives while the participant
+  is reading further down the Feed, we keep the
+  new Moment here WITHOUT creating its image yet.
+*/
+
+let pendingMomentsData =
+  null;
+
+
 const momentsNewPill =
   document.getElementById(
     "momentsNewPill"
@@ -10588,6 +10601,134 @@ momentsNewPill
     "click",
     ()=>{
 
+      /*
+        If new Moments are waiting,
+        activate them NOW.
+
+        Only at this point are their <img>
+        elements created, so this is when
+        the phone begins downloading them.
+      */
+
+      if(
+        pendingMomentsData
+      ){
+
+        const oldIds =
+          new Set(
+            momentsData.map(
+              moment =>
+                moment.id
+            )
+          );
+
+
+        const waitingMoments =
+          pendingMomentsData.filter(
+            moment =>
+              !oldIds.has(
+                moment.id
+              )
+          );
+
+
+        /*
+          Make the latest server state active.
+        */
+
+        momentsData =
+          pendingMomentsData;
+
+
+        pendingMomentsData =
+          null;
+
+
+        const content =
+          document.getElementById(
+            "momentsContent"
+          );
+
+
+        if(
+          content &&
+          momentsView ===
+          "feed"
+        ){
+
+          /*
+            Add only the waiting cards.
+
+            Existing cards/images remain untouched.
+          */
+
+          [...waitingMoments]
+            .reverse()
+            .forEach(
+              moment => {
+
+                content.insertAdjacentHTML(
+                  "afterbegin",
+                  momentCardHTML(
+                    moment
+                  )
+                );
+
+              }
+            );
+
+
+          /*
+            Bind buttons only on newly-created cards.
+          */
+
+          waitingMoments.forEach(
+            moment => {
+
+              const card =
+                document.getElementById(
+                  "moment-card-" +
+                  moment.id
+                );
+
+
+              if(card){
+
+                bindMomentActions(
+                  card
+                );
+
+              }
+
+            }
+          );
+
+        }
+
+
+        /*
+          If participant happens to be using
+          Gallery instead, redraw Gallery now
+          because they explicitly requested
+          the new content.
+        */
+
+        if(
+          momentsView ===
+          "gallery"
+        ){
+
+          renderMomentsContent();
+
+        }
+
+      }
+
+
+      /*
+        Now go to the newest Moment.
+      */
+
       const content =
         document.getElementById(
           "momentsContent"
@@ -10597,7 +10738,9 @@ momentsNewPill
       if(content){
 
         const top =
-          content.getBoundingClientRect().top +
+          content
+            .getBoundingClientRect()
+            .top +
           window.scrollY -
           110;
 
@@ -14010,17 +14153,6 @@ setInterval(
          NEW OR REMOVED MOMENT
       ================================================= */
 
-/* =================================================
-   CASE 1
-   NEW OR REMOVED MOMENT
-
-   IMPORTANT:
-   Do NOT rebuild the whole Feed.
-
-   New Moments are inserted individually so
-   existing photos are never destroyed/reloaded.
-================================================= */
-
 if(
   currentIds !==
   latestIds
@@ -14045,7 +14177,7 @@ if(
 
 
   /*
-    Find genuinely NEW Moments.
+    Identify genuinely new Moments.
   */
 
   const newMoments =
@@ -14056,22 +14188,9 @@ if(
         )
     );
 
-if(
-  newMoments.length &&
-  window.scrollY > 250
-){
-
-  momentsNewPill
-    .classList
-    .remove(
-      "hidden"
-    );
-
-}
-  
 
   /*
-    Find Moments that were removed.
+    Identify removed Moments.
   */
 
   const removedIds =
@@ -14089,147 +14208,205 @@ if(
 
 
   /*
-    Update our local data first.
+    Determine whether participant is
+    currently near the top of the
+    MTERMS Moments Feed.
   */
 
-  momentsData =
-    latestMoments;
+  const momentsContent =
+    document.getElementById(
+      "momentsContent"
+    );
+
+
+  let participantNearTop =
+    false;
+
+
+  if(
+    momentsContent
+  ){
+
+    const contentTop =
+      momentsContent
+        .getBoundingClientRect()
+        .top;
+
+
+    /*
+      If the beginning of the Feed is close
+      to the visible top of the screen,
+      participant is considered "at the top".
+    */
+
+    participantNearTop =
+      contentTop >= -180;
+
+  }
 
 
   /* =================================================
-     FEED VIEW
+     NEW MOMENT + PARTICIPANT NOT AT TOP
+
+     Do NOT create the new card.
+     Do NOT create the <img>.
+     Do NOT download the photo.
+
+     Simply remember that new data exists
+     and show the notification.
   ================================================= */
 
   if(
-    momentsView ===
-    "feed"
+    newMoments.length &&
+    !participantNearTop
   ){
 
-    const content =
-      document.getElementById(
-        "momentsContent"
+    pendingMomentsData =
+      latestMoments;
+
+
+    momentsNewPill
+      .classList
+      .remove(
+        "hidden"
       );
 
 
-    if(content){
+    /*
+      We can still remove any deleted
+      existing cards without affecting
+      the waiting new photos.
+    */
 
-      /*
-        Remove deleted Moment cards only.
-      */
+    removedIds.forEach(
+      momentId => {
 
-      removedIds.forEach(
-        momentId => {
+        document
+          .getElementById(
+            "moment-card-" +
+            momentId
+          )
+          ?.remove();
 
-          document
-            .getElementById(
-              "moment-card-" +
-              momentId
-            )
-            ?.remove();
+      }
+    );
 
-        }
+
+    /*
+      IMPORTANT:
+
+      Do not replace momentsData with
+      latestMoments here.
+
+      momentsData continues representing
+      what is actually displayed on screen.
+
+      Continue to CASE 2 below so comments
+      on already-visible Moments can still
+      update normally.
+    */
+
+
+  }else{
+
+
+    /* =================================================
+       PARTICIPANT IS ALREADY AT TOP
+
+       It is appropriate to show/load the
+       new Moment immediately.
+    ================================================= */
+
+    pendingMomentsData =
+      null;
+
+
+    momentsNewPill
+      .classList
+      .add(
+        "hidden"
       );
 
 
-      /*
-        Remember current document height.
-
-        This lets us compensate after inserting
-        new cards ABOVE what the participant is
-        currently looking at.
-      */
-
-      const oldHeight =
-        document.documentElement
-          .scrollHeight;
+    momentsData =
+      latestMoments;
 
 
-      /*
-        Insert only the NEW Moment cards.
+    /* -----------------------------------------------
+       FEED
+    ----------------------------------------------- */
 
-        latestMoments is newest-first, so reverse
-        before prepend to preserve correct order.
-      */
+    if(
+      momentsView ===
+      "feed"
+    ){
 
-      [...newMoments]
-        .reverse()
-        .forEach(
-          moment => {
+      const content =
+        document.getElementById(
+          "momentsContent"
+        );
 
-            content.insertAdjacentHTML(
-              "afterbegin",
-              momentCardHTML(
-                moment
+
+      if(content){
+
+
+        /*
+          Remove deleted cards only.
+        */
+
+        removedIds.forEach(
+          momentId => {
+
+            document
+              .getElementById(
+                "moment-card-" +
+                momentId
               )
-            );
+              ?.remove();
 
           }
         );
 
 
-      /*
-        Bind controls ONLY on the new cards.
-      */
+        /*
+          Add only the genuinely new cards.
+        */
 
-      newMoments.forEach(
-        moment => {
+        [...newMoments]
+          .reverse()
+          .forEach(
+            moment => {
 
-          const newCard =
-            document.getElementById(
-              "moment-card-" +
-              moment.id
-            );
+              content.insertAdjacentHTML(
+                "afterbegin",
+                momentCardHTML(
+                  moment
+                )
+              );
 
-
-          if(newCard){
-
-            bindMomentActions(
-              newCard
-            );
-
-          }
-
-        }
-      );
+            }
+          );
 
 
-      /*
-        If participant is already scrolled down,
-        compensate for the height added above.
+        /*
+          Bind only newly-added cards.
+        */
 
-        This keeps the same content in the exact
-        same visual position.
-      */
+        newMoments.forEach(
+          moment => {
 
-      if(
-        newMoments.length &&
-        window.scrollY > 0
-      ){
-
-        requestAnimationFrame(
-          ()=>{
-
-            const newHeight =
-              document.documentElement
-                .scrollHeight;
+            const card =
+              document.getElementById(
+                "moment-card-" +
+                moment.id
+              );
 
 
-            const addedHeight =
-              newHeight -
-              oldHeight;
+            if(card){
 
-
-            if(
-              addedHeight > 0
-            ){
-
-              window.scrollBy({
-                top:
-                  addedHeight,
-
-                behavior:
-                  "auto"
-              });
+              bindMomentActions(
+                card
+              );
 
             }
 
@@ -14240,142 +14417,130 @@ if(
 
     }
 
-  }
+
+    /* -----------------------------------------------
+       GALLERY
+    ----------------------------------------------- */
+
+    if(
+      momentsView ===
+      "gallery"
+    ){
+
+      const gallery =
+        document.querySelector(
+          ".moments-gallery"
+        );
 
 
-  /* =================================================
-     GALLERY VIEW
-
-     Gallery thumbnails are small, so we can insert
-     new thumbnails individually too.
-  ================================================= */
-
-  if(
-    momentsView ===
-    "gallery"
-  ){
-
-    const gallery =
-      document.querySelector(
-        ".moments-gallery"
-      );
+      if(gallery){
 
 
-    if(gallery){
+        removedIds.forEach(
+          momentId => {
 
-      /*
-        Remove deleted thumbnails.
-      */
-
-      removedIds.forEach(
-        momentId => {
-
-          gallery
-            .querySelector(
-              `[data-view-moment="${CSS.escape(
-                momentId
-              )}"]`
-            )
-            ?.remove();
-
-        }
-      );
-
-
-      /*
-        Insert new thumbnails only.
-      */
-
-      [...newMoments]
-        .reverse()
-        .forEach(
-          moment => {
-
-            gallery.insertAdjacentHTML(
-              "afterbegin",
-              `
-
-                <button
-                  class="moment-gallery-item"
-                  type="button"
-                  data-view-moment="${escapeHTML(
-                    moment.id
-                  )}"
-                >
-
-                  <img
-                    src="${escapeHTML(
-                      getMomentImageUrl(
-                        moment
-                      )
-                    )}"
-                    alt="MTERMS Moment"
-                    loading="lazy"
-                  >
-
-                  ${
-                    (
-                      moment.comments ||
-                      []
-                    ).length
-                      ? `
-                        <span class="moment-gallery-badge">
-                          💬
-                          ${
-                            (
-                              moment.comments ||
-                              []
-                            ).length
-                          }
-                        </span>
-                      `
-                      : ""
-                  }
-
-                </button>
-
-              `
-            );
+            gallery
+              .querySelector(
+                `[data-view-moment="${CSS.escape(
+                  momentId
+                )}"]`
+              )
+              ?.remove();
 
           }
         );
 
 
-      newMoments.forEach(
-        moment => {
+        [...newMoments]
+          .reverse()
+          .forEach(
+            moment => {
 
-          const button =
-            gallery.querySelector(
-              `[data-view-moment="${CSS.escape(
-                moment.id
-              )}"]`
-            );
+              gallery.insertAdjacentHTML(
+                "afterbegin",
+                `
+
+                  <button
+                    class="moment-gallery-item"
+                    type="button"
+                    data-view-moment="${escapeHTML(
+                      moment.id
+                    )}"
+                  >
+
+                    <img
+                      src="${escapeHTML(
+                        getMomentImageUrl(
+                          moment
+                        )
+                      )}"
+                      alt="MTERMS Moment"
+                      loading="lazy"
+                    >
+
+                    ${
+                      (
+                        moment.comments ||
+                        []
+                      ).length
+                        ? `
+                          <span class="moment-gallery-badge">
+                            💬
+                            ${
+                              (
+                                moment.comments ||
+                                []
+                              ).length
+                            }
+                          </span>
+                        `
+                        : ""
+                    }
+
+                  </button>
+
+                `
+              );
+
+            }
+          );
 
 
-          if(button){
+        newMoments.forEach(
+          moment => {
 
-            bindMomentActions(
-              button
-            );
+            const button =
+              gallery.querySelector(
+                `[data-view-moment="${CSS.escape(
+                  moment.id
+                )}"]`
+              );
+
+
+            if(button){
+
+              bindMomentActions(
+                button
+              );
+
+            }
 
           }
+        );
 
-        }
-      );
+      }
 
     }
 
+
+    /*
+      New/removed Moment has now been
+      handled immediately.
+    */
+
+    return;
+
   }
-
-
-  /*
-    We handled the Moment-list change
-    without rebuilding existing content.
-
-    Continue no further during this refresh.
-  */
-
-  return;
 
 }
 
