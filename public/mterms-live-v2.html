@@ -13802,8 +13802,8 @@ setInterval(
 
 
     /*
-      Do not refresh while a participant
-      is typing a Moment comment.
+      Do not refresh while the participant
+      is typing in any Moment comment box.
     */
 
     const commentDraftActive =
@@ -13829,8 +13829,8 @@ setInterval(
     try{
 
       /*
-        Load latest Moments WITHOUT changing
-        what is currently visible yet.
+        Get the latest Moments without
+        changing anything on screen yet.
       */
 
       const response =
@@ -13865,215 +13865,503 @@ setInterval(
 
 
       /*
-        Build a lightweight signature of the
-        content that actually affects the UI.
+        Compare the actual Moment list.
 
-        If nothing changed, DO NOTHING.
+        A different list means:
+        - new photo
+        - deleted photo
 
-        This means:
-        - images are NOT rebuilt
-        - scroll position stays untouched
-        - no blank image reload
-        - no visual flicker
+        Only in that situation do we need
+        to rebuild the Feed / Gallery.
       */
 
-      const currentSignature =
-        JSON.stringify(
-          momentsData.map(
-            moment => ({
-              id:
-                moment.id,
-
-              updatedAt:
-                moment.updatedAt,
-
-              commentCount:
-                (
-                  moment.comments ||
-                  []
-                ).length
-            })
+      const currentIds =
+        momentsData
+          .map(
+            moment =>
+              moment.id
           )
-        );
+          .join("|");
 
 
-      const latestSignature =
-        JSON.stringify(
-          latestMoments.map(
-            moment => ({
-              id:
-                moment.id,
-
-              updatedAt:
-                moment.updatedAt,
-
-              commentCount:
-                (
-                  moment.comments ||
-                  []
-                ).length
-            })
+      const latestIds =
+        latestMoments
+          .map(
+            moment =>
+              moment.id
           )
-        );
+          .join("|");
 
+
+      /* =================================================
+         CASE 1
+         NEW OR REMOVED MOMENT
+      ================================================= */
 
       if(
-        currentSignature ===
-        latestSignature
+        currentIds !==
+        latestIds
       ){
+
+        /*
+          If we are in Feed view, remember
+          which card the participant is
+          currently looking at.
+        */
+
+        let anchorMomentId =
+          null;
+
+
+        let anchorOffset =
+          null;
+
+
+        if(
+          momentsView ===
+          "feed"
+        ){
+
+          const cards =
+            Array.from(
+              document.querySelectorAll(
+                ".moment-card"
+              )
+            );
+
+
+          let closestDistance =
+            Infinity;
+
+
+          cards.forEach(
+            card => {
+
+              const rect =
+                card.getBoundingClientRect();
+
+
+              if(
+                rect.bottom <= 0
+              ){
+                return;
+              }
+
+
+              const distance =
+                Math.abs(
+                  rect.top
+                );
+
+
+              if(
+                distance <
+                closestDistance
+              ){
+
+                closestDistance =
+                  distance;
+
+
+                anchorMomentId =
+                  card.id.replace(
+                    "moment-card-",
+                    ""
+                  );
+
+
+                anchorOffset =
+                  rect.top;
+
+              }
+
+            }
+          );
+
+        }
+
+
+        const previousScrollY =
+          window.scrollY;
+
+
+        momentsData =
+          latestMoments;
+
+
+        renderMomentsContent();
+
+
+        /*
+          Restore position after the new
+          Moment has been inserted.
+        */
+
+        requestAnimationFrame(
+          ()=>{
+
+            if(
+              anchorMomentId &&
+              anchorOffset !== null
+            ){
+
+              const refreshedCard =
+                document.getElementById(
+                  "moment-card-" +
+                  anchorMomentId
+                );
+
+
+              if(
+                refreshedCard
+              ){
+
+                const newRect =
+                  refreshedCard
+                    .getBoundingClientRect();
+
+
+                window.scrollBy({
+                  top:
+                    newRect.top -
+                    anchorOffset,
+
+                  behavior:
+                    "auto"
+                });
+
+
+                return;
+
+              }
+
+            }
+
+
+            window.scrollTo({
+              top:
+                previousScrollY,
+
+              behavior:
+                "auto"
+            });
+
+          }
+        );
+
 
         return;
 
       }
 
 
-      /*
-        Something genuinely changed.
-        Only now replace our local data
-        and rebuild the visible content.
-      */
+      /* =================================================
+         CASE 2
+         SAME PHOTOS — CHECK COMMENTS
+      ================================================= */
 
-      const momentCards =
-        Array.from(
-          document.querySelectorAll(
-            '.moment-card'
-          )
-        );
+      latestMoments.forEach(
+        latestMoment => {
 
-
-      let anchorMomentId =
-        null;
-
-      let anchorOffset =
-        null;
-
-      let closestDistance =
-        Infinity;
-
-
-      momentCards.forEach(
-        card => {
-
-          const rect =
-            card.getBoundingClientRect();
+          const currentMoment =
+            momentsData.find(
+              moment =>
+                moment.id ===
+                latestMoment.id
+            );
 
 
           if(
-            rect.bottom <= 0
+            !currentMoment
           ){
             return;
           }
 
 
-          const distance =
-            Math.abs(
-              rect.top
+          const currentCommentsSignature =
+            JSON.stringify(
+              (
+                currentMoment.comments ||
+                []
+              )
+              .map(
+                comment => ({
+                  id:
+                    comment.id,
+
+                  message:
+                    comment.message,
+
+                  updatedAt:
+                    comment.updatedAt
+                })
+              )
+            );
+
+
+          const latestCommentsSignature =
+            JSON.stringify(
+              (
+                latestMoment.comments ||
+                []
+              )
+              .map(
+                comment => ({
+                  id:
+                    comment.id,
+
+                  message:
+                    comment.message,
+
+                  updatedAt:
+                    comment.updatedAt
+                })
+              )
+            );
+
+
+          /*
+            No comment change for this Moment.
+          */
+
+          if(
+            currentCommentsSignature ===
+            latestCommentsSignature
+          ){
+            return;
+          }
+
+
+          /*
+            Update only this Moment in memory.
+          */
+
+          const index =
+            momentsData.findIndex(
+              moment =>
+                moment.id ===
+                latestMoment.id
             );
 
 
           if(
-            distance <
-            closestDistance
+            index !== -1
           ){
 
-            closestDistance =
-              distance;
-
-
-            anchorMomentId =
-              card.id
-                .replace(
-                  'moment-card-',
-                  ''
-                );
-
-
-            anchorOffset =
-              rect.top;
+            momentsData[index] =
+              latestMoment;
 
           }
 
-        }
-      );
+
+          /*
+            FEED:
+            Replace ONLY the comments area.
+
+            The image element is not touched,
+            therefore the photo does not reload
+            or flicker.
+          */
+
+          const card =
+            document.getElementById(
+              "moment-card-" +
+              latestMoment.id
+            );
 
 
-      const previousScrollY =
-        window.scrollY;
+          if(card){
 
-
-      momentsData =
-        latestMoments;
-
-
-      renderMomentsContent();
-
-
-      if(
-        currentMomentViewerId
-      ){
-
-        renderMomentViewer(
-          currentMomentViewerId
-        );
-
-      }
-
-
-      requestAnimationFrame(
-        ()=>{
-
-          if(
-            anchorMomentId &&
-            anchorOffset !== null
-          ){
-
-            const refreshedCard =
-              document.getElementById(
-                'moment-card-' +
-                anchorMomentId
+            const oldComments =
+              card.querySelector(
+                ".moment-comments"
               );
 
 
-            if(
-              refreshedCard
-            ){
+            if(oldComments){
 
-              const newRect =
-                refreshedCard
-                  .getBoundingClientRect();
-
-
-              const difference =
-                newRect.top -
-                anchorOffset;
+              const wrapper =
+                document.createElement(
+                  "div"
+                );
 
 
-              window.scrollBy({
-                top:
-                  difference,
-
-                behavior:
-                  'auto'
-              });
+              wrapper.innerHTML =
+                renderMomentComments(
+                  latestMoment
+                );
 
 
-              return;
+              const freshComments =
+                wrapper.firstElementChild;
+
+
+              oldComments.replaceWith(
+                freshComments
+              );
+
+
+              /*
+                Bind events ONLY to the newly
+                created comments section.
+
+                Do not re-bind the whole card.
+              */
+
+              bindMomentActions(
+                freshComments
+              );
 
             }
 
           }
 
 
-          window.scrollTo({
-            top:
-              previousScrollY,
+          /*
+            GALLERY:
+            Only update the comment-count badge.
+            Do not rebuild the thumbnail.
+          */
 
-            behavior:
-              'auto'
-          });
+          if(
+            momentsView ===
+            "gallery"
+          ){
+
+            const galleryButton =
+              document.querySelector(
+                `[data-view-moment="${CSS.escape(
+                  latestMoment.id
+                )}"]`
+              );
+
+
+            if(galleryButton){
+
+              const oldBadge =
+                galleryButton.querySelector(
+                  ".moment-gallery-badge"
+                );
+
+
+              const count =
+                (
+                  latestMoment.comments ||
+                  []
+                ).length;
+
+
+              if(
+                count > 0
+              ){
+
+                if(oldBadge){
+
+                  oldBadge.innerHTML =
+                    "💬 " +
+                    count;
+
+
+                }else{
+
+                  const badge =
+                    document.createElement(
+                      "span"
+                    );
+
+
+                  badge.className =
+                    "moment-gallery-badge";
+
+
+                  badge.innerHTML =
+                    "💬 " +
+                    count;
+
+
+                  galleryButton.appendChild(
+                    badge
+                  );
+
+                }
+
+
+              }else if(oldBadge){
+
+                oldBadge.remove();
+
+              }
+
+            }
+
+          }
+
+
+          /*
+            If the full Moment viewer is open,
+            update ONLY its comments section.
+
+            Do not recreate the large photo.
+          */
+
+          if(
+            currentMomentViewerId ===
+            latestMoment.id
+          ){
+
+            const viewer =
+              document.getElementById(
+                "momentViewerContent"
+              );
+
+
+            const oldViewerComments =
+              viewer?.querySelector(
+                ".moment-comments"
+              );
+
+
+            if(
+              oldViewerComments
+            ){
+
+              const wrapper =
+                document.createElement(
+                  "div"
+                );
+
+
+              wrapper.innerHTML =
+                renderMomentComments(
+                  latestMoment
+                );
+
+
+              const freshViewerComments =
+                wrapper.firstElementChild;
+
+
+              oldViewerComments.replaceWith(
+                freshViewerComments
+              );
+
+
+              bindMomentActions(
+                freshViewerComments
+              );
+
+            }
+
+          }
 
         }
       );
+
+
+      /*
+        If neither photos nor comments changed,
+        nothing in the DOM is touched at all.
+      */
 
 
     }catch(error){
