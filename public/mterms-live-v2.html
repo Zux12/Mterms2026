@@ -13826,24 +13826,55 @@ const commentDraftActive =
     }
 
 
-    try{
+try{
 
-      await loadMoments();
+  /*
+    Remember the participant's exact
+    scroll position before rebuilding
+    the Moments feed.
+  */
 
-      renderMomentsContent();
+  const previousScrollY =
+    window.scrollY;
 
 
-      if(
-        currentMomentViewerId
-      ){
+  await loadMoments();
 
-        renderMomentViewer(
-          currentMomentViewerId
-        );
+  renderMomentsContent();
 
-      }
 
-    }catch(error){
+  if(
+    currentMomentViewerId
+  ){
+
+    renderMomentViewer(
+      currentMomentViewerId
+    );
+
+  }
+
+
+  /*
+    Restore the previous position after
+    the Moments DOM has been refreshed.
+  */
+
+  requestAnimationFrame(
+    ()=>{
+
+      window.scrollTo({
+        top:
+          previousScrollY,
+
+        behavior:
+          "auto"
+      });
+
+    }
+  );
+
+
+}catch(error){
 
       console.error(
         "MTERMS Moments refresh error:",
