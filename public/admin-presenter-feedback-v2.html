@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>MTERMS 2026 — Presenter Feedback Admin</title>
+
+<style>
+
+:root{
+
+  --navy:#071a2c;
+  --blue:#1677ff;
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --text:#172033;
+  --muted:#6d7788;
+  --line:#e3e8ef;
+  --green:#138a5b;
+  --amber:#d88700;
+  --red:#c52b2b;
+  --shadow:
+    0 8px 26px
+    rgba(15,35,60,.08);
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background:var(--bg);
+  color:var(--text);
+
+}
+
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+
+  background:var(--navy);
+  color:#fff;
+  padding:18px 20px;
+
+}
+
+
+.header-inner{
+
+  max-width:1300px;
+  margin:0 auto;
+
+}
+
+
+.header-kicker{
+
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.65;
+
+}
+
+
+.header-title{
+
+  margin-top:4px;
+  font-size:23px;
+  font-weight:850;
+
+}
+
+
+.header-sub{
+
+  margin-top:4px;
+  font-size:12px;
+  opacity:.72;
+
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main{
+
+  max-width:1300px;
+  margin:0 auto;
+  padding:20px;
+
+}
+
+
+.toolbar{
+
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+
+  margin-bottom:18px;
+
+}
+
+
+.btn{
+
+  min-height:42px;
+  padding:0 14px;
+
+  border:0;
+  border-radius:10px;
+
+  font-weight:800;
+
+}
+
+
+.btn-primary{
+
+  background:var(--blue);
+  color:#fff;
+
+}
+
+
+.btn-outline{
+
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--text);
+
+}
+
+
+.status{
+
+  font-size:11px;
+  color:var(--muted);
+
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.summary-grid{
+
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:12px;
+  margin-bottom:18px;
+
+}
+
+
+.summary-card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:16px;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.summary-label{
+
+  font-size:10px;
+
+  font-weight:850;
+
+  text-transform:uppercase;
+
+  letter-spacing:.07em;
+
+  color:var(--muted);
+
+}
+
+
+.summary-value{
+
+  margin-top:7px;
+
+  font-size:28px;
+
+  font-weight:900;
+
+  color:var(--navy);
+
+}
+
+
+.summary-sub{
+
+  margin-top:4px;
+
+  font-size:10px;
+
+  color:var(--muted);
+
+}
+
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filters{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:13px;
+
+  margin-bottom:16px;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr
+    180px
+    220px;
+
+  gap:9px;
+
+}
+
+
+.control{
+
+  min-height:44px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:10px;
+
+  background:#fff;
+
+  padding:0 11px;
+
+}
+
+
+/* =====================================================
+   PRESENTER LIST
+===================================================== */
+
+.presenter-list{
+
+  display:grid;
+  gap:10px;
+
+}
+
+
+.presenter-card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  overflow:hidden;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.presenter-head{
+
+  width:100%;
+
+  border:0;
+
+  background:#fff;
+
+  text-align:left;
+
+  padding:14px;
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    110px
+    110px
+    35px;
+
+  gap:12px;
+
+  align-items:center;
+
+}
+
+
+.presenter-head:hover{
+  background:#fbfcfe;
+}
+
+
+.presenter-session{
+
+  font-size:9px;
+
+  font-weight:900;
+
+  color:var(--blue);
+
+  text-transform:uppercase;
+
+  letter-spacing:.06em;
+
+}
+
+
+.presenter-name{
+
+  margin-top:3px;
+
+  font-size:14px;
+
+  font-weight:850;
+
+}
+
+
+.presenter-title{
+
+  margin-top:4px;
+
+  font-size:10px;
+
+  color:var(--muted);
+
+  line-height:1.45;
+
+}
+
+
+.metric{
+
+  text-align:center;
+
+}
+
+
+.metric-value{
+
+  font-size:18px;
+
+  font-weight:900;
+
+}
+
+
+.metric-label{
+
+  margin-top:2px;
+
+  color:var(--muted);
+
+  font-size:9px;
+
+  text-transform:uppercase;
+
+}
+
+
+.metric-stars{
+
+  color:#d88700;
+  font-size:12px;
+
+}
+
+
+.expand-arrow{
+
+  color:#9aa4b2;
+  font-size:18px;
+  text-align:center;
+
+}
+
+
+/* =====================================================
+   DETAILS
+===================================================== */
+
+.presenter-detail{
+
+  display:none;
+
+  border-top:
+    1px solid
+    var(--line);
+
+  padding:15px;
+
+  background:#fafbfd;
+
+}
+
+
+.presenter-detail.open{
+  display:block;
+}
+
+
+.detail-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    260px
+    minmax(0,1fr);
+
+  gap:15px;
+
+}
+
+
+.rating-box{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:12px;
+
+  padding:13px;
+
+}
+
+
+.rating-big{
+
+  font-size:34px;
+  font-weight:900;
+
+}
+
+
+.rating-stars{
+
+  color:#d88700;
+
+  margin-top:2px;
+
+  font-size:18px;
+
+}
+
+
+.distribution{
+
+  margin-top:12px;
+
+}
+
+
+.dist-row{
+
+  display:grid;
+
+  grid-template-columns:
+    28px
+    1fr
+    30px;
+
+  gap:7px;
+
+  align-items:center;
+
+  margin-top:6px;
+
+  font-size:10px;
+
+}
+
+
+.dist-bar{
+
+  height:8px;
+
+  background:#e9edf2;
+
+  border-radius:999px;
+
+  overflow:hidden;
+
+}
+
+
+.dist-fill{
+
+  height:100%;
+
+  background:#d88700;
+
+  border-radius:999px;
+
+}
+
+
+.comments-box{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:12px;
+
+  padding:13px;
+
+}
+
+
+.comments-title{
+
+  font-size:11px;
+  font-weight:850;
+
+}
+
+
+.comment{
+
+  margin-top:10px;
+
+  padding:10px;
+
+  background:#f6f8fb;
+
+  border-radius:9px;
+
+}
+
+
+.comment-text{
+
+  font-size:11px;
+  line-height:1.5;
+
+}
+
+
+.comment-time{
+
+  margin-top:5px;
+
+  color:var(--muted);
+
+  font-size:9px;
+
+}
+
+
+.empty{
+
+  padding:26px;
+
+  border:
+    1px dashed #ccd4df;
+
+  background:#fff;
+
+  border-radius:14px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:850px){
+
+  .summary-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+
+  .filters{
+    grid-template-columns:1fr;
+  }
+
+
+  .presenter-head{
+
+    grid-template-columns:
+      minmax(0,1fr)
+      80px
+      32px;
+
+  }
+
+
+  .presenter-head
+  .responses-metric{
+    display:none;
+  }
+
+
+  .detail-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+
+@media(max-width:520px){
+
+  main{
+    padding:12px;
+  }
+
+
+  .summary-grid{
+    gap:7px;
+  }
+
+
+  .summary-card{
+    padding:12px;
+  }
+
+
+  .summary-value{
+    font-size:22px;
+  }
+
+
+  .presenter-head{
+
+    grid-template-columns:
+      minmax(0,1fr)
+      70px
+      25px;
+
+    padding:12px;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+  <div class="header-inner">
+
+    <div class="header-kicker">
+      MTERMS 2026 Digital Platform
+    </div>
+
+    <div class="header-title">
+      Presenter Feedback Manager
+    </div>
+
+    <div class="header-sub">
+      Individual presenter feedback · V2
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<main>
+
+
+<div class="toolbar">
+
+  <button
+    class="btn btn-primary"
+    id="refreshBtn"
+    type="button"
+  >
+    Refresh Data
+  </button>
+
+  <span
+    class="status"
+    id="statusText"
+  >
+    Loading…
+  </span>
+
+</div>
+
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<div class="summary-grid">
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Total Responses
+    </div>
+
+    <div
+      class="summary-value"
+      id="totalResponses"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Individual presenter ratings
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Presenters Rated
+    </div>
+
+    <div
+      class="summary-value"
+      id="presentersRated"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Presenters with ≥1 response
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Overall Average
+    </div>
+
+    <div
+      class="summary-value"
+      id="overallAverage"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Across all presenter responses
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Written Comments
+    </div>
+
+    <div
+      class="summary-value"
+      id="writtenComments"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Comments received
+    </div>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     FILTERS
+===================================================== -->
+
+<div class="filters">
+
+  <input
+    class="control"
+    id="searchInput"
+    type="search"
+    placeholder="Search presenter, session or presentation…"
+  >
+
+
+  <select
+    class="control"
+    id="dayFilter"
+  >
+
+    <option value="">
+      All Days
+    </option>
+
+    <option value="1">
+      Day 1
+    </option>
+
+    <option value="2">
+      Day 2
+    </option>
+
+  </select>
+
+
+  <select
+    class="control"
+    id="sessionFilter"
+  >
+
+    <option value="">
+      All Sessions
+    </option>
+
+  </select>
+
+</div>
+
+
+
+<div
+  class="presenter-list"
+  id="presenterList"
+></div>
+
+
+</main>
+
+
+
+<script
+  src="/public/mterms-programme-v2.js?v=1"
+></script>
+
+
+
+<script>
+
+(function(){
+
+"use strict";
+
+
+const API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/presenter-feedback";
+
+
+const MASTER =
+  window.MTERMS_PROGRAMME_V2;
+
+
+let feedbackRecords =
+  [];
+
+
+let presenterIndex =
+  {};
+
+
+let sessionIndex =
+  {};
+
+
+/* =====================================================
+   ESCAPE
+===================================================== */
+
+function escapeHTML(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =====================================================
+   BUILD PRESENTER INDEX
+===================================================== */
+
+function buildPresenterIndex(){
+
+  presenterIndex = {};
+
+  sessionIndex = {};
+
+
+  MASTER.programme
+    .forEach(
+      item => {
+
+
+        if(
+          Array.isArray(
+            item.speakers
+          )
+        ){
+
+          item.speakers.forEach(
+            speaker => {
+
+              presenterIndex[
+                speaker.presenterId
+              ] = {
+
+                presenterId:
+                  speaker.presenterId,
+
+                name:
+                  speaker.name || "",
+
+                affiliation:
+                  speaker.affiliation || "",
+
+                presentationTitle:
+                  speaker.presentationTitle || "",
+
+                sessionId:
+                  item.id,
+
+                sessionLabel:
+                  item.title,
+
+                day:
+                  item.day
+
+              };
+
+
+              sessionIndex[
+                item.id
+              ] = {
+
+                id:item.id,
+                label:item.title,
+                day:item.day
+
+              };
+
+            }
+          );
+
+        }
+
+
+        if(
+          Array.isArray(
+            item.parallel
+          )
+        ){
+
+          item.parallel
+            .forEach(
+              session => {
+
+                sessionIndex[
+                  session.id
+                ] = {
+
+                  id:
+                    session.id,
+
+                  label:
+                    session.label +
+                    " — " +
+                    session.title,
+
+                  day:
+                    item.day
+
+                };
+
+
+                (
+                  session.speakers ||
+                  []
+                )
+                .forEach(
+                  speaker => {
+
+                    presenterIndex[
+                      speaker.presenterId
+                    ] = {
+
+                      presenterId:
+                        speaker.presenterId,
+
+                      name:
+                        speaker.name || "",
+
+                      affiliation:
+                        speaker.affiliation || "",
+
+                      presentationTitle:
+                        speaker.presentationTitle || "",
+
+                      sessionId:
+                        session.id,
+
+                      sessionLabel:
+                        session.label +
+                        " — " +
+                        session.title,
+
+                      day:
+                        item.day
+
+                    };
+
+                  }
+                );
+
+              }
+            );
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   SESSION FILTER
+===================================================== */
+
+function populateSessionFilter(){
+
+  const select =
+    document.getElementById(
+      "sessionFilter"
+    );
+
+
+  const sessions =
+    Object.values(
+      sessionIndex
+    )
+    .sort(
+      (a,b)=>
+        a.label.localeCompare(
+          b.label
+        )
+    );
+
+
+  select.innerHTML =
+    `
+      <option value="">
+        All Sessions
+      </option>
+    ` +
+    sessions
+      .map(
+        session => `
+          <option
+            value="${escapeHTML(
+              session.id
+            )}"
+          >
+            Day ${session.day} ·
+            ${escapeHTML(
+              session.label
+            )}
+          </option>
+        `
+      )
+      .join("");
+
+}
+
+
+/* =====================================================
+   LOAD
+===================================================== */
+
+async function loadFeedback(){
+
+  const status =
+    document.getElementById(
+      "statusText"
+    );
+
+
+  status.textContent =
+    "Loading feedback…";
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/admin/all`
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to load feedback"
+      );
+
+    }
+
+
+    feedbackRecords =
+      Array.isArray(
+        data.feedback
+      )
+        ? data.feedback
+        : [];
+
+
+    renderAll();
+
+
+    status.textContent =
+      "Updated " +
+      new Date()
+        .toLocaleTimeString(
+          "en-MY",
+          {
+            hour:"numeric",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+          }
+        );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    status.textContent =
+      "Unable to load feedback";
+
+
+    document
+      .getElementById(
+        "presenterList"
+      )
+      .innerHTML = `
+        <div class="empty">
+          Unable to load presenter feedback.
+        </div>
+      `;
+
+  }
+
+}
+
+
+/* =====================================================
+   GROUP
+===================================================== */
+
+function groupedFeedback(){
+
+  const grouped =
+    {};
+
+
+  feedbackRecords
+    .forEach(
+      record => {
+
+        if(
+          !grouped[
+            record.presenterId
+          ]
+        ){
+
+          grouped[
+            record.presenterId
+          ] = [];
+
+        }
+
+
+        grouped[
+          record.presenterId
+        ]
+        .push(
+          record
+        );
+
+      }
+    );
+
+
+  return grouped;
+
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+function renderSummary(){
+
+  const total =
+    feedbackRecords.length;
+
+
+  const presenterCount =
+    new Set(
+      feedbackRecords.map(
+        record =>
+          record.presenterId
+      )
+    ).size;
+
+
+  const ratingSum =
+    feedbackRecords.reduce(
+      (
+        total,
+        record
+      ) =>
+        total +
+        Number(
+          record.rating || 0
+        ),
+      0
+    );
+
+
+  const average =
+    total
+      ? ratingSum / total
+      : 0;
+
+
+  const comments =
+    feedbackRecords.filter(
+      record =>
+        String(
+          record.comment ||
+          ""
+        ).trim()
+    ).length;
+
+
+  document
+    .getElementById(
+      "totalResponses"
+    )
+    .textContent =
+      total;
+
+
+  document
+    .getElementById(
+      "presentersRated"
+    )
+    .textContent =
+      presenterCount;
+
+
+  document
+    .getElementById(
+      "overallAverage"
+    )
+    .textContent =
+      total
+        ? average.toFixed(2)
+        : "—";
+
+
+  document
+    .getElementById(
+      "writtenComments"
+    )
+    .textContent =
+      comments;
+
+}
+
+
+/* =====================================================
+   DISTRIBUTION
+===================================================== */
+
+function ratingDistribution(
+  records
+){
+
+  const distribution = {
+    5:0,
+    4:0,
+    3:0,
+    2:0,
+    1:0
+  };
+
+
+  records.forEach(
+    record => {
+
+      const rating =
+        Number(
+          record.rating
+        );
+
+
+      if(
+        distribution[rating] !==
+        undefined
+      ){
+
+        distribution[rating]++;
+
+      }
+
+    }
+  );
+
+
+  return distribution;
+
+}
+
+
+/* =====================================================
+   FILTERED PRESENTERS
+===================================================== */
+
+function filteredPresenters(){
+
+  const query =
+    document
+      .getElementById(
+        "searchInput"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const day =
+    document
+      .getElementById(
+        "dayFilter"
+      )
+      .value;
+
+
+  const session =
+    document
+      .getElementById(
+        "sessionFilter"
+      )
+      .value;
+
+
+  return Object
+    .values(
+      presenterIndex
+    )
+    .filter(
+      presenter => {
+
+
+        if(
+          day &&
+          String(
+            presenter.day
+          ) !== day
+        ){
+
+          return false;
+
+        }
+
+
+        if(
+          session &&
+          presenter.sessionId !==
+          session
+        ){
+
+          return false;
+
+        }
+
+
+        if(query){
+
+          const haystack =
+            [
+              presenter.name,
+              presenter.affiliation,
+              presenter.presentationTitle,
+              presenter.sessionLabel
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+          if(
+            !haystack.includes(
+              query
+            )
+          ){
+
+            return false;
+
+          }
+
+        }
+
+
+        return true;
+
+      }
+    )
+    .sort(
+      (a,b)=>{
+
+        if(
+          a.day !== b.day
+        ){
+
+          return a.day - b.day;
+
+        }
+
+
+        return a.sessionLabel
+          .localeCompare(
+            b.sessionLabel
+          );
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   PRESENTER CARDS
+===================================================== */
+
+function renderPresenterList(){
+
+  const presenters =
+    filteredPresenters();
+
+
+  const grouped =
+    groupedFeedback();
+
+
+  const target =
+    document.getElementById(
+      "presenterList"
+    );
+
+
+  if(
+    !presenters.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty">
+        No presenters match the selected filters.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    presenters
+      .map(
+        presenter => {
+
+
+          const records =
+            grouped[
+              presenter.presenterId
+            ] || [];
+
+
+          const count =
+            records.length;
+
+
+          const average =
+            count
+              ? records.reduce(
+                  (
+                    total,
+                    record
+                  ) =>
+                    total +
+                    Number(
+                      record.rating || 0
+                    ),
+                  0
+                ) / count
+              : 0;
+
+
+          return `
+
+            <div
+              class="presenter-card"
+              data-presenter-card="${escapeHTML(
+                presenter.presenterId
+              )}"
+            >
+
+
+              <button
+                class="presenter-head"
+                type="button"
+                data-expand-presenter="${escapeHTML(
+                  presenter.presenterId
+                )}"
+              >
+
+
+                <div>
+
+                  <div class="presenter-session">
+
+                    Day ${presenter.day}
+
+                    ·
+
+                    ${escapeHTML(
+                      presenter.sessionLabel
+                    )}
+
+                  </div>
+
+
+                  <div class="presenter-name">
+                    ${escapeHTML(
+                      presenter.name
+                    )}
+                  </div>
+
+
+                  <div class="presenter-title">
+                    ${escapeHTML(
+                      presenter.presentationTitle ||
+                      presenter.affiliation
+                    )}
+                  </div>
+
+                </div>
+
+
+
+                <div class="metric">
+
+                  <div class="metric-value">
+
+                    ${
+                      count
+                        ? average.toFixed(2)
+                        : "—"
+                    }
+
+                  </div>
+
+                  <div class="metric-stars">
+                    ${
+                      count
+                        ? "★"
+                        : ""
+                    }
+                  </div>
+
+                  <div class="metric-label">
+                    Average
+                  </div>
+
+                </div>
+
+
+
+                <div class="metric responses-metric">
+
+                  <div class="metric-value">
+                    ${count}
+                  </div>
+
+                  <div class="metric-label">
+                    Responses
+                  </div>
+
+                </div>
+
+
+
+                <div class="expand-arrow">
+                  ▼
+                </div>
+
+
+              </button>
+
+
+              <div
+                class="presenter-detail"
+                id="detail-${escapeHTML(
+                  presenter.presenterId
+                )}"
+              >
+
+                ${renderPresenterDetail(
+                  presenter,
+                  records
+                )}
+
+              </div>
+
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  bindPresenterCards();
+
+}
+
+
+/* =====================================================
+   PRESENTER DETAIL
+===================================================== */
+
+function renderPresenterDetail(
+  presenter,
+  records
+){
+
+  const total =
+    records.length;
+
+
+  const average =
+    total
+      ? records.reduce(
+          (
+            sum,
+            record
+          ) =>
+            sum +
+            Number(
+              record.rating || 0
+            ),
+          0
+        ) / total
+      : 0;
+
+
+  const distribution =
+    ratingDistribution(
+      records
+    );
+
+
+  const comments =
+    records.filter(
+      record =>
+        String(
+          record.comment ||
+          ""
+        ).trim()
+    );
+
+
+  return `
+
+    <div class="detail-grid">
+
+
+      <div class="rating-box">
+
+        <div
+          style="
+            font-size:10px;
+            color:var(--muted);
+            font-weight:850;
+            text-transform:uppercase;
+          "
+        >
+          Rating Summary
+        </div>
+
+
+        <div class="rating-big">
+
+          ${
+            total
+              ? average.toFixed(2)
+              : "—"
+          }
+
+        </div>
+
+
+        <div class="rating-stars">
+
+          ${
+            total
+              ? "★".repeat(
+                  Math.round(
+                    average
+                  )
+                )
+              : ""
+          }
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:4px;
+            font-size:10px;
+            color:var(--muted);
+          "
+        >
+
+          ${total}
+          ${
+            total === 1
+              ? "response"
+              : "responses"
+          }
+
+        </div>
+
+
+        <div class="distribution">
+
+          ${
+            [5,4,3,2,1]
+              .map(
+                rating => {
+
+                  const count =
+                    distribution[
+                      rating
+                    ];
+
+
+                  const percent =
+                    total
+                      ? (
+                          count /
+                          total
+                        ) * 100
+                      : 0;
+
+
+                  return `
+
+                    <div class="dist-row">
+
+                      <div>
+                        ${rating}★
+                      </div>
+
+                      <div class="dist-bar">
+
+                        <div
+                          class="dist-fill"
+                          style="
+                            width:${percent}%;
+                          "
+                        ></div>
+
+                      </div>
+
+                      <div>
+                        ${count}
+                      </div>
+
+                    </div>
+
+                  `;
+
+                }
+              )
+              .join("")
+          }
+
+        </div>
+
+      </div>
+
+
+
+      <div class="comments-box">
+
+        <div class="comments-title">
+
+          Written Comments
+
+          (${comments.length})
+
+        </div>
+
+
+        ${
+          comments.length
+            ? comments
+                .map(
+                  record => `
+
+                    <div class="comment">
+
+                      <div class="comment-text">
+                        ${escapeHTML(
+                          record.comment
+                        )}
+                      </div>
+
+
+                      <div class="comment-time">
+
+                        ${
+                          record.updatedAt
+                            ? escapeHTML(
+                                new Date(
+                                  record.updatedAt
+                                )
+                                .toLocaleString(
+                                  "en-MY",
+                                  {
+                                    day:"numeric",
+                                    month:"short",
+                                    hour:"numeric",
+                                    minute:"2-digit",
+                                    hour12:true
+                                  }
+                                )
+                              )
+                            : ""
+                        }
+
+                      </div>
+
+                    </div>
+
+                  `
+                )
+                .join("")
+            : `
+              <div
+                style="
+                  margin-top:12px;
+                  color:var(--muted);
+                  font-size:11px;
+                "
+              >
+                No written comments yet.
+              </div>
+            `
+        }
+
+      </div>
+
+
+    </div>
+
+  `;
+
+}
+
+
+/* =====================================================
+   EXPAND / COLLAPSE
+===================================================== */
+
+function bindPresenterCards(){
+
+  document
+    .querySelectorAll(
+      "[data-expand-presenter]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              const id =
+                button.dataset
+                  .expandPresenter;
+
+
+              const detail =
+                document.getElementById(
+                  "detail-" +
+                  id
+                );
+
+
+              const opening =
+                !detail.classList
+                  .contains(
+                    "open"
+                  );
+
+
+              detail.classList.toggle(
+                "open"
+              );
+
+
+              const arrow =
+                button.querySelector(
+                  ".expand-arrow"
+                );
+
+
+              if(arrow){
+
+                arrow.textContent =
+                  opening
+                    ? "▲"
+                    : "▼";
+
+              }
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   RENDER ALL
+===================================================== */
+
+function renderAll(){
+
+  renderSummary();
+
+  renderPresenterList();
+
+}
+
+
+/* =====================================================
+   FILTER EVENTS
+===================================================== */
+
+document
+  .getElementById(
+    "searchInput"
+  )
+  .addEventListener(
+    "input",
+    renderPresenterList
+  );
+
+
+document
+  .getElementById(
+    "dayFilter"
+  )
+  .addEventListener(
+    "change",
+    renderPresenterList
+  );
+
+
+document
+  .getElementById(
+    "sessionFilter"
+  )
+  .addEventListener(
+    "change",
+    renderPresenterList
+  );
+
+
+document
+  .getElementById(
+    "refreshBtn"
+  )
+  .addEventListener(
+    "click",
+    loadFeedback
+  );
+
+
+/* =====================================================
+   INITIALISE
+===================================================== */
+
+if(
+  !MASTER
+){
+
+  document
+    .getElementById(
+      "presenterList"
+    )
+    .innerHTML = `
+      <div class="empty">
+        Programme data could not be loaded.
+      </div>
+    `;
+
+  return;
+
+}
+
+
+buildPresenterIndex();
+
+populateSessionFilter();
+
+loadFeedback();
+
+
+})();
+
+</script>
+
+
+</body>
+
+</html>
