@@ -1231,6 +1231,67 @@ textarea.form-control{
         id="adminTimeline"
       ></div>
 
+      <div class="section-label">
+  V2 Management Tools
+</div>
+
+<div
+  class="card"
+  style="padding:16px;"
+>
+
+  <div
+    style="
+      font-size:15px;
+      font-weight:850;
+    "
+  >
+    Conference Management
+  </div>
+
+  <div
+    style="
+      margin-top:5px;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--muted);
+    "
+  >
+    Access the upgraded presenter feedback
+    and participant Moments management tools.
+  </div>
+
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      margin-top:12px;
+    "
+  >
+
+    <button
+      class="btn btn-soft"
+      id="overviewPresenterFeedbackBtn"
+      type="button"
+    >
+      ★ Presenter Feedback
+    </button>
+
+
+    <button
+      class="btn btn-soft"
+      id="overviewMomentsManagerBtn"
+      type="button"
+    >
+      ◉ MTERMS Moments
+    </button>
+
+  </div>
+
+</div>
+
     </div>
 
 
@@ -4988,6 +5049,45 @@ document
 
     }
   );
+
+
+/* =====================================================
+   V2 OVERVIEW MANAGEMENT TOOLS
+===================================================== */
+
+document
+  .getElementById(
+    "overviewPresenterFeedbackBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.open(
+        "/public/admin-presenter-feedback-v2.html",
+        "_blank"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "overviewMomentsManagerBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.open(
+        "/public/admin-mterms-moments-v2.html",
+        "_blank"
+      );
+
+    }
+  );
+
 /* =====================================================
    INITIALISE
 ===================================================== */
