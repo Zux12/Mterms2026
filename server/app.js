@@ -21,6 +21,8 @@ const mtermsAIRouter = require('./routes/mtermsAI');
 const liveRouter = require('./routes/live');
 const presenterFeedbackRouter = require('./routes/mtermsPresenterFeedback');
 const mtermsMomentsRouter = require('./routes/mtermsMoments');
+const liveAnalyticsRouter =
+  require('./routes/liveAnalytics');
 
 const {
   setupMtermsIrc
@@ -117,6 +119,10 @@ app.use('/api/reviewer', reviewerRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/mterms-ai', mtermsAIRouter);
 app.use('/api/live', liveRouter);
+app.use(
+  '/api/live-analytics',
+  liveAnalyticsRouter
+);
 app.use('/api/presenter-feedback', presenterFeedbackRouter);
 app.use('/api/mterms-moments', mtermsMomentsRouter);
 
