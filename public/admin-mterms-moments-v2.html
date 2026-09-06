@@ -90,7 +90,62 @@ button{
 
 }
 
+.header-content{
 
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+
+}
+
+
+.close-tab-btn{
+
+  flex:0 0 auto;
+
+  min-height:38px;
+
+  padding:0 12px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.22);
+
+  border-radius:10px;
+
+  background:
+    rgba(255,255,255,.10);
+
+  color:#fff;
+
+  font-size:11px;
+  font-weight:800;
+
+}
+
+
+.close-tab-btn:hover{
+
+  background:
+    rgba(255,255,255,.18);
+
+}
+
+
+@media(max-width:520px){
+
+  .close-tab-btn{
+
+    min-height:36px;
+    padding:0 10px;
+    font-size:10px;
+
+  }
+
+}
+
+  
 .header-kicker{
 
   font-size:10px;
@@ -715,16 +770,33 @@ main{
 
   <div class="header-inner">
 
-    <div class="header-kicker">
-      MTERMS 2026 Digital Platform
-    </div>
+    <div class="header-content">
 
-    <div class="header-title">
-      MTERMS Moments Manager
-    </div>
+      <div>
 
-    <div class="header-sub">
-      Photo feed · comments · moderation
+        <div class="header-kicker">
+          MTERMS 2026 Digital Platform
+        </div>
+
+        <div class="header-title">
+          MTERMS Moments Manager
+        </div>
+
+        <div class="header-sub">
+          Photo feed · comments · moderation
+        </div>
+
+      </div>
+
+
+      <button
+        class="close-tab-btn"
+        id="closeTabBtn"
+        type="button"
+      >
+        ✕ Close Tab
+      </button>
+
     </div>
 
   </div>
@@ -2069,7 +2141,23 @@ document
     loadMoments
   );
 
+/* =====================================================
+   CLOSE TAB
+===================================================== */
 
+document
+  .getElementById(
+    "closeTabBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.close();
+
+    }
+  );
+  
 /* =====================================================
    INITIALISE
 ===================================================== */
