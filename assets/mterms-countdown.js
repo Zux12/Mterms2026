@@ -918,11 +918,11 @@
 
     <a
     class="mterms-countdown-agenda"
-    href="public/List%20of%20the%20Oral%20Speakers%20MTERMS%202026.pdf"
+    href="public/MTERMSABSTRACTBOOKC.pdf"
     target="_blank"
     rel="noopener">
 
-    LIST OF POSTER SESSIONS
+    DOWNLOAD ABSTRACT BOOK
 
   </a>
 </div>
