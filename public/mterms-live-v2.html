@@ -10198,20 +10198,38 @@ function renderMorePanel(
 
         </div>
 
+<div class="moments-dev-note">
 
-        <div class="moments-dev-note">
+  <strong>Temporary Upload Test</strong>
 
-          MTERMS Moments has been prepared in the
-          V2 participant interface.
+  <br><br>
 
-          <br><br>
+  <input
+    type="file"
+    id="momentTestFile"
+    accept="image/jpeg,image/png,image/webp"
+  >
 
-          Photo upload, camera access, captions,
-          Feed, Gallery and comments will be
-          connected to MongoDB in the next
-          development stage.
+  <br><br>
 
-        </div>
+  <button
+    class="btn btn-primary btn-small"
+    type="button"
+    id="momentTestUploadBtn"
+  >
+    Upload Test Photo
+  </button>
+
+  <div
+    id="momentTestResult"
+    style="
+      margin-top:10px;
+      font-size:11px;
+      line-height:1.5;
+    "
+  ></div>
+
+</div>
 
       </div>
 
@@ -10234,6 +10252,178 @@ function renderMorePanel(
       );
 
 
+
+
+document
+  .getElementById(
+    "momentTestUploadBtn"
+  )
+  ?.addEventListener(
+    "click",
+    async ()=>{
+
+      const input =
+        document.getElementById(
+          "momentTestFile"
+        );
+
+      const result =
+        document.getElementById(
+          "momentTestResult"
+        );
+
+      const file =
+        input?.files?.[0];
+
+
+      if(!file){
+
+        result.textContent =
+          "Please choose a photo first.";
+
+        return;
+
+      }
+
+
+      if(
+        file.size >
+        2 * 1024 * 1024
+      ){
+
+        result.textContent =
+          "For this test, choose a photo under 2 MB.";
+
+        return;
+
+      }
+
+
+      const form =
+        new FormData();
+
+
+      form.append(
+        "participantId",
+        "MTERMS-MOMENTS-TEST"
+      );
+
+
+      form.append(
+        "displayName",
+        "Test Participant"
+      );
+
+
+      form.append(
+        "title",
+        ""
+      );
+
+
+      form.append(
+        "affiliation",
+        "MTERMS 2026"
+      );
+
+
+      form.append(
+        "message",
+        "Testing MTERMS Moments"
+      );
+
+
+      form.append(
+        "imageWidth",
+        "0"
+      );
+
+
+      form.append(
+        "imageHeight",
+        "0"
+      );
+
+
+      form.append(
+        "image",
+        file
+      );
+
+
+      result.textContent =
+        "Uploading test photo…";
+
+
+      try{
+
+        const response =
+          await fetch(
+            "https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments",
+            {
+              method:"POST",
+              body:form
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if(
+          !response.ok ||
+          !data.ok
+        ){
+
+          throw new Error(
+            data.error ||
+            "Upload failed"
+          );
+
+        }
+
+
+        result.innerHTML = `
+          ✓ Upload successful
+
+          <br>
+
+          Moment ID:
+          ${escapeHTML(
+            data.moment.id
+          )}
+
+          <br><br>
+
+          <a
+            href="https://mterm2026-559f9bf571b5.herokuapp.com${escapeHTML(
+              data.moment.imageUrl
+            )}"
+            target="_blank"
+          >
+            Open uploaded image
+          </a>
+        `;
+
+
+      }catch(error){
+
+        console.error(
+          error
+        );
+
+
+        result.textContent =
+          error.message ||
+          "Unable to upload test photo.";
+
+      }
+
+    }
+  );
+    
+    
     return;
 
   }
