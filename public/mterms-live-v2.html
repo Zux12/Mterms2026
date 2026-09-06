@@ -13829,9 +13829,92 @@ const commentDraftActive =
 try{
 
   /*
-    Remember the participant's exact
-    scroll position before rebuilding
-    the Moments feed.
+    Find the Moment card currently closest
+    to the top of the participant's viewport.
+
+    We remember:
+    1. which Moment it is
+    2. its exact visual offset from the top
+
+    This keeps the participant anchored to
+    the same Moment even if new posts appear
+    above it during refresh.
+  */
+
+  const momentCards =
+    Array.from(
+      document.querySelectorAll(
+        '.moment-card'
+      )
+    );
+
+
+  let anchorMomentId =
+    null;
+
+
+  let anchorOffset =
+    null;
+
+
+  let closestDistance =
+    Infinity;
+
+
+  momentCards.forEach(
+    card => {
+
+      const rect =
+        card.getBoundingClientRect();
+
+
+      /*
+        Ignore cards completely above
+        the visible screen.
+      */
+
+      if(
+        rect.bottom <= 0
+      ){
+        return;
+      }
+
+
+      const distance =
+        Math.abs(
+          rect.top
+        );
+
+
+      if(
+        distance <
+        closestDistance
+      ){
+
+        closestDistance =
+          distance;
+
+
+        anchorMomentId =
+          card.id
+            .replace(
+              'moment-card-',
+              ''
+            );
+
+
+        anchorOffset =
+          rect.top;
+
+      }
+
+    }
+  );
+
+
+  /*
+    Fallback in case no Moment card
+    is currently visible.
   */
 
   const previousScrollY =
@@ -13854,20 +13937,68 @@ try{
   }
 
 
-  /*
-    Restore the previous position after
-    the Moments DOM has been refreshed.
-  */
-
   requestAnimationFrame(
     ()=>{
+
+      /*
+        Preferred behaviour:
+        restore the same Moment card to
+        exactly the same place on screen.
+      */
+
+      if(
+        anchorMomentId &&
+        anchorOffset !== null
+      ){
+
+        const refreshedCard =
+          document.getElementById(
+            'moment-card-' +
+            anchorMomentId
+          );
+
+
+        if(
+          refreshedCard
+        ){
+
+          const newRect =
+            refreshedCard
+              .getBoundingClientRect();
+
+
+          const difference =
+            newRect.top -
+            anchorOffset;
+
+
+          window.scrollBy({
+            top:
+              difference,
+
+            behavior:
+              'auto'
+          });
+
+
+          return;
+
+        }
+
+      }
+
+
+      /*
+        Fallback if that Moment was deleted
+        while the refresh was happening.
+      */
 
       window.scrollTo({
         top:
           previousScrollY,
 
         behavior:
-          "auto"
+          'auto'
       });
 
     }
