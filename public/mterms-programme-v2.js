@@ -2579,7 +2579,7 @@
           label:"SP9",
 
           title:
-            "Bridging the Gap from Innovation to Clinical Translation in Emerging Cell Therapies",
+            "Innovation to Clinical Translation in Emerging Cell Therapies",
 
           room:
             "Patio 1",
