@@ -1,0 +1,3618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>MTERMS 2026 — Live Analytics</title>
+
+
+<style>
+
+:root{
+
+  --navy:#071a2c;
+  --blue:#1677ff;
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --text:#172033;
+  --muted:#6d7788;
+  --line:#e3e8ef;
+  --green:#138a5b;
+  --amber:#d88700;
+  --red:#c52b2b;
+
+  --shadow:
+    0 8px 26px
+    rgba(15,35,60,.08);
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background:var(--bg);
+  color:var(--text);
+
+}
+
+
+button,
+select,
+input{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+
+  background:var(--navy);
+  color:#fff;
+
+  padding:18px 20px;
+
+}
+
+
+.header-inner{
+
+  max-width:1400px;
+  margin:0 auto;
+
+}
+
+
+.header-content{
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:18px;
+
+}
+
+
+.header-kicker{
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+  letter-spacing:.12em;
+
+  opacity:.65;
+
+}
+
+
+.header-title{
+
+  margin-top:4px;
+
+  font-size:24px;
+  font-weight:900;
+
+}
+
+
+.header-sub{
+
+  margin-top:4px;
+
+  font-size:12px;
+
+  opacity:.72;
+
+}
+
+
+.close-tab-btn{
+
+  flex:0 0 auto;
+
+  min-height:38px;
+
+  padding:0 12px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.22);
+
+  border-radius:10px;
+
+  background:
+    rgba(255,255,255,.10);
+
+  color:#fff;
+
+  font-size:11px;
+  font-weight:800;
+
+}
+
+
+.close-tab-btn:hover{
+
+  background:
+    rgba(255,255,255,.18);
+
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main{
+
+  max-width:1400px;
+
+  margin:0 auto;
+
+  padding:20px;
+
+}
+
+
+.toolbar{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  align-items:center;
+
+  margin-bottom:18px;
+
+}
+
+
+.btn{
+
+  min-height:40px;
+
+  border:0;
+
+  border-radius:10px;
+
+  padding:0 13px;
+
+  font-weight:800;
+
+}
+
+
+.btn-primary{
+
+  background:var(--blue);
+  color:#fff;
+
+}
+
+
+.btn-outline{
+
+  border:
+    1px solid
+    var(--line);
+
+  background:#fff;
+
+  color:var(--text);
+
+}
+
+
+.status{
+
+  font-size:11px;
+
+  color:var(--muted);
+
+}
+
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
+.section-label{
+
+  margin:
+    22px 2px 9px;
+
+  font-size:10px;
+
+  font-weight:900;
+
+  letter-spacing:.1em;
+
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+}
+
+
+.card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+/* =====================================================
+   EXECUTIVE KPIs
+===================================================== */
+
+.kpi-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(5,1fr);
+
+  gap:10px;
+
+}
+
+
+.kpi-card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:15px;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.kpi-label{
+
+  color:var(--muted);
+
+  font-size:9px;
+
+  font-weight:900;
+
+  text-transform:uppercase;
+
+  letter-spacing:.06em;
+
+  line-height:1.35;
+
+}
+
+
+.kpi-value{
+
+  margin-top:7px;
+
+  color:var(--navy);
+
+  font-size:27px;
+
+  font-weight:950;
+
+  line-height:1.1;
+
+}
+
+
+.kpi-note{
+
+  margin-top:5px;
+
+  color:var(--muted);
+
+  font-size:9px;
+
+  line-height:1.35;
+
+}
+
+
+/* =====================================================
+   CHART GRID
+===================================================== */
+
+.chart-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    1.4fr 1fr;
+
+  gap:12px;
+
+}
+
+
+.chart-card{
+
+  padding:15px;
+
+}
+
+
+.chart-title{
+
+  font-size:14px;
+
+  font-weight:900;
+
+}
+
+
+.chart-sub{
+
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  line-height:1.4;
+
+}
+
+
+.chart-area{
+
+  margin-top:16px;
+
+  min-height:260px;
+
+}
+
+
+/* =====================================================
+   SVG LINE CHART
+===================================================== */
+
+.line-chart{
+
+  width:100%;
+  height:260px;
+
+  display:block;
+
+}
+
+
+.chart-axis-label{
+
+  fill:#7a8493;
+
+  font-size:9px;
+
+}
+
+
+.chart-grid-line{
+
+  stroke:#e8edf3;
+
+  stroke-width:1;
+
+}
+
+
+.chart-line{
+
+  fill:none;
+
+  stroke:#1677ff;
+
+  stroke-width:3;
+
+  stroke-linecap:round;
+
+  stroke-linejoin:round;
+
+}
+
+
+.chart-point{
+
+  fill:#1677ff;
+
+}
+
+
+/* =====================================================
+   BARS
+===================================================== */
+
+.bar-list{
+
+  display:grid;
+
+  gap:10px;
+
+}
+
+
+.bar-row{
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(130px,220px)
+    minmax(100px,1fr)
+    48px;
+
+  gap:10px;
+
+  align-items:center;
+
+}
+
+
+.bar-label{
+
+  font-size:10px;
+
+  line-height:1.3;
+
+  overflow:hidden;
+
+  text-overflow:ellipsis;
+
+}
+
+
+.bar-track{
+
+  height:10px;
+
+  background:#edf1f5;
+
+  border-radius:999px;
+
+  overflow:hidden;
+
+}
+
+
+.bar-fill{
+
+  height:100%;
+
+  background:var(--blue);
+
+  border-radius:999px;
+
+}
+
+
+.bar-value{
+
+  text-align:right;
+
+  font-size:10px;
+
+  font-weight:850;
+
+}
+
+
+/* =====================================================
+   TABLES
+===================================================== */
+
+.table-card{
+
+  overflow:hidden;
+
+}
+
+
+.table-scroll{
+
+  overflow-x:auto;
+
+}
+
+
+table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  min-width:800px;
+
+}
+
+
+th{
+
+  padding:11px 12px;
+
+  text-align:left;
+
+  background:#f7f9fc;
+
+  border-bottom:
+    1px solid
+    var(--line);
+
+  color:#657083;
+
+  font-size:9px;
+
+  font-weight:900;
+
+  text-transform:uppercase;
+
+  letter-spacing:.04em;
+
+}
+
+
+td{
+
+  padding:11px 12px;
+
+  border-bottom:
+    1px solid
+    #edf0f4;
+
+  font-size:10px;
+
+  vertical-align:top;
+
+}
+
+
+tbody tr:last-child td{
+  border-bottom:0;
+}
+
+
+.rank{
+
+  width:30px;
+
+  color:var(--muted);
+
+  font-weight:900;
+
+}
+
+
+.session-name{
+
+  font-weight:800;
+
+  line-height:1.4;
+
+}
+
+
+.numeric{
+
+  text-align:right;
+
+  font-variant-numeric:
+    tabular-nums;
+
+}
+
+
+/* =====================================================
+   DEVICE GRID
+===================================================== */
+
+.device-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:12px;
+
+}
+
+
+.device-card{
+
+  padding:15px;
+
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty{
+
+  padding:25px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:11px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1100px){
+
+  .kpi-grid{
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+
+}
+
+
+@media(max-width:850px){
+
+  .chart-grid{
+    grid-template-columns:1fr;
+  }
+
+
+  .device-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+
+@media(max-width:650px){
+
+  main{
+    padding:12px;
+  }
+
+
+  .kpi-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+
+  .kpi-value{
+    font-size:23px;
+  }
+
+
+  .bar-row{
+
+    grid-template-columns:
+      110px
+      1fr
+      38px;
+
+  }
+
+}
+
+
+@media(max-width:420px){
+
+  .header-title{
+    font-size:19px;
+  }
+
+
+  .close-tab-btn{
+
+    min-height:36px;
+
+    padding:0 9px;
+
+    font-size:9px;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+  <div class="header-inner">
+
+    <div class="header-content">
+
+
+      <div>
+
+        <div class="header-kicker">
+          MTERMS 2026 Digital Platform
+        </div>
+
+        <div class="header-title">
+          Live Conference Analytics
+        </div>
+
+        <div class="header-sub">
+          Digital engagement · participant activity · programme intelligence
+        </div>
+
+      </div>
+
+
+      <button
+        class="close-tab-btn"
+        id="closeTabBtn"
+        type="button"
+      >
+        ✕ Close Tab
+      </button>
+
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<main>
+
+
+<div class="toolbar">
+
+  <button
+    class="btn btn-primary"
+    id="refreshBtn"
+    type="button"
+  >
+    Refresh Analytics
+  </button>
+
+
+  <span
+    class="status"
+    id="statusText"
+  >
+    Loading analytics…
+  </span>
+
+</div>
+
+
+
+<!-- =====================================================
+     EXECUTIVE SUMMARY
+===================================================== -->
+
+<div class="section-label">
+  Digital Engagement Summary
+</div>
+
+
+<div class="kpi-grid">
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Unique Devices
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiDevices"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Unique participant device IDs
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Programme Views
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiProgrammeViews"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Programme page opens
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Created My Schedule
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiScheduleAdoption"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      % of devices saving ≥1 session
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Presenter Feedback
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiPresenterFeedback"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Individual presenter responses
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Questions Submitted
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiQuestions"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Questions posted in discussions
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Discussion Interactions
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiDiscussionInteractions"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Topics + replies + likes
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Moments Shared
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiMoments"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Participant-shared photos
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Announcement Reach
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiAnnouncementReach"
+    >
+      —
+    </div>
+
+    <div class="kpi-note">
+      Devices opening announcements
+    </div>
+
+  </div>
+
+
+
+  <div class="kpi-card">
+
+    <div class="kpi-label">
+      Peak Activity
+    </div>
+
+    <div
+      class="kpi-value"
+      id="kpiPeakActivity"
+      style="font-size:21px;"
+    >
+      —
+    </div>
+
+    <div
+      class="kpi-note"
+      id="kpiPeakActivityNote"
+    >
+      Busiest minute
+    </div>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     ENGAGEMENT CHARTS
+===================================================== -->
+
+<div class="section-label">
+  Engagement Patterns
+</div>
+
+
+<div class="chart-grid">
+
+
+  <div class="card chart-card">
+
+    <div class="chart-title">
+      Engagement Over Time
+    </div>
+
+    <div class="chart-sub">
+      Participant activity by 15-minute interval.
+    </div>
+
+    <div
+      class="chart-area"
+      id="engagementChart"
+    ></div>
+
+  </div>
+
+
+
+  <div class="card chart-card">
+
+    <div class="chart-title">
+      Feature Usage
+    </div>
+
+    <div class="chart-sub">
+      How participants use the digital conference platform.
+    </div>
+
+    <div
+      class="chart-area"
+      id="featureUsageChart"
+    ></div>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     SCIENTIFIC ENGAGEMENT
+===================================================== -->
+
+<div class="section-label">
+  Scientific Programme Engagement
+</div>
+
+
+<div class="chart-grid">
+
+
+  <div class="card chart-card">
+
+    <div class="chart-title">
+      Most Viewed Sessions
+    </div>
+
+    <div class="chart-sub">
+      Ranked by speaker/session expansion.
+    </div>
+
+    <div
+      class="chart-area"
+      id="sessionViewsChart"
+    ></div>
+
+  </div>
+
+
+
+  <div class="card chart-card">
+
+    <div class="chart-title">
+      Most Saved Sessions
+    </div>
+
+    <div class="chart-sub">
+      Sessions added to participant schedules.
+    </div>
+
+    <div
+      class="chart-area"
+      id="sessionSavesChart"
+    ></div>
+
+  </div>
+
+
+</div>
+
+
+
+<div
+  class="card table-card"
+  style="margin-top:12px;"
+>
+
+  <div
+    style="padding:15px;"
+  >
+
+    <div class="chart-title">
+      Scientific Engagement Table
+    </div>
+
+    <div class="chart-sub">
+      Combined session views, schedule saves, discussion opens and presenter feedback.
+    </div>
+
+  </div>
+
+
+  <div class="table-scroll">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            #
+          </th>
+
+          <th>
+            Session
+          </th>
+
+          <th class="numeric">
+            Views
+          </th>
+
+          <th class="numeric">
+            Saves
+          </th>
+
+          <th class="numeric">
+            Discussion Opens
+          </th>
+
+          <th class="numeric">
+            Presenter Feedback
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="scientificTable"
+      ></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     DEVICES
+===================================================== -->
+
+<div class="section-label">
+  Participant Technology
+</div>
+
+
+<div class="device-grid">
+
+
+  <div class="card device-card">
+
+    <div class="chart-title">
+      Device Type
+    </div>
+
+    <div
+      class="chart-area"
+      id="deviceChart"
+    ></div>
+
+  </div>
+
+
+  <div class="card device-card">
+
+    <div class="chart-title">
+      Operating System
+    </div>
+
+    <div
+      class="chart-area"
+      id="osChart"
+    ></div>
+
+  </div>
+
+
+  <div class="card device-card">
+
+    <div class="chart-title">
+      Browser
+    </div>
+
+    <div
+      class="chart-area"
+      id="browserChart"
+    ></div>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     PARTICIPANT TABLE
+===================================================== -->
+
+<div class="section-label">
+  Anonymous Participant Activity
+</div>
+
+
+<div class="card table-card">
+
+
+  <div
+    style="padding:15px;"
+  >
+
+    <div class="chart-title">
+      Participant Activity
+    </div>
+
+    <div class="chart-sub">
+      Anonymous device-level engagement. No participant names are displayed.
+    </div>
+
+  </div>
+
+
+  <div class="table-scroll">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Device
+          </th>
+
+          <th>
+            Device Type
+          </th>
+
+          <th>
+            First Seen
+          </th>
+
+          <th>
+            Last Seen
+          </th>
+
+          <th class="numeric">
+            Actions
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="participantTable"
+      ></tbody>
+
+    </table>
+
+  </div>
+
+
+</div>
+
+
+</main>
+
+
+
+<script
+  src="/public/mterms-programme-v2.js?v=1"
+></script>
+
+
+
+<script>
+
+(function(){
+
+"use strict";
+
+
+/* =====================================================
+   APIs
+===================================================== */
+
+const BASE =
+  "https://mterm2026-559f9bf571b5.herokuapp.com";
+
+
+const ANALYTICS_API =
+  BASE +
+  "/api/live-analytics";
+
+
+const LIVE_API =
+  BASE +
+  "/api/live";
+
+
+const PRESENTER_FEEDBACK_API =
+  BASE +
+  "/api/presenter-feedback";
+
+
+const MOMENTS_API =
+  BASE +
+  "/api/mterms-moments";
+
+
+const MASTER =
+  window.MTERMS_PROGRAMME_V2;
+
+
+
+/* =====================================================
+   DATA
+===================================================== */
+
+let analyticsEvents = [];
+
+let discussions = [];
+
+let presenterFeedback = [];
+
+let moments = [];
+
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+
+function formatNumber(
+  value
+){
+
+  return Number(
+    value || 0
+  )
+    .toLocaleString(
+      "en-MY"
+    );
+
+}
+
+
+
+function formatPercent(
+  value
+){
+
+  if(
+    !Number.isFinite(
+      value
+    )
+  ){
+
+    return "0%";
+
+  }
+
+
+  return (
+    Math.round(
+      value
+    ) +
+    "%"
+  );
+
+}
+
+
+
+function malaysiaDate(
+  iso
+){
+
+  try{
+
+    return new Date(
+      iso
+    )
+    .toLocaleString(
+      "en-MY",
+      {
+        day:"numeric",
+        month:"short",
+        hour:"numeric",
+        minute:"2-digit",
+        hour12:true,
+        timeZone:
+          "Asia/Kuala_Lumpur"
+      }
+    );
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+
+function malaysiaTime(
+  iso
+){
+
+  try{
+
+    return new Date(
+      iso
+    )
+    .toLocaleTimeString(
+      "en-MY",
+      {
+        hour:"numeric",
+        minute:"2-digit",
+        hour12:true,
+        timeZone:
+          "Asia/Kuala_Lumpur"
+      }
+    );
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+
+function uniqueParticipants(
+  events = analyticsEvents
+){
+
+  return new Set(
+    events
+      .map(
+        event =>
+          event.participantId
+      )
+      .filter(Boolean)
+  );
+
+}
+
+
+
+function eventsByName(
+  name
+){
+
+  return analyticsEvents
+    .filter(
+      event =>
+        event.event ===
+        name
+    );
+
+}
+
+
+
+/* =====================================================
+   PROGRAMME INDEX
+===================================================== */
+
+function buildSessionIndex(){
+
+  const index =
+    {};
+
+
+  if(
+    !MASTER ||
+    !Array.isArray(
+      MASTER.programme
+    )
+  ){
+
+    return index;
+
+  }
+
+
+  MASTER.programme
+    .forEach(
+      item => {
+
+
+        index[
+          item.id
+        ] = {
+
+          id:item.id,
+
+          title:
+            item.title,
+
+          day:
+            item.day
+
+        };
+
+
+        (
+          item.parallel ||
+          []
+        )
+        .forEach(
+          session => {
+
+            index[
+              session.id
+            ] = {
+
+              id:
+                session.id,
+
+              title:
+                session.label +
+                " — " +
+                session.title,
+
+              day:
+                item.day
+
+            };
+
+          }
+        );
+
+
+        (
+          item.speakers ||
+          []
+        )
+        .forEach(
+          speaker => {
+
+            if(
+              speaker.presenterId
+            ){
+
+              index[
+                speaker.presenterId
+              ] = {
+
+                id:
+                  speaker.presenterId,
+
+                title:
+                  speaker.name,
+
+                sessionId:
+                  item.id
+
+              };
+
+            }
+
+          }
+        );
+
+
+        (
+          item.parallel ||
+          []
+        )
+        .forEach(
+          session => {
+
+            (
+              session.speakers ||
+              []
+            )
+            .forEach(
+              speaker => {
+
+                if(
+                  speaker.presenterId
+                ){
+
+                  index[
+                    speaker.presenterId
+                  ] = {
+
+                    id:
+                      speaker.presenterId,
+
+                    title:
+                      speaker.name,
+
+                    sessionId:
+                      session.id
+
+                  };
+
+                }
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  return index;
+
+}
+
+
+
+const SESSION_INDEX =
+  buildSessionIndex();
+
+
+
+function sessionTitle(
+  id
+){
+
+  return (
+    SESSION_INDEX[
+      id
+    ]?.title ||
+    id ||
+    "Unknown Session"
+  );
+
+}
+
+
+
+/* =====================================================
+   LOAD ALL DATA
+===================================================== */
+
+async function loadData(){
+
+  const status =
+    document.getElementById(
+      "statusText"
+    );
+
+
+  status.textContent =
+    "Loading live analytics…";
+
+
+  try{
+
+    const [
+      analyticsResponse,
+      discussionResponse,
+      presenterResponse,
+      momentsResponse
+    ] =
+      await Promise.all([
+
+        fetch(
+          `${ANALYTICS_API}/admin/events?limit=20000`
+        ),
+
+        fetch(
+          `${LIVE_API}/messages`
+        ),
+
+        fetch(
+          `${PRESENTER_FEEDBACK_API}/admin/all`
+        ),
+
+        fetch(
+          `${MOMENTS_API}/admin/all`
+        )
+
+      ]);
+
+
+    const [
+      analyticsData,
+      discussionData,
+      presenterData,
+      momentsData
+    ] =
+      await Promise.all([
+
+        analyticsResponse.json(),
+
+        discussionResponse.json(),
+
+        presenterResponse.json(),
+
+        momentsResponse.json()
+
+      ]);
+
+
+    analyticsEvents =
+      Array.isArray(
+        analyticsData.events
+      )
+        ? analyticsData.events
+        : [];
+
+
+    discussions =
+      Array.isArray(
+        discussionData.messages
+      )
+        ? discussionData.messages
+        : [];
+
+
+    presenterFeedback =
+      Array.isArray(
+        presenterData.feedback
+      )
+        ? presenterData.feedback
+        : [];
+
+
+    moments =
+      Array.isArray(
+        momentsData.moments
+      )
+        ? momentsData.moments
+        : [];
+
+
+    renderAll();
+
+
+    status.textContent =
+      "Updated " +
+      new Date()
+        .toLocaleTimeString(
+          "en-MY",
+          {
+            hour:"numeric",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+          }
+        );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    status.textContent =
+      "Unable to load analytics";
+
+  }
+
+}
+
+
+
+/* =====================================================
+   KPI SUMMARY
+===================================================== */
+
+function renderKPIs(){
+
+  const uniqueDevices =
+    uniqueParticipants();
+
+
+  const totalDevices =
+    uniqueDevices.size;
+
+
+  const programmeViews =
+    analyticsEvents
+      .filter(
+        event =>
+          event.event ===
+            "page_view" &&
+          event.page ===
+            "programme"
+      )
+      .length;
+
+
+  const scheduleUsers =
+    uniqueParticipants(
+      eventsByName(
+        "schedule_save"
+      )
+    )
+    .size;
+
+
+  const schedulePercent =
+    totalDevices
+      ? (
+          scheduleUsers /
+          totalDevices
+        ) * 100
+      : 0;
+
+
+  const questions =
+    discussions
+      .filter(
+        item =>
+          item.type ===
+          "Question"
+      )
+      .length;
+
+
+  const replies =
+    discussions.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        (
+          item.replies ||
+          []
+        ).length,
+      0
+    );
+
+
+  const likes =
+    discussions.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        Number(
+          item.likes || 0
+        ),
+      0
+    );
+
+
+  const discussionInteractions =
+    discussions.length +
+    replies +
+    likes;
+
+
+  const announcementUsers =
+    uniqueParticipants(
+      eventsByName(
+        "announcement_open"
+      )
+    )
+    .size;
+
+
+  const announcementReach =
+    totalDevices
+      ? (
+          announcementUsers /
+          totalDevices
+        ) * 100
+      : 0;
+
+
+  const peak =
+    calculatePeakActivity();
+
+
+  document
+    .getElementById(
+      "kpiDevices"
+    )
+    .textContent =
+      formatNumber(
+        totalDevices
+      );
+
+
+  document
+    .getElementById(
+      "kpiProgrammeViews"
+    )
+    .textContent =
+      formatNumber(
+        programmeViews
+      );
+
+
+  document
+    .getElementById(
+      "kpiScheduleAdoption"
+    )
+    .textContent =
+      formatPercent(
+        schedulePercent
+      );
+
+
+  document
+    .getElementById(
+      "kpiPresenterFeedback"
+    )
+    .textContent =
+      formatNumber(
+        presenterFeedback.length
+      );
+
+
+  document
+    .getElementById(
+      "kpiQuestions"
+    )
+    .textContent =
+      formatNumber(
+        questions
+      );
+
+
+  document
+    .getElementById(
+      "kpiDiscussionInteractions"
+    )
+    .textContent =
+      formatNumber(
+        discussionInteractions
+      );
+
+
+  document
+    .getElementById(
+      "kpiMoments"
+    )
+    .textContent =
+      formatNumber(
+        moments.length
+      );
+
+
+  document
+    .getElementById(
+      "kpiAnnouncementReach"
+    )
+    .textContent =
+      formatPercent(
+        announcementReach
+      );
+
+
+  document
+    .getElementById(
+      "kpiPeakActivity"
+    )
+    .textContent =
+      peak
+        ? peak.label
+        : "—";
+
+
+  document
+    .getElementById(
+      "kpiPeakActivityNote"
+    )
+    .textContent =
+      peak
+        ? (
+            formatNumber(
+              peak.count
+            ) +
+            " tracked actions in busiest minute"
+          )
+        : "No tracked activity yet";
+
+}
+
+
+
+/* =====================================================
+   PEAK ACTIVITY
+===================================================== */
+
+function calculatePeakActivity(){
+
+  if(
+    !analyticsEvents.length
+  ){
+
+    return null;
+
+  }
+
+
+  const buckets =
+    {};
+
+
+  analyticsEvents.forEach(
+    event => {
+
+      const date =
+        new Date(
+          event.createdAt
+        );
+
+
+      if(
+        Number.isNaN(
+          date.getTime()
+        )
+      ){
+
+        return;
+
+      }
+
+
+      const key =
+        new Intl.DateTimeFormat(
+          "en-CA",
+          {
+            timeZone:
+              "Asia/Kuala_Lumpur",
+
+            year:"numeric",
+            month:"2-digit",
+            day:"2-digit",
+
+            hour:"2-digit",
+            minute:"2-digit",
+
+            hour12:false
+          }
+        )
+        .format(
+          date
+        );
+
+
+      buckets[key] =
+        (
+          buckets[key] ||
+          0
+        ) +
+        1;
+
+    }
+  );
+
+
+  const entries =
+    Object.entries(
+      buckets
+    );
+
+
+  if(
+    !entries.length
+  ){
+
+    return null;
+
+  }
+
+
+  entries.sort(
+    (a,b)=>
+      b[1] -
+      a[1]
+  );
+
+
+  const [
+    key,
+    count
+  ] =
+    entries[0];
+
+
+  const [
+    datePart,
+    timePart
+  ] =
+    key.split(
+      ", "
+    );
+
+
+  const [
+    hour,
+    minute
+  ] =
+    timePart
+      .split(":")
+      .map(Number);
+
+
+  const suffix =
+    hour >= 12
+      ? "PM"
+      : "AM";
+
+
+  const hour12 =
+    hour % 12 ||
+    12;
+
+
+  return {
+
+    count,
+
+    label:
+      hour12 +
+      ":" +
+      String(
+        minute
+      )
+      .padStart(
+        2,
+        "0"
+      ) +
+      " " +
+      suffix,
+
+    date:
+      datePart
+
+  };
+
+}
+
+
+
+/* =====================================================
+   ENGAGEMENT TIME SERIES
+===================================================== */
+
+function engagementBuckets(){
+
+  const buckets =
+    {};
+
+
+  analyticsEvents.forEach(
+    event => {
+
+      const date =
+        new Date(
+          event.createdAt
+        );
+
+
+      if(
+        Number.isNaN(
+          date.getTime()
+        )
+      ){
+
+        return;
+
+      }
+
+
+      const parts =
+        new Intl.DateTimeFormat(
+          "en-GB",
+          {
+            timeZone:
+              "Asia/Kuala_Lumpur",
+
+            day:"2-digit",
+            month:"2-digit",
+
+            hour:"2-digit",
+            minute:"2-digit",
+
+            hour12:false
+          }
+        )
+        .formatToParts(
+          date
+        );
+
+
+      const map = {};
+
+
+      parts.forEach(
+        part => {
+
+          if(
+            part.type !==
+            "literal"
+          ){
+
+            map[
+              part.type
+            ] =
+              part.value;
+
+          }
+
+        }
+      );
+
+
+      const minute =
+        Math.floor(
+          Number(
+            map.minute
+          ) /
+          15
+        ) *
+        15;
+
+
+      const key =
+        map.day +
+        "/" +
+        map.month +
+        " " +
+        map.hour +
+        ":" +
+        String(
+          minute
+        )
+        .padStart(
+          2,
+          "0"
+        );
+
+
+      buckets[key] =
+        (
+          buckets[key] ||
+          0
+        ) +
+        1;
+
+    }
+  );
+
+
+  return Object
+    .entries(
+      buckets
+    )
+    .map(
+      (
+        [
+          label,
+          count
+        ]
+      ) => ({
+
+        label,
+        count
+
+      })
+    );
+
+}
+
+
+
+/* =====================================================
+   SVG LINE CHART
+===================================================== */
+
+function renderLineChart(
+  targetId,
+  rows
+){
+
+  const target =
+    document.getElementById(
+      targetId
+    );
+
+
+  if(
+    !rows.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty">
+        No activity recorded yet.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const width =
+    900;
+
+
+  const height =
+    250;
+
+
+  const left =
+    42;
+
+
+  const right =
+    18;
+
+
+  const top =
+    18;
+
+
+  const bottom =
+    38;
+
+
+  const plotWidth =
+    width -
+    left -
+    right;
+
+
+  const plotHeight =
+    height -
+    top -
+    bottom;
+
+
+  const max =
+    Math.max(
+      ...rows.map(
+        row =>
+          row.count
+      ),
+      1
+    );
+
+
+  const points =
+    rows.map(
+      (
+        row,
+        index
+      ) => {
+
+        const x =
+          left +
+          (
+            rows.length ===
+            1
+              ? plotWidth / 2
+              : (
+                  index /
+                  (
+                    rows.length -
+                    1
+                  )
+                ) *
+                plotWidth
+          );
+
+
+        const y =
+          top +
+          plotHeight -
+          (
+            row.count /
+            max
+          ) *
+          plotHeight;
+
+
+        return {
+          ...row,
+          x,
+          y
+        };
+
+      }
+    );
+
+
+  let grid =
+    "";
+
+
+  for(
+    let i = 0;
+    i <= 4;
+    i++
+  ){
+
+    const y =
+      top +
+      (
+        plotHeight /
+        4
+      ) *
+      i;
+
+
+    const value =
+      Math.round(
+        max -
+        (
+          max /
+          4
+        ) *
+        i
+      );
+
+
+    grid += `
+
+      <line
+        class="chart-grid-line"
+        x1="${left}"
+        y1="${y}"
+        x2="${width - right}"
+        y2="${y}"
+      ></line>
+
+      <text
+        class="chart-axis-label"
+        x="4"
+        y="${y + 3}"
+      >
+        ${value}
+      </text>
+
+    `;
+
+  }
+
+
+  const polyline =
+    points
+      .map(
+        point =>
+          point.x +
+          "," +
+          point.y
+      )
+      .join(
+        " "
+      );
+
+
+  const labelEvery =
+    Math.max(
+      1,
+      Math.ceil(
+        rows.length /
+        6
+      )
+    );
+
+
+  const labels =
+    points
+      .map(
+        (
+          point,
+          index
+        ) => {
+
+          if(
+            index %
+            labelEvery !==
+            0 &&
+            index !==
+            points.length - 1
+          ){
+
+            return "";
+
+          }
+
+
+          return `
+
+            <text
+              class="chart-axis-label"
+              text-anchor="middle"
+              x="${point.x}"
+              y="${height - 10}"
+            >
+              ${escapeHTML(
+                point.label
+              )}
+            </text>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  const dots =
+    points
+      .map(
+        point => `
+
+          <circle
+            class="chart-point"
+            cx="${point.x}"
+            cy="${point.y}"
+            r="3"
+          >
+
+            <title>
+              ${escapeHTML(
+                point.label
+              )}: ${point.count}
+            </title>
+
+          </circle>
+
+        `
+      )
+      .join("");
+
+
+  target.innerHTML = `
+
+    <svg
+      class="line-chart"
+      viewBox="0 0 ${width} ${height}"
+      preserveAspectRatio="none"
+    >
+
+      ${grid}
+
+      <polyline
+        class="chart-line"
+        points="${polyline}"
+      ></polyline>
+
+      ${dots}
+
+      ${labels}
+
+    </svg>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   GENERIC BAR CHART
+===================================================== */
+
+function renderBarChart(
+  targetId,
+  rows,
+  limit = 10
+){
+
+  const target =
+    document.getElementById(
+      targetId
+    );
+
+
+  const list =
+    rows
+      .slice(
+        0,
+        limit
+      );
+
+
+  if(
+    !list.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty">
+        No data recorded yet.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const max =
+    Math.max(
+      ...list.map(
+        row =>
+          row.value
+      ),
+      1
+    );
+
+
+  target.innerHTML = `
+
+    <div class="bar-list">
+
+      ${
+        list
+          .map(
+            row => `
+
+              <div class="bar-row">
+
+                <div
+                  class="bar-label"
+                  title="${escapeHTML(
+                    row.label
+                  )}"
+                >
+                  ${escapeHTML(
+                    row.label
+                  )}
+                </div>
+
+
+                <div class="bar-track">
+
+                  <div
+                    class="bar-fill"
+                    style="
+                      width:${
+                        (
+                          row.value /
+                          max
+                        ) *
+                        100
+                      }%;
+                    "
+                  ></div>
+
+                </div>
+
+
+                <div class="bar-value">
+                  ${formatNumber(
+                    row.value
+                  )}
+                </div>
+
+              </div>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =====================================================
+   FEATURE USAGE
+===================================================== */
+
+function featureUsageRows(){
+
+  const definitions = [
+
+    [
+      "Programme",
+      event =>
+        event.event ===
+          "page_view" &&
+        event.page ===
+          "programme"
+    ],
+
+    [
+      "Session Details",
+      event =>
+        event.event ===
+          "session_expand"
+    ],
+
+    [
+      "My Schedule",
+      event =>
+        event.event ===
+          "schedule_save"
+    ],
+
+    [
+      "Discussion Rooms",
+      event =>
+        event.event ===
+          "discussion_open"
+    ],
+
+    [
+      "Presenter Feedback",
+      event =>
+        event.event ===
+          "feedback_open"
+    ],
+
+    [
+      "MTERMS Moments",
+      event =>
+        event.event ===
+          "moments_open"
+    ],
+
+    [
+      "Announcements",
+      event =>
+        event.event ===
+          "announcement_open"
+    ],
+
+    [
+      "Speaker Bios",
+      event =>
+        event.event ===
+          "bio_view"
+    ]
+
+  ];
+
+
+  return definitions
+    .map(
+      (
+        [
+          label,
+          filter
+        ]
+      ) => ({
+
+        label,
+
+        value:
+          analyticsEvents.filter(
+            filter
+          ).length
+
+      })
+    )
+    .sort(
+      (a,b)=>
+        b.value -
+        a.value
+    );
+
+}
+
+
+
+/* =====================================================
+   SESSION COUNTS
+===================================================== */
+
+function eventCountsByTarget(
+  eventName
+){
+
+  const counts =
+    {};
+
+
+  analyticsEvents
+    .filter(
+      event =>
+        event.event ===
+        eventName &&
+        event.targetId
+    )
+    .forEach(
+      event => {
+
+        counts[
+          event.targetId
+        ] =
+          (
+            counts[
+              event.targetId
+            ] ||
+            0
+          ) +
+          1;
+
+      }
+    );
+
+
+  return counts;
+
+}
+
+
+
+/* =====================================================
+   SCIENTIFIC ENGAGEMENT
+===================================================== */
+
+function scientificRows(){
+
+  const views =
+    eventCountsByTarget(
+      "session_expand"
+    );
+
+
+  const saves =
+    eventCountsByTarget(
+      "schedule_save"
+    );
+
+
+  const discussionOpens =
+    eventCountsByTarget(
+      "discussion_open"
+    );
+
+
+  const feedbackBySession =
+    {};
+
+
+  presenterFeedback
+    .forEach(
+      item => {
+
+        if(
+          !item.sessionId
+        ){
+          return;
+        }
+
+
+        feedbackBySession[
+          item.sessionId
+        ] =
+          (
+            feedbackBySession[
+              item.sessionId
+            ] ||
+            0
+          ) +
+          1;
+
+      }
+    );
+
+
+  const ids =
+    new Set([
+
+      ...Object.keys(
+        views
+      ),
+
+      ...Object.keys(
+        saves
+      ),
+
+      ...Object.keys(
+        discussionOpens
+      ),
+
+      ...Object.keys(
+        feedbackBySession
+      )
+
+    ]);
+
+
+  return Array
+    .from(
+      ids
+    )
+    .map(
+      id => ({
+
+        id,
+
+        title:
+          sessionTitle(
+            id
+          ),
+
+        views:
+          views[id] ||
+          0,
+
+        saves:
+          saves[id] ||
+          0,
+
+        discussionOpens:
+          discussionOpens[id] ||
+          0,
+
+        feedback:
+          feedbackBySession[id] ||
+          0
+
+      })
+    )
+    .sort(
+      (a,b)=>
+        (
+          b.views +
+          b.saves +
+          b.discussionOpens +
+          b.feedback
+        ) -
+        (
+          a.views +
+          a.saves +
+          a.discussionOpens +
+          a.feedback
+        )
+    );
+
+}
+
+
+
+/* =====================================================
+   SCIENTIFIC TABLE
+===================================================== */
+
+function renderScientificTable(){
+
+  const rows =
+    scientificRows();
+
+
+  const target =
+    document.getElementById(
+      "scientificTable"
+    );
+
+
+  if(
+    !rows.length
+  ){
+
+    target.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="6"
+          class="empty"
+        >
+          No scientific engagement data yet.
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    rows
+      .map(
+        (
+          row,
+          index
+        ) => `
+
+          <tr>
+
+            <td class="rank">
+              ${index + 1}
+            </td>
+
+
+            <td class="session-name">
+              ${escapeHTML(
+                row.title
+              )}
+            </td>
+
+
+            <td class="numeric">
+              ${formatNumber(
+                row.views
+              )}
+            </td>
+
+
+            <td class="numeric">
+              ${formatNumber(
+                row.saves
+              )}
+            </td>
+
+
+            <td class="numeric">
+              ${formatNumber(
+                row.discussionOpens
+              )}
+            </td>
+
+
+            <td class="numeric">
+              ${formatNumber(
+                row.feedback
+              )}
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join("");
+
+}
+
+
+
+/* =====================================================
+   DEVICE BREAKDOWN
+===================================================== */
+
+function groupUniqueDevicesBy(
+  field
+){
+
+  const participants =
+    {};
+
+
+  analyticsEvents.forEach(
+    event => {
+
+      if(
+        !event.participantId
+      ){
+        return;
+      }
+
+
+      if(
+        !participants[
+          event.participantId
+        ]
+      ){
+
+        participants[
+          event.participantId
+        ] =
+          event;
+
+      }
+
+    }
+  );
+
+
+  const counts =
+    {};
+
+
+  Object
+    .values(
+      participants
+    )
+    .forEach(
+      event => {
+
+        const value =
+          event[field] ||
+          "Unknown";
+
+
+        counts[value] =
+          (
+            counts[value] ||
+            0
+          ) +
+          1;
+
+      }
+    );
+
+
+  return Object
+    .entries(
+      counts
+    )
+    .map(
+      (
+        [
+          label,
+          value
+        ]
+      ) => ({
+
+        label,
+        value
+
+      })
+    )
+    .sort(
+      (a,b)=>
+        b.value -
+        a.value
+    );
+
+}
+
+
+
+/* =====================================================
+   PARTICIPANT ACTIVITY TABLE
+===================================================== */
+
+function renderParticipantTable(){
+
+  const map =
+    {};
+
+
+  analyticsEvents
+    .forEach(
+      event => {
+
+        const id =
+          event.participantId;
+
+
+        if(!id){
+          return;
+        }
+
+
+        const timestamp =
+          new Date(
+            event.createdAt
+          )
+          .getTime();
+
+
+        if(
+          !map[id]
+        ){
+
+          map[id] = {
+
+            id,
+
+            deviceType:
+              event.deviceType ||
+              "Unknown",
+
+            first:
+              timestamp,
+
+            last:
+              timestamp,
+
+            actions:
+              0
+
+          };
+
+        }
+
+
+        map[id].actions++;
+
+
+        map[id].first =
+          Math.min(
+            map[id].first,
+            timestamp
+          );
+
+
+        map[id].last =
+          Math.max(
+            map[id].last,
+            timestamp
+          );
+
+      }
+    );
+
+
+  const rows =
+    Object
+      .values(
+        map
+      )
+      .sort(
+        (a,b)=>
+          b.actions -
+          a.actions
+      );
+
+
+  const target =
+    document.getElementById(
+      "participantTable"
+    );
+
+
+  if(
+    !rows.length
+  ){
+
+    target.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="5"
+          class="empty"
+        >
+          No participant activity yet.
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    rows
+      .slice(
+        0,
+        250
+      )
+      .map(
+        row => {
+
+
+          const shortId =
+            row.id.length >
+            10
+              ? "…" +
+                row.id.slice(
+                  -8
+                )
+              : row.id;
+
+
+          return `
+
+            <tr>
+
+              <td>
+                ${escapeHTML(
+                  shortId
+                )}
+              </td>
+
+
+              <td>
+                ${escapeHTML(
+                  row.deviceType
+                )}
+              </td>
+
+
+              <td>
+                ${escapeHTML(
+                  malaysiaDate(
+                    new Date(
+                      row.first
+                    )
+                    .toISOString()
+                  )
+                )}
+              </td>
+
+
+              <td>
+                ${escapeHTML(
+                  malaysiaDate(
+                    new Date(
+                      row.last
+                    )
+                    .toISOString()
+                  )
+                )}
+              </td>
+
+
+              <td class="numeric">
+                ${formatNumber(
+                  row.actions
+                )}
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+
+/* =====================================================
+   RENDER ALL
+===================================================== */
+
+function renderAll(){
+
+  renderKPIs();
+
+
+  renderLineChart(
+    "engagementChart",
+    engagementBuckets()
+  );
+
+
+  renderBarChart(
+    "featureUsageChart",
+    featureUsageRows(),
+    10
+  );
+
+
+  const science =
+    scientificRows();
+
+
+  renderBarChart(
+
+    "sessionViewsChart",
+
+    science
+      .filter(
+        row =>
+          row.views >
+          0
+      )
+      .sort(
+        (a,b)=>
+          b.views -
+          a.views
+      )
+      .map(
+        row => ({
+          label:
+            row.title,
+
+          value:
+            row.views
+        })
+      ),
+
+    10
+
+  );
+
+
+  renderBarChart(
+
+    "sessionSavesChart",
+
+    science
+      .filter(
+        row =>
+          row.saves >
+          0
+      )
+      .sort(
+        (a,b)=>
+          b.saves -
+          a.saves
+      )
+      .map(
+        row => ({
+          label:
+            row.title,
+
+          value:
+            row.saves
+        })
+      ),
+
+    10
+
+  );
+
+
+  renderScientificTable();
+
+
+  renderBarChart(
+    "deviceChart",
+    groupUniqueDevicesBy(
+      "deviceType"
+    ),
+    10
+  );
+
+
+  renderBarChart(
+    "osChart",
+    groupUniqueDevicesBy(
+      "os"
+    ),
+    10
+  );
+
+
+  renderBarChart(
+    "browserChart",
+    groupUniqueDevicesBy(
+      "browser"
+    ),
+    10
+  );
+
+
+  renderParticipantTable();
+
+}
+
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+document
+  .getElementById(
+    "refreshBtn"
+  )
+  .addEventListener(
+    "click",
+    loadData
+  );
+
+
+document
+  .getElementById(
+    "closeTabBtn"
+  )
+  .addEventListener(
+    "click",
+    ()=>{
+
+      window.close();
+
+    }
+  );
+
+
+
+/* =====================================================
+   INITIALISE
+===================================================== */
+
+loadData();
+
+
+setInterval(
+  loadData,
+  30000
+);
+
+
+})();
+
+</script>
+
+
+</body>
+
+</html>
