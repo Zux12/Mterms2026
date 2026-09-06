@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>MTERMS 2026 — Moments Admin</title>
+
+<style>
+
+:root{
+
+  --navy:#071a2c;
+  --blue:#1677ff;
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --text:#172033;
+  --muted:#6d7788;
+  --line:#e3e8ef;
+  --green:#138a5b;
+  --amber:#d88700;
+  --red:#c52b2b;
+
+  --shadow:
+    0 8px 26px
+    rgba(15,35,60,.08);
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background:var(--bg);
+  color:var(--text);
+
+}
+
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+
+  background:var(--navy);
+  color:#fff;
+  padding:18px 20px;
+
+}
+
+
+.header-inner{
+
+  max-width:1300px;
+  margin:0 auto;
+
+}
+
+
+.header-kicker{
+
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.65;
+
+}
+
+
+.header-title{
+
+  margin-top:4px;
+  font-size:23px;
+  font-weight:850;
+
+}
+
+
+.header-sub{
+
+  margin-top:4px;
+  font-size:12px;
+  opacity:.72;
+
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+main{
+
+  max-width:1300px;
+  margin:0 auto;
+  padding:20px;
+
+}
+
+
+.toolbar{
+
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+
+  margin-bottom:18px;
+
+}
+
+
+.btn{
+
+  min-height:40px;
+
+  border:0;
+  border-radius:10px;
+
+  padding:0 13px;
+
+  font-weight:800;
+
+}
+
+
+.btn-primary{
+
+  background:var(--blue);
+  color:#fff;
+
+}
+
+
+.btn-outline{
+
+  background:#fff;
+
+  color:var(--text);
+
+  border:
+    1px solid
+    var(--line);
+
+}
+
+
+.btn-warning{
+
+  background:#fff6df;
+  color:#8c5c00;
+
+}
+
+
+.btn-success{
+
+  background:#eaf8f1;
+  color:#107046;
+
+}
+
+
+.btn-danger{
+
+  background:#fff0f0;
+  color:#b52323;
+
+}
+
+
+.btn-small{
+
+  min-height:34px;
+
+  padding:0 10px;
+
+  font-size:10px;
+
+}
+
+
+.status{
+
+  color:var(--muted);
+  font-size:11px;
+
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.summary-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:12px;
+
+  margin-bottom:18px;
+
+}
+
+
+.summary-card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:16px;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.summary-label{
+
+  font-size:10px;
+  font-weight:850;
+
+  text-transform:uppercase;
+  letter-spacing:.07em;
+
+  color:var(--muted);
+
+}
+
+
+.summary-value{
+
+  margin-top:7px;
+
+  font-size:28px;
+  font-weight:900;
+
+  color:var(--navy);
+
+}
+
+
+.summary-sub{
+
+  margin-top:4px;
+
+  color:var(--muted);
+
+  font-size:10px;
+
+}
+
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filters{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  padding:13px;
+
+  margin-bottom:16px;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr
+    180px;
+
+  gap:9px;
+
+}
+
+
+.control{
+
+  min-height:44px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:10px;
+
+  padding:0 11px;
+
+  background:#fff;
+
+}
+
+
+/* =====================================================
+   MOMENTS GRID
+===================================================== */
+
+.moments-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:14px;
+
+}
+
+
+.moment-card{
+
+  background:#fff;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:15px;
+
+  overflow:hidden;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.moment-card.hidden-moment{
+
+  opacity:.62;
+
+}
+
+
+.moment-image-wrap{
+
+  aspect-ratio:4/3;
+
+  overflow:hidden;
+
+  background:#e9edf2;
+
+}
+
+
+.moment-image{
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+
+}
+
+
+.moment-body{
+
+  padding:13px;
+
+}
+
+
+.moment-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+  align-items:flex-start;
+
+}
+
+
+.moment-author{
+
+  min-width:0;
+
+}
+
+
+.moment-author-name{
+
+  font-size:13px;
+  font-weight:850;
+
+}
+
+
+.moment-affiliation{
+
+  margin-top:3px;
+
+  font-size:10px;
+
+  color:var(--muted);
+
+  line-height:1.4;
+
+}
+
+
+.moment-time{
+
+  font-size:9px;
+
+  color:var(--muted);
+
+  white-space:nowrap;
+
+}
+
+
+.moment-message{
+
+  margin-top:9px;
+
+  font-size:12px;
+
+  line-height:1.5;
+
+  white-space:pre-wrap;
+
+}
+
+
+.moment-meta{
+
+  margin-top:9px;
+
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+
+}
+
+
+.badge{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  min-height:24px;
+
+  padding:0 8px;
+
+  border-radius:999px;
+
+  background:#eef2f7;
+
+  color:#566174;
+
+  font-size:9px;
+  font-weight:850;
+
+}
+
+
+.badge.visible{
+
+  background:#eaf8f1;
+  color:#107046;
+
+}
+
+
+.badge.hidden{
+
+  background:#fff4df;
+  color:#8b5a00;
+
+}
+
+
+.moment-actions{
+
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+
+  margin-top:11px;
+
+}
+
+
+/* =====================================================
+   COMMENTS
+===================================================== */
+
+.comments-section{
+
+  margin-top:12px;
+
+  padding-top:11px;
+
+  border-top:
+    1px solid
+    var(--line);
+
+}
+
+
+.comments-title{
+
+  font-size:10px;
+  font-weight:850;
+
+  text-transform:uppercase;
+
+  color:var(--muted);
+
+  letter-spacing:.05em;
+
+}
+
+
+.comment{
+
+  margin-top:8px;
+
+  padding:9px;
+
+  border-radius:9px;
+
+  background:#f6f8fb;
+
+}
+
+
+.comment-head{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:8px;
+
+}
+
+
+.comment-name{
+
+  font-size:10px;
+  font-weight:850;
+
+}
+
+
+.comment-time{
+
+  font-size:9px;
+  color:var(--muted);
+
+}
+
+
+.comment-message{
+
+  margin-top:4px;
+
+  font-size:11px;
+
+  line-height:1.45;
+
+}
+
+
+.comment-actions{
+
+  margin-top:5px;
+
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty{
+
+  grid-column:1/-1;
+
+  padding:28px;
+
+  border:
+    1px dashed #ccd4df;
+
+  border-radius:14px;
+
+  background:#fff;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:950px){
+
+  .moments-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+}
+
+
+@media(max-width:650px){
+
+  main{
+    padding:12px;
+  }
+
+
+  .summary-grid{
+
+    grid-template-columns:
+      repeat(2,1fr);
+
+    gap:7px;
+
+  }
+
+
+  .summary-card{
+    padding:12px;
+  }
+
+
+  .summary-value{
+    font-size:22px;
+  }
+
+
+  .filters{
+    grid-template-columns:1fr;
+  }
+
+
+  .moments-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+  <div class="header-inner">
+
+    <div class="header-kicker">
+      MTERMS 2026 Digital Platform
+    </div>
+
+    <div class="header-title">
+      MTERMS Moments Manager
+    </div>
+
+    <div class="header-sub">
+      Photo feed · comments · moderation
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<main>
+
+
+<div class="toolbar">
+
+  <button
+    class="btn btn-primary"
+    id="refreshBtn"
+    type="button"
+  >
+    Refresh Data
+  </button>
+
+
+  <span
+    class="status"
+    id="statusText"
+  >
+    Loading…
+  </span>
+
+</div>
+
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<div class="summary-grid">
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Total Moments
+    </div>
+
+    <div
+      class="summary-value"
+      id="totalMoments"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Active uploaded Moments
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Visible
+    </div>
+
+    <div
+      class="summary-value"
+      id="visibleMoments"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Publicly visible
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Hidden
+    </div>
+
+    <div
+      class="summary-value"
+      id="hiddenMoments"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Hidden by admin
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-label">
+      Comments
+    </div>
+
+    <div
+      class="summary-value"
+      id="totalComments"
+    >
+      —
+    </div>
+
+    <div class="summary-sub">
+      Active comments
+    </div>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     FILTERS
+===================================================== -->
+
+<div class="filters">
+
+  <input
+    class="control"
+    id="searchInput"
+    type="search"
+    placeholder="Search uploader, affiliation, message or comment…"
+  >
+
+
+  <select
+    class="control"
+    id="visibilityFilter"
+  >
+
+    <option value="">
+      All Moments
+    </option>
+
+    <option value="visible">
+      Visible Only
+    </option>
+
+    <option value="hidden">
+      Hidden Only
+    </option>
+
+  </select>
+
+</div>
+
+
+
+<div
+  class="moments-grid"
+  id="momentsGrid"
+></div>
+
+
+</main>
+
+
+
+<script>
+
+(function(){
+
+"use strict";
+
+
+const API =
+  "https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments";
+
+
+let moments =
+  [];
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function escapeHTML(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function formatDate(
+  iso
+){
+
+  if(!iso){
+    return "";
+  }
+
+
+  try{
+
+    return new Date(
+      iso
+    )
+    .toLocaleString(
+      "en-MY",
+      {
+        day:"numeric",
+        month:"short",
+        year:"numeric",
+        hour:"numeric",
+        minute:"2-digit",
+        hour12:true,
+        timeZone:
+          "Asia/Kuala_Lumpur"
+      }
+    );
+
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+
+function formatBytes(
+  bytes
+){
+
+  const value =
+    Number(
+      bytes || 0
+    );
+
+
+  if(
+    value <= 0
+  ){
+    return "—";
+  }
+
+
+  if(
+    value < 1024
+  ){
+
+    return (
+      value +
+      " B"
+    );
+
+  }
+
+
+  if(
+    value <
+    1024 * 1024
+  ){
+
+    return (
+      (
+        value /
+        1024
+      )
+      .toFixed(0) +
+      " KB"
+    );
+
+  }
+
+
+  return (
+    (
+      value /
+      1024 /
+      1024
+    )
+    .toFixed(2) +
+    " MB"
+  );
+
+}
+
+
+function momentImageUrl(
+  moment
+){
+
+  return (
+    API +
+    "/" +
+    encodeURIComponent(
+      moment.id
+    ) +
+    "/image"
+  );
+
+}
+
+
+/* =====================================================
+   LOAD
+===================================================== */
+
+async function loadMoments(){
+
+  const status =
+    document.getElementById(
+      "statusText"
+    );
+
+
+  status.textContent =
+    "Loading Moments…";
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/admin/all`
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to load Moments"
+      );
+
+    }
+
+
+    moments =
+      Array.isArray(
+        data.moments
+      )
+        ? data.moments
+        : [];
+
+
+    renderAll();
+
+
+    status.textContent =
+      "Updated " +
+      new Date()
+        .toLocaleTimeString(
+          "en-MY",
+          {
+            hour:"numeric",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+          }
+        );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    status.textContent =
+      "Unable to load Moments";
+
+
+    document
+      .getElementById(
+        "momentsGrid"
+      )
+      .innerHTML = `
+        <div class="empty">
+          Unable to load MTERMS Moments.
+        </div>
+      `;
+
+  }
+
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+function renderSummary(){
+
+  const total =
+    moments.length;
+
+
+  const visible =
+    moments.filter(
+      moment =>
+        moment.isVisible !==
+        false
+    ).length;
+
+
+  const hidden =
+    moments.filter(
+      moment =>
+        moment.isVisible ===
+        false
+    ).length;
+
+
+  const comments =
+    moments.reduce(
+      (
+        total,
+        moment
+      ) =>
+        total +
+        (
+          moment.comments ||
+          []
+        ).length,
+      0
+    );
+
+
+  document
+    .getElementById(
+      "totalMoments"
+    )
+    .textContent =
+      total;
+
+
+  document
+    .getElementById(
+      "visibleMoments"
+    )
+    .textContent =
+      visible;
+
+
+  document
+    .getElementById(
+      "hiddenMoments"
+    )
+    .textContent =
+      hidden;
+
+
+  document
+    .getElementById(
+      "totalComments"
+    )
+    .textContent =
+      comments;
+
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+function filteredMoments(){
+
+  const query =
+    document
+      .getElementById(
+        "searchInput"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const visibility =
+    document
+      .getElementById(
+        "visibilityFilter"
+      )
+      .value;
+
+
+  return moments
+    .filter(
+      moment => {
+
+
+        if(
+          visibility ===
+          "visible" &&
+          moment.isVisible ===
+          false
+        ){
+
+          return false;
+
+        }
+
+
+        if(
+          visibility ===
+          "hidden" &&
+          moment.isVisible !==
+          false
+        ){
+
+          return false;
+
+        }
+
+
+        if(query){
+
+          let text =
+            [
+              moment.displayName,
+              moment.title,
+              moment.affiliation,
+              moment.message
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+
+          (
+            moment.comments ||
+            []
+          )
+          .forEach(
+            comment => {
+
+              text +=
+                " " +
+                [
+                  comment.displayName,
+                  comment.title,
+                  comment.affiliation,
+                  comment.message
+                ]
+                .filter(Boolean)
+                .join(" ");
+
+            }
+          );
+
+
+          if(
+            !text
+              .toLowerCase()
+              .includes(
+                query
+              )
+          ){
+
+            return false;
+
+          }
+
+        }
+
+
+        return true;
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderMoments(){
+
+  const list =
+    filteredMoments();
+
+
+  const target =
+    document.getElementById(
+      "momentsGrid"
+    );
+
+
+  if(
+    !list.length
+  ){
+
+    target.innerHTML = `
+      <div class="empty">
+        No Moments match the selected filter.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  target.innerHTML =
+    list
+      .map(
+        moment => {
+
+
+          const visible =
+            moment.isVisible !==
+            false;
+
+
+          const identity =
+            [
+              moment.title,
+              moment.displayName
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+
+          const comments =
+            moment.comments ||
+            [];
+
+
+          return `
+
+            <article
+              class="
+                moment-card
+                ${
+                  visible
+                    ? ""
+                    : "hidden-moment"
+                }
+              "
+            >
+
+
+              <div class="moment-image-wrap">
+
+                <img
+                  class="moment-image"
+                  src="${escapeHTML(
+                    momentImageUrl(
+                      moment
+                    )
+                  )}"
+                  alt="MTERMS Moment"
+                  loading="lazy"
+                >
+
+              </div>
+
+
+              <div class="moment-body">
+
+
+                <div class="moment-top">
+
+
+                  <div class="moment-author">
+
+                    <div class="moment-author-name">
+                      ${escapeHTML(
+                        identity
+                      )}
+                    </div>
+
+
+                    ${
+                      moment.affiliation
+                        ? `
+                          <div class="moment-affiliation">
+                            ${escapeHTML(
+                              moment.affiliation
+                            )}
+                          </div>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+
+                  <div class="moment-time">
+                    ${escapeHTML(
+                      formatDate(
+                        moment.createdAt
+                      )
+                    )}
+                  </div>
+
+
+                </div>
+
+
+
+                ${
+                  moment.message
+                    ? `
+                      <div class="moment-message">
+                        ${escapeHTML(
+                          moment.message
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+
+
+
+                <div class="moment-meta">
+
+
+                  <span
+                    class="
+                      badge
+                      ${
+                        visible
+                          ? "visible"
+                          : "hidden"
+                      }
+                    "
+                  >
+                    ${
+                      visible
+                        ? "VISIBLE"
+                        : "HIDDEN"
+                    }
+                  </span>
+
+
+                  <span class="badge">
+                    ${comments.length}
+                    ${
+                      comments.length ===
+                      1
+                        ? "COMMENT"
+                        : "COMMENTS"
+                    }
+                  </span>
+
+
+                  <span class="badge">
+                    ${escapeHTML(
+                      formatBytes(
+                        moment.imageSize
+                      )
+                    )}
+                  </span>
+
+
+                  ${
+                    moment.imageWidth &&
+                    moment.imageHeight
+                      ? `
+                        <span class="badge">
+
+                          ${escapeHTML(
+                            moment.imageWidth
+                          )}
+
+                          ×
+
+                          ${escapeHTML(
+                            moment.imageHeight
+                          )}
+
+                        </span>
+                      `
+                      : ""
+                  }
+
+
+                </div>
+
+
+
+                <div class="moment-actions">
+
+
+                  <button
+                    class="
+                      btn
+                      btn-small
+                      ${
+                        visible
+                          ? "btn-warning"
+                          : "btn-success"
+                      }
+                    "
+                    type="button"
+                    data-toggle-visibility="${escapeHTML(
+                      moment.id
+                    )}"
+                    data-current-visible="${visible ? "true" : "false"}"
+                  >
+                    ${
+                      visible
+                        ? "Hide Moment"
+                        : "Show Moment"
+                    }
+                  </button>
+
+
+                  <button
+                    class="btn btn-danger btn-small"
+                    type="button"
+                    data-delete-moment="${escapeHTML(
+                      moment.id
+                    )}"
+                  >
+                    Delete Moment
+                  </button>
+
+
+                </div>
+
+
+
+                <div class="comments-section">
+
+                  <div class="comments-title">
+
+                    Comments
+
+                    (${comments.length})
+
+                  </div>
+
+
+                  ${
+                    comments.length
+                      ? comments
+                          .map(
+                            comment => {
+
+
+                              const commentIdentity =
+                                [
+                                  comment.title,
+                                  comment.displayName
+                                ]
+                                .filter(Boolean)
+                                .join(" ");
+
+
+                              return `
+
+                                <div class="comment">
+
+
+                                  <div class="comment-head">
+
+                                    <div class="comment-name">
+
+                                      ${escapeHTML(
+                                        commentIdentity
+                                      )}
+
+                                      ${
+                                        comment.affiliation
+                                          ? `
+                                            ·
+                                            ${escapeHTML(
+                                              comment.affiliation
+                                            )}
+                                          `
+                                          : ""
+                                      }
+
+                                    </div>
+
+
+                                    <div class="comment-time">
+
+                                      ${escapeHTML(
+                                        formatDate(
+                                          comment.createdAt
+                                        )
+                                      )}
+
+                                    </div>
+
+                                  </div>
+
+
+                                  <div class="comment-message">
+                                    ${escapeHTML(
+                                      comment.message
+                                    )}
+                                  </div>
+
+
+                                  <div class="comment-actions">
+
+                                    <button
+                                      class="btn btn-danger btn-small"
+                                      type="button"
+                                      data-delete-comment="${escapeHTML(
+                                        comment.id
+                                      )}"
+                                      data-comment-moment="${escapeHTML(
+                                        moment.id
+                                      )}"
+                                    >
+                                      Delete Comment
+                                    </button>
+
+                                  </div>
+
+
+                                </div>
+
+                              `;
+
+                            }
+                          )
+                          .join("")
+                      : `
+                        <div
+                          style="
+                            margin-top:9px;
+                            color:var(--muted);
+                            font-size:10px;
+                          "
+                        >
+                          No comments.
+                        </div>
+                      `
+                  }
+
+
+                </div>
+
+
+              </div>
+
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  bindActions();
+
+}
+
+
+/* =====================================================
+   HIDE / SHOW
+===================================================== */
+
+async function toggleVisibility(
+  momentId,
+  currentlyVisible
+){
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API}/admin/${encodeURIComponent(
+          momentId
+        )}/visibility`,
+
+        {
+
+          method:"PATCH",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              isVisible:
+                !currentlyVisible
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to update Moment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to update Moment."
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE MOMENT
+===================================================== */
+
+async function deleteMoment(
+  momentId
+){
+
+  if(
+    !confirm(
+      "Permanently delete this Moment and its stored photo?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API}/admin/${encodeURIComponent(
+          momentId
+        )}`,
+
+        {
+          method:"DELETE"
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to delete Moment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to delete Moment."
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE COMMENT
+===================================================== */
+
+async function deleteComment(
+  momentId,
+  commentId
+){
+
+  if(
+    !confirm(
+      "Delete this comment?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        `${API}/admin/${encodeURIComponent(
+          momentId
+        )}/comments/${encodeURIComponent(
+          commentId
+        )}`,
+
+        {
+          method:"DELETE"
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+
+      throw new Error(
+        data.error ||
+        "Unable to delete comment"
+      );
+
+    }
+
+
+    await loadMoments();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "Unable to delete comment."
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   BIND
+===================================================== */
+
+function bindActions(){
+
+
+  document
+    .querySelectorAll(
+      "[data-toggle-visibility]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              toggleVisibility(
+
+                button.dataset
+                  .toggleVisibility,
+
+                button.dataset
+                  .currentVisible ===
+                  "true"
+
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      "[data-delete-moment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              deleteMoment(
+                button.dataset
+                  .deleteMoment
+              );
+
+            }
+          );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      "[data-delete-comment]"
+    )
+    .forEach(
+      button => {
+
+        button
+          .addEventListener(
+            "click",
+            ()=>{
+
+              deleteComment(
+
+                button.dataset
+                  .commentMoment,
+
+                button.dataset
+                  .deleteComment
+
+              );
+
+            }
+          );
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   RENDER ALL
+===================================================== */
+
+function renderAll(){
+
+  renderSummary();
+
+  renderMoments();
+
+}
+
+
+/* =====================================================
+   FILTER EVENTS
+===================================================== */
+
+document
+  .getElementById(
+    "searchInput"
+  )
+  .addEventListener(
+    "input",
+    renderMoments
+  );
+
+
+document
+  .getElementById(
+    "visibilityFilter"
+  )
+  .addEventListener(
+    "change",
+    renderMoments
+  );
+
+
+document
+  .getElementById(
+    "refreshBtn"
+  )
+  .addEventListener(
+    "click",
+    loadMoments
+  );
+
+
+/* =====================================================
+   INITIALISE
+===================================================== */
+
+loadMoments();
+
+
+})();
+
+</script>
+
+
+</body>
+
+</html>
