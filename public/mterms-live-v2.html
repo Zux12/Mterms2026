@@ -13791,7 +13791,7 @@ function initialise(){
     5000
   );
 
- setInterval(
+setInterval(
   async ()=>{
 
     if(
@@ -13802,21 +13802,21 @@ function initialise(){
 
 
     /*
-      Do not refresh while the participant
+      Do not refresh while a participant
       is typing a Moment comment.
     */
 
-const commentDraftActive =
-  Array.from(
-    document.querySelectorAll(
-      '[id^="moment-comment-"]'
-    )
-  )
-  .some(
-    input =>
-      input === document.activeElement ||
-      input.value.trim()
-  );
+    const commentDraftActive =
+      Array.from(
+        document.querySelectorAll(
+          '[id^="moment-comment-"]'
+        )
+      )
+      .some(
+        input =>
+          input === document.activeElement ||
+          input.value.trim()
+      );
 
 
     if(
@@ -13826,186 +13826,257 @@ const commentDraftActive =
     }
 
 
-try{
-
-  /*
-    Find the Moment card currently closest
-    to the top of the participant's viewport.
-
-    We remember:
-    1. which Moment it is
-    2. its exact visual offset from the top
-
-    This keeps the participant anchored to
-    the same Moment even if new posts appear
-    above it during refresh.
-  */
-
-  const momentCards =
-    Array.from(
-      document.querySelectorAll(
-        '.moment-card'
-      )
-    );
-
-
-  let anchorMomentId =
-    null;
-
-
-  let anchorOffset =
-    null;
-
-
-  let closestDistance =
-    Infinity;
-
-
-  momentCards.forEach(
-    card => {
-
-      const rect =
-        card.getBoundingClientRect();
-
+    try{
 
       /*
-        Ignore cards completely above
-        the visible screen.
+        Load latest Moments WITHOUT changing
+        what is currently visible yet.
       */
 
+      const response =
+        await fetch(
+          `${MOMENTS_API}?limit=200`
+        );
+
+
+      const data =
+        await response.json();
+
+
       if(
-        rect.bottom <= 0
+        !response.ok ||
+        !data.ok
       ){
-        return;
+
+        throw new Error(
+          data.error ||
+          "Unable to refresh MTERMS Moments"
+        );
+
       }
 
 
-      const distance =
-        Math.abs(
-          rect.top
+      const latestMoments =
+        Array.isArray(
+          data.moments
+        )
+          ? data.moments
+          : [];
+
+
+      /*
+        Build a lightweight signature of the
+        content that actually affects the UI.
+
+        If nothing changed, DO NOTHING.
+
+        This means:
+        - images are NOT rebuilt
+        - scroll position stays untouched
+        - no blank image reload
+        - no visual flicker
+      */
+
+      const currentSignature =
+        JSON.stringify(
+          momentsData.map(
+            moment => ({
+              id:
+                moment.id,
+
+              updatedAt:
+                moment.updatedAt,
+
+              commentCount:
+                (
+                  moment.comments ||
+                  []
+                ).length
+            })
+          )
+        );
+
+
+      const latestSignature =
+        JSON.stringify(
+          latestMoments.map(
+            moment => ({
+              id:
+                moment.id,
+
+              updatedAt:
+                moment.updatedAt,
+
+              commentCount:
+                (
+                  moment.comments ||
+                  []
+                ).length
+            })
+          )
         );
 
 
       if(
-        distance <
-        closestDistance
+        currentSignature ===
+        latestSignature
       ){
 
-        closestDistance =
-          distance;
-
-
-        anchorMomentId =
-          card.id
-            .replace(
-              'moment-card-',
-              ''
-            );
-
-
-        anchorOffset =
-          rect.top;
+        return;
 
       }
 
-    }
-  );
-
-
-  /*
-    Fallback in case no Moment card
-    is currently visible.
-  */
-
-  const previousScrollY =
-    window.scrollY;
-
-
-  await loadMoments();
-
-  renderMomentsContent();
-
-
-  if(
-    currentMomentViewerId
-  ){
-
-    renderMomentViewer(
-      currentMomentViewerId
-    );
-
-  }
-
-
-  requestAnimationFrame(
-    ()=>{
 
       /*
-        Preferred behaviour:
-        restore the same Moment card to
-        exactly the same place on screen.
+        Something genuinely changed.
+        Only now replace our local data
+        and rebuild the visible content.
       */
 
+      const momentCards =
+        Array.from(
+          document.querySelectorAll(
+            '.moment-card'
+          )
+        );
+
+
+      let anchorMomentId =
+        null;
+
+      let anchorOffset =
+        null;
+
+      let closestDistance =
+        Infinity;
+
+
+      momentCards.forEach(
+        card => {
+
+          const rect =
+            card.getBoundingClientRect();
+
+
+          if(
+            rect.bottom <= 0
+          ){
+            return;
+          }
+
+
+          const distance =
+            Math.abs(
+              rect.top
+            );
+
+
+          if(
+            distance <
+            closestDistance
+          ){
+
+            closestDistance =
+              distance;
+
+
+            anchorMomentId =
+              card.id
+                .replace(
+                  'moment-card-',
+                  ''
+                );
+
+
+            anchorOffset =
+              rect.top;
+
+          }
+
+        }
+      );
+
+
+      const previousScrollY =
+        window.scrollY;
+
+
+      momentsData =
+        latestMoments;
+
+
+      renderMomentsContent();
+
+
       if(
-        anchorMomentId &&
-        anchorOffset !== null
+        currentMomentViewerId
       ){
 
-        const refreshedCard =
-          document.getElementById(
-            'moment-card-' +
-            anchorMomentId
-          );
+        renderMomentViewer(
+          currentMomentViewerId
+        );
+
+      }
 
 
-        if(
-          refreshedCard
-        ){
+      requestAnimationFrame(
+        ()=>{
 
-          const newRect =
-            refreshedCard
-              .getBoundingClientRect();
+          if(
+            anchorMomentId &&
+            anchorOffset !== null
+          ){
+
+            const refreshedCard =
+              document.getElementById(
+                'moment-card-' +
+                anchorMomentId
+              );
 
 
-          const difference =
-            newRect.top -
-            anchorOffset;
+            if(
+              refreshedCard
+            ){
+
+              const newRect =
+                refreshedCard
+                  .getBoundingClientRect();
 
 
-          window.scrollBy({
+              const difference =
+                newRect.top -
+                anchorOffset;
+
+
+              window.scrollBy({
+                top:
+                  difference,
+
+                behavior:
+                  'auto'
+              });
+
+
+              return;
+
+            }
+
+          }
+
+
+          window.scrollTo({
             top:
-              difference,
+              previousScrollY,
 
             behavior:
               'auto'
           });
 
-
-          return;
-
         }
-
-      }
-
-
-      /*
-        Fallback if that Moment was deleted
-        while the refresh was happening.
-      */
-
-      window.scrollTo({
-        top:
-          previousScrollY,
-
-        behavior:
-          'auto'
-      });
-
-    }
-  );
+      );
 
 
-}catch(error){
+    }catch(error){
 
       console.error(
         "MTERMS Moments refresh error:",
