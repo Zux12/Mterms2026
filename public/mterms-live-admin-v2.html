@@ -1203,22 +1203,24 @@ textarea.form-control{
 </div>
 
 
-        <div class="stat">
+<div class="stat">
 
-          <div class="stat-label">
-            Participants Online
-          </div>
+  <div class="stat-label">
+    MTERMS Moments
+  </div>
 
-          <div class="stat-value">
-            —
-          </div>
+  <div
+    class="stat-value"
+    id="overviewMoments"
+  >
+    0
+  </div>
 
-          <div class="stat-note">
-            Available after live backend
-          </div>
+  <div class="stat-note">
+    Active participant-shared Moments
+  </div>
 
-        </div>
-
+</div>
       </div>
 
 
@@ -1895,6 +1897,9 @@ const LIVE_API =
 
 const PRESENTER_FEEDBACK_API =
   'https://mterm2026-559f9bf571b5.herokuapp.com/api/presenter-feedback';
+
+const MOMENTS_API =
+  'https://mterm2026-559f9bf571b5.herokuapp.com/api/mterms-moments';
 
 const MASTER =
   window.MTERMS_PROGRAMME_V2;
@@ -3108,6 +3113,65 @@ try{
 
 }
 
+
+try{
+
+  const response =
+    await fetch(
+      `${MOMENTS_API}/admin/all`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load MTERMS Moments"
+    );
+
+  }
+
+
+  const moments =
+    Array.isArray(
+      data.moments
+    )
+      ? data.moments
+      : [];
+
+
+  document
+    .getElementById(
+      "overviewMoments"
+    )
+    .textContent =
+      moments.length;
+
+
+}catch(error){
+
+  console.error(
+    "MTERMS Moments overview error:",
+    error
+  );
+
+
+  document
+    .getElementById(
+      "overviewMoments"
+    )
+    .textContent =
+      "—";
+
+}
+  
 }
 
 
