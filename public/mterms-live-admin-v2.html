@@ -1893,6 +1893,9 @@ textarea.form-control{
 const LIVE_API =
   'https://mterm2026-559f9bf571b5.herokuapp.com/api/live';
 
+const PRESENTER_FEEDBACK_API =
+  'https://mterm2026-559f9bf571b5.herokuapp.com/api/presenter-feedback';
+
 const MASTER =
   window.MTERMS_PROGRAMME_V2;
 
@@ -3049,22 +3052,59 @@ async function renderOverviewStats(){
 
 try{
 
-  const sessionFeedback =
-    await AdminStore
-      .getSessionFeedback();
+  const response =
+    await fetch(
+      `${PRESENTER_FEEDBACK_API}/admin/all`
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if(
+    !response.ok ||
+    !data.ok
+  ){
+
+    throw new Error(
+      data.error ||
+      "Unable to load presenter feedback"
+    );
+
+  }
+
+
+  const feedback =
+    Array.isArray(
+      data.feedback
+    )
+      ? data.feedback
+      : [];
 
 
   document
     .getElementById(
-      "overviewFeedback"
+      "overviewPresenterFeedback"
     )
     .textContent =
-      sessionFeedback.length;
+      feedback.length;
 
 
 }catch(error){
 
-  console.error(error);
+  console.error(
+    "Presenter feedback overview error:",
+    error
+  );
+
+
+  document
+    .getElementById(
+      "overviewPresenterFeedback"
+    )
+    .textContent =
+      "—";
 
 }
 
