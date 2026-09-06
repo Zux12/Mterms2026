@@ -914,7 +914,7 @@
     target="_blank"
     rel="noopener">
 
-    LIST OF ORAL SESSIONS
+    ORAL SESSIONS
 
   </a>
 
@@ -928,7 +928,27 @@
 
   </a>
 
+  <a
+    class="mterms-countdown-agenda"
+    href="public/mtermseposter.pdf"
+    target="_blank"
+    rel="noopener">
 
+    ePOSTER SESSIONS
+
+  </a>
+
+    <a
+    class="mterms-countdown-agenda"
+    href="public/mtermsrapidfire.pdf"
+    target="_blank"
+    rel="noopener">
+
+    RAPID FIRE SESSIONS
+
+  </a>
+
+  
 </div>
 
 </div>
