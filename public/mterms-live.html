@@ -5422,10 +5422,20 @@ document
         }
       );
 
+updateProfileSummary();
 
-      updateProfileSummary();
 
-      closeProfile();
+if(
+  typeof window.MTERMS32Connect ===
+  "function"
+){
+
+  window.MTERMS32Connect();
+
+}
+
+
+closeProfile();
 
     }
   );
