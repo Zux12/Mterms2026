@@ -444,6 +444,54 @@ const VIRTUAL_PERSONAS = [
       'why does this look like Windows 98 haha',
       'okay now I understand the nostalgia'
     ]
+  },
+
+  {
+    nickname:'Alya',
+    channels:[
+      '#kampung',
+      '#mamak'
+    ],
+    lines:[
+      'hello semua',
+      'just reached the venue',
+      'ramai today',
+      'checking programme now',
+      'maybe upload photo later',
+      'see you guys around'
+    ]
+  },
+
+  {
+    nickname:'Marcus',
+    channels:[
+      '#kampung',
+      '#lagenda'
+    ],
+    lines:[
+      'morning everyone',
+      'interesting setup for the conference',
+      'checking the next session',
+      'this IRC thing is quite fun actually',
+      'anyone remember old chat rooms?',
+      'catch you guys later'
+    ]
+  },
+
+  {
+    nickname:'Deepa',
+    channels:[
+      '#kampung',
+      '#mamak'
+    ],
+    lines:[
+      'good morning',
+      'hotel quite busy now',
+      'trying to plan my sessions',
+      'anyone already had coffee?',
+      'lots happening today',
+      'see everyone later'
+    ]
   }
 
 ];
@@ -1741,7 +1789,7 @@ CHANNELS.forEach(
   channel => {
 
     /*
-      Start with the genuinely connected
+      Start with all genuinely connected
       participants.
     */
 
@@ -1752,17 +1800,14 @@ CHANNELS.forEach(
 
 
     /*
-      Add only personas assigned
-      to THIS particular room.
+      Show ALL virtual personas in EVERY
+      MTERMS32 room.
+
+      Their actual conversation subjects
+      remain channel-specific elsewhere.
     */
 
     VIRTUAL_PERSONAS
-      .filter(
-        persona =>
-          persona.channels.includes(
-            channel
-          )
-      )
       .forEach(
         persona => {
 
