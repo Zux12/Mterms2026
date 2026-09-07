@@ -17,7 +17,38 @@ const MtermsIrcMessage =
 
 const router = express.Router();
 
+/* =====================================================
+   MTERMS LIVE CLIENT VERSION
+===================================================== */
 
+/*
+  Increase this number ONLY when participants
+  need to be forced onto a newer MTERMS LIVE
+  client version.
+*/
+
+const MTERMS_LIVE_CLIENT_VERSION =
+  1;
+
+
+router.get(
+  '/client-version',
+  (req,res)=>{
+
+    res.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate'
+    );
+
+
+    res.json({
+      ok:true,
+      clientVersion:
+        MTERMS_LIVE_CLIENT_VERSION
+    });
+
+  }
+);
 /* =====================================================
    HEALTH
 ===================================================== */
