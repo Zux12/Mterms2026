@@ -151,6 +151,174 @@ const BOTS = {
 
 };
 
+/* =====================================================
+   MTERMS32 VIRTUAL PERSONAS
+===================================================== */
+
+const VIRTUAL_PERSONAS = [
+
+  {
+    nickname:'Amir',
+    channels:[
+      '#kampung',
+      '#mamak'
+    ],
+    lines:[
+      'morning semua',
+      'ramai dah sampai ke?',
+      'which session u guys going after this?',
+      'coffee break bila ya haha',
+      'baru sempat buka chat ni',
+      'anyone dekat ballroom now?',
+      'programme today quite packed',
+      'haha lama tak guna chat macam ni',
+      'siapa first time MTERMS?',
+      'okay see u guys later'
+    ]
+  },
+
+  {
+    nickname:'Mei',
+    channels:[
+      '#kampung',
+      '#lagenda'
+    ],
+    lines:[
+      'good morning everyone',
+      'any recommendation for session later?',
+      'this IRC thing actually quite nostalgic haha',
+      'just checking the programme',
+      'anyone already at the venue?',
+      'so many sessions today',
+      'hello hello',
+      'I just saw the Moments page',
+      'nice to meet everyone here',
+      'see you around'
+    ]
+  },
+
+  {
+    nickname:'Farah',
+    channels:[
+      '#kampung',
+      '#mamak'
+    ],
+    lines:[
+      'hai semua 😄',
+      'dah breakfast?',
+      'ramai kat sini rupanya',
+      'jangan lupa share gambar dekat Moments',
+      'saya tengah tengok programme dulu',
+      'best juga chat macam ni',
+      'siapa dekat registration area?',
+      'later ada coffee kan',
+      'okay jumpa kat session',
+      'have a good conference semua'
+    ]
+  },
+
+  {
+    nickname:'Jason',
+    channels:[
+      '#lagenda',
+      '#kampung'
+    ],
+    lines:[
+      'wow this really feels like old IRC',
+      'anyone here actually used mIRC before?',
+      'haha suddenly feel young again',
+      'this brings back memories',
+      'I forgot how simple chat used to be',
+      'which channel everyone hanging out in?',
+      'old school but it works',
+      'nice touch for a conference',
+      'brb checking programme',
+      'see you guys later'
+    ]
+  },
+
+  {
+    nickname:'Hakim',
+    channels:[
+      '#mamak',
+      '#kampung'
+    ],
+    lines:[
+      'teh tarik mana teh tarik 😂',
+      'dah penat ke belum semua',
+      'rehat jap',
+      'session tadi interesting juga',
+      'ramai orang today',
+      'nak cari coffee dulu',
+      'siapa kat lobby?',
+      'okay sambung conference',
+      'mamak channel mesti cerita makan',
+      'jumpa later'
+    ]
+  },
+
+  {
+    nickname:'Priya',
+    channels:[
+      '#kampung',
+      '#lagenda'
+    ],
+    lines:[
+      'hello everyone',
+      'looking forward to the sessions today',
+      'anyone attending the next presentation?',
+      'quite a nice digital setup',
+      'checking my schedule now',
+      'there are many interesting topics',
+      'hope everyone having a good conference',
+      'I will catch the next session',
+      'nice meeting everyone here',
+      'see you all later'
+    ]
+  },
+
+  {
+    nickname:'Aina',
+    channels:[
+      '#kampung',
+      '#mamak'
+    ],
+    lines:[
+      'hello semua',
+      'ambil gambar banyak banyak today 📸',
+      'share dekat Moments ya',
+      'baru sampai venue',
+      'ramai juga pagi ni',
+      'anyone dah tengok Moments?',
+      'cute juga feature chat ni',
+      'saya pergi session dulu',
+      'enjoy conference semua',
+      'jumpa nanti'
+    ]
+  },
+
+  {
+    nickname:'Kenny',
+    channels:[
+      '#mamak',
+      '#lagenda'
+    ],
+    lines:[
+      'hello everybody',
+      'today very busy haha',
+      'which talk good later?',
+      'I go find coffee first',
+      'this chat very old school',
+      'many people today',
+      'programme quite full',
+      'okay I check schedule first',
+      'see everybody later',
+      'enjoy conference'
+    ]
+  }
+
+];
+
 function cleanString(
   value,
   maxLength
@@ -237,6 +405,101 @@ async function sendBotMessage(
 
     console.error(
       'MTERMS32 bot error:',
+      error
+    );
+
+  }
+
+}
+
+/* =====================================================
+   VIRTUAL PERSONA MESSAGE
+===================================================== */
+
+async function sendPersonaMessage(
+  namespace,
+  channel
+){
+
+  try{
+
+    const available =
+      VIRTUAL_PERSONAS
+        .filter(
+          persona =>
+            persona.channels.includes(
+              channel
+            )
+        );
+
+
+    if(
+      !available.length
+    ){
+      return;
+    }
+
+
+    const persona =
+      available[
+        Math.floor(
+          Math.random() *
+          available.length
+        )
+      ];
+
+
+    const line =
+      persona.lines[
+        Math.floor(
+          Math.random() *
+          persona.lines.length
+        )
+      ];
+
+
+    const created =
+      await MtermsIrcMessage
+        .create({
+
+          channel,
+
+          messageType:
+            'chat',
+
+          nickname:
+            persona.nickname,
+
+          title:
+            'MTERMS32 Virtual Persona',
+
+          affiliation:
+            'MTERMS 2026 Digital Demonstration',
+
+          participantId:
+            'VIRTUAL_PERSONA:' +
+            persona.nickname,
+
+          message:
+            line
+
+        });
+
+
+    namespace
+      .to(channel)
+      .emit(
+        'irc:message',
+        serializeMessage(
+          created
+        )
+      );
+
+
+  }catch(error){
+
+    console.error(
+      'MTERMS32 virtual persona error:',
       error
     );
 
@@ -794,6 +1057,89 @@ function scheduleBackgroundBot(){
 
 
 scheduleBackgroundBot();
+
+/* =====================================================
+   VIRTUAL PERSONA BACKGROUND CHAT
+===================================================== */
+
+function scheduleVirtualPersona(){
+
+  /*
+    One message approximately every
+    45–90 seconds.
+  */
+
+  const delay =
+    45000 +
+    Math.floor(
+      Math.random() *
+      45000
+    );
+
+
+  setTimeout(
+    async ()=>{
+
+      try{
+
+        const sockets =
+          await irc.fetchSockets();
+
+
+        /*
+          Only generate persona conversation
+          while at least one real participant
+          is connected.
+        */
+
+        const realUsers =
+          sockets.filter(
+            socket =>
+              socket.data.nickname
+          );
+
+
+        if(
+          realUsers.length > 0
+        ){
+
+          const channel =
+            CHANNELS[
+              Math.floor(
+                Math.random() *
+                CHANNELS.length
+              )
+            ];
+
+
+          await sendPersonaMessage(
+            irc,
+            channel
+          );
+
+        }
+
+
+      }catch(error){
+
+        console.error(
+          'MTERMS32 virtual persona scheduler error:',
+          error
+        );
+
+      }
+
+
+      scheduleVirtualPersona();
+
+    },
+    delay
+  );
+
+}
+
+
+scheduleVirtualPersona();
   
 }
 
@@ -880,6 +1226,32 @@ async function emitAllNickLists(
       }
     );
 
+
+    /*
+  Add virtual personas to the visible
+  MTERMS32 nick list.
+
+  Real connected users above remain untouched.
+*/
+
+VIRTUAL_PERSONAS.forEach(
+  persona => {
+
+    nicknames.push({
+
+      nickname:
+        persona.nickname,
+
+      title:
+        'MTERMS32 Virtual Persona',
+
+      affiliation:
+        'MTERMS 2026 Digital Demonstration'
+
+    });
+
+  }
+);
 
     /*
       Everyone automatically joins all
