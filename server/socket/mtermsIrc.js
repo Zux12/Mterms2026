@@ -157,167 +157,446 @@ const BOTS = {
 
 const VIRTUAL_PERSONAS = [
 
+  /* ===================================================
+     #KAMPUNG — MAIN CONFERENCE CHAT
+  =================================================== */
+
   {
     nickname:'Amir',
-    channels:[
-      '#kampung',
-      '#mamak'
-    ],
+    channels:['#kampung'],
     lines:[
       'morning semua',
       'ramai dah sampai ke?',
       'which session u guys going after this?',
-      'coffee break bila ya haha',
-      'baru sempat buka chat ni',
-      'anyone dekat ballroom now?',
       'programme today quite packed',
-      'haha lama tak guna chat macam ni',
+      'anyone dekat ballroom now?',
       'siapa first time MTERMS?',
+      'baru sempat buka chat ni',
       'okay see u guys later'
     ]
   },
 
   {
     nickname:'Mei',
-    channels:[
-      '#kampung',
-      '#lagenda'
-    ],
+    channels:['#kampung','#lagenda'],
     lines:[
       'good morning everyone',
-      'any recommendation for session later?',
-      'this IRC thing actually quite nostalgic haha',
       'just checking the programme',
-      'anyone already at the venue?',
       'so many sessions today',
-      'hello hello',
+      'any recommendation for session later?',
       'I just saw the Moments page',
-      'nice to meet everyone here',
-      'see you around'
+      'nice to meet everyone here'
     ]
   },
 
   {
     nickname:'Farah',
-    channels:[
-      '#kampung',
-      '#mamak'
-    ],
+    channels:['#kampung'],
     lines:[
       'hai semua 😄',
-      'dah breakfast?',
       'ramai kat sini rupanya',
-      'jangan lupa share gambar dekat Moments',
       'saya tengah tengok programme dulu',
-      'best juga chat macam ni',
       'siapa dekat registration area?',
-      'later ada coffee kan',
-      'okay jumpa kat session',
-      'have a good conference semua'
-    ]
-  },
-
-  {
-    nickname:'Jason',
-    channels:[
-      '#lagenda',
-      '#kampung'
-    ],
-    lines:[
-      'wow this really feels like old IRC',
-      'anyone here actually used mIRC before?',
-      'haha suddenly feel young again',
-      'this brings back memories',
-      'I forgot how simple chat used to be',
-      'which channel everyone hanging out in?',
-      'old school but it works',
-      'nice touch for a conference',
-      'brb checking programme',
-      'see you guys later'
-    ]
-  },
-
-  {
-    nickname:'Hakim',
-    channels:[
-      '#mamak',
-      '#kampung'
-    ],
-    lines:[
-      'teh tarik mana teh tarik 😂',
-      'dah penat ke belum semua',
-      'rehat jap',
-      'session tadi interesting juga',
-      'ramai orang today',
-      'nak cari coffee dulu',
-      'siapa kat lobby?',
-      'okay sambung conference',
-      'mamak channel mesti cerita makan',
-      'jumpa later'
+      'jangan lupa share gambar dekat Moments',
+      'okay jumpa kat session'
     ]
   },
 
   {
     nickname:'Priya',
-    channels:[
-      '#kampung',
-      '#lagenda'
-    ],
+    channels:['#kampung','#lagenda'],
     lines:[
       'hello everyone',
       'looking forward to the sessions today',
-      'anyone attending the next presentation?',
-      'quite a nice digital setup',
       'checking my schedule now',
       'there are many interesting topics',
-      'hope everyone having a good conference',
-      'I will catch the next session',
-      'nice meeting everyone here',
+      'anyone attending the next presentation?',
       'see you all later'
     ]
   },
 
   {
     nickname:'Aina',
-    channels:[
-      '#kampung',
-      '#mamak'
-    ],
+    channels:['#kampung','#mamak'],
     lines:[
       'hello semua',
       'ambil gambar banyak banyak today 📸',
-      'share dekat Moments ya',
-      'baru sampai venue',
-      'ramai juga pagi ni',
       'anyone dah tengok Moments?',
-      'cute juga feature chat ni',
+      'ramai juga pagi ni',
       'saya pergi session dulu',
-      'enjoy conference semua',
-      'jumpa nanti'
+      'enjoy conference semua'
+    ]
+  },
+
+  {
+    nickname:'Nabil',
+    channels:['#kampung'],
+    lines:[
+      'first time MTERMS for me',
+      'montage tadi nice',
+      'just arrived at the venue',
+      'checking which session to attend',
+      'quite ramai today',
+      'see everyone around'
+    ]
+  },
+
+  {
+    nickname:'Rachel',
+    channels:['#kampung'],
+    lines:[
+      'morning everyone',
+      'opening montage was nice',
+      'already took some photos haha',
+      'need to upload to Moments later',
+      'trying to plan my sessions',
+      'nice crowd today'
+    ]
+  },
+
+  {
+    nickname:'Iman',
+    channels:['#kampung'],
+    lines:[
+      'morning guys',
+      'ballroom area quite ramai now',
+      'anyone still at registration?',
+      'programme looks full today',
+      'going into session now',
+      'catch up later'
+    ]
+  },
+
+  {
+    nickname:'Joanne',
+    channels:['#kampung','#lagenda'],
+    lines:[
+      'hello everyone',
+      'remember speaker feedback guys',
+      'checking programme now',
+      'quite convenient having everything here',
+      'anyone using My Schedule?',
+      'see everyone later'
+    ]
+  },
+
+
+  /* ===================================================
+     #MAMAK — HOTEL / FOOD / CASUAL
+  =================================================== */
+
+  {
+    nickname:'Hakim',
+    channels:['#mamak'],
+    lines:[
+      'teh tarik mana teh tarik 😂',
+      'dah penat ke belum semua',
+      'nak cari coffee dulu',
+      'siapa kat lobby?',
+      'mamak channel mesti cerita makan',
+      'okay sambung conference'
     ]
   },
 
   {
     nickname:'Kenny',
-    channels:[
-      '#mamak',
-      '#lagenda'
-    ],
+    channels:['#mamak','#lagenda'],
     lines:[
       'hello everybody',
       'today very busy haha',
-      'which talk good later?',
       'I go find coffee first',
-      'this chat very old school',
       'many people today',
-      'programme quite full',
       'okay I check schedule first',
-      'see everybody later',
-      'enjoy conference'
+      'see everybody later'
+    ]
+  },
+
+  {
+    nickname:'Shima',
+    channels:['#mamak'],
+    lines:[
+      'anyone know Patio 1 which side?',
+      'I am near lobby now',
+      'parking tadi okay',
+      'trying to find the room haha',
+      'dah jumpa coffee',
+      'okay found it'
+    ]
+  },
+
+  {
+    nickname:'Kumar',
+    channels:['#mamak'],
+    lines:[
+      'concorde breakfast not bad actually',
+      'anyone staying at the hotel?',
+      'I need coffee again',
+      'lobby quite busy now',
+      'wonder what lunch is today',
+      'good venue so far'
+    ]
+  },
+
+  {
+    nickname:'Azlan',
+    channels:['#mamak'],
+    lines:[
+      'morning semua',
+      'parking morning okay lagi',
+      'I think Patio side dekat ballroom',
+      'lobby ramai sekarang',
+      'coffee dulu',
+      'jalan jalan cari room'
+    ]
+  },
+
+  {
+    nickname:'Melissa',
+    channels:['#mamak'],
+    lines:[
+      'aircond ballroom very cold 😂',
+      'anyone brought jacket?',
+      'already taking photos',
+      'hotel lobby nice for photos actually',
+      'waiting for coffee break',
+      'need lunch soon haha'
+    ]
+  },
+
+  {
+    nickname:'Haziq',
+    channels:['#mamak'],
+    lines:[
+      'coffee break bila 😂',
+      'baru start dah lapar',
+      'aircond memang kuat',
+      'ramai dekat lobby',
+      'conference survival = coffee',
+      'okay masuk session balik'
+    ]
+  },
+
+  {
+    nickname:'Wei',
+    channels:['#mamak'],
+    lines:[
+      'morning',
+      'I only take coffee haha',
+      'hotel okay so far',
+      'very cold inside ballroom',
+      'lunch later right?',
+      'going back session now'
+    ]
+  },
+
+
+  /* ===================================================
+     #LAGENDA — IRC / TECH / NOSTALGIA
+  =================================================== */
+
+  {
+    nickname:'Jason',
+    channels:['#lagenda'],
+    lines:[
+      'seriously IRC in 2026 😂',
+      'anyone here actually used mIRC before?',
+      'this brings back memories',
+      'old school but it works',
+      'next somebody play dial up sound',
+      'brb checking programme'
+    ]
+  },
+
+  {
+    nickname:'Daniel',
+    channels:['#lagenda'],
+    lines:[
+      'I thought IRC disappeared 20 years ago',
+      'who remembers ICQ also?',
+      'this really feels old school',
+      'status window brings back memories',
+      'anyone remember ASL?',
+      'technology really goes full circle'
+    ]
+  },
+
+  {
+    nickname:'Ravi',
+    channels:['#lagenda'],
+    lines:[
+      'old technology inside new platform',
+      'quite interesting concept actually',
+      'programme and chat same place is convenient',
+      'anyone used IRC in university days?',
+      'this is unexpected for a conference',
+      'digital conference has changed a lot'
+    ]
+  },
+
+  {
+    nickname:'Lina',
+    channels:['#lagenda'],
+    lines:[
+      'what is ASL? 😂',
+      'you all exposing your age now',
+      'I never used IRC before this',
+      'this is actually quite fun',
+      'why does this look like Windows 98 haha',
+      'okay now I understand the nostalgia'
     ]
   }
 
 ];
+
+
+/* =====================================================
+   MTERMS32 MINI CONVERSATIONS
+===================================================== */
+
+const PERSONA_CONVERSATIONS = {
+
+  '#kampung':[
+
+    [
+      ['Nabil','montage tadi quite nice'],
+      ['Rachel','yaa especially opening part'],
+      ['Amir','very different for conference haha'],
+      ['Mei','who made the video?'],
+      ['Nabil','not sure but nice la']
+    ],
+
+    [
+      ['Farah','ramai dah sampai?'],
+      ['Iman','ballroom area quite ramai now'],
+      ['Farah','okay coming down']
+    ],
+
+    [
+      ['Aina','anyone taking photos today 📸'],
+      ['Rachel','already haha'],
+      ['Aina','put in Moments!'],
+      ['Rachel','later later 😂']
+    ],
+
+    [
+      ['Priya','so many parallel sessions today'],
+      ['Amir','same problem haha'],
+      ['Priya','I saved mine in My Schedule'],
+      ['Joanne','good idea easier to check later']
+    ],
+
+    [
+      ['Joanne','guys remember speaker feedback also'],
+      ['Mei','where is it?'],
+      ['Joanne','programme > open speaker > provide feedback'],
+      ['Mei','found it 👍']
+    ],
+
+    [
+      ['Iman','first time MTERMS for anyone?'],
+      ['Nabil','me'],
+      ['Rachel','second time for me'],
+      ['Jason','first time using IRC at conference definitely 😂']
+    ]
+
+  ],
+
+
+  '#mamak':[
+
+    [
+      ['Hakim','siapa dah breakfast'],
+      ['Kumar','concorde breakfast not bad actually'],
+      ['Wei','you staying here also?'],
+      ['Kumar','yup just for conference'],
+      ['Kenny','I only take coffee 😂']
+    ],
+
+    [
+      ['Shima','anyone know Patio 1 which side?'],
+      ['Azlan','I think near ballroom side'],
+      ['Shima','okay jap I cari'],
+      ['Azlan','follow sign after lobby'],
+      ['Shima','found it thanks!']
+    ],
+
+    [
+      ['Haziq','aircond ballroom cold or is it just me'],
+      ['Melissa','VERY cold 😂'],
+      ['Aina','luckily brought jacket'],
+      ['Hakim','conference survival kit']
+    ],
+
+    [
+      ['Kenny','coffee break when ah'],
+      ['Wei','hahaha baru start already coffee'],
+      ['Kenny','important question']
+    ],
+
+    [
+      ['Melissa','parking tadi okay?'],
+      ['Azlan','morning okay'],
+      ['Hakim','later maybe full'],
+      ['Melissa','luckily came early']
+    ],
+
+    [
+      ['Farah','lunch sini ke?'],
+      ['Kumar','should be conference lunch'],
+      ['Kenny','finally serious discussion in mamak channel']
+    ]
+
+  ],
+
+
+  '#lagenda':[
+
+    [
+      ['Jason','seriously IRC in 2026 😂'],
+      ['Daniel','I thought this disappeared 20 years ago'],
+      ['Mei','same haha'],
+      ['Jason','next somebody play the dial up sound']
+    ],
+
+    [
+      ['Ravi','anyone here actually used mIRC?'],
+      ['Jason','yes unfortunately I am that old'],
+      ['Lina','hahaha'],
+      ['Daniel','ICQ also?'],
+      ['Jason',"okay now you're going too far"]
+    ],
+
+    [
+      ['Mei','funny that this works inside conference app'],
+      ['Priya',"I didn't expect live chat when I scanned QR"],
+      ['Ravi','programme + chat + feedback all same place'],
+      ['Mei','quite convenient actually']
+    ],
+
+    [
+      ['Kenny','last time need cyber cafe for this'],
+      ['Jason','RM2 per hour 😂'],
+      ['Lina','you all exposing your age now'],
+      ['Kenny','delete this conversation please']
+    ],
+
+    [
+      ['Daniel','who remembers ASL'],
+      ['Jason','hahahaha'],
+      ['Mei','what is ASL?'],
+      ['Jason','okay you are definitely younger generation']
+    ],
+
+    [
+      ['Ravi','old technology inside new platform'],
+      ['Priya','actually nice concept'],
+      ['Joanne','nostalgia with QR code 😂'],
+      ['Jason','full circle']
+    ]
+
+  ]
+
+};
 
 function cleanString(
   value,
@@ -504,6 +783,139 @@ async function sendPersonaMessage(
     );
 
   }
+
+}
+
+/* =====================================================
+   PLAY VIRTUAL PERSONA CONVERSATION
+===================================================== */
+
+async function playPersonaConversation(
+  namespace,
+  channel
+){
+
+  const conversations =
+    PERSONA_CONVERSATIONS[
+      channel
+    ] || [];
+
+
+  if(
+    !conversations.length
+  ){
+    return;
+  }
+
+
+  const conversation =
+    conversations[
+      Math.floor(
+        Math.random() *
+        conversations.length
+      )
+    ];
+
+
+  let delay =
+    0;
+
+
+  conversation.forEach(
+    (
+      [
+        nickname,
+        message
+      ],
+      index
+    ) => {
+
+      /*
+        First line appears fairly quickly.
+
+        Following replies have natural
+        2.5–6 second gaps.
+      */
+
+      if(
+        index === 0
+      ){
+
+        delay =
+          1000 +
+          Math.floor(
+            Math.random() *
+            2000
+          );
+
+      }else{
+
+        delay +=
+          2500 +
+          Math.floor(
+            Math.random() *
+            3500
+          );
+
+      }
+
+
+      setTimeout(
+        async ()=>{
+
+          try{
+
+            const created =
+              await MtermsIrcMessage
+                .create({
+
+                  channel,
+
+                  messageType:
+                    'chat',
+
+                  nickname,
+
+                  title:
+                    'MTERMS32 Virtual Persona',
+
+                  affiliation:
+                    'MTERMS 2026 Digital Demonstration',
+
+                  participantId:
+                    'VIRTUAL_PERSONA:' +
+                    nickname,
+
+                  message
+
+                });
+
+
+            namespace
+              .to(channel)
+              .emit(
+                'irc:message',
+                serializeMessage(
+                  created
+                )
+              );
+
+
+          }catch(error){
+
+            console.error(
+              'MTERMS32 persona conversation error:',
+              error
+            );
+
+          }
+
+        },
+        delay
+      );
+
+    }
+  );
 
 }
 
@@ -1140,6 +1552,86 @@ function scheduleVirtualPersona(){
 
 
 scheduleVirtualPersona();
+
+/* =====================================================
+   MINI CONVERSATION SCHEDULER
+===================================================== */
+
+function schedulePersonaConversation(){
+
+  /*
+    Start a mini conversation approximately
+    every 4–7 minutes.
+
+    Random single-person chatter continues
+    independently every 45–90 seconds.
+  */
+
+  const delay =
+    240000 +
+    Math.floor(
+      Math.random() *
+      180000
+    );
+
+
+  setTimeout(
+    async ()=>{
+
+      try{
+
+        const sockets =
+          await irc.fetchSockets();
+
+
+        const realUsers =
+          sockets.filter(
+            socket =>
+              socket.data.nickname
+          );
+
+
+        if(
+          realUsers.length > 0
+        ){
+
+          const channel =
+            CHANNELS[
+              Math.floor(
+                Math.random() *
+                CHANNELS.length
+              )
+            ];
+
+
+          playPersonaConversation(
+            irc,
+            channel
+          );
+
+        }
+
+
+      }catch(error){
+
+        console.error(
+          'MTERMS32 persona conversation scheduler error:',
+          error
+        );
+
+      }
+
+
+      schedulePersonaConversation();
+
+    },
+    delay
+  );
+
+}
+
+
+schedulePersonaConversation();  
   
 }
 
@@ -1234,24 +1726,7 @@ async function emitAllNickLists(
   Real connected users above remain untouched.
 */
 
-VIRTUAL_PERSONAS.forEach(
-  persona => {
 
-    nicknames.push({
-
-      nickname:
-        persona.nickname,
-
-      title:
-        'MTERMS32 Virtual Persona',
-
-      affiliation:
-        'MTERMS 2026 Digital Demonstration'
-
-    });
-
-  }
-);
 
     /*
       Everyone automatically joins all
@@ -1262,19 +1737,64 @@ VIRTUAL_PERSONAS.forEach(
       Bots are added separately by the
       MTERMS32 interface.
     */
-    CHANNELS.forEach(
-      channel => {
+CHANNELS.forEach(
+  channel => {
 
-        namespace.emit(
-          'irc:nicks',
-          {
-            channel,
-            nicknames
-          }
-        );
+    /*
+      Start with the genuinely connected
+      participants.
+    */
 
+    const channelNicknames =
+      [
+        ...nicknames
+      ];
+
+
+    /*
+      Add only personas assigned
+      to THIS particular room.
+    */
+
+    VIRTUAL_PERSONAS
+      .filter(
+        persona =>
+          persona.channels.includes(
+            channel
+          )
+      )
+      .forEach(
+        persona => {
+
+          channelNicknames.push({
+
+            nickname:
+              persona.nickname,
+
+            title:
+              'MTERMS32 Virtual Persona',
+
+            affiliation:
+              'MTERMS 2026 Digital Demonstration'
+
+          });
+
+        }
+      );
+
+
+    namespace.emit(
+      'irc:nicks',
+      {
+        channel,
+
+        nicknames:
+          channelNicknames
       }
     );
+
+  }
+);
 
 
   }catch(error){
