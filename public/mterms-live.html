@@ -4776,6 +4776,188 @@ function trackAnalytics(
 }
 
 /* =====================================================
+   CLIENT VERSION WATCHDOG
+===================================================== */
+
+const CLIENT_VERSION_KEY =
+  "mtermsLiveClientVersion";
+
+
+let clientUpdateInProgress =
+  false;
+
+
+function participantIsTyping(){
+
+  const active =
+    document.activeElement;
+
+
+  if(!active){
+    return false;
+  }
+
+
+  const tag =
+    String(
+      active.tagName || ""
+    )
+    .toLowerCase();
+
+
+  return (
+    tag === "input" ||
+    tag === "textarea" ||
+    tag === "select" ||
+    active.isContentEditable === true
+  );
+
+}
+
+
+async function checkForClientUpdate(){
+
+  if(
+    clientUpdateInProgress
+  ){
+    return;
+  }
+
+
+  if(
+    participantIsTyping()
+  ){
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${LIVE_API}/client-version?_=${Date.now()}`,
+        {
+          method:"GET",
+          cache:"no-store"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
+      return;
+    }
+
+
+    const serverVersion =
+      Number(
+        data.clientVersion || 0
+      );
+
+
+    if(
+      !serverVersion
+    ){
+      return;
+    }
+
+
+    const storedVersion =
+      Number(
+        localStorage.getItem(
+          CLIENT_VERSION_KEY
+        ) || 0
+      );
+
+
+    /*
+      First time this device sees
+      the watchdog:
+      store baseline only.
+    */
+
+    if(
+      !storedVersion
+    ){
+
+      localStorage.setItem(
+        CLIENT_VERSION_KEY,
+        String(
+          serverVersion
+        )
+      );
+
+
+      return;
+
+    }
+
+
+    if(
+      serverVersion >
+      storedVersion
+    ){
+
+      clientUpdateInProgress =
+        true;
+
+
+      localStorage.setItem(
+        CLIENT_VERSION_KEY,
+        String(
+          serverVersion
+        )
+      );
+
+
+      window.location.reload();
+
+    }
+
+
+  }catch(error){
+
+    /*
+      Update check must never
+      affect MTERMS LIVE.
+    */
+
+  }
+
+}
+
+
+/*
+  When a participant returns to the browser,
+  check immediately for an update.
+*/
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      setTimeout(
+        checkForClientUpdate,
+        300
+      );
+
+    }
+
+  }
+);
+  
+/* =====================================================
    BASIC HELPERS
 ===================================================== */
 
@@ -14374,6 +14556,18 @@ function initialise(){
     loadAllDiscussions,
     5000
   );
+
+  /*
+  Check for urgent client updates.
+*/
+
+checkForClientUpdate();
+
+
+setInterval(
+  checkForClientUpdate,
+  15000
+);
 
 setInterval(
   async ()=>{
