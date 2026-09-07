@@ -28,7 +28,7 @@ const router = express.Router();
 */
 
 const MTERMS_LIVE_CLIENT_VERSION =
-  2;
+  3;
 
 
 router.get(
