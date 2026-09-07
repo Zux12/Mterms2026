@@ -960,33 +960,17 @@ function toggleMaximize(){
 
 function closeMterms32(){
 
-  document
-    .getElementById(
-      "m32-window"
-    )
-    .classList
-    .add("m32-hidden");
-
-
-  opened = false;
-  minimized = false;
-   sessionStarted = false;
-
-
   /*
-    Close means disconnect.
-    Minimize does not.
+    During MTERMS 2026, the X button
+    behaves the same as Minimize.
+
+    Participants remain connected to
+    MTERMS32 in the background.
   */
-  if(socket){
 
-    socket.disconnect();
-
-    socket = null;
-
-  }
+  minimizeMterms32();
 
 }
-
 
 /* =========================================================
    SOCKET
@@ -2145,6 +2129,42 @@ setInterval(
 );
 
 
+
+/* =========================================================
+   PUBLIC AUTO-CONNECT
+========================================================= */
+
+window.MTERMS32Connect =
+  function(){
+
+    const profile =
+      getProfile();
+
+
+    if(
+      !profile ||
+      !profile.name
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      socket &&
+      socket.connected
+    ){
+
+      return;
+
+    }
+
+
+    connectSocket();
+
+  };
+   
 /* =========================================================
    INITIALISE
 ========================================================= */
@@ -2154,6 +2174,27 @@ function initialiseMterms32(){
   buildMterms32();
 
   updateTabStyles();
+
+
+  /*
+    Automatically connect participants who
+    already have a saved MTERMS LIVE profile.
+
+    The chat window remains hidden.
+  */
+
+  const profile =
+    getProfile();
+
+
+  if(
+    profile &&
+    profile.name
+  ){
+
+    connectSocket();
+
+  }
 
 }
 
