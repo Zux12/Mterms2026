@@ -4,6 +4,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const Expert = require('./experts.model');
+const { sendExpertEmails } = require('./experts-email');
 
 const router = express.Router();
 
@@ -213,8 +214,8 @@ if (existing) {
 
 // Create a new registration
 const reference = createReference();
-
-await Expert.create({
+// Save registration in MongoDB first
+const expert = await Expert.create({
   ...data,
   email,
   reference,
@@ -225,6 +226,26 @@ await Expert.create({
   status: 'New'
 });
 
+// Send acknowledgement and admin notification.
+// Email failures must never undo a saved registration.
+try {
+  const emailResult = await sendExpertEmails(expert);
+
+  console.log('BIRT registration emails:', {
+    reference,
+    applicantSent: emailResult.applicantSent,
+    adminSent: emailResult.adminSent
+  });
+
+} catch (emailError) {
+  console.error(
+    'BIRT email error for registration:',
+    reference,
+    emailError
+  );
+}
+
+// Return success because MongoDB saved the registration
 return res.status(201).json({
   status: 'success',
   message: 'Your expression of interest has been received.',
