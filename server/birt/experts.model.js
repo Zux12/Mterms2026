@@ -166,10 +166,16 @@ expertSchema.index({
   createdAt: -1
 });
 
-expertSchema.index({
-  email: 1,
-  event: 1
-});
+expertSchema.index(
+  {
+    email: 1,
+    event: 1
+  },
+  {
+    unique: true,
+    name: 'unique_birt_email_event'
+  }
+);
 
 module.exports =
   mongoose.models.BirtExpert ||
