@@ -24,6 +24,7 @@ const mtermsMomentsRouter = require('./routes/mtermsMoments');
 const liveAnalyticsRouter =
   require('./routes/liveAnalytics');
 const birtExpertsRouter = require('./birt/experts');
+const birtExpertsAdminRouter = require('./birt/experts-admin');
 
 const {
   setupMtermsIrc
@@ -128,6 +129,7 @@ app.use(
 app.use('/api/presenter-feedback', presenterFeedbackRouter);
 app.use('/api/mterms-moments', mtermsMomentsRouter);
 app.use('/api/birt/experts', birtExpertsRouter);
+app.use('/api/birt/admin', birtExpertsAdminRouter);
 
 /* Friendly root */
 app.get('/', (req, res) => {
