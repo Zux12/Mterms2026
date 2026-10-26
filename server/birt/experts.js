@@ -192,24 +192,44 @@ router.post('/', rateLimit, async (req, res) => {
         });
       }
     }
+const email = data.email.toLowerCase().trim();
+const event = 'TERMIS-AP 2028';
 
-    const reference = createReference();
+// Check for an existing registration
+const existing = await Expert.findOne({
+  email,
+  event
+});
 
-    await Expert.create({
-      ...data,
-      reference,
-      roles,
-      consent: true,
-      event: 'TERMIS-AP 2028',
-      registrationType: 'Expression of Interest',
-      status: 'New'
-    });
+if (existing) {
+  return res.status(409).json({
+    status: 'duplicate',
+    message:
+      'An expression of interest has already been registered ' +
+      'using this email address. Please contact BIRT Lab ' +
+      'if you need to update your information.'
+  });
+}
 
-    return res.status(201).json({
-      status: 'success',
-      message: 'Your expression of interest has been received.',
-      reference
-    });
+// Create a new registration
+const reference = createReference();
+
+await Expert.create({
+  ...data,
+  email,
+  reference,
+  roles,
+  consent: true,
+  event,
+  registrationType: 'Expression of Interest',
+  status: 'New'
+});
+
+return res.status(201).json({
+  status: 'success',
+  message: 'Your expression of interest has been received.',
+  reference
+});
 
   } catch (error) {
     console.error('BIRT registration error:', error);
