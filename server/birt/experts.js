@@ -231,8 +231,17 @@ return res.status(201).json({
   reference
 });
 
-  } catch (error) {
-    console.error('BIRT registration error:', error);
+} catch (error) {
+
+  if (error.code === 11000) {
+    return res.status(409).json({
+      status: 'duplicate',
+      message:
+        'An expression of interest already exists for this email address.'
+    });
+  }
+
+  console.error('BIRT registration error:', error);
 
     return res.status(500).json({
       status: 'error',
