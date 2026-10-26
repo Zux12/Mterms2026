@@ -23,6 +23,7 @@ const presenterFeedbackRouter = require('./routes/mtermsPresenterFeedback');
 const mtermsMomentsRouter = require('./routes/mtermsMoments');
 const liveAnalyticsRouter =
   require('./routes/liveAnalytics');
+const birtExpertsRouter = require('./birt/experts');
 
 const {
   setupMtermsIrc
@@ -63,11 +64,12 @@ app.set('trust proxy', 1);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-
-  const allowed = new Set([
-    'https://www.mterms2026.com',
-    'https://mterms2026.com'
-  ]);
+const allowed = new Set([
+  'https://www.mterms2026.com',
+  'https://mterms2026.com',
+  'https://birtlab.com',
+  'https://www.birtlab.com'
+]);
 
   if (origin && allowed.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -125,6 +127,7 @@ app.use(
 );
 app.use('/api/presenter-feedback', presenterFeedbackRouter);
 app.use('/api/mterms-moments', mtermsMomentsRouter);
+app.use('/api/birt/experts', birtExpertsRouter);
 
 /* Friendly root */
 app.get('/', (req, res) => {
