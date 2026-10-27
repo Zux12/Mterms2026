@@ -6,6 +6,7 @@ const crypto = require('crypto');
 
 const Member = require('./membership.model');
 const Expert = require('./experts.model');
+const { sendMembershipEmails } = require('./membership-email');
 
 const router = express.Router();
 
@@ -175,24 +176,45 @@ router.post('/', rateLimit, async (req, res) => {
       });
     }
 
-    const member = await Member.create({
-      ...data,
-      memberId: createMemberId(),
-      status: 'Active',
-      membershipFee: 0,
-      joinedAt: new Date(),
-      source: 'birtlab.com/membership.html',
-      researchUpdatesConsent:
-        body.researchUpdatesConsent === true,
-      consent: true
-    });
+// Save membership in MongoDB first
+const member = await Member.create({
+  ...data,
+  memberId: createMemberId(),
+  status: 'Active',
+  membershipFee: 0,
+  joinedAt: new Date(),
+  source: 'birtlab.com/membership.html',
+  researchUpdatesConsent:
+    body.researchUpdatesConsent === true,
+  consent: true
+});
 
-    return res.status(201).json({
-      status: 'success',
-      message: 'Welcome to the BIRT Lab Research Community.',
-      memberId: member.memberId,
-      membershipStatus: member.status
-    });
+// Send welcome email and administrator notification.
+// Email failure must not undo a saved membership.
+try {
+  const emailResult = await sendMembershipEmails(member);
+
+  console.log('BIRT membership emails:', {
+    memberId: member.memberId,
+    memberSent: emailResult.memberSent,
+    adminSent: emailResult.adminSent
+  });
+
+} catch (emailError) {
+  console.error(
+    'BIRT membership email error:',
+    member.memberId,
+    emailError
+  );
+}
+
+// Return successful registration confirmation
+return res.status(201).json({
+  status: 'success',
+  message: 'Welcome to the BIRT Lab Research Community.',
+  memberId: member.memberId,
+  membershipStatus: member.status
+});
 
   } catch (error) {
     if (error.code === 11000) {
