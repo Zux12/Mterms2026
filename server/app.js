@@ -24,6 +24,7 @@ const mtermsMomentsRouter = require('./routes/mtermsMoments');
 const liveAnalyticsRouter =
   require('./routes/liveAnalytics');
 const birtExpertsRouter = require('./birt/experts');
+const birtMembershipRouter = require('./birt/membership');
 const birtExpertsAdminRouter = require('./birt/experts-admin');
 
 const {
@@ -129,6 +130,7 @@ app.use(
 app.use('/api/presenter-feedback', presenterFeedbackRouter);
 app.use('/api/mterms-moments', mtermsMomentsRouter);
 app.use('/api/birt/experts', birtExpertsRouter);
+app.use('/api/birt/membership', birtMembershipRouter);
 app.use('/api/birt/admin', birtExpertsAdminRouter);
 
 /* Friendly root */
