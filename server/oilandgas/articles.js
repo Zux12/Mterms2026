@@ -179,7 +179,9 @@ async function deliver() {
         if (!host || !user || !pass) throw Error('Missing mail configuration');
         const smtp = mail.createTransport({host, port:465, secure:true,
           auth:{user,pass}, connectionTimeout:10000, socketTimeout:20000});
-        const article = editor ? await db().collection('articles').findOne({_id:job._id.slice(0,-6)}) : null;
+const article = editor
+  ? await db().collection('articles').findOne({ _id: job._id.slice(0, -'-editor'.length) })
+  : null;
         const result = await smtp.sendMail({
           from:{name:'Oil & Gas Editorial',address:sender},
           to:{address:editor ? mailbox : job.email},
