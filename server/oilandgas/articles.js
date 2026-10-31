@@ -119,16 +119,23 @@ async function deliver() {
       const claim = await queue.updateOne({_id:job._id,...due},{$set:{lock,nextAttempt:new Date(Date.now()+300000)}});
       if (!claim.modifiedCount) continue;
       try {
-        const sender = process.env.OIL_ARTICLE_SENDER;
-        const recipient = process.env.OIL_CONTACT_MAILBOX;
-        const pass = process.env.OIL_ARTICLE_PASSWORD;
-        if (!sender || !pass || !recipient || !process.env.OIL_CONTACT_SMTP_HOST || sender.toLowerCase() === recipient.toLowerCase()) throw Error('Configure editorial sender');
-        const smtp = mail.createTransport({host:process.env.OIL_CONTACT_SMTP_HOST,port:465,secure:true,
-          auth:{user:sender,pass},connectionTimeout:10000,socketTimeout:20000});
         const editor = job.kind === 'editor';
-        const result = await smtp.sendMail({from:{name:'Oil & Gas Editorial',address:sender},
-          to:{address:editor ? recipient : job.email},subject:'Article received · '+job.reference,
-          text:[editor ? 'A new article is ready for editorial review.' : 'Thank you. Your article has been received for editorial review.',job.title,job.reference].join('\n\n')});
+        const mailbox = process.env.OIL_CONTACT_MAILBOX;
+        const sender = editor ? mailbox : 'receipts@updates.oilandgas.eu.com';
+        const host = editor ? process.env.OIL_CONTACT_SMTP_HOST : 'smtp.resend.com';
+        const user = editor ? mailbox : 'resend';
+        const pass = editor ? process.env.OIL_CONTACT_PASSWORD : process.env.OIL_ARTICLE_RESEND_KEY;
+        if (!host || !user || !pass) throw Error('Missing mail configuration');
+        const smtp = mail.createTransport({host, port:465, secure:true,
+          auth:{user,pass}, connectionTimeout:10000, socketTimeout:20000});
+        const result = await smtp.sendMail({
+          from:{name:'Oil & Gas Editorial',address:sender},
+          to:{address:editor ? mailbox : job.email},
+          headers:editor ? {} : {'Resend-Idempotency-Key':job._id},
+          subject:'Article received · '+job.reference,
+          text:[editor ? 'A new article is ready for editorial review.' : 'Thank you. Your article has been received for editorial review.',
+            job.title,job.reference,'Contact the editors: https://oilandgas.eu.com/contact.html'].join('\n\n')
+        });
         if (!result.accepted.length) throw Error('Delivery declined');
         await queue.deleteOne({_id:job._id,lock});
       } catch (err) {
