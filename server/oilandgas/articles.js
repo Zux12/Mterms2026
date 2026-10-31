@@ -88,7 +88,7 @@ router.post('/', (req,res,next) => {
         },{upsert:true,session});
       }
       await database.collection('article_mail').insertMany(['editor','author'].map(kind=>({
-        _id:id+'-'+kind, reference, title, kind, email:authors[0].email, nextAttempt:now
+        _id:id+'-'+kind, reference, title, kind, authorName:authors[0].name, email:authors[0].email, nextAttempt:now
       })),{session});
     });
     res.status(202).json({reference});
@@ -96,6 +96,27 @@ router.post('/', (req,res,next) => {
   } catch (err) { next(err); }
   finally { if (session) await session.endSession(); }
 });
+function receiptHtml(job) {
+  const escape = value => String(value).replace(/[&<>"']/g, ch =>
+    ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[ch]);
+  const greeting = job.authorName ? 'Dear ' + escape(job.authorName) + ',' : 'Dear contributor,';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;background:#fff;color:#20201f;font:16px/1.55 Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;text-align:left"><tr><td style="padding:32px 22px">
+<div style="border-left:6px solid #f66520;padding-left:12px;font:bold 38px/1 Arial,sans-serif;letter-spacing:-2px">oil &amp; gas<span style="color:#f66520">.</span></div>
+<p style="margin:12px 0 0;padding-bottom:22px;border-bottom:2px solid #242424;font:12px Arial,sans-serif;letter-spacing:1px">KNOWLEDGE &bull; EXPERTISE &bull; EXCHANGE</p>
+<h1 style="margin:28px 0 18px;font:normal 30px/1.2 Georgia,serif">Article received</h1>
+<p>${greeting}</p><p>Thank you for submitting <strong>${escape(job.title)}</strong> to Oil &amp; Gas. Your manuscript is with our editorial team for review.</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="padding:18px 20px;background:#f6f4f0;border-left:4px solid #f66520">
+<div style="font:12px Arial,sans-serif;letter-spacing:1px;color:#595852">SUBMISSION REFERENCE</div>
+<div style="margin:6px 0 12px;font:bold 18px Arial,sans-serif;overflow-wrap:anywhere">${escape(job.reference)}</div>
+<div><strong>Status</strong> &nbsp; Pending editorial review</div></td></tr></table>
+<p>If you have a question or need to correct a detail, <a href="https://oilandgas.eu.com/contact.html" style="color:#953809">contact the editors</a> and include your reference number.</p>
+<p style="margin:26px 0 4px">Oil &amp; Gas Editorial Team</p>
+</td></tr></table></td></tr></table></body></html>`;
+}
+
 function logError(err) { console.error('Oil & Gas articles',err.code || err.name); }
 router.use((err,req,res,next) => {
   logError(err);
@@ -131,6 +152,7 @@ async function deliver() {
         const result = await smtp.sendMail({
           from:{name:'Oil & Gas Editorial',address:sender},
           to:{address:editor ? mailbox : job.email},
+          ...(editor ? {} : {html:receiptHtml(job)}),
           headers:editor ? {} : {'Resend-Idempotency-Key':job._id},
           subject:'Article received · '+job.reference,
           text:[editor ? 'A new article is ready for editorial review.' : 'Thank you. Your article has been received for editorial review.',
