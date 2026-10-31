@@ -60,6 +60,7 @@ setupMtermsIrc(
 
 const oilandgasMembershipRouter = require('./oilandgas/membership');
 app.use('/api/oilandgas/membership', oilandgasMembershipRouter);
+app.use('/api/oilandgas/contact', require('./oilandgas/contact'));
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
