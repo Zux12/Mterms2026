@@ -62,6 +62,7 @@ const oilandgasMembershipRouter = require('./oilandgas/membership');
 app.use('/api/oilandgas/membership', oilandgasMembershipRouter);
 app.use('/api/oilandgas/contact', require('./oilandgas/contact'));
 app.use('/api/oilandgas/articles', require('./oilandgas/articles'));
+app.use('/api/oilandgas/publications', require('./oilandgas/publications'));
 
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
