@@ -117,6 +117,36 @@ function receiptHtml(job) {
 </td></tr></table></td></tr></table></body></html>`;
 }
 
+function editorNotice(article) {
+  const esc = value => String(value).replace(/[&<>"']/g, ch =>
+    ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[ch]);
+  const received = new Intl.DateTimeFormat('en-GB', {
+    dateStyle:'long', timeStyle:'short', timeZone:'Asia/Kuala_Lumpur'
+  }).format(article.submittedAt) + ' MYT';
+  const word = article.manuscript.bytes;
+  const content = word ? (Buffer.isBuffer(word) ? word : Buffer.from(word.value(true))) :
+    Buffer.from(article.manuscript.text, 'utf8');
+  const filename = article.reference + (word ? '.docx' : '.txt');
+  const status = article.status === 'pending_review' ? 'Pending editorial review' : article.status;
+  const authors = article.authors.map((a,i) =>
+    (i === 0 ? 'Submitting author' : 'Co-author ' + i) + ' — ' + a.name + ' <' + a.email + '>');
+  const details = [['Reference', article.reference], ['Status', status], ['Topic', article.topic], ['Received', received]];
+  const text = [article.title, ...details.map(([k,v]) => k + ': ' + v), ...authors,
+    'Summary', article.summary, 'Manuscript attached: ' + filename].join('\n\n');
+  const html = `<!doctype html><html lang="en"><body style="margin:0;color:#242422;background:white;font:16px/1.55 Arial,sans-serif">
+<table role="presentation" width="100%"><tr><td align="center"><table role="presentation" width="100%" style="max-width:620px;text-align:left"><tr><td style="padding:30px 18px">
+<div style="border-left:6px solid #f66520;padding-left:12px;font:bold 38px Arial;letter-spacing:-2px">oil &amp; gas<span style="color:#f66520">.</span></div>
+<p style="border-bottom:2px solid #242424;padding-bottom:18px;font:12px Arial;letter-spacing:1px">KNOWLEDGE • EXPERTISE • EXCHANGE</p>
+<p style="font:bold 12px Arial;color:#924015;letter-spacing:1px">EDITORIAL DESK &nbsp; / &nbsp; NEW SUBMISSION</p>
+<h1 style="font:normal 30px Georgia">${esc(article.title)}</h1>
+<table cellpadding="6" style="width:100%;background:#f6f4f0;border-left:4px solid #f66520;font:15px Arial">${details.map(([k,v])=>`<tr><th scope="row" align="left">${k}</th><td>${esc(v)}</td></tr>`).join('')}</table>
+<h2 style="font:normal 23px Georgia">Authors</h2>${authors.map(a=>'<p>'+esc(a)+'</p>').join('')}
+<h2 style="font:normal 23px Georgia">Submission summary</h2><p>${esc(article.summary).replace(/\r?\n/g,'<br>')}</p>
+<p style="border-top:1px solid #ccc;padding-top:16px"><b>Manuscript attached</b><br>${esc(filename)}</p>
+</td></tr></table></td></tr></table></body></html>`;
+  return {subject:'Editorial review · '+article.reference, text, html, attachments:[{filename,content}]};
+}
+
 function logError(err) { console.error('Oil & Gas articles',err.code || err.name); }
 router.use((err,req,res,next) => {
   logError(err);
@@ -149,6 +179,7 @@ async function deliver() {
         if (!host || !user || !pass) throw Error('Missing mail configuration');
         const smtp = mail.createTransport({host, port:465, secure:true,
           auth:{user,pass}, connectionTimeout:10000, socketTimeout:20000});
+        const article = editor ? await db().collection('articles').findOne({_id:job._id.slice(0,-6)}) : null;
         const result = await smtp.sendMail({
           from:{name:'Oil & Gas Editorial',address:sender},
           to:{address:editor ? mailbox : job.email},
@@ -156,7 +187,8 @@ async function deliver() {
           headers:editor ? {} : {'Resend-Idempotency-Key':job._id},
           subject:'Article received · '+job.reference,
           text:[editor ? 'A new article is ready for editorial review.' : 'Thank you. Your article has been received for editorial review.',
-            job.title,job.reference,'Contact the editors: https://oilandgas.eu.com/contact.html'].join('\n\n')
+            job.title,job.reference,'Contact the editors: https://oilandgas.eu.com/contact.html'].join('\n\n'),
+          ...(editor ? editorNotice(article) : {})
         });
         if (!result.accepted.length) throw Error('Delivery declined');
         await queue.deleteOne({_id:job._id,lock});
