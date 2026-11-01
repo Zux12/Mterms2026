@@ -10,7 +10,7 @@ async function api(path,body){
   return result;
 }
 function run(fn){return async e=>{e?.preventDefault();try{byId('message').textContent='';await fn(e);}catch(err){byId('message').textContent=err.message;}};}
-function closeEntry(){current=null;proofToken=null;dirty=false;detail.hidden=true;byId('proof').hidden=true;form.reset();byId('original').replaceChildren();byId('card').replaceChildren();}
+function closeEntry(){document.getElementById('highlight-controls')?.remove();current=null;proofToken=null;dirty=false;detail.hidden=true;byId('proof').hidden=true;form.reset();byId('original').replaceChildren();byId('card').replaceChildren();}
 function mayLeave(){return !dirty||confirm('Discard the unsaved draft edits?');}
 function itemPath(){return 'item/'+current.kind+'/'+current.reference;}
 async function queue(){
@@ -38,6 +38,29 @@ async function open(item){
   const pending=record.status==='pending_review',approved=record.status==='approved';
   for(const [k,v] of Object.entries(record.draft)){form.elements[k].value=v;form.elements[k].readOnly=!pending&&!approved;}
   byId('save').hidden=!pending&&!approved;byId('approve').hidden=!pending;byId('preview').hidden=!approved;byId('decliner').hidden=!pending;
+  if(record.status==='published') {
+    const controls=document.createElement('section');
+    controls.id='highlight-controls';
+    const heading=document.createElement('h3');heading.textContent='Feature on homepage';
+    const label=document.createElement('label');label.textContent='Featured position ';
+    const select=document.createElement('select');
+    for(const [value,text] of [['lead','Lead story'],['story1','Story 01'],['story2','Story 02']]) {
+      const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option);
+    }
+    label.append(select);
+    const imageLabel=document.createElement('label');imageLabel.textContent='Image URL (optional, HTTPS) ';
+    const image=document.createElement('input');image.type='url';image.placeholder='https://…';imageLabel.append(image);
+    const button=document.createElement('button');button.type='button';button.textContent='Set featured story';
+    const message=document.createElement('p');message.setAttribute('role','status');
+    button.onclick=run(async()=>{
+      button.disabled=true;
+      try {
+        await api('highlight',{slot:select.value,kind:item.kind,reference:item.reference,image:image.value.trim()});
+        message.textContent='Featured story saved. Refresh the homepage to see it.';
+      } finally {button.disabled=false;}
+    });
+    controls.append(heading,label,imageLabel,button,message);detail.append(controls);
+  }
   byId('reason').value='';detail.scrollIntoView({block:'start'});
 }
 login.onsubmit=run(async()=>{await api('login',{password:login.password.value});login.reset();await queue();});
