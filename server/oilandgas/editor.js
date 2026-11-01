@@ -13,7 +13,8 @@ const cookieName = '__Secure-oilDesk';
 const cookieOptions = {httpOnly:true, secure:true, sameSite:'strict', path:'/api/oilandgas/editor'};
 const digest = value => crypto.createHash('sha256').update(value).digest();
 const secret = () => process.env.OIL_EDITOR_PASSWORD || '';
-const wrap = handler => (req,res,next) => Promise.resolve(handler(req,res)).catch(next);
+const wrap = handler => (req, res, next) =>
+  Promise.resolve(handler(req, res, next)).catch(next);
 const fail = (status,message) => { throw Object.assign(new Error(message),{status}); };
 const safeLink = link => {
   try { const u = new URL(link); return ['http:','https:'].includes(u.protocol) && !u.username && !u.password ? u.href : ''; }
