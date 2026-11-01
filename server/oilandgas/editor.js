@@ -13,8 +13,7 @@ const cookieName = '__Secure-oilDesk';
 const cookieOptions = {httpOnly:true, secure:true, sameSite:'strict', path:'/api/oilandgas/editor'};
 const digest = value => crypto.createHash('sha256').update(value).digest();
 const secret = () => process.env.OIL_EDITOR_PASSWORD || '';
-const wrap = handler => (req, res, next) =>
-  Promise.resolve(handler(req, res, next)).catch(next);
+const wrap = handler => (req,res,next) => Promise.resolve(handler(req,res,next)).catch(next);
 const fail = (status,message) => { throw Object.assign(new Error(message),{status}); };
 const safeLink = link => {
   try { const u = new URL(link); return ['http:','https:'].includes(u.protocol) && !u.username && !u.password ? u.href : ''; }
@@ -40,6 +39,43 @@ router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
 for (const file of ['desk.html','desk.css','desk.js','reader.js','read.html']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
+
+router.get('/browse',wrap(async(req,res)=>{
+  const origin=req.get('Origin');
+  if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
+  const kind=req.query.kind || 'articles';
+  const page=Number(req.query.page || 0);
+  const limit=Number(req.query.limit || 12);
+  if (!kinds.includes(kind) || !Number.isSafeInteger(page) || page<0 || page>100000 ||
+      !Number.isSafeInteger(limit) || limit<1 || limit>24) fail(400,'Invalid selection.');
+  const topic=typeof req.query.topic==='string' ? req.query.topic.trim() : '';
+  const query=typeof req.query.q==='string' ? req.query.q.trim() : '';
+  if (topic.length>100 || query.length>120) fail(400,'Search is too long.');
+  const match={status:'published',publication:{$exists:true}};
+  if (topic && topic!=='All') match['publication.topic']=topic;
+  if (query) {
+    const literal=query.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\$&');
+    match.$or=['title','summary','byline'].map(field=>({['publication.'+field]:{$regex:literal,$options:'i'}}));
+  }
+  const rows=await database().collection(kind).find(match,
+    {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}})
+    .sort({publishedAt:-1,_id:-1}).skip(page*limit).limit(limit+1).toArray();
+  res.json({items:rows.slice(0,limit).map(r=>publicEntry(r,kind)),more:rows.length>limit});
+}));
+router.get('/highlights',wrap(async(req,res)=>{
+  const origin=req.get('Origin');
+  if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
+  const selection=await database().collection('homepage').findOne({_id:'highlights'}) || {};
+  const items=await Promise.all(['lead','story1','story2'].map(async slot=>{
+    const chosen=selection[slot];
+    if (!chosen || !kinds.includes(chosen.kind)) return null;
+    const record=await database().collection(chosen.kind).findOne({reference:chosen.reference,status:'published',publication:{$exists:true}},
+      {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}});
+    return record ? {slot,image:safeLink(chosen.image),entry:publicEntry(record,chosen.kind)} : null;
+  }));
+  res.json(items.filter(Boolean));
+}));
+
 router.get('/published',wrap(async(req,res)=>{
   const origin=req.get('Origin');
   if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
@@ -88,6 +124,19 @@ router.use(wrap(async(req,res,next)=>{
   if(!id || !secret() || !(await database().collection('editor_sessions').findOne({_id:id,expiresAt:{$gt:new Date()}}))) fail(401,'Please sign in.');
   next();
 }));
+
+router.post('/highlight',wrap(async(req,res)=>{
+  const {slot,kind,reference}=req.body || {};
+  if (!['lead','story1','story2'].includes(slot) || !kinds.includes(kind)) fail(400,'Invalid feature slot.');
+  const record=await database().collection(kind).findOne({reference,status:'published',publication:{$exists:true}});
+  if (!record) fail(404,'Choose a published entry.');
+  const image=safeLink(req.body.image || '');
+  if (req.body.image && !image.startsWith('https://')) fail(400,'Use an HTTPS image URL.');
+  await database().collection('homepage').updateOne({_id:'highlights'},
+    {$set:{[slot]:{kind,reference,image}}},{upsert:true});
+  res.json({ok:true});
+}));
+
 router.post('/logout',wrap(async(req,res)=>{
   await database().collection('editor_sessions').deleteOne({_id:sessionId(req)});
   res.clearCookie(cookieName,cookieOptions).json({ok:true});
