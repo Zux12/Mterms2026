@@ -68,7 +68,7 @@ function sessionId(req) {
 }
 router.post('/login',wrap(async(req,res)=>{
   const password=secret();
-  if(password.length<16) fail(503,'Set the editor password in Heroku (at least 16 characters).');
+  if(password.length<8) fail(503,'Set the editor password in Heroku (at least 8 characters).');
   const db=database(), attempts=db.collection('editor_login_attempts');
   const bucket=Math.floor(Date.now()/900000);
   const key=bucket+':'+digest(req.ip||'unknown').toString('hex');
