@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const mail = require('nodemailer');
 const router = express.Router();
 const database = () => mongoose.connection.useDb('oilandgas', {useCache:true}).db;
+const industryNews = require('./industry-news');
 const manuscriptText = require('./manuscript-text');
 const kinds = ['articles','publications'];
 const site = 'https://oilandgas.eu.com';
@@ -82,7 +83,21 @@ router.get('/highlights',wrap(async(req,res)=>{
       {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}});
     return record ? {slot,image:safeLink(chosen.image),entry:publicEntry(record,chosen.kind)} : null;
   }));
-  res.json(items.filter(Boolean));
+  const result=items.filter(Boolean);
+  const usedTitles=new Set(result.map(row=>row.entry.title.trim().toLowerCase()));
+  const usedLinks=new Set(result.map(row=>row.entry.source));
+  if(result.length<3){
+    const stories=await industryNews.latest();
+    for(const slot of ['lead','story1','story2']){
+      if(result.some(row=>row.slot===slot)) continue;
+      const entry=stories.find(s=>!usedTitles.has(s.title.toLowerCase()) && !usedLinks.has(s.source));
+      if(!entry) break;
+      usedTitles.add(entry.title.toLowerCase());
+      usedLinks.add(entry.source);
+      result.push({slot,entry});
+    }
+  }
+  res.json(result);
 }));
 
 router.get('/published',wrap(async(req,res)=>{
@@ -153,7 +168,7 @@ router.post('/logout',wrap(async(req,res)=>{
 }));
 router.get('/queue',wrap(async(req,res)=>{
   const status=req.query.status || 'pending_review';
-  if(!['pending_review','approved','declined','published'].includes(status)) fail(400,'Unknown status.');
+  if(!['pending_review','approved','declined','published','archived'].includes(status)) fail(400,'Unknown status.');
   const page=Number(req.query.page||0);
   if(!Number.isSafeInteger(page)||page<0||page>10000) fail(400,'Invalid page.');
   const rows=await Promise.all(kinds.map(async kind=>(await database().collection(kind).find({status},
@@ -192,7 +207,7 @@ function draftFields(input) {
 }
 router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
   const {action}=req.params;
-  const allowed={save:['pending_review','approved'],approve:['pending_review'],decline:['pending_review'],preview:['approved'],publish:['approved']};
+  const allowed={archive:['published'],restore:['archived'],save:['pending_review','approved'],approve:['pending_review'],decline:['pending_review'],preview:['approved'],publish:['approved']};
   if(!Object.hasOwn(allowed,action)) return res.sendStatus(404);
   const version=req.body?.version;
   if(!Number.isSafeInteger(version)||version<0) fail(400,'Invalid version.');
@@ -209,6 +224,8 @@ router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
   const set={};
   if(action==='save'||action==='approve') set.draft=draftFields(req.body.draft);
   if(action==='approve') set.status='approved';
+  if(action==='archive') set.status='archived';
+  if(action==='restore') set.status='approved';
   if(action==='decline') {
     const reason=req.body.reason;
     if(typeof reason!=='string'||!reason.trim()||reason.length>2000) fail(400,'Enter a short reason for the contributor.');
