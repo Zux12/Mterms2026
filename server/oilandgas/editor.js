@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const mail = require('nodemailer');
 const router = express.Router();
 const database = () => mongoose.connection.useDb('oilandgas', {useCache:true}).db;
+const manuscriptText = require('./manuscript-text');
 const kinds = ['articles','publications'];
 const site = 'https://oilandgas.eu.com';
 const lifetime = 2 * 60 * 60 * 1000;
@@ -29,6 +30,14 @@ function publicEntry(record,kind) {
   return {kind,reference:record.reference, ...record.publication,
     source:kind==='publications' ? safeLink(record.source) : '',
     sharedBy:kind==='publications' ? record.name : '',publishedAt:record.publishedAt};
+}
+async function readingEntry(record,kind) {
+  const entry=publicEntry(record,kind);
+  if (kind==='articles') {
+    try { entry.body=await manuscriptText(record.manuscript); }
+    catch { console.warn('Could not extract article body',record.reference); entry.body=''; }
+  }
+  return entry;
 }
 router.use((req,res,next)=>{
   res.set({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
@@ -89,10 +98,11 @@ router.get('/published',wrap(async(req,res)=>{
 router.get('/published/:kind/:ref',wrap(async(req,res)=>{
   const {kind,ref}=req.params;
   if (!kinds.includes(kind)) return res.sendStatus(404);
-  const r=await database().collection(kind).findOne({reference:ref,status:'published',publication:{$exists:true}},
-    {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}});
+  const projection={reference:1,publication:1,source:1,name:1,publishedAt:1};
+  if (kind==='articles') projection.manuscript=1;
+  const r=await database().collection(kind).findOne({reference:ref,status:'published',publication:{$exists:true}},{projection});
   if (!r) return res.sendStatus(404);
-  res.json(publicEntry(r,kind));
+  res.json(await readingEntry(r,kind));
 }));
 router.use(express.json({limit:'32kb'}));
 router.use((req,res,next)=>{
@@ -187,14 +197,14 @@ router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
   const version=req.body?.version;
   if(!Number.isSafeInteger(version)||version<0) fail(400,'Invalid version.');
   const filter={reference:req.ref,status:{$in:allowed[action]},editorVersion:version||{$in:[null,0]}};
-  const r=await req.items.findOne(filter,{projection:{manuscript:0}});
+  const r=await req.items.findOne(filter,action==='preview' && req.params.kind==='articles' ? {} : {projection:{manuscript:0}});
   if(!r) fail(409,'This entry changed. Reopen it before continuing.');
   const draft=r.draft||fields(r);
   if(action==='preview') {
     const token=crypto.randomBytes(24).toString('hex');
     const ok=await req.items.updateOne(filter,{$set:{previewHash:digest(token).toString('hex')}});
     if(!ok.matchedCount) fail(409,'Reopen the updated entry.');
-    return res.json({token,entry:publicEntry({...r,publication:draft},req.params.kind)});
+    return res.json({token,entry:await readingEntry({...r,publication:draft},req.params.kind)});
   }
   const set={};
   if(action==='save'||action==='approve') set.draft=draftFields(req.body.draft);
