@@ -38,15 +38,17 @@ function parse(xml, feed) {
     item=null;
     if(!title.trim() || !Number.isFinite(time)) return;
     const cleanTitle=title.replace(/<[^>]*>/g,'').trim();
-    const intro=description.replace(/<[^>]*>/g,' ').slice(0,300);
-    if(!relevant(cleanTitle) && !(industry.test(cleanTitle) && relevant(intro))) return;
+    const intro=description.replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ')
+      .replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim();
+    if (!intro || intro.toLowerCase()===cleanTitle.toLowerCase()) return;
+    if(!relevant(cleanTitle) && !(industry.test(cleanTitle) && relevant(intro.slice(0,300)))) return;
     let url;
     try {url=new URL(link.trim());} catch {return;}
     if(!['http:','https:'].includes(url.protocol) || url.username || url.password ||
        !(url.hostname===feed.host || url.hostname.endsWith('.'+feed.host))) return;
     url.protocol='https:';url.hash='';
     for(const key of [...url.searchParams.keys()]) if(key.startsWith('utm_'))url.searchParams.delete(key);
-    stories.push({title:cleanTitle,source:url.href,publishedAt:time,byline:feed.name,topic:'Industry news',kind:'external'});
+    stories.push({title:cleanTitle,summary:intro.slice(0,500),source:url.href,publishedAt:time,byline:feed.name,topic:'Industry news',kind:'external'});
   };
   parser.write(xml).close();
   return stories;
