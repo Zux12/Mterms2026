@@ -5,6 +5,14 @@ function renderEntry(target,entry){
   }
   line('small',entry.kind==='articles'?'ARTICLE':'RESEARCH PUBLICATION');
   line('h2',entry.title);line('p',entry.byline);line('small',entry.topic);line('p',entry.summary);
+  if(entry.kind==='articles'){
+    line('h3','Full article');
+    if(entry.body){
+      for(const paragraph of entry.body.split(/\r?\n[ \t]*\r?\n/)){
+        if(paragraph.trim())line('p',paragraph);
+      }
+    }else line('p','The full text is unavailable for this article.');
+  }
   if(entry.sharedBy)line('p','Shared by '+entry.sharedBy);
   if(entry.source){
     const a=document.createElement('a');a.textContent='Read original paper ↗';a.href=entry.source;a.rel='noopener noreferrer';target.append(a);
