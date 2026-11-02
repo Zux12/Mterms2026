@@ -38,6 +38,16 @@ async function open(item){
   const pending=record.status==='pending_review',approved=record.status==='approved';
   for(const [k,v] of Object.entries(record.draft)){form.elements[k].value=v;form.elements[k].readOnly=!pending&&!approved;}
   byId('save').hidden=!pending&&!approved;byId('approve').hidden=!pending;byId('preview').hidden=!approved;byId('decliner').hidden=!pending;
+  const archiveButton=byId('archive-toggle');
+  const archived=record.status==='archived';
+  archiveButton.hidden=!(archived || record.status==='published');
+  archiveButton.textContent=archived?'Restore to Approved · private':'Remove from website';
+  archiveButton.onclick=run(async()=>{
+    if(!archived && !confirm('Remove this published item from the website and keep it in Archived?')) return;
+    await api(itemPath()+(archived?'/restore':'/archive'),{version:record.version});
+    await queue();
+    byId('message').textContent=archived?'Restored to Approved · private.':'Removed from website. Saved in Archived.';
+  });
   if(record.status==='published') {
     const controls=document.createElement('section');
     controls.id='highlight-controls';
