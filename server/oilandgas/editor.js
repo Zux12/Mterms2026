@@ -79,7 +79,11 @@ router.get('/highlights',wrap(async(req,res)=>{
   const items=await Promise.all(['lead','story1','story2'].map(async slot=>{
     const chosen=selection[slot];
     if (!chosen || !kinds.includes(chosen.kind)) return null;
-    const record=await database().collection(chosen.kind).findOne({reference:chosen.reference,status:'published',publication:{$exists:true}},
+    const record=await database().collection(chosen.kind).findOne({
+      reference:chosen.reference, status:'published', publication:{$exists:true},
+      // Existing picks and publications both predate this field.
+      publicationId:chosen.publicationId ?? null
+    },
       {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}});
     return record ? {slot,image:safeLink(chosen.image),entry:publicEntry(record,chosen.kind)} : null;
   }));
@@ -158,7 +162,7 @@ router.post('/highlight',wrap(async(req,res)=>{
   const image=safeLink(req.body.image || '');
   if (req.body.image && !image.startsWith('https://')) fail(400,'Use an HTTPS image URL.');
   await database().collection('homepage').updateOne({_id:'highlights'},
-    {$set:{[slot]:{kind,reference,image}}},{upsert:true});
+    {$set:{[slot]:{kind,reference,image,publicationId:record.publicationId ?? null}}},{upsert:true});
   res.json({ok:true});
 }));
 
@@ -234,7 +238,7 @@ router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
   if(action==='publish') {
     if(typeof req.body.token!=='string'|| !r.previewHash || digest(req.body.token).toString('hex')!==r.previewHash) fail(409,'Preview this draft first.');
     filter.previewHash=r.previewHash;
-    Object.assign(set,{status:'published',publication:draft,publishedAt:new Date()});
+    Object.assign(set,{status:'published',publication:draft,publishedAt:new Date(),publicationId:crypto.randomUUID()});
   }
   const changed=await req.items.updateOne(filter,{$set:set,$inc:{editorVersion:1},$unset:{previewHash:''}});
   if(!changed.matchedCount) fail(409,'Another edit was saved. Reopen this entry.');
