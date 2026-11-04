@@ -10,7 +10,7 @@ async function api(path,body){
   return result;
 }
 function run(fn){return async e=>{e?.preventDefault();try{byId('message').textContent='';await fn(e);}catch(err){byId('message').textContent=err.message;}};}
-function closeEntry(){document.getElementById('highlight-controls')?.remove();current=null;proofToken=null;dirty=false;detail.hidden=true;byId('proof').hidden=true;form.reset();byId('original').replaceChildren();byId('card').replaceChildren();}
+function closeEntry(){document.getElementById('collection-control')?.remove();document.getElementById('highlight-controls')?.remove();current=null;proofToken=null;dirty=false;detail.hidden=true;byId('proof').hidden=true;form.reset();byId('original').replaceChildren();byId('card').replaceChildren();}
 function mayLeave(){return !dirty||confirm('Discard the unsaved draft edits?');}
 function itemPath(){return 'item/'+current.kind+'/'+current.reference;}
 async function queue(){
@@ -38,6 +38,29 @@ async function open(item){
   const pending=record.status==='pending_review',approved=record.status==='approved';
   for(const [k,v] of Object.entries(record.draft)){form.elements[k].value=v;form.elements[k].readOnly=!pending&&!approved;}
   byId('save').hidden=!pending&&!approved;byId('approve').hidden=!pending;byId('preview').hidden=!approved;byId('decliner').hidden=!pending;
+  if (pending || approved || record.status === 'published') {
+    const section=document.createElement('section');
+    section.id='collection-control';
+    const label=document.createElement('label');
+    const checkbox=document.createElement('input');
+    checkbox.type='checkbox';
+    checkbox.checked=record.crossIndustry === true;
+    label.append(checkbox,' Technology Across Industries');
+    const save=document.createElement('button');
+    save.type='button';
+    save.textContent='Save collection';
+    save.onclick=run(async()=>{
+      if (dirty) throw Error('Save the draft edits first.');
+      save.disabled=true;
+      try {
+        await api(itemPath()+'/collection',{version:record.version,checked:checkbox.checked});
+        await open(item);
+        byId('message').textContent='Collection saved.';
+      } finally { save.disabled=false; }
+    });
+    section.append(label,save);
+    detail.append(section);
+  }
   const archiveButton=byId('archive-toggle');
   const archived=record.status==='archived';
   archiveButton.hidden=!(archived || record.status==='published');
