@@ -62,7 +62,8 @@ router.get('/browse',wrap(async(req,res)=>{
   const query=typeof req.query.q==='string' ? req.query.q.trim() : '';
   if (topic.length>100 || query.length>120) fail(400,'Search is too long.');
   const match={status:'published',publication:{$exists:true}};
-  if (topic && topic!=='All') match['publication.topic']=topic;
+  if (topic === 'Technology Across Industries') match['publication.crossIndustry'] = true;
+  else if (topic && topic!=='All') match['publication.topic']=topic;
   if (query) {
     const literal=query.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\$&');
     match.$or=['title','summary','byline'].map(field=>({['publication.'+field]:{$regex:literal,$options:'i'}}));
@@ -189,7 +190,7 @@ router.use('/item/:kind/:ref',(req,res,next)=>{
 router.get('/item/:kind/:ref',wrap(async(req,res)=>{
   const r=await req.items.findOne({reference:req.ref},{projection:{'manuscript.bytes':0}});
   if(!r) return res.sendStatus(404);
-  res.json({original:fields(r),draft:r.draft||fields(r),reference:r.reference,status:r.status,version:r.editorVersion||0,
+  res.json({crossIndustry:r.crossIndustry === true,original:fields(r),draft:r.draft||fields(r),reference:r.reference,status:r.status,version:r.editorVersion||0,
     contacts:r.authors||[{name:r.name,email:r.email}],source:safeLink(r.source),sharedBy:r.name,reason:r.declineReason,
     manuscript:!!r.manuscript,mailState:r.declineMail?.state});
 }));
@@ -211,14 +212,14 @@ function draftFields(input) {
 }
 router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
   const {action}=req.params;
-  const allowed={archive:['published'],restore:['archived'],save:['pending_review','approved'],approve:['pending_review'],decline:['pending_review'],preview:['approved'],publish:['approved']};
+  const allowed={collection:['pending_review','approved','published'],archive:['published'],restore:['archived'],save:['pending_review','approved'],approve:['pending_review'],decline:['pending_review'],preview:['approved'],publish:['approved']};
   if(!Object.hasOwn(allowed,action)) return res.sendStatus(404);
   const version=req.body?.version;
   if(!Number.isSafeInteger(version)||version<0) fail(400,'Invalid version.');
   const filter={reference:req.ref,status:{$in:allowed[action]},editorVersion:version||{$in:[null,0]}};
   const r=await req.items.findOne(filter,action==='preview' && req.params.kind==='articles' ? {} : {projection:{manuscript:0}});
   if(!r) fail(409,'This entry changed. Reopen it before continuing.');
-  const draft=r.draft||fields(r);
+  const draft={...(r.draft||fields(r)),crossIndustry:r.crossIndustry === true};
   if(action==='preview') {
     const token=crypto.randomBytes(24).toString('hex');
     const ok=await req.items.updateOne(filter,{$set:{previewHash:digest(token).toString('hex')}});
@@ -226,6 +227,11 @@ router.post('/item/:kind/:ref/:action',wrap(async(req,res)=>{
     return res.json({token,entry:await readingEntry({...r,publication:draft},req.params.kind)});
   }
   const set={};
+  if (action === 'collection') {
+    if (typeof req.body.checked !== 'boolean') fail(400,'Choose a collection setting.');
+    set.crossIndustry = req.body.checked;
+    if (r.status === 'published') set['publication.crossIndustry'] = req.body.checked;
+  }
   if(action==='save'||action==='approve') set.draft=draftFields(req.body.draft);
   if(action==='approve') set.status='approved';
   if(action==='archive') set.status='archived';
