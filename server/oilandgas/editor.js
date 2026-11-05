@@ -10,6 +10,7 @@ const industryNews = require('./industry-news');
 const manuscriptText = require('./manuscript-text');
 const kinds = ['articles','publications'];
 const site = 'https://oilandgas.eu.com';
+const highlightSlots = require('./highlight-slots');
 const lifetime = 2 * 60 * 60 * 1000;
 const cookieName = '__Secure-oilDesk';
 const cookieOptions = {httpOnly:true, secure:true, sameSite:'strict', path:'/api/oilandgas/editor'};
@@ -76,7 +77,8 @@ router.get('/browse',wrap(async(req,res)=>{
 router.get('/highlights',wrap(async(req,res)=>{
   const origin=req.get('Origin');
   if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
-  const selection=await database().collection('homepage').findOne({_id:'highlights'}) || {};
+  const saved = await database().collection('homepage').findOne({_id:'highlights'});
+  const selection = highlightSlots.uniqueSlots(saved || {});
   const items=await Promise.all(['lead','story1','story2'].map(async slot=>{
     const chosen=selection[slot];
     if (!chosen || !kinds.includes(chosen.kind)) return null;
@@ -162,8 +164,9 @@ router.post('/highlight',wrap(async(req,res)=>{
   if (!record) fail(404,'Choose a published entry.');
   const image=safeLink(req.body.image || '');
   if (req.body.image && !image.startsWith('https://')) fail(400,'Use an HTTPS image URL.');
-  await database().collection('homepage').updateOne({_id:'highlights'},
-    {$set:{[slot]:{kind,reference,image,publicationId:record.publicationId ?? null}}},{upsert:true});
+  await highlightSlots.move(database().collection('homepage'), slot, {
+    kind, reference, image, publicationId: record.publicationId ?? null
+  });
   res.json({ok:true});
 }));
 
@@ -269,7 +272,7 @@ async function sendDecisions(){
       try{
         const smtp=mail.createTransport({host:'smtp.resend.com',port:465,secure:true,auth:{user:'resend',pass:process.env.OIL_ARTICLE_RESEND_KEY},connectionTimeout:10000,socketTimeout:20000});
         const result=await smtp.sendMail({from:'Oil & Gas Editorial <receipts@updates.oilandgas.eu.com>',to:{address:r.authors?.[0]?.email||r.email},
-          headers:{'Resend-Idempotency-Key':'decision-'+r.reference},subject:'Editorial decision · '+r.reference,
+          headers:{'Resend-Idempotency-Key':'decision-'+r.reference},subject:'Editorial decision Â· '+r.reference,
           text:['Thank you for your submission. The editorial team has decided to decline it.',r.title,r.reference,r.declineReason,'Oil & Gas Editorial Team'].join('\n\n')});
         if(!result.accepted.length)throw Error('Delivery declined');
         await c.updateOne(claim,{$set:{'declineMail.state':'sent'}});
