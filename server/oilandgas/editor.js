@@ -25,7 +25,7 @@ const safeLink = link => {
 function fields(record) {
   return {
     title:record.title, summary:record.summary ?? record.note, topic:record.topic,
-    byline:record.byline ?? record.authors.map(a=>a.name).join(', ')
+    byline:record.byline ?? (record.authors||[]).map(a=>a.name).join(', ')
   };
 }
 function publicEntry(record,kind) {
@@ -174,14 +174,36 @@ router.post('/logout',wrap(async(req,res)=>{
   await database().collection('editor_sessions').deleteOne({_id:sessionId(req)});
   res.clearCookie(cookieName,cookieOptions).json({ok:true});
 }));
+// Dashboard totals are authenticated and include both content collections.
+router.get('/stats',wrap(async(req,res)=>{
+  const statuses=['pending_review','approved','published','archived','declined'];
+  const counts=Object.fromEntries(statuses.map(s=>[s,0]));
+  const lists=await Promise.all(kinds.map(kind=>database().collection(kind).aggregate([
+    {$match:{status:{$in:statuses}}},{$group:{_id:'$status',count:{$sum:1}}}
+  ]).toArray()));
+  for(const row of lists.flat()) counts[row._id]+=row.count;
+  res.json({counts});
+}));
 router.get('/queue',wrap(async(req,res)=>{
   const status=req.query.status || 'pending_review';
   if(!['pending_review','approved','declined','published','archived'].includes(status)) fail(400,'Unknown status.');
   const page=Number(req.query.page||0);
   if(!Number.isSafeInteger(page)||page<0||page>10000) fail(400,'Invalid page.');
-  const rows=await Promise.all(kinds.map(async kind=>(await database().collection(kind).find({status},
-    {projection:{reference:1,title:1,'draft.title':1,submittedAt:1}}).sort({submittedAt:-1,reference:1}).limit((page+1)*25+1).toArray()).map(r=>({kind,reference:r.reference,title:r.draft?.title||r.title,submittedAt:r.submittedAt}))));
-  const sorted=rows.flat().sort((a,b)=>b.submittedAt-a.submittedAt||a.reference.localeCompare(b.reference));
+  const kind=req.query.kind||'';
+  if(kind && !kinds.includes(kind)) fail(400,'Unknown content type.');
+  const query=typeof req.query.q==='string'?req.query.q.trim():'';
+  if(query.length>120) fail(400,'Search is too long.');
+  const match={status};
+  if(query){
+    const literal=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    match.$or=['title','topic','byline','authors.name','draft.title','draft.topic','draft.byline','publication.title','publication.topic','publication.byline'].map(field=>({[field]:{$regex:literal,$options:'i'}}));
+  }
+  const rows=await Promise.all((kind?[kind]:kinds).map(async kind=>(await database().collection(kind).find(match,
+    {projection:{reference:1,title:1,topic:1,draft:1,publication:1,submittedAt:1}})
+    .sort({submittedAt:-1,reference:1}).limit((page+1)*25+1).toArray()).map(r=>({kind,reference:r.reference,
+      title:(status==='published'?r.publication?.title:r.draft?.title)||r.title,
+      topic:(status==='published'?r.publication?.topic:r.draft?.topic)||r.topic,submittedAt:r.submittedAt}))));
+  const sorted=rows.flat().sort((a,b)=>(new Date(b.submittedAt).getTime()||0)-(new Date(a.submittedAt).getTime()||0)||a.reference.localeCompare(b.reference));
   res.json({items:sorted.slice(page*25,(page+1)*25),more:sorted.length>(page+1)*25});
 }));
 router.use('/item/:kind/:ref',(req,res,next)=>{
