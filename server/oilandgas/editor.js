@@ -47,7 +47,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
-for (const file of ['desk.html','desk.css','desk.js','reader.js','read.html']) {
+for (const file of ['desk.html','desk.css','desk.js','reader.js','read.html','bulk.js','bulk.css']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
 
