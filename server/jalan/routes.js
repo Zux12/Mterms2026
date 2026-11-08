@@ -136,5 +136,6 @@ router.use('/real-road-field', require('./real-road-field-validation').router);
 
 router.use('/multi-point', require('./multi-point-validation').router);
 router.use('/weighted-sequence', require('./weighted-sequence-validation').router);
+router.use('/topology', require('./topology-validation').router);
 
 module.exports = router;
