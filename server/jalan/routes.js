@@ -125,4 +125,11 @@ router.get('/road-matching-self-test', (_req, res) => {
 });
 
 router.use('/road-pilot', require('./road-pilot').router);
+router.use('/real-road', require('./real-road-matching').router);
+
+router.get('/real-road-self-test', (_req, res) => {
+  const result = require('./real-road-selftest').runTests();
+  res.status(result.ok ? 200 : 500).json(result);
+});
+
 module.exports = router;
