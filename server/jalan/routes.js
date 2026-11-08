@@ -111,4 +111,10 @@ router.get('/traffic', async (req, res) => {
     return res.status(503).json({ error: 'Traffic service unavailable' });
   }
 });
+
+router.get('/self-test', (_req, res) => {
+  const { runTests } = require('./selftest');
+  const result = runTests();
+  res.status(result.ok ? 200 : 500).json(result);
+});
 module.exports = router;
