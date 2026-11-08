@@ -132,4 +132,5 @@ router.get('/real-road-self-test', (_req, res) => {
   res.status(result.ok ? 200 : 500).json(result);
 });
 
+router.use('/real-road-field', require('./real-road-field-validation').router);
 module.exports = router;
