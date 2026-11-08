@@ -144,5 +144,6 @@ router.use('/restriction-v492', require('./restriction-v492').router);
 router.use('/network-v493', require('./network-v493').router);
 router.use('/kl-preview-v4100', require('./kl-preview-v4100').router);
 router.use('/kl-preview-v4101', require('./kl-preview-v4101').router);
+router.use('/kl-segment-v4102', require('./kl-segment-v4102').router);
 
 module.exports = router;
