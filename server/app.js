@@ -80,7 +80,8 @@ const allowed = new Set([
   'https://www.mterms2026.com',
   'https://mterms2026.com',
   'https://birtlab.com',
-  'https://www.birtlab.com'
+  'https://www.birtlab.com',
+  'https://zux12.github.io'
 ]);
 
   if (origin && allowed.has(origin)) {
