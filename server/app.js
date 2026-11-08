@@ -45,7 +45,8 @@ const io =
       cors:{
         origin:[
           'https://www.mterms2026.com',
-          'https://mterms2026.com'
+          'https://mterms2026.com',
+          'https://zux12.github.io'
         ],
         credentials:true
       }
@@ -119,6 +120,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 /* Health */
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.use('/api/jalan', require('./jalan/routes'));
 
 /* API routes */
 app.use('/api/pricing', pricingRouter);
