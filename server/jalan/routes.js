@@ -117,4 +117,10 @@ router.get('/self-test', (_req, res) => {
   const result = runTests();
   res.status(result.ok ? 200 : 500).json(result);
 });
+
+router.get('/road-matching-self-test', (_req, res) => {
+  const { runTests } = require('./road-matching-selftest');
+  const result = runTests();
+  res.status(result.ok ? 200 : 500).json(result);
+});
 module.exports = router;
