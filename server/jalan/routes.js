@@ -138,5 +138,6 @@ router.use('/multi-point', require('./multi-point-validation').router);
 router.use('/weighted-sequence', require('./weighted-sequence-validation').router);
 router.use('/topology', require('./topology-validation').router);
 router.use('/network-foundation', require('./network-foundation').router);
+router.use('/network-v490', require('./network-v490').router);
 
 module.exports = router;
