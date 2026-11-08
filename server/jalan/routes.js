@@ -133,4 +133,6 @@ router.get('/real-road-self-test', (_req, res) => {
 });
 
 router.use('/real-road-field', require('./real-road-field-validation').router);
+
+router.use('/multi-point', require('./multi-point-validation').router);
 module.exports = router;
