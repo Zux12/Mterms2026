@@ -23,6 +23,7 @@ test('a legal two-edge chain preserves destination partial edge',()=>{
  const r=calculate(graph([ab,bc]),snap(ab,.9),snap(bc,.1));
  assert.ok(r);
  assert.equal(r.edgeCount,2);
- assert.deepEqual(r.geometry.at(-1),[101.681,3.1401]);
+ assert.ok(Math.abs(r.geometry.at(-1)[0]-101.681)<1e-10);
+ assert.ok(Math.abs(r.geometry.at(-1)[1]-3.1401)<1e-10);
  assert.ok(r.distanceMeters>0);
 });
