@@ -23,8 +23,9 @@ test('a disconnected road crossing does not create an artificial junction',()=>{
  assert.equal(calculate(graph([ab,cd]),snap(ab,.5),snap(cd,.5)),null);
 });
 test('equal-length alternative paths yield a valid directed result',()=>{
- const ab=edge('ab','a','b',A,B),bc=edge('bc','b','c',B,C),ad=edge('ad','a','d',A,D),dc=edge('dc','d','c',D,C);
- const r=calculate(graph([ab,bc,ad,dc]),snap(ab,0),snap(dc,1));
+ const ab=edge('ab','a','b',A,B),bc=edge('bc','b','c',B,C),ad=edge('ad','a','d',A,D),dc=edge('dc','d','c',D,C),da=edge('da','d','a',D,A);
+ // Start at the END of an incoming edge: start-node travel is forward-only.
+ const r=calculate(graph([ab,bc,ad,dc,da]),snap(da,1),snap(dc,1));
  assert.ok(r);
  assert.ok(r.distanceMeters>0);
  assert.deepEqual(r.geometry[0],[A[1],A[0]]);
