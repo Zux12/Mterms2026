@@ -21,7 +21,11 @@ add(START,sEdge.to,sEdge.len*(1-s.t),[s.point,sEdge.b],sEdge.id);
 add(tEdge.from,END,tEdge.len*t.t,[tEdge.a,t.point],tEdge.id);
 if(sEdge.id===tEdge.id&&s.t<=t.t)add(START,END,sEdge.len*(t.t-s.t),[s.point,t.point],sEdge.id);
 const heap=new Heap(),dist=new Map([[START,0]]),prev=new Map();heap.push({n:START,d:0});let visited=0;
-while(heap.a.length){const cur=heap.pop();if(cur.d!==dist.get(cur.n))continue;if(++visited>150000)throw Error('Search visit limit');if(cur.n===END)break;
+// A directed graph with E edges may have up to 2E distinct nodes. The former fixed
+// 150,000-node guard could reject valid routes in the 168,221-edge pilot graph.
+const edgeCount=g.edges.length;
+const visitLimit=Math.min(400000,Math.max(150000,2*edgeCount+2));
+while(heap.a.length){const cur=heap.pop();if(cur.d!==dist.get(cur.n))continue;if(++visited>visitLimit)throw Error('Search visit limit');if(cur.n===END)break;
 const next=[...(extra.get(cur.n)||[])];for(const e of g.adj.get(cur.n)||[])next.push({to:e.to,len:e.len,coords:[e.a,e.b],id:e.id});
 for(const e of next){const nd=cur.d+e.len;if(nd<(dist.get(e.to)??Infinity)){dist.set(e.to,nd);prev.set(e.to,{from:cur.n,e});heap.push({n:e.to,d:nd});}}
 }
