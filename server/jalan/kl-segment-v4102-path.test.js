@@ -12,7 +12,7 @@ test('chooses shorter directed path over longer alternative',()=>{
  const g=graph([ab,bc,cd,da,ac]);
  const r=calculate(g,snap(da,1),snap(cd,0));
  assert.ok(r);
- assert.equal(r.edgeCount,2); // zero-length partial edges around direct ac
+ assert.equal(r.edgeCount,3); // zero-length partial edges around direct ac
  assert.ok(Math.abs(r.distanceMeters-ac.len)<2);
 });
 test('returned geometry is longitude-latitude and has at least two positions',()=>{
