@@ -124,6 +124,9 @@ router.get('/road-matching-self-test', (_req, res) => {
   res.status(result.ok ? 200 : 500).json(result);
 });
 
+// Experimental diagnostic storage; no public write access without a server token.
+router.use('/routing-diagnostics', require('./routing-diagnostics').router);
+
 router.use('/road-pilot', require('./road-pilot').router);
 router.use('/real-road', require('./real-road-matching').router);
 
