@@ -91,3 +91,37 @@ test('real KL only-via-way alternate exit is surfaced to preview as advisory',()
  assert.ok(missing);
  assert.equal(missing.turnReviewViaWayOnlyExitMismatchCandidateCount,null);
 });
+
+test('preview separates no-via-way hazard from an only-turn permitted-exit pattern',()=>{
+ const p0=[3.1025633,101.6660873],p1=[3.1026564,101.6660847];
+ const p2=[3.1026598,101.6661589],p3=[3.1025678,101.6661664];
+ const from=edge('osm-way-761937946:0:F','7118946719','7118946718',p0,p1);
+ const via=edge('osm-way-761937951:0:F','7118946718','7118946726',p1,p2);
+ const to=edge('osm-way-761937950:0:F','7118946726','7118946720',p2,p3);
+ const relation={restrictionId:'osm-relation-10560396',
+  fromWay:'osm-way-761937946',toWay:'osm-way-761937950',
+  viaNodes:[],viaWays:['osm-way-761937951'],
+  restriction:'no_u_turn',applicability:'unverified'};
+ const g=graph([from,via,to],[relation]);
+ const forbidden=calculate(g,snap(from,.5),snap(to,.5));
+ assert.ok(forbidden);
+ assert.equal(forbidden.turnReviewViaWayNoTurnCandidateCount,1);
+ assert.equal(forbidden.turnReviewViaWayOnlyDesignatedExitPatternCount,0);
+ assert.equal(forbidden.turnReviewViaWayRelationsEligible,1);
+ assert.equal(forbidden.turnReviewViaWayRelationsUnsupported,0);
+ const only=calculate(graph([from,via,to],[{...relation,restriction:'only_straight_on'}]),
+  snap(from,.5),snap(to,.5));
+ assert.ok(only);
+ assert.equal(only.turnReviewViaWayNoTurnCandidateCount,0);
+ assert.equal(only.turnReviewViaWayOnlyDesignatedExitPatternCount,1);
+ assert.equal(only.turnReviewViaWayPatternAdvisoryOnly,true);
+});
+test('missing turn import keeps new via-way classifications unknown, not zero',()=>{
+ const r=calculate(graph([ab],null),snap(ab,.1),snap(ab,.9));
+ assert.ok(r);
+ for(const name of ['turnReviewViaWayNoTurnCandidateCount',
+  'turnReviewViaWayOnlyDesignatedExitPatternCount',
+  'turnReviewViaWayRelationsEligible','turnReviewViaWayRelationsUnsupported']){
+  assert.equal(r[name],null,name);
+ }
+});
