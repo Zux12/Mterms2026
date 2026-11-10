@@ -3,6 +3,7 @@
 const express=require('express'),mongoose=require('mongoose');
 const {auditTurnCandidates}=require('./kl-turn-audit-v4102');
 const {auditViaWayPathCandidates}=require('./kl-via-way-audit-v4102');
+const {auditPathGeometryGaps}=require('./kl-path-geometry-audit-v4102');
 const router=express.Router(),DB='jalan_navigation',COL='road_graph_edges_v495',COUNT=168221,R=6371000;
 let graph=null,loading=null;
 const rad=Math.PI/180;
@@ -59,6 +60,8 @@ for(const e of next){const nd=cur.d+e.len;if(nd<(dist.get(e.to)??Infinity)){dist
 }
 if(!dist.has(END))return null;const path=[];let n=END;while(n!==START){const p=prev.get(n);if(!p||path.length>COUNT)throw Error('Path reconstruction');path.push(p.e);n=p.from;}path.reverse();const geometry=[];for(const e of path){for(const p of e.coords){const q=[p[1],p[0]],last=geometry[geometry.length-1];if(!last||last[0]!==q[0]||last[1]!==q[1])geometry.push(q);}}
 if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineString requires at least two positions
+// Advisory only: OSM node ID connectivity can conceal displaced endpoints.
+const geometryGapAudit=auditPathGeometryGaps(path,distance);
 const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
  path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 // The via-way matcher flags only possible OSM relation path overlaps. Neither
@@ -66,6 +69,7 @@ const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
 const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
  path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
+ ...geometryGapAudit,
  potentialAccessReviewEdges:path.filter(e=>e.potentialAccessCaution).length,
  turnReviewAvailable:turnAudit!==null,
  potentialTurnRestrictionReviewCount:turnAudit?turnAudit.potentialTurnRestrictionReviewCount:null,
