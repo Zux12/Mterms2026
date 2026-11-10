@@ -38,32 +38,46 @@ function auditViaWayPathCandidates(routeEdges,restrictions){
   if(!byFromWay.has(r.fromWay))byFromWay.set(r.fromWay,[]);
   byFromWay.get(r.fromWay).push(r);
  }
- const matches=[];
+ const matches=[],onlyExitMismatches=[];
  for(let i=0;i<runs.length;i++){
   if(!runs[i].way)continue;
   for(const r of byFromWay.get(runs[i].way)||[]){
-   const sequence=[r.fromWay,...r.viaWays,r.toWay];
-   if(i+sequence.length>runs.length)continue;
-   let matchesPath=true;
-   for(let j=0;j<sequence.length;j++){
+   // For an OSM via-way restriction, first prove the directed from-way/via-way
+   // prefix is contiguous. An 'only_*' relation also merits an advisory if
+   // that exact prefix exits onto a different way than the designated to-way.
+   // This is deliberately NOT a legality/enforcement decision.
+   const prefix=[r.fromWay,...r.viaWays],exitIndex=i+prefix.length;
+   if(exitIndex>=runs.length)continue; // route ends before the exit: unknown
+   let prefixMatches=true;
+   for(let j=0;j<prefix.length;j++){
     const actual=runs[i+j];
-    if(actual.way!==sequence[j]||(j>0&&runs[i+j-1].to!==actual.from)){
-     matchesPath=false;break;
+    if(actual.way!==prefix[j]||(j>0&&runs[i+j-1].to!==actual.from)){
+     prefixMatches=false;break;
     }
    }
-   if(matchesPath)matches.push({
+   if(!prefixMatches)continue;
+   const exit=runs[exitIndex];
+   if(!exit.way||runs[exitIndex-1].to!==exit.from)continue;
+   const candidate={
     restrictionId:String(r.restrictionId||''),
-    startEdgeIndex:runs[i].startEdgeIndex,
-    endEdgeIndex:runs[i+sequence.length-1].endEdgeIndex,
+    startEdgeIndex:runs[i].startEdgeIndex,endEdgeIndex:exit.endEdgeIndex,
     viaWayCount:r.viaWays.length,
-    kind:'via_way_path_pattern_only',
     conditional:!!r.conditional,except:!!r.except,
     applicability:String(r.applicability||'unknown')
-   });
+   };
+   if(exit.way===r.toWay){
+    matches.push({...candidate,kind:'via_way_path_pattern_only'});
+   }else if(r.restriction.startsWith('only_')){
+    onlyExitMismatches.push({...candidate,
+     kind:'via_way_only_exit_mismatch_candidate',
+     expectedToWay:r.toWay,observedToWay:exit.way});
+   }
   }
  }
  return {viaWayRelationsUnassessed,viaWayPathCandidateCount:matches.length,
-  viaWayPathCandidates:matches,turnRestrictionsEnforced:false,
-  legalDrivingRouteVerified:false};
+  viaWayPathCandidates:matches,
+  viaWayOnlyExitMismatchCandidateCount:onlyExitMismatches.length,
+  viaWayOnlyExitMismatchCandidates:onlyExitMismatches,
+  turnRestrictionsEnforced:false,legalDrivingRouteVerified:false};
 }
 module.exports={directedWayRuns,auditViaWayPathCandidates};
