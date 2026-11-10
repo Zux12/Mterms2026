@@ -68,3 +68,26 @@ test('missing turn import reports unknown via-way status rather than zero',()=>{
  assert.equal(r.turnReviewViaWayPathCandidateCount,null);
  assert.equal(r.turnReviewViaWayRelationsUnassessed,null);
 });
+
+
+test('real KL only-via-way alternate exit is surfaced to preview as advisory',()=>{
+ // Directed OSM edges: OpenStreetMap contributors (ODbL), read-only KL v495 sample.
+ const p0=[3.1597605,101.6505332],p1=[3.159861,101.6505325],
+  p2=[3.159886,101.650533],p3=[3.1598812,101.6505118];
+ const from=edge('osm-way-1097851190:0:F','9201507292','1788202342',p0,p1);
+ const via=edge('osm-way-755896646:0:F','1788202342','7059996209',p1,p2);
+ const alternate=edge('osm-way-755896648:0:F','7059996209','7549218898',p2,p3);
+ const restriction={
+  restrictionId:'osm-relation-14624187',fromWay:'osm-way-1097851190',
+  toWay:'osm-way-755896647',viaNodes:[],viaWays:['osm-way-755896646'],
+  restriction:'only_straight_on',applicability:'unverified'
+ };
+ const r=calculate(graph([from,via,alternate],[restriction]),snap(from,.5),snap(alternate,.5));
+ assert.ok(r);assert.equal(r.edgeCount,3);
+ assert.equal(r.turnReviewViaWayPathCandidateCount,0);
+ assert.equal(r.turnReviewViaWayOnlyExitMismatchCandidateCount,1);
+ assert.equal(r.turnReviewViaWayPatternAdvisoryOnly,true);
+ const missing=calculate(graph([from,via,alternate],null),snap(from,.5),snap(alternate,.5));
+ assert.ok(missing);
+ assert.equal(missing.turnReviewViaWayOnlyExitMismatchCandidateCount,null);
+});
