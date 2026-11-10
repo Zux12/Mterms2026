@@ -3,11 +3,15 @@ on:
   push:
     branches:
       - dev/jalan-routing-diagnostics
+      - main
     paths:
       - 'server/jalan/routing-diagnostics.js'
       - 'server/jalan/routing-diagnostics.test.js'
       - 'server/jalan/routes.js'
       - '.github/workflows/jalan-diagnostics.yml'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
