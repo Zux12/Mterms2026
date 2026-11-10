@@ -72,7 +72,11 @@ return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,
  turnReviewTransitionsInspected:turnAudit?turnAudit.transitionsInspected:null,
  turnReviewComplexRecordsUnassessed:turnAudit?turnAudit.complexRestrictionsUnassessed:null,
  turnReviewViaWayRelationsUnassessed:viaWayAudit?viaWayAudit.viaWayRelationsUnassessed:null,
+ turnReviewViaWayRelationsEligible:viaWayAudit?viaWayAudit.viaWayRelationsEligible:null,
+ turnReviewViaWayRelationsUnsupported:viaWayAudit?viaWayAudit.viaWayRelationsUnsupported:null,
  turnReviewViaWayPathCandidateCount:viaWayAudit?viaWayAudit.viaWayPathCandidateCount:null,
+ turnReviewViaWayNoTurnCandidateCount:viaWayAudit?viaWayAudit.viaWayNoTurnCandidateCount:null,
+ turnReviewViaWayOnlyDesignatedExitPatternCount:viaWayAudit?viaWayAudit.viaWayOnlyDesignatedExitPatternCount:null,
  turnReviewViaWayOnlyExitMismatchCandidateCount:viaWayAudit?viaWayAudit.viaWayOnlyExitMismatchCandidateCount:null,
  turnReviewViaWayPatternAdvisoryOnly:true};}
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,turnReviewAvailable:!!graph&&Array.isArray(graph.turnRestrictions),liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
