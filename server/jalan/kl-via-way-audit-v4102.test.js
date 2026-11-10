@@ -65,3 +65,31 @@ test('empty/malformed input never yields fabricated matches',()=>{
  assert.throws(()=>auditViaWayPathCandidates(null,[]),TypeError);
  assert.throws(()=>auditViaWayPathCandidates([],null),TypeError);
 });
+
+test('no_* match is separately reported as possible violation, not permitted-exit proof',()=>{
+ const r=auditViaWayPathCandidates(restrictedViaWay,[viaWay]);
+ assert.equal(r.viaWayPathCandidateCount,1);
+ assert.equal(r.viaWayNoTurnCandidateCount,1);
+ assert.equal(r.viaWayOnlyDesignatedExitPatternCount,0);
+ assert.equal(r.viaWayPathCandidates[0].restrictionClass,'no_turn_path_candidate');
+ assert.equal(r.viaWayRelationsEligible,1);
+ assert.equal(r.viaWayRelationsUnsupported,0);
+});
+test('only_* designated exit is not incorrectly counted as a no-turn candidate',()=>{
+ const only={...viaWay,restriction:'only_right_turn'};
+ const r=auditViaWayPathCandidates(restrictedViaWay,[only]);
+ assert.equal(r.viaWayPathCandidateCount,1);
+ assert.equal(r.viaWayNoTurnCandidateCount,0);
+ assert.equal(r.viaWayOnlyDesignatedExitPatternCount,1);
+ assert.equal(r.viaWayPathCandidates[0].restrictionClass,'only_designated_exit_pattern');
+ assert.equal(r.turnRestrictionsEnforced,false);
+});
+test('mixed/unsupported relations remain in unassessed total but are excluded from eligible',()=>{
+ const unsupported={...viaWay,viaNodes:['unexpected-node']};
+ const r=auditViaWayPathCandidates(restrictedViaWay,[viaWay,unsupported]);
+ assert.equal(r.viaWayRelationsUnassessed,2);
+ assert.equal(r.viaWayRelationsEligible,1);
+ assert.equal(r.viaWayRelationsUnsupported,1);
+ assert.equal(r.viaWayNoTurnCandidateCount,1);
+ assert.equal(r.viaWayOnlyDesignatedExitPatternCount,0);
+});
