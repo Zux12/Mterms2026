@@ -2,6 +2,7 @@
 // Jalan Batch 3C: isolated, read-only segment-snap preview with direction-aware partial edges.
 const express=require('express'),mongoose=require('mongoose');
 const {auditTurnCandidates}=require('./kl-turn-audit-v4102');
+const {auditViaWayPathCandidates}=require('./kl-via-way-audit-v4102');
 const router=express.Router(),DB='jalan_navigation',COL='road_graph_edges_v495',COUNT=168221,R=6371000;
 let graph=null,loading=null;
 const rad=Math.PI/180;
@@ -60,12 +61,19 @@ if(!dist.has(END))return null;const path=[];let n=END;while(n!==START){const p=p
 if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineString requires at least two positions
 const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
  path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
+// The via-way matcher flags only possible OSM relation path overlaps. Neither
+// a match nor an absent match establishes road-turn legality.
+const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
+ path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
  potentialAccessReviewEdges:path.filter(e=>e.potentialAccessCaution).length,
  turnReviewAvailable:turnAudit!==null,
  potentialTurnRestrictionReviewCount:turnAudit?turnAudit.potentialTurnRestrictionReviewCount:null,
  turnReviewTransitionsInspected:turnAudit?turnAudit.transitionsInspected:null,
- turnReviewComplexRecordsUnassessed:turnAudit?turnAudit.complexRestrictionsUnassessed:null};}
+ turnReviewComplexRecordsUnassessed:turnAudit?turnAudit.complexRestrictionsUnassessed:null,
+ turnReviewViaWayRelationsUnassessed:viaWayAudit?viaWayAudit.viaWayRelationsUnassessed:null,
+ turnReviewViaWayPathCandidateCount:viaWayAudit?viaWayAudit.viaWayPathCandidateCount:null,
+ turnReviewViaWayPatternAdvisoryOnly:true};}
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,turnReviewAvailable:!!graph&&Array.isArray(graph.turnRestrictions),liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
 router.get('/route',async(req,res)=>{try{const s=[Number(req.query.startLat),Number(req.query.startLng)],t=[Number(req.query.endLat),Number(req.query.endLng)];if(!pilot(s)||!pilot(t))return res.status(400).json({ok:false,error:'Both coordinates must be in the KL pilot region'});const g=await load(),a=nearest(g.edges,s),b=nearest(g.edges,t);if(!a||!b||a.meters>200||b.meters>200)return res.status(422).json({ok:false,error:'No nearby directed graph segment within 200 m',startSnapMeters:a?Math.round(a.meters):null,endSnapMeters:b?Math.round(b.meters):null});const r=calculate(g,a,b);if(!r)return res.status(404).json({ok:false,error:'No directed path found'});res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',geometry:{type:'LineString',coordinates:r.geometry},...r,startSnapMeters:Math.round(a.meters),endSnapMeters:Math.round(b.meters),startSnapCandidatesWithin200m:a.candidatesWithin200,endSnapCandidatesWithin200m:b.candidatesWithin200,startSnapAmbiguous:a.ambiguousSnap,endSnapAmbiguous:b.ambiguousSnap,snapAmbiguityAdvisoryOnly:true,illustrativeEtaMinutes:Math.round(r.distanceMeters/1000/30*60*10)/10,etaAssumedSpeedKmh:30,trafficAware:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,turnReviewSource:'OSM_v493_UNVERIFIED_VIA_NODE_CANDIDATES',legalDrivingRouteVerified:false,routingActivated:false,databaseWrites:0});}catch(e){console.error('KL 3C:',e.message);res.status(503).json({ok:false,error:'KL preview temporarily unavailable'});}});
 module.exports={router,project,nearest,calculate,distance,accessCaution};
