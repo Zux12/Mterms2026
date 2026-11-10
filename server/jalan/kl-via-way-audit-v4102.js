@@ -24,7 +24,9 @@ function auditViaWayPathCandidates(routeEdges,restrictions){
  if(!Array.isArray(routeEdges)||!Array.isArray(restrictions))
   throw new TypeError('Expected traversed edge and restriction arrays');
  const runs=directedWayRuns(routeEdges),byFromWay=new Map();
- let viaWayRelationsUnassessed=0;
+ // The legacy count means 'legal applicability unassessed', even when a pattern
+ // is recognizable. Report eligible vs unsupported records separately.
+ let viaWayRelationsUnassessed=0,viaWayRelationsEligible=0,viaWayRelationsUnsupported=0;
  for(const r of restrictions){
   if(!Array.isArray(r?.viaWays)||!r.viaWays.length)continue;
   viaWayRelationsUnassessed++;
@@ -34,7 +36,10 @@ function auditViaWayPathCandidates(routeEdges,restrictions){
      typeof r.fromWay!=='string'||!r.fromWay||
      typeof r.toWay!=='string'||!r.toWay||
      !r.viaWays.every(w=>typeof w==='string'&&w)||
-     !/^(no_|only_)/.test(String(r.restriction||'')))continue;
+     !/^(no_|only_)/.test(String(r.restriction||''))){
+   viaWayRelationsUnsupported++;continue;
+  }
+  viaWayRelationsEligible++;
   if(!byFromWay.has(r.fromWay))byFromWay.set(r.fromWay,[]);
   byFromWay.get(r.fromWay).push(r);
  }
@@ -66,7 +71,9 @@ function auditViaWayPathCandidates(routeEdges,restrictions){
     applicability:String(r.applicability||'unknown')
    };
    if(exit.way===r.toWay){
-    matches.push({...candidate,kind:'via_way_path_pattern_only'});
+    matches.push({...candidate,kind:'via_way_path_pattern_only',
+     restrictionClass:r.restriction.startsWith('no_')
+      ?'no_turn_path_candidate':'only_designated_exit_pattern'});
    }else if(r.restriction.startsWith('only_')){
     onlyExitMismatches.push({...candidate,
      kind:'via_way_only_exit_mismatch_candidate',
@@ -74,7 +81,12 @@ function auditViaWayPathCandidates(routeEdges,restrictions){
    }
   }
  }
- return {viaWayRelationsUnassessed,viaWayPathCandidateCount:matches.length,
+ return {viaWayRelationsUnassessed,viaWayRelationsEligible,viaWayRelationsUnsupported,
+  viaWayPathCandidateCount:matches.length,
+  // An exact no_* path is a potential restriction violation. An exact only_*
+  // designated exit is merely a recognized path, not a violation.
+  viaWayNoTurnCandidateCount:matches.filter(x=>x.restrictionClass==='no_turn_path_candidate').length,
+  viaWayOnlyDesignatedExitPatternCount:matches.filter(x=>x.restrictionClass==='only_designated_exit_pattern').length,
   viaWayPathCandidates:matches,
   viaWayOnlyExitMismatchCandidateCount:onlyExitMismatches.length,
   viaWayOnlyExitMismatchCandidates:onlyExitMismatches,
