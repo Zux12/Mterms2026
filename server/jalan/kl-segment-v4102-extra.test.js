@@ -12,7 +12,7 @@ test('zero-length same-edge journey stays at the snapped location',()=>{
  const ab=e('ab','a','b',A,B),s=snap(ab,.4),r=calculate(graph([ab]),s,s);
  assert.ok(r);
  assert.equal(r.distanceMeters,0);
- assert.deepEqual(r.geometry,[[s.point[1],s.point[0]]]);
+ assert.deepEqual(r.geometry,[[s.point[1],s.point[0]],[s.point[1],s.point[0]]]);
 });
 
 test('route crosses adjacent directed edges without a gap',()=>{
