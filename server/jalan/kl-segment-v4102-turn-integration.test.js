@@ -41,3 +41,30 @@ test('complex via-way restrictions remain explicitly unassessed',()=>{
  assert.equal(r.potentialTurnRestrictionReviewCount,0);
  assert.equal(r.turnReviewComplexRecordsUnassessed,1);
 });
+
+test('read-only preview surfaces real KL via-way pattern but does not enforce it',()=>{
+ // OpenStreetMap contributors, ODbL. Three directed edges sampled from v495.
+ const p0=[3.1025633,101.6660873],p1=[3.1026564,101.6660847];
+ const p2=[3.1026598,101.6661589],p3=[3.1025678,101.6661664];
+ const from=edge('osm-way-761937946:0:F','7118946719','7118946718',p0,p1);
+ const via=edge('osm-way-761937951:0:F','7118946718','7118946726',p1,p2);
+ const to=edge('osm-way-761937950:0:F','7118946726','7118946720',p2,p3);
+ const relation={
+  restrictionId:'osm-relation-10560396',fromWay:'osm-way-761937946',
+  toWay:'osm-way-761937950',viaNodes:[],viaWays:['osm-way-761937951'],
+  restriction:'no_u_turn',applicability:'unverified',conditional:'',except:''
+ };
+ const r=calculate(graph([from,via,to],[relation]),snap(from,.6),snap(to,.4));
+ assert.ok(r);assert.equal(r.edgeCount,3);
+ assert.equal(r.turnReviewViaWayPathCandidateCount,1);
+ assert.equal(r.turnReviewViaWayRelationsUnassessed,1);
+ assert.equal(r.turnReviewComplexRecordsUnassessed,1);
+ assert.equal(r.turnReviewViaWayPatternAdvisoryOnly,true);
+});
+test('missing turn import reports unknown via-way status rather than zero',()=>{
+ const r=calculate(graph([ab],null),snap(ab,.1),snap(ab,.9));
+ assert.ok(r);
+ assert.equal(r.turnReviewAvailable,false);
+ assert.equal(r.turnReviewViaWayPathCandidateCount,null);
+ assert.equal(r.turnReviewViaWayRelationsUnassessed,null);
+});
