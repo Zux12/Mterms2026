@@ -69,9 +69,20 @@ router.get('/browse',wrap(async(req,res)=>{
     const literal=query.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\$&');
     match.$or=['title','summary','byline'].map(field=>({['publication.'+field]:{$regex:literal,$options:'i'}}));
   }
-  const rows=await database().collection(kind).find(match,
-    {projection:{reference:1,publication:1,source:1,name:1,publishedAt:1}})
-    .sort({publishedAt:-1,_id:-1}).skip(page*limit).limit(limit+1).toArray();
+  const collection=database().collection(kind);
+  const projection={reference:1,publication:1,source:1,name:1,publishedAt:1};
+  const order={publishedAt:-1,_id:-1};
+  if (req.query.includeTotal==='true') {
+    // Count the same filtered records that supply this page.
+    const {rows,count}=await collection.aggregate([
+      {$match:match}, {$sort:order},
+      {$facet:{rows:[{$skip:page*limit},{$limit:limit},{$project:projection}],count:[{$count:'total'}]}}
+    ]).next();
+    const total=count[0]?.total ?? 0;
+    return res.json({items:rows.map(r=>publicEntry(r,kind)),more:(page+1)*limit<total,total});
+  }
+  const rows=await collection.find(match,{projection})
+    .sort(order).skip(page*limit).limit(limit+1).toArray();
   res.json({items:rows.slice(0,limit).map(r=>publicEntry(r,kind)),more:rows.length>limit});
 }));
 router.get('/highlights',wrap(async(req,res)=>{
