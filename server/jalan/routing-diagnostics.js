@@ -45,11 +45,18 @@ function authorized(req) {
 router.use((_req,res,next) => { res.set('Cache-Control','no-store'); next(); });
 router.get('/health', (_req,res) => res.json({
   ok:true, service:'jalan-routing-diagnostics', mode:'experimental',
-  storageConfigured: Boolean(process.env.JALAN_DIAGNOSTICS_TOKEN &&
-    process.env.JALAN_DIAGNOSTICS_TOKEN.length >= 32)
+  writesEnabled: false // health endpoint never discloses secret configuration
 }));
-router.post('/records', express.json({ limit:'8kb' }), async (req,res) => {
+router.post('/records', async (req,res) => {
+  // This app already runs express.json({limit:'5mb'}) upstream, so a
+  // second route-local parser does not enforce a smaller limit.
+  // Enforce a conservative size cap on the parsed diagnostic payload.
+  if (!process.env.JALAN_DIAGNOSTICS_TOKEN || process.env.JALAN_DIAGNOSTICS_TOKEN.length < 32)
+    return res.status(503).json({error:'Diagnostic storage disabled'});
   if (!authorized(req)) return res.status(401).json({error:'Unauthorized'});
+  if (!req.is('application/json')) return res.status(415).json({error:'JSON required'});
+  const bytes = Buffer.byteLength(JSON.stringify(req.body === undefined ? null : req.body));
+  if (bytes > 8192) return res.status(413).json({error:'Diagnostic payload too large'});
   const doc = validate(req.body);
   if (!doc) return res.status(400).json({error:'Invalid diagnostic'});
   try {
