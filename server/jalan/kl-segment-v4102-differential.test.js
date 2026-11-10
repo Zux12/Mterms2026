@@ -5,8 +5,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const {calculate,distance}=require('./kl-segment-v4102');
 function reference(edges,start,end){
- const dist=Array.from({length:end+1},()=>Infinity);dist[start]=0;
- for(let k=0;k<end;k++){let changed=false;for(const e of edges){
+ const dist=Array.from({length:Math.max(start,end,...edges.flatMap(e=>[Number(e.from),Number(e.to)]))+1},()=>Infinity);dist[start]=0;
+ for(let k=0;k<dist.length-1;k++){let changed=false;for(const e of edges){
   const a=Number(e.from),b=Number(e.to);
   if(dist[a]+e.len<dist[b]){dist[b]=dist[a]+e.len;changed=true;}
  }if(!changed)break;}
@@ -26,7 +26,12 @@ test('directed Dijkstra agrees with independent Bellman-Ford over 40 seeded netw
   const adj=new Map();for(const e of edges){if(!adj.has(e.from))adj.set(e.from,[]);adj.get(e.from).push(e);}
   const snap=(e,t)=>({edge:e,t,point:[e.a[0]+(e.b[0]-e.a[0])*t,e.a[1]+(e.b[1]-e.a[1])*t]});
   const actual=calculate({edges,adj},snap(start,0),snap(end,1));
-  const expected=reference(edges,0,11);
+  const referenceEdges=[...edges,
+   {from:'12',to:start.to,len:start.len},
+   {from:end.from,to:'13',len:end.len}];
+  // The router starts by traversing its selected start edge and ends by
+  // traversing its selected destination edge; model both explicitly.
+  const expected=reference(referenceEdges,12,13);
   assert.equal(actual===null,expected===null,'trial '+trial);
   if(expected!==null)assert.ok(Math.abs(actual.distanceMeters-expected)<2,'trial '+trial);
  }
