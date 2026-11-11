@@ -4,12 +4,14 @@
 // Does not connect to MongoDB, dispatch routes, or authorize production routing.
 const fs=require('node:fs');
 const requiredJourneyTypes=['short-urban','long-corridor','one-way','overpass','disconnected'];
-const minCases=20,minimumPerJourneyType=4;
+const minCases=20,minimumPerJourneyType=4,minimumReachablePerRoutedType=2;
+const routedJourneyTypes=requiredJourneyTypes.filter(t=>t!=='disconnected');
 const cases=JSON.parse(fs.readFileSync(process.argv[2]||'', 'utf8'));
 if(!Array.isArray(cases)||cases.length===0)throw Error('Expected a nonempty JSON array');
 const failures=[],seen=new Set(),snap=[],latency=[],types=new Set();
 let rejectedSnapOver200Meters=0;
 const journeyTypeCounts=Object.fromEntries(requiredJourneyTypes.map(t=>[t,0]));
+const reachableControlsByType=Object.fromEntries(routedJourneyTypes.map(t=>[t,0]));
 let expectedNoPath=0,unexpectedNoPath=0;
 const serverStageKeys=['graphLoadMs','snappingMs','pathSearchMs','serverTotalMs'];
 const serverStageSamples=Object.fromEntries(serverStageKeys.map(k=>[k,[]]));
@@ -25,6 +27,13 @@ for(const [i,c] of cases.entries()){
  if(!requiredJourneyTypes.includes(c.journeyType))failures.push(id+': missing/invalid journeyType');
  else {types.add(c.journeyType);journeyTypeCounts[c.journeyType]++;}
  if(typeof c.expectedReachable!=='boolean')failures.push(id+': missing expectedReachable boolean');
+ // Keep positive controls for each routed-road class. Otherwise twenty
+ // reviewed 404s could appear to cover urban, corridor and overpass routes.
+ // One-way and grade-separated negative controls remain valid alongside these.
+ if(routedJourneyTypes.includes(c.journeyType)&&c.expectedReachable===true)
+  reachableControlsByType[c.journeyType]++;
+ if(c.journeyType==='disconnected'&&c.expectedReachable===true)
+  failures.push(id+': disconnected journey type must be independently expected unreachable');
  if(typeof c.ok!=='boolean')failures.push(id+': missing ok boolean');
  if(typeof c.ok==='boolean'&&typeof c.expectedReachable==='boolean'&&c.ok!==c.expectedReachable)
   failures.push(id+': actual reachability differs from independent expectedReachable');
@@ -88,10 +97,12 @@ for(const samples of Object.values(graphCacheTimingSamples))samples.sort((a,b)=>
 const quantile=(arr,p)=>arr.length?arr[Math.ceil(p*arr.length)-1]:null;
 const missingJourneyTypes=requiredJourneyTypes.filter(k=>!types.has(k));
 const insufficientJourneyTypes=requiredJourneyTypes.filter(k=>journeyTypeCounts[k]<minimumPerJourneyType);
+const insufficientReachableTypes=routedJourneyTypes.filter(k=>reachableControlsByType[k]<minimumReachablePerRoutedType);
 const automatedEvidenceGatePassed=cases.length>=minCases&&
- insufficientJourneyTypes.length===0&&failures.length===0;
+ insufficientJourneyTypes.length===0&&insufficientReachableTypes.length===0&&failures.length===0;
 const summary={
  cases:cases.length,minimumCases:minCases,minimumPerJourneyType,journeyTypeCounts,insufficientJourneyTypes,
+ minimumReachablePerRoutedType,reachableControlsByType,insufficientReachableTypes,
  successful:cases.filter(c=>c&&c.ok===true).length,
  failed:cases.filter(c=>c&&c.ok===false).length,
  expectedNoPath,unexpectedNoPath,
