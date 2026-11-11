@@ -80,3 +80,19 @@ test('only HTTPS or loopback HTTP accepted for experimental endpoint',()=>{
  assert.equal(endpointUrl('http://127.0.0.1:3000/route').hostname,'127.0.0.1');
  assert.throws(()=>endpointUrl('https://example.test/health'),/route/);
 });
+
+test('captures valid stage timings without leaking private coordinates',async()=>{
+ const body={...good,timingMs:{graphLoad:120.25,snapping:35.19,pathSearch:8.31,total:163.75}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].graphLoadMs,120.3);
+ assert.equal(out[0].snappingMs,35.2);
+ assert.equal(out[0].pathSearchMs,8.3);
+ assert.equal(out[0].serverTotalMs,163.8);
+ assert.equal(out[0].startLat,undefined);
+});
+test('rejects malformed stage timings without losing valid route evidence',async()=>{
+ const body={...good,timingMs:{graphLoad:-1,snapping:2,pathSearch:3,total:4}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].ok,true);
+ assert.equal(out[0].graphLoadMs,undefined);
+});
