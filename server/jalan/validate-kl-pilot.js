@@ -41,7 +41,10 @@ for(const [i,c] of cases.entries()){
     if(c[k]>200)failures.push(id+': successful route snap exceeds 200 m ('+k+')');
    }
   }
-  // A self-declared continuous geometry is not enough for acceptance:\n  // require the collector's independent endpoint and distance cross-check.\n  if(c.geometryMetricsVerified!==true)failures.push(id+': independent geometry metrics not verified');\n  if(c.geometryContinuous!==true)failures.push(id+': geometry continuity not verified');
+  // A self-declared continuous geometry is not enough for acceptance:
+  // require the collector's independent endpoint and distance cross-check.
+  if(c.geometryMetricsVerified!==true)failures.push(id+': independent geometry metrics not verified');
+  if(c.geometryContinuous!==true)failures.push(id+': geometry continuity not verified');
  }else if(c.ok===false){
   if(c.noPathModeVerified!==true)failures.push(id+': experimental no-path response not verified');
   if(c.expectedReachable===false)expectedNoPath++;
