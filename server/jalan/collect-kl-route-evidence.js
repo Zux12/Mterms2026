@@ -138,6 +138,9 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.disconnectionReviewed=c.disconnectionReviewed===true;
     // Confirm a recognized experimental no-path response, not just HTTP 404.
     row.noPathModeVerified=true;
+    // Diagnostic only: size of Dijkstra's explored directed component, not a
+    // legal-route verdict. Never persist untrusted free-form response metadata.
+    row.searchVisitedNodes=evidenceCount(body.searchVisitedNodes);
     appendServerTiming(row,body);
    }else if(res.status===422&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
