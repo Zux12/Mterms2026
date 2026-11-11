@@ -43,3 +43,23 @@ Every case requires: `caseId`, `journeyType`, `expectedReachable`, `ok`, `elapse
 - [ ] Record independent ground truth, route geometry, snap errors, latency and TomTom comparison for all 20 journeys.
 
 This preflight is not a substitute for the route endpoint: `$graphLookup` verifies directed database connectivity only. No production traffic or routing changes.
+
+## Execute real experimental routes without publishing GPS or credentials
+
+The isolated `collect-kl-route-evidence.js` CLI performs **sequential, read-only** GETs against an operator-supplied **experimental** `/route` endpoint. It requires that HTTP 200 responses explicitly identify `EXPERIMENTAL_SEGMENT_ROUTE`, report `routingActivated:false`, `databaseWrites:0`, `trafficAware:false`, and both access/turn restrictions as **not enforced**. This rejects TomTom/production or malformed responses. An HTTP 404 is accepted as no-path evidence **only** with `ok:false,error:"No directed path found"`; HTTP 401/403/422/5xx/redirects/transport errors must not count as disconnections.
+
+Store a **private, uncommitted** JSON array of genuine independently selected journeys. Required input fields per case: `caseId`, `journeyType` (one of the five types above), `expectedReachable` (determined independently), `startLat`, `startLng`, `endLat`, `endLng`. Cases expected to be unreachable also need `disconnectionReviewed:true` from a prior independent map/access review. Do **not** infer this flag from the router's 404 response. Do not include addresses, vehicle identifiers, user names or confidential GPS tracks in case IDs.
+
+On the authorized operator machine, set `JALAN_EXPERIMENTAL_ROUTE_URL` to the **existing verified experimental** URL ending in `/route`. If needed, set `JALAN_AUTH_HEADER` to the actual configured header name and supply `JALAN_AUTH_VALUE` securely without putting the value in a command line, repository, or chat. Run:
+
+```sh
+node server/jalan/collect-kl-route-evidence.js /secure/kl-cases.private.json /secure/kl-results.sanitized.json
+```
+
+The collector deliberately **does not store or print** origin/destination coordinates, URL, request headers, response bodies, or credentials. It writes a new private `0600`-mode results file and runs `validate-kl-pilot.js`. The output cannot silently overwrite a prior result. Do not commit the input or output. The script cannot run without an accessible experimental endpoint and valid authentication.
+
+The structural gate now requires **at least 20 actual cases, at least four per journey type**, and an explicit `responseStatus`: HTTP 200 for a successful route or the specific HTTP 404 for an independently reviewed disconnected route. It reports per-type case counts and p50/p95/max elapsed milliseconds, together with snap statistics. A successful CLI exit means only **structural evidence completeness**, never verified legal driving or production authorization.
+
+For a successful route, the collector sets `geometryContinuous:true` only when returned GeoJSON coordinates are structurally valid **and** the preview's existing ≤2 m graph-transition gap audit reports zero excessive gaps. This check does not verify traffic rules, correct road snapping, grade-separated junctions or map provenance. Any access/turn warnings, snap ambiguity, unusual detours or source restrictions still require manual review.
+
+**Automation checkpoint, 11 November 2026:** verified [185/185 routing/collector/acceptance regressions passed](https://github.com/Zux12/Mterms2026/actions/runs/43001142898) and [diagnostics passed](https://github.com/Zux12/Mterms2026/actions/runs/43001141650) for commit `82c570f8b1ff1fdb3381717c3532e720fbd04ca8`. These are *offline/mocked tests*, not real route execution. The runbook documentation commit needs its own CI.
