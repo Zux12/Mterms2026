@@ -8,6 +8,7 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - [x] Synthetic large-graph performance measurement completed (not representative of actual KL roads).
 - [x] Route-coordinate gap advisory detects displaced endpoints even when imported directed graph node IDs connect (synthetic regression plus sampled KL chain).
 - [x] Audit coordinate consistency across **every imported KL graph-node endpoint** (168,221 directed edges, 336,442 endpoint observations, 103,670 unique node IDs). Every same-ID observation had identical coordinates. This validates imported node-coordinate consistency, **not** physical road connectivity or route legality.
+- [x] Synthetic route-plausibility advisory tests: detour ratio, impossible below-geodesic distance, near-zero baseline and integration. These checks never establish legal driving suitability.
 - [ ] Re-run GitHub Actions against the final proposed commit and capture run IDs.
 
 ## Read-only KL edge identity preflight (11 November 2026)
@@ -45,3 +46,9 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 
 ## Evidence format for each real-road case
 Record anonymized case ID, origin/destination coordinates, graph version, snap distances, route distance, result/no-path, elapsed milliseconds, geometric continuity, suspected restrictions, and reviewer conclusion. Avoid storing user GPS traces or credentials in Git.
+
+## Experimental snapped-route plausibility review (11 November 2026)
+
+- Added an **advisory-only** comparison of computed route length with geodesic distance between *snapped* road locations. A route 4× or more the geodesic can trigger `routeDetourReviewCandidate`; a route substantially **shorter** than geodesic (allowing the greater of 1% or 2 m tolerance) triggers `routeTooShortReviewCandidate`. Both are heuristics, not driving-law or route-quality verdicts.
+- For snapped endpoints closer than **100 m**, ratios and warning flags are `null` (unknown), since near-zero denominators magnify benign detours. Malformed values also fail closed. `routePlausibilityAdvisoryOnly:true`.
+- No snapping, path selection, routing cost, real-time ETA, TomTom API, database or production behavior changes. The tool requires **real-world KL journeys** to calibrate thresholds and assess false positives. A long legal one-way/bridge detour is not necessarily an algorithm error.

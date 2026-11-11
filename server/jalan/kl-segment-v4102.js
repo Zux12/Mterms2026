@@ -6,6 +6,7 @@ const {auditViaWayPathCandidates}=require('./kl-via-way-audit-v4102');
 const {auditPathGeometryGaps}=require('./kl-path-geometry-audit-v4102');
 const {createEdgeIdGuard}=require('./kl-edge-identity-v4102');
 const {auditGraphNodeGeometry}=require('./kl-node-geometry-audit-v4102');
+const {auditRoutePlausibility}=require('./kl-route-plausibility-audit-v4102');
 const router=express.Router(),DB='jalan_navigation',COL='road_graph_edges_v495',COUNT=168221,R=6371000;
 let graph=null,loading=null;
 const rad=Math.PI/180;
@@ -70,6 +71,8 @@ if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineStrin
 const advisoryPath=path.filter(e=>!(e.virtualPartial&&e.len===0));
 // Advisory only: OSM node ID connectivity can conceal displaced endpoints.
 const geometryGapAudit=auditPathGeometryGaps(advisoryPath,distance);
+// Heuristic only: extreme detours or below-geodesic costs warrant manual QA.
+const plausibilityAudit=auditRoutePlausibility(dist.get(END),s.point,t.point,distance);
 const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
  advisoryPath.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 // The via-way matcher flags only possible OSM relation path overlaps. Neither
@@ -78,6 +81,7 @@ const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
  advisoryPath.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
  ...geometryGapAudit,
+ ...plausibilityAudit,
  potentialAccessReviewEdges:advisoryPath.filter(e=>e.potentialAccessCaution).length,
  advisoryEdgesInspected:advisoryPath.length,
  turnReviewAvailable:turnAudit!==null,
