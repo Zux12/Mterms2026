@@ -13,6 +13,7 @@ function twentyValid(){
   return {
    caseId:`kl-${k}-${i}`,journeyType:kind,expectedReachable:!unreachable,
    ok:!unreachable,responseStatus:unreachable?404:200,elapsedMs:k*100+i,
+   graphEvidenceVerified:true,
    ...(unreachable?{disconnectionReviewed:true,noPathModeVerified:true}:{
     routeModeVerified:true,distanceMeters:1000+k*100,startSnapMeters:5,endSnapMeters:8,
     geometryContinuous:true,geometryMetricsVerified:true
@@ -293,4 +294,26 @@ test('unreviewed and malformed no-path visit counts cannot skew the diagnostic p
  assert.equal(summary.noPathSearchVisitSamples,0);
  assert.equal(summary.noPathSearchVisitedP95,null);
  assert.ok(summary.validationErrors.some(x=>x.includes('disconnection review')));
+});
+
+test('missing full-graph provenance invalidates positive-route acceptance and performance samples',()=>{
+ const rows=twentyValid();
+ delete rows[0].graphEvidenceVerified;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.equal(summary.latencySamples,19);
+ assert.equal(summary.snapEndpointSamples,30);
+ assert.ok(summary.validationErrors.some(e=>e.includes('full KL graph evidence not verified')));
+});
+test('missing full-graph provenance invalidates expected disconnection and no-path statistics',()=>{
+ const rows=twentyValid();
+ rows[16].graphEvidenceVerified=false;
+ rows[16].searchVisitedNodes=200;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.equal(summary.latencySamples,19);
+ assert.equal(summary.noPathSearchVisitSamples,0);
+ assert.ok(summary.validationErrors.some(e=>e.includes('full KL graph evidence not verified')));
 });

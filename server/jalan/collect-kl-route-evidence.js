@@ -76,6 +76,12 @@ function routeReply(body){
   body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
   body.turnRestrictionsEnforced===false;
 }
+// Self-reported graph provenance is required as an additional acceptance
+// preflight. The router's loader separately checks the complete v495 count;
+// neither assertion independently proves road legality or snapshot quality.
+function fullGraphReply(body){
+ return body?.graphVersion==='road_graph_edges_v495'&&body?.graphEdges===168221;
+}
 // The response body is untrusted diagnostic input. Keep only scalar fields
 // of the expected type in the durable evidence file, never opaque strings,
 // objects or arrays that may accidentally contain URL/GPS/token material.
@@ -118,8 +124,8 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
    const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',signal:AbortSignal.timeout(timeoutMs)});
    let body=null;try{body=await res.json();}catch(_){} // Do not log response bodies.
    row.elapsedMs=Math.round((performance.now()-start)*10)/10;
-   if(res.status===200&&routeReply(body)){
-    row.responseStatus=200;row.ok=true;
+   if(res.status===200&&routeReply(body)&&fullGraphReply(body)){
+    row.responseStatus=200;row.ok=true;row.graphEvidenceVerified=true;
     row.distanceMeters=evidenceNonnegativeNumber(body.distanceMeters);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
     row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
@@ -133,8 +139,8 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
     row.startSnapAmbiguous=evidenceBoolean(body.startSnapAmbiguous);
     row.endSnapAmbiguous=evidenceBoolean(body.endSnapAmbiguous);
-   }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'){
-    row.responseStatus=404;row.ok=false;
+   }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'&&fullGraphReply(body)){
+    row.responseStatus=404;row.ok=false;row.graphEvidenceVerified=true;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
     // Confirm a recognized experimental no-path response, not just HTTP 404.
     row.noPathModeVerified=true;

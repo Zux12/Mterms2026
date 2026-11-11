@@ -5,7 +5,7 @@ const base={caseId:'kl-test-01',journeyType:'short-urban',expectedReachable:true
  startLat:3.14,startLng:101.69,endLat:3.15,endLng:101.70};
 const url='https://experimental.example.invalid/api/jalan/kl/route';
 const good={
- ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
+ ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,routingActivated:false,
  databaseWrites:0,trafficAware:false,legalDrivingRouteVerified:false,
  accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
  distanceMeters:1571,startSnapMeters:0,endSnapMeters:0,
@@ -14,7 +14,7 @@ const good={
  potentialAccessReviewEdges:1,potentialTurnRestrictionReviewCount:0,
  startSnapAmbiguous:false,endSnapAmbiguous:true
 };
-const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,
  error:'No directed path found',routingActivated:false,databaseWrites:0,
  trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
 const reply=(status,body)=>async()=>({status,json:async()=>body});
@@ -308,4 +308,34 @@ test('unknown service responses do not produce search-visit evidence',async()=>{
  })});
  assert.equal(out[0].responseStatus,0);
  assert.equal(out[0].searchVisitedNodes,undefined);
+});
+
+test('accepted routes preserve a full-v495 provenance marker without recording graph metadata strings',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,good)});
+ assert.equal(out[0].graphEvidenceVerified,true);
+ assert.ok(!JSON.stringify(out).includes('road_graph_edges_v495'));
+});
+test('incomplete or wrong-version graph cannot supply accepted route evidence',async()=>{
+ for(const body of [
+  {...good,graphEdges:1000},
+  {...good,graphEdges:undefined},
+  {...good,graphVersion:'road_graph_edges_v493'},
+  {...good,graphEdges:'168221'}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].geometryMetricsVerified,undefined);
+ }
+});
+test('incomplete-graph HTTP 404 cannot masquerade as reviewed KL disconnection',async()=>{
+ const c={...base,caseId:'kl-incomplete-no-path',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const body of [{...noPath,graphEdges:1000},{...noPath,graphVersion:'stale'}]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,body)});
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].noPathModeVerified,undefined);
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+ }
 });

@@ -40,11 +40,11 @@ for(const [i,c] of cases.entries()){
  // Performance statistics must represent only independently verified,
  // expected journey outcomes; keep failures visible through validationErrors.
  const verifiedRoute=c.ok===true&&c.expectedReachable===true&&c.responseStatus===200&&
-  c.routeModeVerified===true&&c.geometryMetricsVerified===true&&c.geometryContinuous===true&&
+  c.routeModeVerified===true&&c.graphEvidenceVerified===true&&c.geometryMetricsVerified===true&&c.geometryContinuous===true&&
   Number.isFinite(c.distanceMeters)&&c.distanceMeters>=0&&
   ['startSnapMeters','endSnapMeters'].every(k=>Number.isFinite(c[k])&&c[k]>=0&&c[k]<=200);
  const verifiedNoPath=c.ok===false&&c.expectedReachable===false&&c.responseStatus===404&&
-  c.noPathModeVerified===true&&c.disconnectionReviewed===true;
+  c.noPathModeVerified===true&&c.graphEvidenceVerified===true&&c.disconnectionReviewed===true;
  // The visit count is optional and diagnostic only. Include solely genuine,
  // independently reviewed experimental no-path outcomes, never outages.
  if(verifiedNoPath&&Number.isSafeInteger(c.searchVisitedNodes)&&
@@ -69,6 +69,8 @@ for(const [i,c] of cases.entries()){
  if(!Number.isInteger(c.responseStatus)||(c.ok===true&&c.responseStatus!==200)||
     (c.ok===false&&c.responseStatus!==404))
   failures.push(id+': responseStatus must be HTTP 200 for a route or HTTP 404 for a reviewed no-path');
+ if(typeof c.ok==='boolean'&&c.graphEvidenceVerified!==true)
+  failures.push(id+': full KL graph evidence not verified');
  if(c.ok===true){
   // A 200 status alone does not prove the experimental route contract was checked.
   if(c.routeModeVerified!==true)failures.push(id+': experimental route response not verified');

@@ -40,3 +40,15 @@ test('no-path response does not reflect malformed or sensitive diagnostic values
  }
  assert.equal(noPathResponse({total:1}).searchVisitedNodes,null);
 });
+
+test('no-path replies tag complete graph provenance only when v495 cardinality is supplied',()=>{
+ const time={graphLoad:1,snapping:1,pathSearch:1,total:3};
+ const complete=noPathResponse(time,100,168221);
+ assert.equal(complete.graphEdges,168221);
+ assert.equal(complete.graphVersion,'road_graph_edges_v495');
+ assert.equal(complete.searchVisitedNodes,100);
+ for(const n of [null,1000,-1,'168221',168222]){
+  const incomplete=noPathResponse(time,100,n);
+  assert.equal(incomplete.graphEdges,null);
+ }
+});
