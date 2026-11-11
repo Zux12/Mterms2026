@@ -270,3 +270,27 @@ test('disconnected classification cannot be used to satisfy reachable route cove
  assert.equal(summary.automatedEvidenceGatePassed,false);
  assert.ok(summary.validationErrors.some(x=>x.includes('disconnected journey type')));
 });
+
+test('summarizes Dijkstra breadth from independently reviewed no-path cases only',()=>{
+ const cases=twentyValid();
+ [10,20,30,40].forEach((v,i)=>{cases[16+i].searchVisitedNodes=v;});
+ cases[0].searchVisitedNodes=99999; // A successful route is not no-path evidence.
+ const {status,summary}=run(cases);
+ assert.equal(status,0);
+ assert.equal(summary.noPathSearchVisitSamples,4);
+ assert.equal(summary.noPathSearchVisitedP50,20);
+ assert.equal(summary.noPathSearchVisitedP95,40);
+ assert.equal(summary.noPathSearchVisitedMax,40);
+});
+test('unreviewed and malformed no-path visit counts cannot skew the diagnostic percentile',()=>{
+ const cases=twentyValid();
+ Object.assign(cases[16],{searchVisitedNodes:400001});
+ Object.assign(cases[17],{searchVisitedNodes:'SECRET_DIAGNOSTIC'});
+ Object.assign(cases[18],{searchVisitedNodes:-1});
+ Object.assign(cases[19],{searchVisitedNodes:25,disconnectionReviewed:false});
+ const {status,summary}=run(cases);
+ assert.equal(status,1);
+ assert.equal(summary.noPathSearchVisitSamples,0);
+ assert.equal(summary.noPathSearchVisitedP95,null);
+ assert.ok(summary.validationErrors.some(x=>x.includes('disconnection review')));
+});
