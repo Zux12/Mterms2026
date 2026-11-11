@@ -48,7 +48,9 @@ function add(from,to,len,coords,id,potentialAccessCaution=false,graphFrom=null,g
 const sEdge=s.edge,tEdge=t.edge;
 add(START,sEdge.to,sEdge.len*(1-s.t),[s.point,sEdge.b],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
 add(tEdge.from,END,tEdge.len*t.t,[tEdge.a,t.point],tEdge.id,!!tEdge.potentialAccessCaution,tEdge.from,tEdge.to);
-if(sEdge.id===tEdge.id&&s.t<=t.t)add(START,END,sEdge.len*(t.t-s.t),[s.point,t.point],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
+// A reused external edge ID is not evidence that both snaps hit the same
+// directed edge. Only the same graph edge object permits this direct shortcut.
+if(sEdge===tEdge&&s.t<=t.t)add(START,END,sEdge.len*(t.t-s.t),[s.point,t.point],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
 const heap=new Heap(),dist=new Map([[START,0]]),prev=new Map();heap.push({n:START,d:0});let visited=0;
 // A directed graph with E edges may have up to 2E distinct nodes. The former fixed
 // 150,000-node guard could reject valid routes in the 168,221-edge pilot graph.
