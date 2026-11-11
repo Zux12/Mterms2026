@@ -50,3 +50,25 @@ Direct review links (these are lookup entry points, **not evidence that the curr
 - [Sink candidate 1466762606](https://www.openstreetmap.org/node/1466762606)
 
 **Review blocker:** retrieve independent node/parent-way details and relevant tags or a timestamped OSM extract before classifying any node. Do not assume public map search snippets are road-level verification.
+
+## Fresh read-only imported-edge inspection — 11 November 2026
+
+Connected to the existing Atlas cluster containing `jalan_navigation`. A bounded, **read-only** `find` with six candidate node IDs and explicit field projection returned **13** directed edges. This is fresh evidence about the imported graph, **not an independent OSM map or signage review**.
+
+| Node | Imported endpoint | Directed edges returned | Imported `highway` tags | Way IDs parsed from edge IDs |
+|---|---|---:|---|---|
+| 5738558701 | source-only | 3 outgoing | service (3) | 1161236396, 1161236395, 604900312 |
+| 11305000094 | source-only | 2 outgoing | service (2) | 1220066418, 1321780545 |
+| 11921503726 | source-only | 2 outgoing | service (2) | 1285076371, 1348864760 |
+| 12469319673 | sink-only | 2 incoming | service (2) | 1227811696, 1229005328 |
+| 13246999063 | sink-only | 2 incoming | service (2) | 1228621320, 1230915600 |
+| 1466762606 | sink-only | 2 incoming | motorway_link (1), secondary (1) | 1221539413, 291026091 |
+
+All 13 records showed empty `access`, `vehicle`, and `motorVehicle` values in the projected fields. **Empty values are not evidence of unrestricted legal access.** The edge IDs embed OSM way identifiers, but the current OSM parent ways and tags have not been independently fetched.
+
+- [x] Read-only query of all six candidate endpoints and their imported incident edges
+- [x] Imported road classes and way identifiers recorded for further review
+- [ ] Independent OSM parent-way and road-signage verification
+- [ ] Classify endpoints and establish any actual missing connection
+
+**Priority:** inspect node `1466762606` first because it combines a motorway link and secondary road at a sink-only imported endpoint; that is a *review priority*, not proof of a mapping error. Do not alter routing or data on this basis.
