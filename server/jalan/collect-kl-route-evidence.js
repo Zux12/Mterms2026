@@ -87,6 +87,8 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
    }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'){
     row.responseStatus=404;row.ok=false;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
+    // Confirm a recognized experimental no-path response, not just HTTP 404.
+    row.noPathModeVerified=true;
     appendServerTiming(row,body);
    }else{
     // Authentication failures, 422 snap failures, server outages and
