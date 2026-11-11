@@ -211,3 +211,14 @@ The collector and its tests remain in the isolated draft branch; production TomT
 - [ ] Independently validate 20 actual journeys and compare against TomTom.
 
 These checkmarks verify code and test behavior, **not real-route performance**. This documentation update itself requires new CI verification.
+
+## Verified snap-failure classification checkpoint — 12 November 2026
+
+- [x] Experimental route endpoint distinguishes GPS snap-out-of-range HTTP 422 from directed no-path HTTP 404, with diagnostic stage timings for the former.
+- [x] Offline collector preserves only sanitized snap-distance and timing metrics for verified experimental 422 responses, without marking them as reviewed graph disconnections.
+- [x] Routing CI [run 43061343976](https://github.com/Zux12/Mterms2026/actions/runs/43061343976) for commit `bebc1d290d1b54331057b17f837ccc9657afadb1`: **210/210 tests passed, zero failed** (job log verified).
+- [x] Diagnostic CI [run 43061344062](https://github.com/Zux12/Mterms2026/actions/runs/43061344062) succeeded for the same commit.
+- [ ] Complete real KL full-graph origin/destination route execution and capture failure-rate distribution.
+- [ ] Twenty independently reviewed actual KL journeys, legal-turn checks and TomTom comparison.
+
+The new documentation commit requires fresh CI confirmation. These test results are not full-road navigation acceptance.
