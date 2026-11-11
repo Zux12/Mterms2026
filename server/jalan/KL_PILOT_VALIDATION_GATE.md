@@ -256,3 +256,14 @@ These findings certify the offline checker behavior only. No full-graph live rou
 **Security boundary:** The runner requires read-only credentials but cannot itself prove a supplied database user has read-only permissions. Confirm Atlas privileges independently before running it. No secrets or private journey coordinates belong in Git.
 
 This documentation commit requires its own CI verification.
+
+## Local runner authentication and graph-count preflight — 12 November 2026
+
+- [x] Local loopback route runner now uses a fresh 32-byte random session token, with timing-safe comparison, for its private route requests.
+- [x] Runner checks `jalan_navigation.road_graph_edges_v495` contains exactly **168,221** records before opening the loopback route listener. This is an availability/cardinality preflight, **not** full graph consistency or legal-road verification.
+- [x] Routing CI [run 43070776894](https://github.com/Zux12/Mterms2026/actions/runs/43070776894) for commit `07c742b4f54936e6d02dbcefeaffadf96ef50f5d`: **219/219 passed, zero failed** (job logs checked).
+- [x] Diagnostic CI [run 43070776850](https://github.com/Zux12/Mterms2026/actions/runs/43070776850) passed.
+- [ ] Execute full-graph KL routes in the read-only operator environment and measure actual timings.
+- [ ] Independently review 20 KL journeys and compare TomTom routing and road legality.
+
+This documentation update requires its own CI verification. Keep PR draft and TomTom production routing unchanged.
