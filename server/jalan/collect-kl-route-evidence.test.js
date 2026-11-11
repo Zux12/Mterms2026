@@ -39,6 +39,7 @@ test('recognized no-path 404 is accepted only with pre-existing independent revi
  const out=await collectEvidence([c],url,{fetchImpl:reply(404,noPath)});
  assert.equal(out[0].responseStatus,404);assert.equal(out[0].ok,false);
  assert.equal(out[0].disconnectionReviewed,true);
+ assert.equal(out[0].noPathModeVerified,true);
  assert.equal(out[0].pathSearchMs,78.7);
  assert.equal(out[0].serverTotalMs,94.4);
 });
@@ -117,6 +118,7 @@ test('spoofed no-path 404 from another route service never becomes reviewed disc
   assert.equal(out[0].responseStatus,0);
   assert.equal(out[0].failureClass,'unverified-experimental-response');
   assert.equal(out[0].disconnectionReviewed,undefined);
+  assert.equal(out[0].noPathModeVerified,undefined);
  }
 });
 test('malformed no-path timing does not contaminate sanitized evidence',async()=>{
