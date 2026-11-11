@@ -15,6 +15,9 @@ const graph=()=>{const adj=new Map();for(const e of fixture)adj.set(e.from,[e]);
 test('sampled actual KL directed-edge chain is traversable and geometrically continuous',()=>{
  const r=calculate(graph(),snap(fixture[0],0.5),snap(fixture[2],0.5));
  assert.ok(r);assert.equal(r.edgeCount,3);assert.equal(r.potentialAccessReviewEdges,0);
+ assert.equal(r.geometryGapReviewAvailable,true);
+ assert.equal(r.geometryGapTransitionsInspected,2);
+ assert.equal(r.geometryGapCountOverThreshold,0);
  assert.deepEqual(r.geometry[1],[101.7225577,3.1475594]);
  assert.deepEqual(r.geometry[2],[101.722657,3.1478894]);
  const expected=fixture[0].len*.5+fixture[1].len+fixture[2].len*.5;
