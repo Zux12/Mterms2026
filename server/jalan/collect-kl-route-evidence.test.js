@@ -232,3 +232,15 @@ test('inconsistent no-path stage timing does not undermine independently verifie
  assert.equal(out[0].noPathModeVerified,true);
  assert.equal(out[0].graphLoadMs,undefined);
 });
+
+test('even internally consistent but impossible stage durations are not archived',async()=>{
+ for(const total of [60000.1,1e308]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{
+   ...good,timingMs:{graphLoad:total,snapping:0,pathSearch:0,total}
+  })});
+  assert.equal(out[0].ok,true);
+  assert.equal(out[0].geometryMetricsVerified,true);
+  assert.equal(out[0].graphLoadMs,undefined);
+  assert.equal(out[0].serverTotalMs,undefined);
+ }
+});
