@@ -136,7 +136,7 @@ function routeAsGeoJSON(result){
 // never mistake an unrelated application's HTTP 404 for a road disconnection.
 function noPathResponse(timingMs,visitedNodes=null){
  return {ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',error:'No directed path found',
-  timingMs,searchVisitedNodes:Number.isSafeInteger(visitedNodes)&&visitedNodes>=0?visitedNodes:null,
+  timingMs,searchVisitedNodes:Number.isSafeInteger(visitedNodes)&&visitedNodes>=0&&visitedNodes<=400000?visitedNodes:null,
   timingDiagnosticOnly:true,trafficAware:false,routingActivated:false,databaseWrites:0};
 }
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,turnReviewAvailable:!!graph&&Array.isArray(graph.turnRestrictions),nodeGeometry:graph?.nodeGeometry??null,graphTopology:graph?.topology??null,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
