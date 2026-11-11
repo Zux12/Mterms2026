@@ -16,6 +16,6 @@ function reviewEndpoint(record){
  if(!CLASSES.has(record.classification))errors.push('Invalid classification');
  if(typeof record.reason!=='string'||record.reason.trim().length<30)errors.push('Insufficient independent review rationale');
  if(record.classification==='suspected-import-gap'&&(!record.confirmationSource||!/^https:\/\//.test(record.confirmationSource)))errors.push('Suspected import gap requires second independent source');
- return {accepted:errors.length===0,errors,roadLegalityVerified:false,productionRoutingAuthorized:false};
+ return {accepted:errors.length===0,errors,evidenceStatus:errors.length?'incomplete':'metadata-complete-unverified',independentSourceFetched:false,roadLegalityVerified:false,productionRoutingAuthorized:false};
 }
 module.exports={reviewEndpoint};
