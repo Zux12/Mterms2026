@@ -125,6 +125,7 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.geometryMetricsVerified=geometryMatchesJourney(body,c);
     row.geometryContinuous=verifiedGeometry(body)&&row.geometryMetricsVerified;
     row.routeModeVerified=true;
+    row.graphCacheHit=evidenceBoolean(body.graphCacheHit);
     appendServerTiming(row,body);
     row.potentialAccessReviewEdges=evidenceCount(body.potentialAccessReviewEdges);
     row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
