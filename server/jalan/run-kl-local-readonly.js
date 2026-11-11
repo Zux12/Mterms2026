@@ -32,6 +32,12 @@ async function main(){
   await mongoose.connect(process.env.JALAN_READONLY_MONGODB_URI,{
    serverSelectionTimeoutMS:15000,readPreference:'secondaryPreferred'
   });
+  // Fail closed before opening the loopback endpoint if the complete
+  // expected imported graph is unavailable. This is a count check, not
+  // proof of road legality or a transactionally consistent snapshot.
+  const edgeCount=await mongoose.connection.useDb('jalan_navigation',{useCache:true})
+   .db.collection('road_graph_edges_v495').countDocuments();
+  if(edgeCount!==168221)throw Error('Incomplete KL graph');
   server=await new Promise((resolve,reject)=>{
    const s=app.listen(0,'127.0.0.1',()=>resolve(s));s.once('error',reject);
   });
