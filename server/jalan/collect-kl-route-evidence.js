@@ -90,7 +90,10 @@ function appendServerTiming(row,body){
   // clock. Inconsistent stage sums are not trustworthy performance evidence.
   // Check unrounded source values before rounding each exported metric.
   const stages=timing.graphLoad+timing.snapping+timing.pathSearch;
-  if(!Number.isFinite(stages)||Math.abs(stages-timing.total)>0.05)return;
+  // Collector requests are capped at 60 s. Bigger values cannot be credible
+  // completed response timings and could overflow Math.round(value*10).
+  if(!Number.isFinite(stages)||timing.total>60000||
+     Math.abs(stages-timing.total)>0.05)return;
   row.graphLoadMs=Math.round(timing.graphLoad*10)/10;
   row.snappingMs=Math.round(timing.snapping*10)/10;
   row.pathSearchMs=Math.round(timing.pathSearch*10)/10;
