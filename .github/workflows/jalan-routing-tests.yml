@@ -17,4 +17,4 @@ jobs:
         with:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: node --test server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js
+      - run: node --test server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js
