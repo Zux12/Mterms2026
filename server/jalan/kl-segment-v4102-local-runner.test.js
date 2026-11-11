@@ -25,3 +25,11 @@ test('local runner uses per-execution random session authorization',()=>{
  assert.match(source,/authHeader:'x-jalan-local-session',authValue:sessionToken/);
  assert.doesNotMatch(source,/console\.log\(sessionToken\)/);
 });
+
+test('local runner checks complete graph count before opening the listener',()=>{
+ const source=fs.readFileSync(file,'utf8');
+ const count=source.indexOf("collection('road_graph_edges_v495').countDocuments()");
+ const guard=source.indexOf("edgeCount!==168221");
+ const listen=source.indexOf("app.listen(0,'127.0.0.1'");
+ assert.ok(count>=0&&guard>count&&listen>guard);
+});
