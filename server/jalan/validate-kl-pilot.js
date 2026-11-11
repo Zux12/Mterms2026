@@ -8,7 +8,7 @@ const minCases=20,minimumPerJourneyType=4,minimumReachablePerRoutedType=2;
 const routedJourneyTypes=requiredJourneyTypes.filter(t=>t!=='disconnected');
 const cases=JSON.parse(fs.readFileSync(process.argv[2]||'', 'utf8'));
 if(!Array.isArray(cases)||cases.length===0)throw Error('Expected a nonempty JSON array');
-const failures=[],seen=new Set(),snap=[],latency=[],types=new Set();
+const failures=[],seen=new Set(),snap=[],latency=[],noPathVisits=[],types=new Set();
 let rejectedSnapOver200Meters=0;
 const journeyTypeCounts=Object.fromEntries(requiredJourneyTypes.map(t=>[t,0]));
 const reachableControlsByType=Object.fromEntries(routedJourneyTypes.map(t=>[t,0]));
@@ -45,6 +45,11 @@ for(const [i,c] of cases.entries()){
   ['startSnapMeters','endSnapMeters'].every(k=>Number.isFinite(c[k])&&c[k]>=0&&c[k]<=200);
  const verifiedNoPath=c.ok===false&&c.expectedReachable===false&&c.responseStatus===404&&
   c.noPathModeVerified===true&&c.disconnectionReviewed===true;
+ // The visit count is optional and diagnostic only. Include solely genuine,
+ // independently reviewed experimental no-path outcomes, never outages.
+ if(verifiedNoPath&&Number.isSafeInteger(c.searchVisitedNodes)&&
+    c.searchVisitedNodes>=0&&c.searchVisitedNodes<=400000)
+  noPathVisits.push(c.searchVisitedNodes);
  const verifiedOutcome=verifiedRoute||verifiedNoPath;
  if(!Number.isFinite(c.elapsedMs)||c.elapsedMs<0)failures.push(id+': invalid elapsedMs');
  else if(verifiedOutcome)latency.push(c.elapsedMs);
@@ -91,7 +96,7 @@ for(const [i,c] of cases.entries()){
    failures.push(id+': expected no-path case lacks disconnection review');
  }
 }
-snap.sort((a,b)=>a-b);latency.sort((a,b)=>a-b);
+snap.sort((a,b)=>a-b);latency.sort((a,b)=>a-b);noPathVisits.sort((a,b)=>a-b);
 for(const k of serverStageKeys)serverStageSamples[k].sort((a,b)=>a-b);
 for(const samples of Object.values(graphCacheTimingSamples))samples.sort((a,b)=>a-b);
 const quantile=(arr,p)=>arr.length?arr[Math.ceil(p*arr.length)-1]:null;
@@ -110,6 +115,10 @@ const summary={
  snapEndpointSamples:snap.length,
  snapMedianMeters:quantile(snap,.5),snapP95Meters:quantile(snap,.95),snapMaxMeters:quantile(snap,1),
  latencySamples:latency.length,
+ noPathSearchVisitSamples:noPathVisits.length,
+ noPathSearchVisitedP50:quantile(noPathVisits,.5),
+ noPathSearchVisitedP95:quantile(noPathVisits,.95),
+ noPathSearchVisitedMax:quantile(noPathVisits,1),
  latencyP50Ms:quantile(latency,.5),latencyP95Ms:quantile(latency,.95),latencyMaxMs:quantile(latency,1),
  serverTimingSamples,
  graphCacheTimingByStatusMs:Object.fromEntries(Object.entries(graphCacheTimingSamples).map(([status,values])=>[status,{samples:values.length,p50:quantile(values,.5),p95:quantile(values,.95),max:quantile(values,1)}])),
