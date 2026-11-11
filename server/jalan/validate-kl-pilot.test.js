@@ -13,8 +13,8 @@ function twentyValid(){
   return {
    caseId:`kl-${k}-${i}`,journeyType:kind,expectedReachable:!unreachable,
    ok:!unreachable,responseStatus:unreachable?404:200,elapsedMs:k*100+i,
-   ...(unreachable?{disconnectionReviewed:true}:{
-    distanceMeters:1000+k*100,startSnapMeters:5,endSnapMeters:8,
+   ...(unreachable?{disconnectionReviewed:true,noPathModeVerified:true}:{
+    routeModeVerified:true,distanceMeters:1000+k*100,startSnapMeters:5,endSnapMeters:8,
     geometryContinuous:true
    })
   };
@@ -80,4 +80,20 @@ test('review flag is required for every expected disconnected case',()=>{
  const {status,summary}=run(rows);
  assert.equal(status,1);
  assert.ok(summary.validationErrors.some(x=>x.includes('disconnection review')));
+});
+
+
+test('structurally valid routes lacking experimental response verification fail closed',()=>{
+ const rows=twentyValid();delete rows[0].routeModeVerified;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.ok(summary.validationErrors.some(x=>x.includes('experimental route response not verified')));
+});
+test('reviewed HTTP 404 without experimental no-path verification cannot pass',()=>{
+ const rows=twentyValid();delete rows[19].noPathModeVerified;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.ok(summary.validationErrors.some(x=>x.includes('experimental no-path response not verified')));
 });
