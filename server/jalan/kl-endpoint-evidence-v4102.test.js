@@ -27,3 +27,15 @@ test('corroborated candidate still never authorizes routing',()=>{
  const r=reviewEndpoint({...valid,classification:'suspected-import-gap',confirmationSource:'https://example.org/independent-map'});
  assert.equal(r.accepted,true);assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('metadata-only source URL never claims independent verification',()=>{
+ const r=reviewEndpoint(valid);
+ assert.equal(r.evidenceStatus,'metadata-complete-unverified');
+ assert.equal(r.independentSourceFetched,false);
+ assert.equal(r.roadLegalityVerified,false);
+});
+test('incomplete endpoint evidence is explicitly unknown',()=>{
+ const r=reviewEndpoint({...valid,parentWayIds:[]});
+ assert.equal(r.evidenceStatus,'incomplete');
+ assert.equal(r.independentSourceFetched,false);
+});
