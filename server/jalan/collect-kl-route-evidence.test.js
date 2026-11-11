@@ -8,7 +8,7 @@ const good={
  ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
  databaseWrites:0,trafficAware:false,legalDrivingRouteVerified:false,
  accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
- distanceMeters:1300,startSnapMeters:2,endSnapMeters:6,
+ distanceMeters:1571,startSnapMeters:0,endSnapMeters:0,
  geometry:{type:'LineString',coordinates:[[101.69,3.14],[101.70,3.15]]},
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,geometryGapThresholdMeters:2,
  potentialAccessReviewEdges:1,potentialTurnRestrictionReviewCount:0,
@@ -130,4 +130,38 @@ test('malformed no-path timing does not contaminate sanitized evidence',async()=
  assert.equal(out[0].responseStatus,404);
  assert.equal(out[0].serverTotalMs,undefined);
  assert.ok(!JSON.stringify(out).includes('startLat'));
+});
+
+test('independent geometry metric check accepts correct route endpoints and distance',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,good)});
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.equal(out[0].geometryContinuous,true);
+});
+test('route reporting an impossible distance fails geometry evidence despite clean gap advisory',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,distanceMeters:200})});
+ assert.equal(out[0].ok,true);
+ assert.equal(out[0].geometryMetricsVerified,false);
+ assert.equal(out[0].geometryContinuous,false);
+});
+test('geographically displaced route fails even when polyline length is plausible',async()=>{
+ const shifted={...good,geometry:{type:'LineString',
+  coordinates:[[101.69,3.141],[101.70,3.151]]}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,shifted)});
+ assert.equal(out[0].geometryMetricsVerified,false);
+ assert.equal(out[0].geometryContinuous,false);
+});
+test('reversed GeoJSON coordinate order fails independent journey check',async()=>{
+ const swapped={...good,geometry:{type:'LineString',
+  coordinates:[[3.14,101.69],[3.15,101.70]]}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,swapped)});
+ assert.equal(out[0].geometryMetricsVerified,false);
+ assert.equal(out[0].geometryContinuous,false);
+});
+test('zero-distance same-point route remains valid geometry',async()=>{
+ const same={...base,endLat:base.startLat,endLng:base.startLng};
+ const body={...good,distanceMeters:0,geometry:{type:'LineString',
+  coordinates:[[base.startLng,base.startLat],[base.startLng,base.startLat]]}};
+ const out=await collectEvidence([same],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.equal(out[0].geometryContinuous,true);
 });
