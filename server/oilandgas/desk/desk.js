@@ -4,7 +4,7 @@ const login=byId('login'),office=byId('office'),form=byId('draft'),detail=byId('
 let current,proofToken,page=0,dirty=false;
 async function api(path,body){
   const response=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(response.status===401){login.hidden=false;office.hidden=true;closeEntry();byId('queue').replaceChildren();}
+  if(response.status===401){byId('story-picker')?.close();login.hidden=false;office.hidden=true;closeEntry();byId('queue').replaceChildren();}
   const result=await response.json();
   if(!response.ok)throw Error(result.error||'Request failed.');
   return result;
@@ -146,23 +146,28 @@ async function loadStats(){
     byId('stats-message').textContent='';
   }catch{byId('stats-message').textContent='Summary counts are temporarily unavailable.';}
 }
+let highlightsGeneration=0;
 async function loadDashboardHighlights(){
+  const generation=++highlightsGeneration;
   const target=byId('dashboard-highlights');target.textContent='Loading homepage stories…';
   try{
-    const rows=await api('highlights');target.replaceChildren();
+    const rows=await api('highlights');if(generation!==highlightsGeneration)return;target.replaceChildren();
     for(const [slot,label] of [['lead','Featured story'],['story1','Story 01'],['story2','Story 02']]){
       const row=rows.find(r=>r.slot===slot);const card=document.createElement('div');card.className='highlight-card';
       const tag=document.createElement('small');tag.textContent=label;
       const title=document.createElement('h3');title.textContent=row?.entry?.title||'No story available';
       const note=document.createElement('p');note.textContent=row?(row.entry.kind==='external'?'Automatic industry news':'Editorial selection'):'Choose a published entry to fill this position.';
       card.append(tag,title,note);
+      const change=document.createElement('button');change.type='button';change.textContent='Change story';
+      change.setAttribute('aria-label','Change '+label.toLowerCase());
+      change.onclick=()=>openStoryPicker(slot,label,row);card.append(change);
       if(row && row.entry.kind!=='external'){
         const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Manage story';
         button.onclick=run(async()=>{if(mayLeave())await open(row.entry);});card.append(button);
       }
       target.append(card);
     }
-  }catch{target.textContent='Homepage stories are temporarily unavailable. Use Refresh to try again.';}
+  }catch{if(generation===highlightsGeneration)target.textContent='Homepage stories are temporarily unavailable. Use Refresh to try again.';}
 }
 function setupDashboard(){
   document.querySelectorAll('[data-status]').forEach(button=>button.onclick=()=>{

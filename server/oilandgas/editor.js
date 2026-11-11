@@ -47,7 +47,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
-for (const file of ['desk.html','desk.css','desk.js','reader.js','read.html','bulk.js','bulk.css']) {
+for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
 
@@ -166,6 +166,13 @@ router.use(wrap(async(req,res,next)=>{
   const id=sessionId(req);
   if(!id || !secret() || !(await database().collection('editor_sessions').findOne({_id:id,expiresAt:{$gt:new Date()}}))) fail(401,'Please sign in.');
   next();
+}));
+
+router.post('/highlight/automatic',wrap(async(req,res)=>{
+  const {slot}=req.body || {};
+  if (!['lead','story1','story2'].includes(slot)) fail(400,'Invalid feature slot.');
+  await highlightSlots.automatic(database().collection('homepage'), slot);
+  res.json({ok:true});
 }));
 
 router.post('/highlight',wrap(async(req,res)=>{

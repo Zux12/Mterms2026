@@ -35,4 +35,10 @@ async function move(collection, slot, item) {
   return collection.updateOne({ _id: 'highlights' }, [{ $set: fields }], { upsert: true });
 }
 
-module.exports = { uniqueSlots, move };
+async function automatic(collection, slot) {
+  if (!slots.includes(slot)) throw new Error('Invalid highlight slot');
+  // An empty slot uses the existing industry-news selection on the homepage.
+  return collection.updateOne({ _id: 'highlights' }, { $unset: { [slot]: '' } });
+}
+
+module.exports = { uniqueSlots, move, automatic };
