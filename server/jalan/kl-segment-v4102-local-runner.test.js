@@ -16,3 +16,12 @@ test('local full-graph runner binds loopback and requires read-only credential',
  assert.match(source,/flag:'wx',mode:0o600/);
  assert.doesNotMatch(source,/0\.0\.0\.0/);
 });
+
+test('local runner uses per-execution random session authorization',()=>{
+ const source=fs.readFileSync(file,'utf8');
+ assert.match(source,/randomBytes\(32\)/);
+ assert.match(source,/timingSafeEqual/);
+ assert.match(source,/x-jalan-local-session/);
+ assert.match(source,/authHeader:'x-jalan-local-session',authValue:sessionToken/);
+ assert.doesNotMatch(source,/console\.log\(sessionToken\)/);
+});
