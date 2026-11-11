@@ -88,3 +88,13 @@ Both paths terminate at the same imported node coordinate **(101.7208629 E, 3.13
 - [ ] If confirmed defective, create isolated regression and propose an import fix without modifying the live database
 
 **No road defect is confirmed.** The source remains the existing imported graph; the review must not be marked independently complete.
+
+## Independent targeted sink query checkpoint — 11 November 2026
+
+A fresh read-only `find({fromNode:"1466762606"})` on `road_graph_edges_v495` returned **zero outgoing records**, confirming the sink classification independently of the earlier grouped endpoint aggregation. The two incoming `motorway_link` / `secondary` chains remain documented above.
+
+- [x] Confirm zero outgoing directed edges with direct `fromNode` query
+- [ ] Determine why current OSM road data and imported graph differ, **if they differ**; no such discrepancy has been established
+- [ ] Independent current OSM way and access-tag review
+
+This is an imported-graph fact only, not a finding of unsafe or incorrect road routing.
