@@ -155,3 +155,50 @@ test('422 GPS snap failure timings cannot contaminate accepted route percentiles
  assert.equal(r.summary.serverTimingSamples,19);
  assert.ok(r.summary.validationErrors.some(x=>x.includes('responseStatus')));
 });
+
+test('unverified geometry does not contaminate latency, snap or server timing distributions',()=>{
+ const cases=twentyValid();
+ for(const c of cases)Object.assign(c,{graphLoadMs:5,snappingMs:3,pathSearchMs:2,serverTotalMs:10});
+ Object.assign(cases[0],{geometryMetricsVerified:false,elapsedMs:900000,
+  startSnapMeters:199,endSnapMeters:199,
+  graphLoadMs:10000,snappingMs:2000,pathSearchMs:3000,serverTotalMs:15000});
+ const r=run(cases);
+ assert.equal(r.status,1);
+ assert.equal(r.summary.automatedEvidenceGatePassed,false);
+ assert.equal(r.summary.latencySamples,19);
+ assert.equal(r.summary.latencyMaxMs,403);
+ assert.equal(r.summary.snapEndpointSamples,38);
+ assert.equal(r.summary.snapP95Meters,8);
+ assert.equal(r.summary.serverTimingSamples,19);
+ assert.equal(r.summary.serverTimingByStageMs.serverTotalMs.max,10);
+});
+test('unreviewed disconnected-road response is excluded from performance statistics',()=>{
+ const cases=twentyValid();
+ Object.assign(cases[19],{disconnectionReviewed:false,elapsedMs:500000,
+  graphLoadMs:5000,snappingMs:1000,pathSearchMs:2000,serverTotalMs:8000});
+ const r=run(cases);
+ assert.equal(r.status,1);
+ assert.equal(r.summary.latencySamples,19);
+ assert.equal(r.summary.latencyMaxMs,402);
+ assert.equal(r.summary.serverTimingSamples,0);
+ assert.ok(r.summary.validationErrors.some(x=>x.includes('disconnection review')));
+});
+test('out-of-range snap is reported as an error without biasing accepted snap percentiles',()=>{
+ const cases=twentyValid();
+ Object.assign(cases[1],{startSnapMeters:241,endSnapMeters:5,elapsedMs:700000});
+ const r=run(cases);
+ assert.equal(r.status,1);
+ assert.equal(r.summary.snapOver200Meters,1);
+ assert.equal(r.summary.snapEndpointSamples,38);
+ assert.equal(r.summary.snapP95Meters,8);
+ assert.equal(r.summary.latencySamples,19);
+ assert.equal(r.summary.latencyMaxMs,403);
+});
+test('unreasonable server timing is never reported as an accepted performance sample',()=>{
+ const cases=twentyValid();
+ Object.assign(cases[0],{graphLoadMs:60001,snappingMs:0,pathSearchMs:0,serverTotalMs:60001});
+ const r=run(cases);
+ assert.equal(r.status,0);
+ assert.equal(r.summary.serverTimingSamples,0);
+ assert.equal(r.summary.serverTimingByStageMs.serverTotalMs.p95,null);
+});
