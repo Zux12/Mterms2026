@@ -24,13 +24,13 @@ const noTurn={restrictionId:'demo-node',restriction:'no_right_turn',
 test('starting at downstream end of a restricted road does not count that untravelled road',()=>{
  const a=ab(),b=bc(),r=calculate(graph([a,b]),snap(a,1),snap(b,.5));
  assert.ok(r);assert.equal(r.potentialAccessReviewEdges,0);
- assert.equal(r.geometryGapTransitionsInspected,0);
+ assert.equal(r.geometryGapTransitionsInspected,1);
 });
 test('ending at upstream end of restricted road does not count that untravelled road',()=>{
  const a=bc(),b=edge('osm-way-14:0:F','c','d',C,D,true);
  const r=calculate(graph([a,b]),snap(a,.5),snap(b,0));
  assert.ok(r);assert.equal(r.potentialAccessReviewEdges,0);
- assert.equal(r.geometryGapTransitionsInspected,0);
+ assert.equal(r.geometryGapTransitionsInspected,1);
 });
 test('zero-length same-edge journey does not report restricted road traversed',()=>{
  const a=ab(),r=calculate(graph([a]),snap(a,.3),snap(a,.3));

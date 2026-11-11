@@ -100,7 +100,10 @@ if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineStrin
 // and every real graph edge (including zero-length imported ones) for routing.
 const advisoryPath=path.filter(e=>!(e.virtualPartial&&e.len===0));
 // Advisory only: OSM node ID connectivity can conceal displaced endpoints.
-const geometryGapAudit=auditPathGeometryGaps(advisoryPath,distance);
+// Zero-length virtual connectors are not travelled roads for turn/access QA,
+// but must remain in geometry QA: their endpoints can reveal displaced
+// imported-node coordinates at a chosen origin or destination.
+const geometryGapAudit=auditPathGeometryGaps(path,distance);
 // Heuristic only: extreme detours or below-geodesic costs warrant manual QA.
 const plausibilityAudit=auditRoutePlausibility(dist.get(END),s.point,t.point,distance);
 const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
