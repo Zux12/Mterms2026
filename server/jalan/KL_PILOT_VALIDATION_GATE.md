@@ -152,3 +152,14 @@ A degree-first, stable node-ID tie-break produced eight **source-only** and eigh
 Two samples were cross-checked with a separate, read-only edge query: node `5738558701` has three outgoing imported segments, and node `12469319673` has two incoming segments; the sampled edge ID and coordinate continuity agree with the grouped evidence. **This does not mean these junctions are bad.** They may represent legitimate one-way entrances/exits or an OSM boundary; independent map/signage review is still needed.
 
 Added the **offline-only** `kl-endpoint-review-v4102.js` candidate-prioritization utility with tests for one-way corridors, bidirectional cycles, degree ranking, malformed inputs, optional coordinate handling, and agreement with the established weak-graph topology analysis. It is deliberately **not wired into production or the experimental route handler**. All output is advisory and expressly does not verify legal driving. Imported road source: OpenStreetMap contributors (ODbL). Do not present a sample node as a road defect or treat this screening as completion of the 20 real KL journey acceptance gate.
+
+## Latest endpoint evidence verification checkpoint — 11 November 2026
+
+- [x] GitHub routing CI **passed** for commit `d09d4cb15e78fa6660f6e524bd49fa5535ad430c`, [run 42995458994](https://github.com/Zux12/Mterms2026/actions/runs/42995458994).
+- [x] Diagnostic CI **passed** for the same commit, [run 42995459142](https://github.com/Zux12/Mterms2026/actions/runs/42995459142).
+- [x] Offline endpoint metadata validator now explicitly distinguishes `metadata-complete-unverified` from independent source verification. A supplied URL is not proof that the source was fetched.
+- [ ] Obtain independent node/parent-way evidence for six candidate OSM nodes; the direct OSM API could not be retrieved from the available web environment.
+- [ ] Classify candidate road endpoints based on actual way tags and independently checked map geometry.
+- [ ] Complete 20 real KL journeys and independent driving-legality review.
+
+**Note:** The two CI checkmarks refer to the previously verified commit above. This documentation-only commit requires its own fresh CI result. Keep TomTom in production.
