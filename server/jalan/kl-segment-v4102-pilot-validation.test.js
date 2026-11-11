@@ -11,8 +11,8 @@ const types=['short-urban','long-corridor','one-way','overpass','disconnected'];
 function sample(i){
  const journeyType=types[i%types.length],ok=journeyType!=='disconnected';
  return {caseId:'synthetic_'+i,journeyType,expectedReachable:ok,ok,
-  elapsedMs:23+i,responseStatus:ok?200:404,...(ok?{distanceMeters:800+i,startSnapMeters:5,endSnapMeters:6,
-   geometryContinuous:true}:{disconnectionReviewed:true})};
+  elapsedMs:23+i,responseStatus:ok?200:404,...(ok?{routeModeVerified:true,distanceMeters:800+i,startSnapMeters:5,endSnapMeters:6,
+   geometryContinuous:true}:{disconnectionReviewed:true,noPathModeVerified:true})};
 }
 function run(cases){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'jalan-gate-'));
