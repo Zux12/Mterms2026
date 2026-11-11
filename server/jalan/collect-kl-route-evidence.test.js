@@ -201,3 +201,34 @@ test('malformed required route metrics fail closed without persisting response s
  assert.equal(out[0].geometryContinuous,false);
  assert.ok(!JSON.stringify(out).includes(secret));
 });
+
+test('inconsistent server stage timings are never archived as performance evidence',async()=>{
+ for(const timingMs of [
+  {graphLoad:100,snapping:25,pathSearch:10,total:7},
+  {graphLoad:100,snapping:25,pathSearch:10,total:130},
+  {graphLoad:1e308,snapping:1e308,pathSearch:0,total:1e308}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,timingMs})});
+  assert.equal(out[0].ok,true,'timing rejection does not reclassify route');
+  for(const key of ['graphLoadMs','snappingMs','pathSearchMs','serverTotalMs'])
+   assert.equal(out[0][key],undefined,'no incomplete stage metrics stored');
+ }
+});
+test('accepts small monotonic-clock floating-point differences before rounding',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,{
+  ...good,timingMs:{graphLoad:12.34001,snapping:4.56001,pathSearch:9.10001,total:26}
+ })});
+ assert.equal(out[0].graphLoadMs,12.3);
+ assert.equal(out[0].snappingMs,4.6);
+ assert.equal(out[0].pathSearchMs,9.1);
+ assert.equal(out[0].serverTotalMs,26);
+});
+test('inconsistent no-path stage timing does not undermine independently verified 404',async()=>{
+ const c={...base,expectedReachable:false,disconnectionReviewed:true,journeyType:'disconnected'};
+ const out=await collectEvidence([c],url,{fetchImpl:reply(404,{
+  ...noPath,timingMs:{graphLoad:10,snapping:20,pathSearch:30,total:300}
+ })});
+ assert.equal(out[0].responseStatus,404);
+ assert.equal(out[0].noPathModeVerified,true);
+ assert.equal(out[0].graphLoadMs,undefined);
+});
