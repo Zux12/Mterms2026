@@ -200,3 +200,14 @@ The counts reconcile: 496 + 519 + 102,655 = 103,670. This corroborates the earli
 - [ ] Manually inspect road legalities, turn restrictions, grade-separation and snap ambiguity before any pilot acceptance.
 
 The collector and its tests remain in the isolated draft branch; production TomTom and the original MTERMS app remain unchanged. This documentation commit is not part of the above verified CI result and requires a fresh check.
+
+## Route timing instrumentation checkpoint — 11 November 2026
+
+- [x] Experimental `/route` now exposes separate server-side `timingMs.graphLoad`, `timingMs.snapping`, `timingMs.pathSearch` and `timingMs.total` metrics; diagnostics only.
+- [x] Offline route-evidence collector sanitizes and records these four timings when all are finite and nonnegative, without storing private GPS coordinates or credentials.
+- [x] Commit `eea8fbe631ab9eac3fa181010665a1e8613ee2c7`: [routing CI run 43006409973](https://github.com/Zux12/Mterms2026/actions/runs/43006409973) **187 tests passed, 0 failed** (job log verified).
+- [x] [Diagnostic CI run 43006409656](https://github.com/Zux12/Mterms2026/actions/runs/43006409656) succeeded on the same commit.
+- [ ] Execute complete route calculations on the live full KL graph and record actual cold/warm timing distributions.
+- [ ] Independently validate 20 actual journeys and compare against TomTom.
+
+These checkmarks verify code and test behavior, **not real-route performance**. This documentation update itself requires new CI verification.
