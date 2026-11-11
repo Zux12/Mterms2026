@@ -80,6 +80,8 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - [x] Differential shortest-path and synthetic large-graph tests implemented and previously verified.
 - [x] Read-only KL edge-identity and node-coordinate audits documented with complete-collection observations.
 - [x] Offline 20-journey structural evidence gate implemented; missing coverage never authorizes production routing.
+- [x] Offline directed **strongly connected component** (SCC) analysis and seven regression scenarios verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: routing CI **151/151 passed**, run `42983451836`; diagnostics CI succeeded, run `42983451981`.
+- [ ] Run SCC diagnostic against the **real imported KL graph** with read-only access; inspect one-way bridges, isolated strongly connected islands and source/sink SCCs before inferring navigation limitations.
 - [x] CI verified for commit `70e99dca54e48aebe167a0da6dd52814758e7d1e`: routing run `42978554365` succeeded; diagnostic run `42978554238` succeeded.
 - [ ] CI verified for the latest proposed commit (must refresh for every new commit).
 - [ ] Full KL graph health and load time rechecked in a live read-only environment.
@@ -94,3 +96,11 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - [ ] Sabah/Sarawak rollout considered only after Peninsular Malaysia acceptance.
 
 **Progress accounting:** Automated regression completion and database shape audits are not substitutes for route legality, user-facing navigation quality, or production acceptance. Keep TomTom authoritative.
+
+## Experimental directed SCC analysis — offline milestone (11 November 2026)
+
+- A separate module `server/jalan/kl-strong-components-audit-v4102.js` analyzes directed graph strongly connected components using two **iterative** passes (no recursive DFS stack overflow on long chains). It reports SCC count, largest SCC share, singleton SCC count, source SCC count and sink SCC count. Malformed/empty inputs return `strongConnectivityAvailable:false` and null metrics.
+- Synthetic cases cover one-way roads, cycles, one-way bridges between cycles, disconnected two-way islands, repeated arcs/self-loops, malformed data, and a long chain. A separately executed synthetic 168,221-edge one-way-chain check produced 168,222 SCCs; this is **not a result from KL road data**.
+- Verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: [routing CI run 42983451836](https://github.com/Zux12/Mterms2026/actions/runs/42983451836) reports 151/151 tests passing (0 failed), and [diagnostic CI run 42983451981](https://github.com/Zux12/Mterms2026/actions/runs/42983451981) succeeded.
+- This is an **offline analysis module**, not yet wired into the route handler or live graph loader; actual KL component counts and production latency impact are unmeasured. SCC topology alone does not validate legal turn movements, OSM access permissions, trip-specific reachability or real driving safety. Never use the SCC result as production routing approval.
+- Attempts to establish a read-only Atlas connector session for the available clusters failed at cluster-address lookup in this run. Do not mark the live KL graph audit complete from previous terminal diagnostics.
