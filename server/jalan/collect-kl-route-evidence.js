@@ -68,6 +68,15 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     // Requires graph transition gap diagnostic, NOT merely valid GeoJSON.
     row.geometryContinuous=verifiedGeometry(body);
     row.routeModeVerified=true;
+    // Server-side stage timings are diagnostic, not evidence of route legality.
+    // Reject malformed or negative values rather than silently accepting them.
+    const timing=body.timingMs;
+    if(timing&&['graphLoad','snapping','pathSearch','total'].every(k=>Number.isFinite(timing[k])&&timing[k]>=0)){
+     row.graphLoadMs=Math.round(timing.graphLoad*10)/10;
+     row.snappingMs=Math.round(timing.snapping*10)/10;
+     row.pathSearchMs=Math.round(timing.pathSearch*10)/10;
+     row.serverTotalMs=Math.round(timing.total*10)/10;
+    }
     row.potentialAccessReviewEdges=body.potentialAccessReviewEdges??null;
     row.potentialTurnRestrictionReviewCount=body.potentialTurnRestrictionReviewCount??null;
     row.startSnapAmbiguous=body.startSnapAmbiguous??null;
