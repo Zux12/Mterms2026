@@ -72,3 +72,19 @@ All 13 records showed empty `access`, `vehicle`, and `motorVehicle` values in th
 - [ ] Classify endpoints and establish any actual missing connection
 
 **Priority:** inspect node `1466762606` first because it combines a motorway link and secondary road at a sink-only imported endpoint; that is a *review priority*, not proof of a mapping error. Do not alter routing or data on this basis.
+
+## Priority sink-node upstream trace — 11 November 2026
+
+A fresh read-only query expanded node `1466762606` to its immediate predecessors `11329290039` and `2944902632`. Four imported directed edges were found:
+
+- `11329290038 → 11329290039 → 1466762606`: two consecutive `motorway_link` segments (OSM ways `1221539412`, `1221539413`).
+- `5940535316 → 2944902632 → 1466762606`: two consecutive `secondary` segments (OSM ways `166734461`, `291026091`).
+
+Both paths terminate at the same imported node coordinate **(101.7208629 E, 3.1387100 N)**. The observed directed graph has no outgoing arc from this sink node, but these imported edges alone do not establish why. This may reflect import truncation, road access, direction tags or genuine road configuration.
+
+- [x] Trace both immediate upstream imported paths to priority sink node
+- [ ] Retrieve current OSM node and way tags independently
+- [ ] Determine whether the sink is a legitimate road end or an import/topology defect
+- [ ] If confirmed defective, create isolated regression and propose an import fix without modifying the live database
+
+**No road defect is confirmed.** The source remains the existing imported graph; the review must not be marked independently complete.
