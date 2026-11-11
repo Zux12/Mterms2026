@@ -74,6 +74,13 @@ function routeReply(body){
   body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
   body.turnRestrictionsEnforced===false;
 }
+// The response body is untrusted diagnostic input. Keep only scalar fields
+// of the expected type in the durable evidence file, never opaque strings,
+// objects or arrays that may accidentally contain URL/GPS/token material.
+// Missing or malformed required metrics deliberately fail the validator.
+function evidenceNonnegativeNumber(v){return Number.isFinite(v)&&v>=0?v:null;}
+function evidenceCount(v){return Number.isSafeInteger(v)&&v>=0?v:null;}
+function evidenceBoolean(v){return typeof v==='boolean'?v:null;}
 // Stage timings are advisory only: preserve measured processing costs even for
 // a legitimate directed no-path outcome, without copying URL, GPS or secrets.
 function appendServerTiming(row,body){
@@ -103,18 +110,18 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
    row.elapsedMs=Math.round((performance.now()-start)*10)/10;
    if(res.status===200&&routeReply(body)){
     row.responseStatus=200;row.ok=true;
-    row.distanceMeters=body.distanceMeters;
-    row.startSnapMeters=body.startSnapMeters;
-    row.endSnapMeters=body.endSnapMeters;
+    row.distanceMeters=evidenceNonnegativeNumber(body.distanceMeters);
+    row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
+    row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
     // Requires graph transition gap diagnostic, NOT merely valid GeoJSON.
     row.geometryMetricsVerified=geometryMatchesJourney(body,c);
     row.geometryContinuous=verifiedGeometry(body)&&row.geometryMetricsVerified;
     row.routeModeVerified=true;
     appendServerTiming(row,body);
-    row.potentialAccessReviewEdges=body.potentialAccessReviewEdges??null;
-    row.potentialTurnRestrictionReviewCount=body.potentialTurnRestrictionReviewCount??null;
-    row.startSnapAmbiguous=body.startSnapAmbiguous??null;
-    row.endSnapAmbiguous=body.endSnapAmbiguous??null;
+    row.potentialAccessReviewEdges=evidenceCount(body.potentialAccessReviewEdges);
+    row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
+    row.startSnapAmbiguous=evidenceBoolean(body.startSnapAmbiguous);
+    row.endSnapAmbiguous=evidenceBoolean(body.endSnapAmbiguous);
    }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'){
     row.responseStatus=404;row.ok=false;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
