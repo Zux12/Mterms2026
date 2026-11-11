@@ -3,6 +3,7 @@
 // Requires a separately provisioned READ-ONLY MongoDB credential.
 // Input JSON is private; only sanitized evidence is written (mode 0600).
 const fs=require('node:fs'),path=require('node:path');
+const {randomBytes,timingSafeEqual}=require('node:crypto');
 const {spawnSync}=require('node:child_process');
 const express=require('express'),mongoose=require('mongoose');
 const {router}=require('./kl-segment-v4102');
@@ -15,8 +16,17 @@ async function main(){
   throw Error('A read-only MongoDB connection is required');
  const cases=validateCases(JSON.parse(fs.readFileSync(input,'utf8')));
  const app=express();
- // This preview is never exposed to the network or production application.
- app.use('/api/jalan/kl',router);
+ // Ephemeral per-run token prevents other local processes from casually
+ // querying private journey coordinates through the loopback preview.
+ const sessionToken=randomBytes(32).toString('hex');
+ app.use('/api/jalan/kl',(req,res,next)=>{
+  const received=req.get('x-jalan-local-session');
+  const expected=Buffer.from(sessionToken);
+  const candidate=typeof received==='string'?Buffer.from(received):Buffer.alloc(0);
+  if(candidate.length!==expected.length||!timingSafeEqual(candidate,expected))
+   return res.status(401).json({ok:false,error:'Unauthorized'});
+  next();
+ },router);
  let server;
  try{
   await mongoose.connect(process.env.JALAN_READONLY_MONGODB_URI,{
@@ -27,7 +37,7 @@ async function main(){
   });
   const port=server.address().port;
   const evidence=await collectEvidence(cases,`http://127.0.0.1:${port}/api/jalan/kl/route`,{
-   timeoutMs:60000
+   timeoutMs:60000,authHeader:'x-jalan-local-session',authValue:sessionToken
   });
   fs.writeFileSync(output,JSON.stringify(evidence,null,2)+'\n',{flag:'wx',mode:0o600});
   const checked=spawnSync(process.execPath,[path.join(__dirname,'validate-kl-pilot.js'),output],{
