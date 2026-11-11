@@ -268,3 +268,13 @@ test('untrusted 422 response cannot masquerade as verified snap failure',async()
  assert.equal(out[0].startSnapMeters,undefined);
  assert.ok(!JSON.stringify(out).includes('DO_NOT_PERSIST'));
 });
+
+test('records only boolean cold versus cached graph metadata',async()=>{
+ const cold=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,graphCacheHit:false})});
+ const warm=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,graphCacheHit:true})});
+ const malformed=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,graphCacheHit:{secret:'DO_NOT_STORE'}})});
+ assert.equal(cold[0].graphCacheHit,false);
+ assert.equal(warm[0].graphCacheHit,true);
+ assert.equal(malformed[0].graphCacheHit,null);
+ assert.ok(!JSON.stringify(malformed).includes('DO_NOT_STORE'));
+});
