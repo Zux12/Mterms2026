@@ -167,7 +167,7 @@ test('unverified geometry does not contaminate latency, snap or server timing di
  assert.equal(r.summary.automatedEvidenceGatePassed,false);
  assert.equal(r.summary.latencySamples,19);
  assert.equal(r.summary.latencyMaxMs,403);
- assert.equal(r.summary.snapEndpointSamples,38);
+ assert.equal(r.summary.snapEndpointSamples,30); // 15 verified routes, two endpoints each
  assert.equal(r.summary.snapP95Meters,8);
  assert.equal(r.summary.serverTimingSamples,19);
  assert.equal(r.summary.serverTimingByStageMs.serverTotalMs.max,10);
@@ -189,7 +189,7 @@ test('out-of-range snap is reported as an error without biasing accepted snap pe
  const r=run(cases);
  assert.equal(r.status,1);
  assert.equal(r.summary.snapOver200Meters,1);
- assert.equal(r.summary.snapEndpointSamples,38);
+ assert.equal(r.summary.snapEndpointSamples,30); // 15 verified routes, two endpoints each
  assert.equal(r.summary.snapP95Meters,8);
  assert.equal(r.summary.latencySamples,19);
  assert.equal(r.summary.latencyMaxMs,403);
