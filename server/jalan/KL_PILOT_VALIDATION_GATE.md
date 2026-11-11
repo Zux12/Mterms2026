@@ -222,3 +222,12 @@ These checkmarks verify code and test behavior, **not real-route performance**. 
 - [ ] Twenty independently reviewed actual KL journeys, legal-turn checks and TomTom comparison.
 
 The new documentation commit requires fresh CI confirmation. These test results are not full-road navigation acceptance.
+
+## Accepted timing-sample integrity checkpoint — 12 November 2026
+
+- [x] Route timing quantiles now exclude unverified HTTP failures, including 422 GPS snap-out-of-range responses, rather than allowing them to contaminate accepted route/no-path performance statistics.
+- [x] Routing CI [run 43064294035](https://github.com/Zux12/Mterms2026/actions/runs/43064294035) on commit `ba6a96792297c879d37035a71144daea18506d94`: **211 tests passed, 0 failed** (job log verified).
+- [x] Diagnostic CI [run 43064294064](https://github.com/Zux12/Mterms2026/actions/runs/43064294064) succeeded.
+- [ ] Complete full-graph KL route execution, 20 independent real-road journey reviews, and TomTom comparison.
+
+This is an evidence-quality improvement, not proof of road-level navigation readiness. This documentation commit requires fresh CI verification.
