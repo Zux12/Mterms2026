@@ -6,6 +6,8 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - [x] Directed edges, partial-edge starts/ends, junction connectivity, disconnected crossings, and zero-distance GeoJSON covered by isolated unit tests.
 - [x] Differential synthetic shortest-path comparison against an independent Bellman–Ford reference.
 - [x] Synthetic large-graph performance measurement completed (not representative of actual KL roads).
+- [x] Route-coordinate gap advisory detects displaced endpoints even when imported directed graph node IDs connect (synthetic regression plus sampled KL chain).
+- [ ] Audit geometry gap counts/distribution on the complete KL graph; zero synthetic or sampled gaps is **not** full-network validation.
 - [ ] Re-run GitHub Actions against the final proposed commit and capture run IDs.
 
 ## Real KL graph — must verify before merge
@@ -13,7 +15,7 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - [ ] Cold graph load and warm route latency measured with representative KL origin/destination pairs.
 - [ ] At least 20 origin/destination pairs, including short urban trips, longer corridors, one-way streets, overpasses and disconnected roads.
 - [ ] Snap-distance distribution (median, p95, max, and >200 m failures) recorded.
-- [ ] Confirm GeoJSON geometry continuity and direction against the road network.
+- [ ] Confirm GeoJSON geometry continuity and direction against the road network; log `geometryGapCountOverThreshold`, `geometryMaxGapMeters`, `geometryGapTransitionsInspected` (default 2 m alert threshold), investigate every mismatch.
 - [ ] Review no-path and ambiguous snapping cases; never silently present an illegal route.
 - [ ] Independently verify actual road restrictions; node adjacency alone does **not** enforce turn prohibitions.
 - [ ] Compare distances and plausible journey paths with TomTom; do not treat illustrative 30 km/h ETA as real traffic-aware ETA.
