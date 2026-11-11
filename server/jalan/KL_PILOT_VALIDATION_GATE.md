@@ -14,7 +14,8 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - Examined **all 168,221 documents** in `jalan_navigation.road_graph_edges_v495` through MongoDB Atlas **read-only aggregations**: grouping by `edgeId` produced **zero duplicate IDs** (including forward/reverse directed records).
 - Separate full-collection structural aggregation found **zero** missing/non-string `edgeId` values; **zero** missing `fromNode` or `toNode`; and **zero** records whose top-level `coordinates` array has a length other than two.
 - The preview graph loader now rejects duplicate or empty/non-string directed IDs instead of accepting a cardinality-only check. This is an in-memory fail-closed guard; no MongoDB indexes, records, schemas, or production routes were changed.
-- **Still outstanding:** numeric endpoint values and geographic bounds across the *entire* graph, mismatched endpoint coordinates for every adjacency, actual on-road GPS snapping, representative full routes and turn legality. A zero-duplicate result does not establish route correctness.
+- Additional read-only full-collection aggregation found **zero** nonnumeric endpoint values, **zero** malformed nested coordinate pairs and **zero** coordinates outside global WGS84 latitude/longitude bounds. These checks are data-shape validation, **not** precision, consistency or road-legality verification.
+- **Still outstanding:** mismatched endpoint coordinates across all graph adjacencies, genuine on-road GPS snapping, representative full routes and turn legality. A zero-duplicate result does not establish route correctness.
 
 ## Real KL graph — must verify before merge
 - [ ] Read-only health confirms expected `road_graph_edges_v495` count (168,221) in `jalan_navigation`.
