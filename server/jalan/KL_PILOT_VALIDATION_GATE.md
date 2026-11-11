@@ -267,3 +267,13 @@ This documentation commit requires its own CI verification.
 - [ ] Independently review 20 KL journeys and compare TomTom routing and road legality.
 
 This documentation update requires its own CI verification. Keep PR draft and TomTom production routing unchanged.
+
+## Cold/warm route performance summary checkpoint — 12 November 2026
+
+- [x] Offline KL acceptance validator now reports separate `graphCacheTimingByStatusMs.cold` and `.warm` sample counts, p50, p95 and maximum for verified route outcomes with internally consistent stage timings.
+- [x] Two regression tests cover cold/warm separation and exclusion of invalid cache metadata/unverified journeys.
+- [x] Routing CI [run 43072881863](https://github.com/Zux12/Mterms2026/actions/runs/43072881863) on commit `1c77d64b5eebe0d648f4cb832b1f07e54d17194d`: **222/222 tests passed, zero failed**, job log verified.
+- [ ] Diagnostic CI for the same commit: [run 43072881972](https://github.com/Zux12/Mterms2026/actions/runs/43072881972) was queued when checked; do not mark passed until completion.
+- [ ] Execute full-graph cold/warm routes against actual KL graph and record independent 20-journey acceptance evidence.
+
+This documentation commit also requires fresh CI. Do not mistake offline synthetic timing fixtures for actual route latency.
