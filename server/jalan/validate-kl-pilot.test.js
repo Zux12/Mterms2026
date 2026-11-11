@@ -15,7 +15,7 @@ function twentyValid(){
    ok:!unreachable,responseStatus:unreachable?404:200,elapsedMs:k*100+i,
    ...(unreachable?{disconnectionReviewed:true,noPathModeVerified:true}:{
     routeModeVerified:true,distanceMeters:1000+k*100,startSnapMeters:5,endSnapMeters:8,
-    geometryContinuous:true
+    geometryContinuous:true,geometryMetricsVerified:true
    })
   };
  }));
@@ -96,4 +96,22 @@ test('reviewed HTTP 404 without experimental no-path verification cannot pass',(
  assert.equal(status,1);
  assert.equal(summary.automatedEvidenceGatePassed,false);
  assert.ok(summary.validationErrors.some(x=>x.includes('experimental no-path response not verified')));
+});
+
+test('asserted geometry continuity without independent endpoint/distance check cannot pass',()=>{
+ const rows=twentyValid();
+ delete rows[0].geometryMetricsVerified;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.ok(summary.validationErrors.some(x=>x.includes('independent geometry metrics not verified')));
+});
+test('explicitly failed independent geometry metrics prevent acceptance even with clean continuity claim',()=>{
+ const rows=twentyValid();
+ rows[0].geometryMetricsVerified=false;
+ rows[0].geometryContinuous=true;
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.ok(summary.validationErrors.some(x=>x.includes('independent geometry metrics not verified')));
 });
