@@ -35,3 +35,18 @@ For each candidate, record **all** of the following before ticking its review ce
 - [ ] Representative 20 real KL journey acceptance gate
 
 Production TomTom remains authoritative; no merge or deployment is authorized.
+
+## Independent-source lookup status
+
+The public OpenStreetMap documentation confirms that node identifiers are stable OSM object identifiers and that node pages are addressable by `https://www.openstreetmap.org/node/<id>`. General web searches did **not** return node-specific road/way/tag evidence for these six IDs; therefore **none** has been classified as verified.
+
+Direct review links (these are lookup entry points, **not evidence that the current OSM object was retrieved**):
+
+- [Source candidate 5738558701](https://www.openstreetmap.org/node/5738558701)
+- [Source candidate 11305000094](https://www.openstreetmap.org/node/11305000094)
+- [Source candidate 11921503726](https://www.openstreetmap.org/node/11921503726)
+- [Sink candidate 12469319673](https://www.openstreetmap.org/node/12469319673)
+- [Sink candidate 13246999063](https://www.openstreetmap.org/node/13246999063)
+- [Sink candidate 1466762606](https://www.openstreetmap.org/node/1466762606)
+
+**Review blocker:** retrieve independent node/parent-way details and relevant tags or a timestamped OSM extract before classifying any node. Do not assume public map search snippets are road-level verification.
