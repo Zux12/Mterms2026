@@ -224,3 +224,49 @@ test('unverified route and malformed cache status never contaminate cold warm me
  assert.equal(r.summary.graphCacheTimingByStatusMs.warm.samples,0);
  assert.equal(r.summary.graphCacheTimingByStatusMs.cold.p50,null);
 });
+
+test('all-reviewed 404s cannot substitute for positive route controls',()=>{
+ const rows=twentyValid();
+ for(const c of rows){
+  if(c.journeyType==='disconnected')continue;
+  Object.assign(c,{expectedReachable:false,ok:false,responseStatus:404,
+   disconnectionReviewed:true,noPathModeVerified:true});
+ }
+ const {status,summary}=run(rows);
+ assert.equal(status,2);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.deepEqual(summary.insufficientReachableTypes,kinds.slice(0,4));
+ assert.equal(summary.expectedNoPath,20);
+ assert.equal(summary.validationErrors.length,0);
+});
+test('two forward and two independently reviewed reverse one-way journeys remain allowed',()=>{
+ const rows=twentyValid();
+ for(const c of rows.slice(8,10)){
+  Object.assign(c,{expectedReachable:false,ok:false,responseStatus:404,
+   disconnectionReviewed:true,noPathModeVerified:true});
+ }
+ const {status,summary}=run(rows);
+ assert.equal(status,0);
+ assert.equal(summary.reachableControlsByType['one-way'],2);
+ assert.deepEqual(summary.insufficientReachableTypes,[]);
+ assert.equal(summary.expectedNoPath,6);
+});
+test('one positive corridor journey is insufficient to pass the coverage gate',()=>{
+ const rows=twentyValid();
+ for(const c of rows.slice(4,7)){
+  Object.assign(c,{expectedReachable:false,ok:false,responseStatus:404,
+   disconnectionReviewed:true,noPathModeVerified:true});
+ }
+ const {status,summary}=run(rows);
+ assert.equal(status,2);
+ assert.equal(summary.reachableControlsByType['long-corridor'],1);
+ assert.deepEqual(summary.insufficientReachableTypes,['long-corridor']);
+});
+test('disconnected classification cannot be used to satisfy reachable route coverage',()=>{
+ const rows=twentyValid();
+ Object.assign(rows[16],{...rows[0],caseId:rows[16].caseId,journeyType:'disconnected'});
+ const {status,summary}=run(rows);
+ assert.equal(status,1);
+ assert.equal(summary.automatedEvidenceGatePassed,false);
+ assert.ok(summary.validationErrors.some(x=>x.includes('disconnected journey type')));
+});
