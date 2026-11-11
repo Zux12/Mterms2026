@@ -70,3 +70,27 @@ Nine **synthetic** CLI regression tests exercise these fail-closed semantics. Pa
 - If input is empty or invalid, counts are `null` with `graphTopologyAvailable:false`, not a false zero; outputs explicitly retain `topologyAdvisoryOnly:true` and `directedReachabilityVerified:false`.
 - Seven synthetic regression tests cover one-way chains, cycles, disconnected fragments, bidirectional arcs, duplicate arcs/self-loops, malformed input and a 5,000-edge chain. **The live 168,221-edge KL graph topology has not been computed in this run**, because Atlas cluster address resolution failed. Inspect real weak components and directed source/sink nodes when read-only Atlas connectivity is restored, then review representative road endings against OSM junctions and actual access rules.
 - No change to Dijkstra routing, snapping, turn enforcement, TomTom, production deployment or MongoDB records. **Do not merge or deploy for navigation.**
+
+## Overall milestone tracker (maintained as CI evidence arrives)
+
+Tick a milestone **only after verifying its own acceptance evidence**. A synthetic test does not close a real-road milestone.
+
+- [x] Original terminal diagnostic token-storage request returned HTTP 201 with `stored:true` (previous operator observation; not a fresh live-service check).
+- [x] Experimental directed routing and regression test framework implemented.
+- [x] Differential shortest-path and synthetic large-graph tests implemented and previously verified.
+- [x] Read-only KL edge-identity and node-coordinate audits documented with complete-collection observations.
+- [x] Offline 20-journey structural evidence gate implemented; missing coverage never authorizes production routing.
+- [x] CI verified for commit `70e99dca54e48aebe167a0da6dd52814758e7d1e`: routing run `42978554365` succeeded; diagnostic run `42978554238` succeeded.
+- [ ] CI verified for the latest proposed commit (must refresh for every new commit).
+- [ ] Full KL graph health and load time rechecked in a live read-only environment.
+- [ ] Twenty independently reviewed actual KL origin–destination journeys completed.
+- [ ] GPS snapping error percentiles and ambiguity cases measured on real KL journeys.
+- [ ] Full-graph connectivity and no-path cases reviewed against actual roads.
+- [ ] Turn and access restrictions independently checked and enforced for legal driving.
+- [ ] Actual KL routing latency and memory benchmark accepted.
+- [ ] TomTom route-distance and traffic-aware ETA comparisons completed.
+- [ ] KL pilot safety and quality acceptance signed off.
+- [ ] Peninsular Malaysia coverage and performance validated.
+- [ ] Sabah/Sarawak rollout considered only after Peninsular Malaysia acceptance.
+
+**Progress accounting:** Automated regression completion and database shape audits are not substitutes for route legality, user-facing navigation quality, or production acceptance. Keep TomTom authoritative.
