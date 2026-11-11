@@ -79,3 +79,13 @@ Read-only Atlas `$graphLookup` started at all three imported outgoing edges of O
 - [ ] Independently review legal road restrictions and 20 journey cases.
 
 **Caution:** Maximum observed depth equals the query limit; it is not a measurement of maximum reachable path length. These are reachable **edge-record counts**, not distinct road nodes or complete navigable journeys. No live route or TomTom behavior changed.
+
+## Full-network export preflight — 12 November 2026
+
+A read-only Atlas aggregation was attempted to fetch all 168,221 directed KL edges in seven 25,000-record pages for an independent full-graph route calculation. **The connector enforced `config.maxDocumentsPerQuery` and returned only 1,000 documents in the first page**, so the attempted snapshot was intentionally discarded. **No complete route was calculated or accepted.**
+
+- [x] Confirm connector query cap and fail closed on incomplete graph extraction
+- [ ] Run full-graph route calculation in a controlled environment with access to all edges, using the existing experimental preview or a validated full export
+- [ ] Collect cold/warm route timing and independent 20-journey evidence
+
+Do not silently concatenate truncated pages or claim a partial graph is the complete network. This limit concerns the connected query interface, not the road data itself.
