@@ -136,8 +136,17 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     // Confirm a recognized experimental no-path response, not just HTTP 404.
     row.noPathModeVerified=true;
     appendServerTiming(row,body);
+   }else if(res.status===422&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
+    body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.error==='No nearby directed graph segment within 200 m'){
+    // A snap failure is NOT a directed no-path finding. Preserve only sanitized
+    // measurements; the existing acceptance validator must reject this case.
+    row.responseStatus=422;row.ok=false;row.failureClass='snap-out-of-range';
+    row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
+    row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
+    appendServerTiming(row,body);
    }else{
-    // Authentication failures, 422 snap failures, server outages and
+    // Authentication failures, unrelated 422/404 responses, outages and
     // unrelated 404s can NEVER be counted as reviewed graph disconnections.
     row.responseStatus=res.status===404?0:res.status;
     row.ok=false;row.failureClass='unverified-experimental-response';
