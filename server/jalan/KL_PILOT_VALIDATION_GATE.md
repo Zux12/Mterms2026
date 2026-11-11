@@ -81,7 +81,8 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - [x] Read-only KL edge-identity and node-coordinate audits documented with complete-collection observations.
 - [x] Offline 20-journey structural evidence gate implemented; missing coverage never authorizes production routing.
 - [x] Offline directed **strongly connected component** (SCC) analysis and seven regression scenarios verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: routing CI **151/151 passed**, run `42983451836`; diagnostics CI succeeded, run `42983451981`.
-- [ ] Run SCC diagnostic against the **real imported KL graph** with read-only access; inspect one-way bridges, isolated strongly connected islands and source/sink SCCs before inferring navigation limitations.
+- [x] Run the offline SCC diagnostic against the **real imported KL graph** via read-only Atlas queries (168,221 edges / 103,670 nodes, seven sorted batches, 11 Nov 2026); results below. **Only metric computation is complete**; road-specific component investigation remains open.
+- [ ] Investigate actual one-way bridges, strongly connected islands, and source/sink SCCs against mapped roads and signage; component counts alone do not certify navigation.
 - [x] CI verified for commit `70e99dca54e48aebe167a0da6dd52814758e7d1e`: routing run `42978554365` succeeded; diagnostic run `42978554238` succeeded.
 - [ ] CI verified for the latest proposed commit (must refresh for every new commit).
 - [ ] Full KL graph health and load time rechecked in a live read-only environment.
@@ -104,3 +105,29 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - Verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: [routing CI run 42983451836](https://github.com/Zux12/Mterms2026/actions/runs/42983451836) reports 151/151 tests passing (0 failed), and [diagnostic CI run 42983451981](https://github.com/Zux12/Mterms2026/actions/runs/42983451981) succeeded.
 - This is an **offline analysis module**, not yet wired into the route handler or live graph loader; actual KL component counts and production latency impact are unmeasured. SCC topology alone does not validate legal turn movements, OSM access permissions, trip-specific reachability or real driving safety. Never use the SCC result as production routing approval.
 - Attempts to establish a read-only Atlas connector session for the available clusters failed at cluster-address lookup in this run. Do not mark the live KL graph audit complete from previous terminal diagnostics.
+
+## Read-only full KL weak/strong component evidence — 11 November 2026
+
+- Connected through Atlas to the *existing* `jalan_navigation.road_graph_edges_v495` collection using read-only query operations. No code, GPS traces, authentication values or database records were uploaded, saved or changed.
+- Queried all **168,221** directed edges in **seven** sorted `_id` batches (25,000 per full batch, 18,221 final), using `$sort`, `$skip`, `$limit`, `$group` and string projections of `fromNode` and `toNode`; verified every batch size and ascending `_id` page boundaries. This was a stable-size read, **not a transactionally consistent snapshot**; concurrent edits would require a repeat.
+- Applied the unchanged offline `kl-graph-topology-audit-v4102.js` and `kl-strong-components-audit-v4102.js` modules to the complete in-memory directed edge list. Counts for edges, nodes, source-only and sink-only nodes reproduce prior read-only observations.
+
+| Full KL imported graph structural measure | Read-only result |
+| --- | ---: |
+| Directed edges | **168,221** |
+| Unique nodes | **103,670** |
+| Source-only nodes (zero in-degree) | **496** |
+| Sink-only nodes (zero out-degree) | **519** |
+| Weakly connected components | **198** |
+| Weak components with fewer than five nodes | **113** |
+| Largest weak component: nodes | **101,847 (98.24%)** |
+| Largest weak component: directed edges | **165,310** |
+| Strongly connected components (SCCs) | **6,312** |
+| Singleton SCCs | **6,073** |
+| Largest SCC: nodes | **94,609 (91.26%)** |
+| SCCs without incoming cross-component edges | **647** |
+| SCCs without outgoing cross-component edges | **669** |
+
+These are **OSM-imported graph connectivity** metrics, not real driving acceptance. In particular, strongly connected paths may still involve prohibited turns, vehicle-specific access restrictions, unmapped barriers, missing geometry, and implausible detours. Singletons and source/sink SCCs can result from legitimate one-way layouts. Do not infer that 91.26% of KL journeys are navigable or safe, or that any other percentage is unreliable.
+
+**Milestone complete:** read-only structural computation on the full imported graph. **Still outstanding:** independent road-level review of flagged components, live service cold-load/warm-route latency, at least 20 independently reviewed KL origin–destination journeys with GPS and turn/access legality, and TomTom comparisons. Keep routing experimental and TomTom authoritative.
