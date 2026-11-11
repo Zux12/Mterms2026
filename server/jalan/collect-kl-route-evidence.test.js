@@ -278,3 +278,11 @@ test('records only boolean cold versus cached graph metadata',async()=>{
  assert.equal(malformed[0].graphCacheHit,null);
  assert.ok(!JSON.stringify(malformed).includes('DO_NOT_STORE'));
 });
+test('contradictory disconnected category is blocked before issuing HTTP requests',async()=>{
+ let calls=0;
+ await assert.rejects(()=>collectEvidence([{
+  ...base,caseId:'kl-contradiction',journeyType:'disconnected',
+  expectedReachable:true,disconnectionReviewed:true
+ }],url,{fetchImpl:async()=>{calls++;return reply(200,good)();}}),/Disconnected journey/);
+ assert.equal(calls,0);
+});
