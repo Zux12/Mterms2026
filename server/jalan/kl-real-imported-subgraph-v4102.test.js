@@ -57,3 +57,17 @@ test('real imported KL subgraph contains a reachable cycle, not just a straight 
  assert.ok(r.distanceMeters>0);
  assert.equal(g.edges.length,16);
 });
+
+test('real Atlas shortcut beats the earlier 157m four-edge path when both exist',()=>{
+ const g=fixture();
+ const directA={id:'osm-way-604900312:0:F',from:'a',to:'f',a:nodes.a,b:nodes.f,len:distance(nodes.a,nodes.f)};
+ const directB={id:'osm-way-1161236397:0:F',from:'f',to:'e',a:nodes.f,b:nodes.e,len:distance(nodes.f,nodes.e)};
+ g.edges.push(directA,directB);
+ g.adj.get('a').push(directA);
+ g.adj.get('f').push(directB);
+ const route=calculate(g,snap(g.edges[0],0),snap(g.edges[5],1));
+ assert.ok(route);
+ assert.equal(route.distanceMeters,17);
+ assert.deepEqual(route.geometry,[ [101.7038508,3.1315707],[101.7039169,3.1315322],[101.7038951,3.1314573] ]);
+ assert.equal(route.geometryGapCountOverThreshold,0);
+});
