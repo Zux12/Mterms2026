@@ -65,7 +65,7 @@ test('real Atlas shortcut beats the earlier 157m four-edge path when both exist'
  g.edges.push(directA,directB);
  g.adj.get('a').push(directA);
  g.adj.get('f').push(directB);
- const route=calculate(g,snap(g.edges[0],0),snap(g.edges[5],1));
+ const route=calculate(g,snap(g.edges[0],0),snap(directB,1));
  assert.ok(route);
  assert.equal(route.distanceMeters,17);
  assert.deepEqual(route.geometry,[ [101.7038508,3.1315707],[101.7039169,3.1315322],[101.7038951,3.1314573] ]);
