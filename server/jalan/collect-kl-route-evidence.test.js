@@ -286,3 +286,26 @@ test('contradictory disconnected category is blocked before issuing HTTP request
  }],url,{fetchImpl:async()=>{calls++;return reply(200,good)();}}),/Disconnected journey/);
  assert.equal(calls,0);
 });
+
+test('only a bounded integer no-path search breadth is kept in private evidence',async()=>{
+ const c={...base,caseId:'kl-visited',expectedReachable:false,
+  journeyType:'disconnected',disconnectionReviewed:true};
+ const goodCount=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,searchVisitedNodes:157})});
+ assert.equal(goodCount[0].searchVisitedNodes,157);
+ assert.equal(goodCount[0].noPathModeVerified,true);
+ for(const invalid of ['Bearer SECRET_ROUTE_TOKEN',{},[],NaN,-1,1.5,400001,Infinity]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,searchVisitedNodes:invalid})});
+  assert.equal(out[0].responseStatus,404);
+  assert.equal(out[0].searchVisitedNodes,null);
+  assert.ok(!JSON.stringify(out).includes('SECRET_ROUTE_TOKEN'));
+ }
+});
+test('unknown service responses do not produce search-visit evidence',async()=>{
+ const c={...base,caseId:'kl-bad-visited',expectedReachable:false,
+  journeyType:'disconnected',disconnectionReviewed:true};
+ const out=await collectEvidence([c],url,{fetchImpl:reply(404,{
+  ...noPath,mode:'UNRELATED_SERVICE',searchVisitedNodes:15
+ })});
+ assert.equal(out[0].responseStatus,0);
+ assert.equal(out[0].searchVisitedNodes,undefined);
+});
