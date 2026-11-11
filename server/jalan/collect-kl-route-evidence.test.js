@@ -14,6 +14,9 @@ const good={
  potentialAccessReviewEdges:1,potentialTurnRestrictionReviewCount:0,
  startSnapAmbiguous:false,endSnapAmbiguous:true
 };
+const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+ error:'No directed path found',routingActivated:false,databaseWrites:0,
+ trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
 const reply=(status,body)=>async()=>({status,json:async()=>body});
 test('collects actual experimental response metadata but never writes coordinates or secrets to evidence',async()=>{
  let request;
@@ -33,9 +36,11 @@ test('collects actual experimental response metadata but never writes coordinate
 test('recognized no-path 404 is accepted only with pre-existing independent review',async()=>{
  const c={...base,caseId:'kl-unreachable',journeyType:'disconnected',
   expectedReachable:false,disconnectionReviewed:true};
- const out=await collectEvidence([c],url,{fetchImpl:reply(404,{ok:false,error:'No directed path found'})});
+ const out=await collectEvidence([c],url,{fetchImpl:reply(404,noPath)});
  assert.equal(out[0].responseStatus,404);assert.equal(out[0].ok,false);
  assert.equal(out[0].disconnectionReviewed,true);
+ assert.equal(out[0].pathSearchMs,78.7);
+ assert.equal(out[0].serverTotalMs,94.4);
 });
 test('generic HTTP 404 cannot be mistaken for a disconnected road',async()=>{
  const c={...base,expectedReachable:false,disconnectionReviewed:true};
@@ -95,4 +100,32 @@ test('rejects malformed stage timings without losing valid route evidence',async
  const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
  assert.equal(out[0].ok,true);
  assert.equal(out[0].graphLoadMs,undefined);
+});
+
+test('spoofed no-path 404 from another route service never becomes reviewed disconnection',async()=>{
+ const c={...base,caseId:'kl-spoof',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const body of [
+  {...noPath,mode:'TOMTOM_PRODUCTION'},
+  {...noPath,mode:undefined},
+  {...noPath,routingActivated:true},
+  {...noPath,databaseWrites:1},
+  {...noPath,trafficAware:true}
+ ]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,body)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].disconnectionReviewed,undefined);
+ }
+});
+test('malformed no-path timing does not contaminate sanitized evidence',async()=>{
+ const c={...base,caseId:'kl-invalid-timing',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ const out=await collectEvidence([c],url,{fetchImpl:reply(404,{
+  ...noPath,timingMs:{...noPath.timingMs,pathSearch:-2}
+ })});
+ assert.equal(out[0].responseStatus,404);
+ assert.equal(out[0].serverTotalMs,undefined);
+ assert.ok(!JSON.stringify(out).includes('startLat'));
 });
