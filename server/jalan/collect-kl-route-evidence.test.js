@@ -244,3 +244,27 @@ test('even internally consistent but impossible stage durations are not archived
   assert.equal(out[0].serverTotalMs,undefined);
  }
 });
+
+test('verified 422 snap miss is distinct from no-path and preserves bounded timing',async()=>{
+ const body={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  startSnapMeters:240,endSnapMeters:null,
+  timingMs:{graphLoad:12,snapping:4,pathSearch:0,total:16}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(422,body)});
+ assert.equal(out[0].responseStatus,422);
+ assert.equal(out[0].failureClass,'snap-out-of-range');
+ assert.equal(out[0].ok,false);
+ assert.equal(out[0].noPathModeVerified,undefined);
+ assert.equal(out[0].startSnapMeters,240);
+ assert.equal(out[0].serverTotalMs,16);
+});
+test('untrusted 422 response cannot masquerade as verified snap failure',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(422,{
+  ok:false,error:'No nearby directed graph segment within 200 m',
+  startSnapMeters:{secret:'DO_NOT_PERSIST'}
+ })});
+ assert.equal(out[0].failureClass,'unverified-experimental-response');
+ assert.equal(out[0].startSnapMeters,undefined);
+ assert.ok(!JSON.stringify(out).includes('DO_NOT_PERSIST'));
+});
