@@ -32,36 +32,57 @@ try{
  turnRestrictions=docs;
 }catch(e){console.warn('KL turn advisory unavailable:',e.message);}
 return {adj,edges,turnRestrictions,nodeGeometry:auditGraphNodeGeometry(edges),topology:auditDirectedGraphTopology(edges)};})();try{graph=await loading;return graph;}finally{loading=null;}}
-function nearest(edges,p){let best=null,second=null,candidatesWithin200=0;for(const e of edges){
+function nearest(edges,p){let best=null,second=null,candidatesWithin200=0,nearby=[];for(const e of edges){
 // Evaluate the segment envelope, not endpoints alone; a long road can cross the GPS location.
 if(p[0]<Math.min(e.a[0],e.b[0])-.007||p[0]>Math.max(e.a[0],e.b[0])+.007)continue;
 if(p[1]<Math.min(e.a[1],e.b[1])-.007||p[1]>Math.max(e.a[1],e.b[1])+.007)continue;
 const x=project(p,e.a,e.b);
-if(x.meters<=200)candidatesWithin200++;
+if(x.meters<=200){candidatesWithin200++;nearby.push({edge:e,...x});}
 if(!best||x.meters<best.meters){second=best;best={edge:e,...x};}
 else if(!second||x.meters<second.meters){second={edge:e,...x};}
 }
 if(!best)return null;
-// This is a diagnostic, not a map-matching decision. Parallel/opposing roads can
-// project equally well. Do not silently claim this closest-edge snap is reliable.
-return {...best,candidatesWithin200,secondBestSnapMeters:second?second.meters:null,
+// Preserve both legal directions only for a genuine reverse directed twin:
+// same OSM end nodes reversed, coincident geometry and the same snap point.
+// Merely nearby parallel streets, bridges or unrelated node IDs must NOT be
+// offered as alternate snaps. This is not legal turn/access enforcement.
+const reverseTwin=nearby.find(candidate=>
+ candidate.edge!==best.edge&&
+ candidate.edge.from===best.edge.to&&candidate.edge.to===best.edge.from&&
+ distance(candidate.edge.a,best.edge.b)<=0.5&&
+ distance(candidate.edge.b,best.edge.a)<=0.5&&
+ distance(candidate.point,best.point)<=0.5) || null;
+// Ambiguity is still reported even when the reverse-twin optimization applies.
+return {...best,reverseTwin,candidatesWithin200,secondBestSnapMeters:second?second.meters:null,
  ambiguousSnap:!!second&&second.meters<=200&&second.meters-best.meters<=10};
 }
 function calculate(g,s,t){const START='@start',END='@end',extra=new Map();
 function add(from,to,len,coords,id,potentialAccessCaution=false,graphFrom=null,graphTo=null){if(!extra.has(from))extra.set(from,[]);extra.get(from).push({to,len,coords,id,potentialAccessCaution,graphFrom,graphTo,virtualPartial:true});}
-const sEdge=s.edge,tEdge=t.edge;
-add(START,sEdge.to,sEdge.len*(1-s.t),[s.point,sEdge.b],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
-add(tEdge.from,END,tEdge.len*t.t,[tEdge.a,t.point],tEdge.id,!!tEdge.potentialAccessCaution,tEdge.from,tEdge.to);
-// Exact node snaps are not required to traverse their selected road edge.
-// A departure at the upstream endpoint may take any directed outgoing road,
-// and arrival at the downstream endpoint may come from any directed incoming
-// road. Without these node connectors, arbitrary snap-edge choice imposes
-// detours or false disconnections even on a correctly connected graph.
-if(s.t===0)add(START,sEdge.from,0,[s.point,sEdge.a],sEdge.id,false,sEdge.from,sEdge.to);
-if(t.t===1)add(tEdge.to,END,0,[tEdge.b,t.point],tEdge.id,false,tEdge.from,tEdge.to);
-// A reused external edge ID is not evidence that both snaps hit the same
-// directed edge. Only the same graph edge object permits this direct shortcut.
-if(sEdge===tEdge&&s.t<=t.t)add(START,END,sEdge.len*(t.t-s.t),[s.point,t.point],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
+// Closest-edge order must not force a detour on a bidirectional segment.
+// Reverse twins were strictly verified by nearest(); offer both legal graph
+// orientations to the same Dijkstra search (not a second search or road jump).
+const starts=s.reverseTwin?[s,s.reverseTwin]:[s];
+const targets=t.reverseTwin?[t,t.reverseTwin]:[t];
+for(const snap of starts){
+ const e=snap.edge;
+ add(START,e.to,e.len*(1-snap.t),[snap.point,e.b],e.id,!!e.potentialAccessCaution,e.from,e.to);
+ // Exact upstream node snaps may leave on any directed outgoing edge.
+ if(snap.t===0)add(START,e.from,0,[snap.point,e.a],e.id,false,e.from,e.to);
+}
+for(const snap of targets){
+ const e=snap.edge;
+ add(e.from,END,e.len*snap.t,[e.a,snap.point],e.id,!!e.potentialAccessCaution,e.from,e.to);
+ // Exact downstream target node snaps may arrive via any incoming edge.
+ if(snap.t===1)add(e.to,END,0,[e.b,snap.point],e.id,false,e.from,e.to);
+}
+// Direct same-edge travel is directional. Never join merely matching edge IDs
+// or coordinates across different nodes, and never travel backwards.
+for(const source of starts)for(const target of targets){
+ const e=source.edge;
+ if(e===target.edge&&source.t<=target.t)
+  add(START,END,e.len*(target.t-source.t),[source.point,target.point],
+   e.id,!!e.potentialAccessCaution,e.from,e.to);
+}
 const heap=new Heap(),dist=new Map([[START,0]]),prev=new Map();heap.push({n:START,d:0});let visited=0;
 // A directed graph with E edges may have up to 2E distinct nodes. The former fixed
 // 150,000-node guard could reject valid routes in the 168,221-edge pilot graph.
