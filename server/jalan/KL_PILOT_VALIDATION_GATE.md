@@ -163,3 +163,14 @@ Added the **offline-only** `kl-endpoint-review-v4102.js` candidate-prioritizatio
 - [ ] Complete 20 real KL journeys and independent driving-legality review.
 
 **Note:** The two CI checkmarks refer to the previously verified commit above. This documentation-only commit requires its own fresh CI result. Keep TomTom in production.
+
+## Verified imported-road sink fixture checkpoint — 11 November 2026
+
+- [x] Imported KL sink `1466762606` and its two upstream two-edge chains were queried read-only from `road_graph_edges_v495`.
+- [x] Four directed-routing regression tests were added using the imported edge IDs and coordinates, including forward chains and disallowed reverse reachability in this **limited fixture**.
+- [x] GitHub Actions routing run [42998706761](https://github.com/Zux12/Mterms2026/actions/runs/42998706761) completed successfully for commit `dec4d7f126e901cf2ffdfaaf547b1dbaf9a4c0ce`: **169 tests, 169 passed, 0 failed** (verified in job log).
+- [x] GitHub Actions diagnostic run [42998706766](https://github.com/Zux12/Mterms2026/actions/runs/42998706766) succeeded for the same commit.
+- [ ] Independently verify OSM directions, barriers and legal junction transitions at the priority sink. The fixture alone cannot establish road legality.
+- [ ] Run at least 20 independently reviewed actual KL journeys on the full graph; fixture tests are **not** journey acceptance evidence.
+
+**This documentation commit has not yet passed its own CI.** Never merge or deploy on the strength of the imported-road fixture alone.
