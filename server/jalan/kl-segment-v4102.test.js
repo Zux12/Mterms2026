@@ -73,3 +73,22 @@ test('no-path response is explicitly experimental, read-only and carries sanitiz
  assert.deepEqual(response.timingMs,timingMs);
  assert.ok(!('geometry' in response));
 });
+
+test('real imported KL four-edge service-road witness is routed by calculate on an isolated fixture',()=>{
+ // Coordinates and directed node IDs were read from Atlas road_graph_edges_v495.
+ // This is an actual imported-road fixture, NOT a full-graph/road-legality test.
+ const records=[
+  ['osm-way-1161236396:0:F','5738558701','5738558702',[101.7038508,3.1315707],[101.7036171,3.130908]],
+  ['osm-way-1161236398:0:F','5738558702','10800536677',[101.7036171,3.130908],[101.7037223,3.1308854]],
+  ['osm-way-1161236397:2:R','10800536677','10800536676',[101.7037223,3.1308854],[101.7039025,3.1313468]],
+  ['osm-way-1161236397:1:R','10800536676','10800536675',[101.7039025,3.1313468],[101.7038951,3.1314573]]
+ ];
+ const imported=records.map(([id,from,to,a,b])=>edge(id,from,to,[a[1],a[0]],[b[1],b[0]]));
+ const route=calculate(graph(imported),snap(imported[0],0),snap(imported[3],1));
+ assert.ok(route,'the imported directed witness must be reachable');
+ assert.ok(route.distanceMeters>=150&&route.distanceMeters<=165);
+ assert.equal(route.geometry[0][0],101.7038508);
+ assert.equal(route.geometry[0][1],3.1315707);
+ assert.deepEqual(route.geometry.at(-1),[101.7038951,3.1314573]);
+ assert.equal(route.geometryGapsOver2Meters??0,0);
+});
