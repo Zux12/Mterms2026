@@ -52,6 +52,13 @@ function add(from,to,len,coords,id,potentialAccessCaution=false,graphFrom=null,g
 const sEdge=s.edge,tEdge=t.edge;
 add(START,sEdge.to,sEdge.len*(1-s.t),[s.point,sEdge.b],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
 add(tEdge.from,END,tEdge.len*t.t,[tEdge.a,t.point],tEdge.id,!!tEdge.potentialAccessCaution,tEdge.from,tEdge.to);
+// Exact node snaps are not required to traverse their selected road edge.
+// A departure at the upstream endpoint may take any directed outgoing road,
+// and arrival at the downstream endpoint may come from any directed incoming
+// road. Without these node connectors, arbitrary snap-edge choice imposes
+// detours or false disconnections even on a correctly connected graph.
+if(s.t===0)add(START,sEdge.from,0,[s.point,sEdge.a],sEdge.id,false,sEdge.from,sEdge.to);
+if(t.t===1)add(tEdge.to,END,0,[tEdge.b,t.point],tEdge.id,false,tEdge.from,tEdge.to);
 // A reused external edge ID is not evidence that both snaps hit the same
 // directed edge. Only the same graph edge object permits this direct shortcut.
 if(sEdge===tEdge&&s.t<=t.t)add(START,END,sEdge.len*(t.t-s.t),[s.point,t.point],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
