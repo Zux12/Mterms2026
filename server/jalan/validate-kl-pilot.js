@@ -14,6 +14,7 @@ let expectedNoPath=0,unexpectedNoPath=0;
 const serverStageKeys=['graphLoadMs','snappingMs','pathSearchMs','serverTotalMs'];
 const serverStageSamples=Object.fromEntries(serverStageKeys.map(k=>[k,[]]));
 let serverTimingSamples=0;
+const graphCacheTimingSamples={cold:[],warm:[]};
 for(const [i,c] of cases.entries()){
  if(!c||typeof c!=='object'||Array.isArray(c)){
   failures.push('case '+i+': expected object');continue;
@@ -46,6 +47,8 @@ for(const [i,c] of cases.entries()){
    Math.abs(c.graphLoadMs+c.snappingMs+c.pathSearchMs-c.serverTotalMs)<=0.21){
   serverTimingSamples++;
   for(const k of serverStageKeys)serverStageSamples[k].push(c[k]);
+  if(c.graphCacheHit===true)graphCacheTimingSamples.warm.push(c.serverTotalMs);
+  else if(c.graphCacheHit===false)graphCacheTimingSamples.cold.push(c.serverTotalMs);
  }
  // Explicit HTTP evidence prevents a 422 snap failure, 503 outage or an
  // authentication error from being mislabeled a genuinely disconnected road.
@@ -81,6 +84,7 @@ for(const [i,c] of cases.entries()){
 }
 snap.sort((a,b)=>a-b);latency.sort((a,b)=>a-b);
 for(const k of serverStageKeys)serverStageSamples[k].sort((a,b)=>a-b);
+for(const samples of Object.values(graphCacheTimingSamples))samples.sort((a,b)=>a-b);
 const quantile=(arr,p)=>arr.length?arr[Math.ceil(p*arr.length)-1]:null;
 const missingJourneyTypes=requiredJourneyTypes.filter(k=>!types.has(k));
 const insufficientJourneyTypes=requiredJourneyTypes.filter(k=>journeyTypeCounts[k]<minimumPerJourneyType);
@@ -97,6 +101,7 @@ const summary={
  latencySamples:latency.length,
  latencyP50Ms:quantile(latency,.5),latencyP95Ms:quantile(latency,.95),latencyMaxMs:quantile(latency,1),
  serverTimingSamples,
+ graphCacheTimingByStatusMs:Object.fromEntries(Object.entries(graphCacheTimingSamples).map(([status,values])=>[status,{samples:values.length,p50:quantile(values,.5),p95:quantile(values,.95),max:quantile(values,1)}])),
  serverTimingByStageMs:Object.fromEntries(serverStageKeys.map(k=>[k,{
   p50:quantile(serverStageSamples[k],.5),
   p95:quantile(serverStageSamples[k],.95),
