@@ -165,3 +165,39 @@ test('zero-distance same-point route remains valid geometry',async()=>{
  assert.equal(out[0].geometryMetricsVerified,true);
  assert.equal(out[0].geometryContinuous,true);
 });
+
+test('malformed advisory metadata never enters the sanitized evidence output',async()=>{
+ const secret='Bearer PRIVATE_DIAGNOSTIC_TOKEN';
+ const body={...good,
+  potentialAccessReviewEdges:{message:secret,coordinate:101.69123},
+  potentialTurnRestrictionReviewCount:['private',secret],
+  startSnapAmbiguous:'private-coordinate-101.69123',
+  endSnapAmbiguous:{secret}};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].ok,true);
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.equal(out[0].potentialAccessReviewEdges,null);
+ assert.equal(out[0].potentialTurnRestrictionReviewCount,null);
+ assert.equal(out[0].startSnapAmbiguous,null);
+ assert.equal(out[0].endSnapAmbiguous,null);
+ const persisted=JSON.stringify(out);
+ assert.ok(!persisted.includes(secret));
+ assert.ok(!persisted.includes('101.69123'));
+ assert.ok(!persisted.includes('private-coordinate'));
+});
+test('malformed required route metrics fail closed without persisting response secrets',async()=>{
+ const secret='PRIVATE_ORIGIN_BEARER_TOKEN';
+ const body={...good,distanceMeters:{raw:secret},startSnapMeters:secret,
+  endSnapMeters:[secret],potentialAccessReviewEdges:-2,
+  potentialTurnRestrictionReviewCount:1.25};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].routeModeVerified,true);
+ assert.equal(out[0].distanceMeters,null);
+ assert.equal(out[0].startSnapMeters,null);
+ assert.equal(out[0].endSnapMeters,null);
+ assert.equal(out[0].potentialAccessReviewEdges,null);
+ assert.equal(out[0].potentialTurnRestrictionReviewCount,null);
+ assert.equal(out[0].geometryMetricsVerified,false);
+ assert.equal(out[0].geometryContinuous,false);
+ assert.ok(!JSON.stringify(out).includes(secret));
+});
