@@ -33,7 +33,7 @@ test('successful search retains the same visited count with optional diagnostics
  assert.ok(diagnostics.visited>0);
 });
 test('no-path response does not reflect malformed or sensitive diagnostic values',()=>{
- for(const bad of ['PRIVATE_GPS_TOKEN',{},[],Infinity,NaN,-1,1.5,Number.MAX_SAFE_INTEGER+1]){
+ for(const bad of ['PRIVATE_GPS_TOKEN',{},[],Infinity,NaN,-1,1.5,400001,1000000,Number.MAX_SAFE_INTEGER+1]){
   const reply=noPathResponse({graphLoad:0,snapping:0,pathSearch:1,total:1},bad);
   assert.equal(reply.searchVisitedNodes,null);
   assert.ok(!JSON.stringify(reply).includes('PRIVATE_GPS_TOKEN'));
