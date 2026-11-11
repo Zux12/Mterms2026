@@ -84,7 +84,8 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - [x] Run the offline SCC diagnostic against the **real imported KL graph** via read-only Atlas queries (168,221 edges / 103,670 nodes, seven sorted batches, 11 Nov 2026); results below. **Only metric computation is complete**; road-specific component investigation remains open.
 - [ ] Investigate actual one-way bridges, strongly connected islands, and source/sink SCCs against mapped roads and signage; component counts alone do not certify navigation.
 - [x] CI verified for commit `70e99dca54e48aebe167a0da6dd52814758e7d1e`: routing run `42978554365` succeeded; diagnostic run `42978554238` succeeded.
-- [ ] CI verified for the latest proposed commit (must refresh for every new commit).
+- [x] SCC code milestone CI independently verified: 151/151 routing tests and successful diagnostics at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`; latest documented full-graph audit head `ab9bff21e910eeae5de1869b52da803d07882991` also passed both workflows.
+- [ ] Refresh CI for the **final PR commit** immediately before review/merge (ongoing release gate, not permission to merge).
 - [ ] Full KL graph health and load time rechecked in a live read-only environment.
 - [ ] Twenty independently reviewed actual KL origin–destination journeys completed.
 - [ ] GPS snapping error percentiles and ambiguity cases measured on real KL journeys.
@@ -104,7 +105,7 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - Synthetic cases cover one-way roads, cycles, one-way bridges between cycles, disconnected two-way islands, repeated arcs/self-loops, malformed data, and a long chain. A separately executed synthetic 168,221-edge one-way-chain check produced 168,222 SCCs; this is **not a result from KL road data**.
 - Verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: [routing CI run 42983451836](https://github.com/Zux12/Mterms2026/actions/runs/42983451836) reports 151/151 tests passing (0 failed), and [diagnostic CI run 42983451981](https://github.com/Zux12/Mterms2026/actions/runs/42983451981) succeeded.
 - This is an **offline analysis module**, not yet wired into the route handler or live graph loader; actual KL component counts and production latency impact are unmeasured. SCC topology alone does not validate legal turn movements, OSM access permissions, trip-specific reachability or real driving safety. Never use the SCC result as production routing approval.
-- Attempts to establish a read-only Atlas connector session for the available clusters failed at cluster-address lookup in this run. Do not mark the live KL graph audit complete from previous terminal diagnostics.
+- Initial Atlas cluster-address lookups for two legacy projects failed. A subsequent read-only connection to the existing cluster hosting `jalan_navigation` succeeded, and the complete imported KL graph was audited as recorded below. A successful historical Atlas scan does not prove the live route service is healthy.
 
 ## Read-only full KL weak/strong component evidence — 11 November 2026
 
