@@ -38,6 +38,36 @@ function verifiedGeometry(body){
   body.geometryGapReviewAvailable===true&&body.geometryGapCountOverThreshold===0&&
   Number.isFinite(body.geometryGapThresholdMeters)&&body.geometryGapThresholdMeters<=2;
 }
+// Independently cross-check experimental GeoJSON against the private input
+// coordinates while they are in memory. Never serialize those coordinates.
+// This guards against a well-formed but wrong/shortened/swapped route even
+// if a server's own geometry-gap advisory reports no gaps.
+function haversineLngLat(a,b){
+ const rad=Math.PI/180,R=6371000,dy=(b[1]-a[1])*rad,dx=(b[0]-a[0])*rad;
+ const h=Math.sin(dy/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin(dx/2)**2;
+ return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function geometryMatchesJourney(body,c){
+ const points=body?.geometry?.coordinates;
+ if(!Array.isArray(points)||points.length<2||!c||
+    !points.every(p=>Array.isArray(p)&&p.length===2&&
+      Number.isFinite(p[0])&&Number.isFinite(p[1])&&
+      Math.abs(p[0])<=180&&Math.abs(p[1])<=90))return false;
+ if(!validCoord(c.startLat,c.startLng)||!validCoord(c.endLat,c.endLng))return false;
+ if(!['startSnapMeters','endSnapMeters','distanceMeters'].every(k=>
+   Number.isFinite(body[k])&&body[k]>=0))return false;
+ const origin=[c.startLng,c.startLat],destination=[c.endLng,c.endLat];
+ const first=haversineLngLat(origin,points[0]);
+ const last=haversineLngLat(destination,points[points.length-1]);
+ // The preview rounds snap and path lengths to whole metres. Allow a small
+ // additional numeric tolerance for serialized GeoJSON coordinates.
+ const toleranceMeters=2;
+ if(Math.abs(first-body.startSnapMeters)>toleranceMeters||
+    Math.abs(last-body.endSnapMeters)>toleranceMeters)return false;
+ let length=0;
+ for(let i=1;i<points.length;i++)length+=haversineLngLat(points[i-1],points[i]);
+ return Number.isFinite(length)&&Math.abs(length-body.distanceMeters)<=toleranceMeters;
+}
 function routeReply(body){
  return !!body&&body.ok===true&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
   body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
@@ -77,7 +107,8 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.startSnapMeters=body.startSnapMeters;
     row.endSnapMeters=body.endSnapMeters;
     // Requires graph transition gap diagnostic, NOT merely valid GeoJSON.
-    row.geometryContinuous=verifiedGeometry(body);
+    row.geometryMetricsVerified=geometryMatchesJourney(body,c);
+    row.geometryContinuous=verifiedGeometry(body)&&row.geometryMetricsVerified;
     row.routeModeVerified=true;
     appendServerTiming(row,body);
     row.potentialAccessReviewEdges=body.potentialAccessReviewEdges??null;
