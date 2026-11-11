@@ -44,7 +44,7 @@ return {...best,candidatesWithin200,secondBestSnapMeters:second?second.meters:nu
  ambiguousSnap:!!second&&second.meters<=200&&second.meters-best.meters<=10};
 }
 function calculate(g,s,t){const START='@start',END='@end',extra=new Map();
-function add(from,to,len,coords,id,potentialAccessCaution=false,graphFrom=null,graphTo=null){if(!extra.has(from))extra.set(from,[]);extra.get(from).push({to,len,coords,id,potentialAccessCaution,graphFrom,graphTo});}
+function add(from,to,len,coords,id,potentialAccessCaution=false,graphFrom=null,graphTo=null){if(!extra.has(from))extra.set(from,[]);extra.get(from).push({to,len,coords,id,potentialAccessCaution,graphFrom,graphTo,virtualPartial:true});}
 const sEdge=s.edge,tEdge=t.edge;
 add(START,sEdge.to,sEdge.len*(1-s.t),[s.point,sEdge.b],sEdge.id,!!sEdge.potentialAccessCaution,sEdge.from,sEdge.to);
 add(tEdge.from,END,tEdge.len*t.t,[tEdge.a,t.point],tEdge.id,!!tEdge.potentialAccessCaution,tEdge.from,tEdge.to);
@@ -60,17 +60,22 @@ for(const e of next){const nd=cur.d+e.len;if(nd<(dist.get(e.to)??Infinity)){dist
 }
 if(!dist.has(END))return null;const path=[];let n=END;while(n!==START){const p=prev.get(n);if(!p||path.length>COUNT)throw Error('Path reconstruction');path.push(p.e);n=p.from;}path.reverse();const geometry=[];for(const e of path){for(const p of e.coords){const q=[p[1],p[0]],last=geometry[geometry.length-1];if(!last||last[0]!==q[0]||last[1]!==q[1])geometry.push(q);}}
 if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineString requires at least two positions
+// Zero-distance start/end connectors are graph plumbing, not travelled roads.
+// Exclude only these *virtual* edges from warnings; retain the original path
+// and every real graph edge (including zero-length imported ones) for routing.
+const advisoryPath=path.filter(e=>!(e.virtualPartial&&e.len===0));
 // Advisory only: OSM node ID connectivity can conceal displaced endpoints.
-const geometryGapAudit=auditPathGeometryGaps(path,distance);
+const geometryGapAudit=auditPathGeometryGaps(advisoryPath,distance);
 const turnAudit=Array.isArray(g.turnRestrictions)?auditTurnCandidates(
- path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
+ advisoryPath.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 // The via-way matcher flags only possible OSM relation path overlaps. Neither
 // a match nor an absent match establishes road-turn legality.
 const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
- path.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
+ advisoryPath.map(e=>({id:e.id,fromNode:e.graphFrom,toNode:e.graphTo})),g.turnRestrictions):null;
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
  ...geometryGapAudit,
- potentialAccessReviewEdges:path.filter(e=>e.potentialAccessCaution).length,
+ potentialAccessReviewEdges:advisoryPath.filter(e=>e.potentialAccessCaution).length,
+ advisoryEdgesInspected:advisoryPath.length,
  turnReviewAvailable:turnAudit!==null,
  potentialTurnRestrictionReviewCount:turnAudit?turnAudit.potentialTurnRestrictionReviewCount:null,
  turnReviewTransitionsInspected:turnAudit?turnAudit.transitionsInspected:null,
