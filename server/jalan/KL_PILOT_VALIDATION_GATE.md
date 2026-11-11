@@ -82,6 +82,7 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 - [x] Offline 20-journey structural evidence gate implemented; missing coverage never authorizes production routing.
 - [x] Offline directed **strongly connected component** (SCC) analysis and seven regression scenarios verified at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`: routing CI **151/151 passed**, run `42983451836`; diagnostics CI succeeded, run `42983451981`.
 - [x] Run the offline SCC diagnostic against the **real imported KL graph** via read-only Atlas queries (168,221 edges / 103,670 nodes, seven sorted batches, 11 Nov 2026); results below. **Only metric computation is complete**; road-specific component investigation remains open.
+- [x] Read-only screening of source-only/sink-only KL road-node review candidates against all 168,221 imported directed edges (Atlas degree-group query, 11 Nov 2026); counts independently reproduce 496 sources and 519 sinks. Candidate locations and individual road/signage correctness remain unverified.
 - [ ] Investigate actual one-way bridges, strongly connected islands, and source/sink SCCs against mapped roads and signage; component counts alone do not certify navigation.
 - [x] CI verified for commit `70e99dca54e48aebe167a0da6dd52814758e7d1e`: routing run `42978554365` succeeded; diagnostic run `42978554238` succeeded.
 - [x] SCC code milestone CI independently verified: 151/151 routing tests and successful diagnostics at commit `945cbbf1cc99dcb390bed6bd3e8e3a77210d3c62`; latest documented full-graph audit head `ab9bff21e910eeae5de1869b52da803d07882991` also passed both workflows.
@@ -132,3 +133,22 @@ Tick a milestone **only after verifying its own acceptance evidence**. A synthet
 These are **OSM-imported graph connectivity** metrics, not real driving acceptance. In particular, strongly connected paths may still involve prohibited turns, vehicle-specific access restrictions, unmapped barriers, missing geometry, and implausible detours. Singletons and source/sink SCCs can result from legitimate one-way layouts. Do not infer that 91.26% of KL journeys are navigable or safe, or that any other percentage is unreliable.
 
 **Milestone complete:** read-only structural computation on the full imported graph. **Still outstanding:** independent road-level review of flagged components, live service cold-load/warm-route latency, at least 20 independently reviewed KL origin–destination journeys with GPS and turn/access legality, and TomTom comparisons. Keep routing experimental and TomTom authoritative.
+
+## Actual KL road-endpoint candidate screen — 11 November 2026 (read-only)
+
+A fresh read-only MongoDB Atlas query against `jalan_navigation.road_graph_edges_v495` expanded both endpoints of every imported directed edge, grouped by node ID and counted inbound/outbound arcs. No source-system updates, routing, user positions, or database writes. **168,221** documents were counted immediately before the scan. The full aggregation found **1,015** one-sided endpoint candidates: **496** with zero inbound and **519** with zero outbound directed arcs, matching the earlier topology audit.
+
+A degree-first, stable node-ID tie-break produced eight **source-only** and eight **sink-only** public OSM-node review samples. Representative observations (WGS84 longitude, latitude):
+
+| Imported node | Class | Inbound | Outbound | Longitude, latitude |
+| --- | --- | ---: | ---: | --- |
+| `5738558701` | source-only | 0 | 3 | 101.7038508, 3.1315707 |
+| `11305000094` | source-only | 0 | 2 | 101.7103802, 3.1433230 |
+| `11921503726` | source-only | 0 | 2 | 101.6652293, 3.1105581 |
+| `12469319673` | sink-only | 2 | 0 | 101.7185481, 3.1396225 |
+| `13246999063` | sink-only | 2 | 0 | 101.7194419, 3.1421348 |
+| `1466762606` | sink-only | 2 | 0 | 101.7208629, 3.1387100 |
+
+Two samples were cross-checked with a separate, read-only edge query: node `5738558701` has three outgoing imported segments, and node `12469319673` has two incoming segments; the sampled edge ID and coordinate continuity agree with the grouped evidence. **This does not mean these junctions are bad.** They may represent legitimate one-way entrances/exits or an OSM boundary; independent map/signage review is still needed.
+
+Added the **offline-only** `kl-endpoint-review-v4102.js` candidate-prioritization utility with tests for one-way corridors, bidirectional cycles, degree ranking, malformed inputs, optional coordinate handling, and agreement with the established weak-graph topology analysis. It is deliberately **not wired into production or the experimental route handler**. All output is advisory and expressly does not verify legal driving. Imported road source: OpenStreetMap contributors (ODbL). Do not present a sample node as a road defect or treat this screening as completion of the 20 real KL journey acceptance gate.
