@@ -42,6 +42,8 @@ async function main(){
    const s=app.listen(0,'127.0.0.1',()=>resolve(s));s.once('error',reject);
   });
   const port=server.address().port;
+  // The first valid route request measures a cold load; subsequent requests
+  // should observe the cached graph. This runner deliberately remains sequential.
   const evidence=await collectEvidence(cases,`http://127.0.0.1:${port}/api/jalan/kl/route`,{
    timeoutMs:60000,authHeader:'x-jalan-local-session',authValue:sessionToken
   });
