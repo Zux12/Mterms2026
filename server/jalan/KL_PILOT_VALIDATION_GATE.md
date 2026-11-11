@@ -174,3 +174,29 @@ Added the **offline-only** `kl-endpoint-review-v4102.js` candidate-prioritizatio
 - [ ] Run at least 20 independently reviewed actual KL journeys on the full graph; fixture tests are **not** journey acceptance evidence.
 
 **This documentation commit has not yet passed its own CI.** Never merge or deploy on the strength of the imported-road fixture alone.
+
+## Full-collection node-degree audit and acceptance-collector milestone — 11 November 2026
+
+**Fresh connected Atlas read-only aggregation**, `jalan_navigation.road_graph_edges_v495`, grouped each imported directed edge as an inbound and outbound node occurrence across the **entire current collection**:
+
+| Metric | Actual result |
+| --- | ---: |
+| Unique directed-graph nodes | 103,670 |
+| Source-only (in-degree 0) | 496 |
+| Sink-only (out-degree 0) | 519 |
+| Nodes with inbound and outbound arcs | 102,655 |
+| Maximum observed inbound degree | 5 |
+| Maximum observed outbound degree | 5 |
+
+The counts reconcile: 496 + 519 + 102,655 = 103,670. This corroborates the earlier endpoint screening on the full actual collection, not just sampled endpoints or a synthetic graph. **It does not verify legal driving direction, graph connected components, turn restrictions or end-to-end journeys.**
+
+- [x] Recalculate actual directed in-/out-degree node totals across the full imported graph without MongoDB writes.
+- [x] Fix structural acceptance loophole: at least **four** cases per each of five journey classes, not merely one of each.
+- [x] Require explicit HTTP **200** for route cases, **404** only for confirmed preview `No directed path found` cases; 422/503/auth failures cannot be mislabeled as disconnections.
+- [x] Report per-type counts and elapsed-time p50/p95/max, and add seven regression tests to the CLI gate.
+- [x] Add a **local-only** authenticated experimental batch collector that checks preview identity, never stores coordinates/tokens in result evidence, and preserves independent review requirements.
+- [x] Verify [routing regression Actions run 43001142898](https://github.com/Zux12/Mterms2026/actions/runs/43001142898): **185 tests passed, zero failed**, and [diagnostic Actions run 43001141650](https://github.com/Zux12/Mterms2026/actions/runs/43001141650): succeeded, both for `82c570f8b1ff1fdb3381717c3532e720fbd04ca8`.
+- [ ] Execute the collector against the **authenticated experimental backend** with at least 20 independently selected KL journeys and independently reviewed expectations. **No real endpoint execution has occurred in this checkpoint**.
+- [ ] Manually inspect road legalities, turn restrictions, grade-separation and snap ambiguity before any pilot acceptance.
+
+The collector and its tests remain in the isolated draft branch; production TomTom and the original MTERMS app remain unchanged. This documentation commit is not part of the above verified CI result and requires a fresh check.
