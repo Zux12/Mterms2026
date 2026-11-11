@@ -18,7 +18,7 @@ const types=['short-urban','long-corridor','one-way','overpass','disconnected'];
 function sample(i){
  const journeyType=types[i%types.length],reachable=journeyType!=='disconnected';
  return {caseId:'kl_'+i,journeyType,expectedReachable:reachable,ok:reachable,
- elapsedMs:12,responseStatus:reachable?200:404, ...(reachable?{distanceMeters:1200,startSnapMeters:4,endSnapMeters:5,geometryContinuous:true}:{disconnectionReviewed:true})};
+ elapsedMs:12,responseStatus:reachable?200:404, ...(reachable?{routeModeVerified:true,distanceMeters:1200,startSnapMeters:4,endSnapMeters:5,geometryContinuous:true}:{disconnectionReviewed:true,noPathModeVerified:true})};
 }
 test('20 complete records clear structural gate but never authorize production',()=>{
  const result=run(Array.from({length:20},(_,i)=>sample(i)));
