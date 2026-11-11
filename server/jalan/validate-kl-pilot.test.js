@@ -143,3 +143,15 @@ test('partial or nonfinite timings are not counted as complete measurements',()=
  assert.equal(status,0);
  assert.equal(summary.serverTimingSamples,0);
 });
+
+test('422 GPS snap failure timings cannot contaminate accepted route percentiles',()=>{
+ const cases=twentyValid();
+ for(const c of cases)Object.assign(c,{graphLoadMs:10,snappingMs:2,pathSearchMs:3,serverTotalMs:15});
+ Object.assign(cases[0],{ok:false,responseStatus:422,routeModeVerified:false,
+  failureClass:'snap-out-of-range',graphLoadMs:10000,snappingMs:2000,
+  pathSearchMs:0,serverTotalMs:12000});
+ const r=run(cases);
+ assert.equal(r.status,1);
+ assert.equal(r.summary.serverTimingSamples,19);
+ assert.ok(r.summary.validationErrors.some(x=>x.includes('responseStatus')));
+});
