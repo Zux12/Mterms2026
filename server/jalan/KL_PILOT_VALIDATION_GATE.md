@@ -231,3 +231,15 @@ The new documentation commit requires fresh CI confirmation. These test results 
 - [ ] Complete full-graph KL route execution, 20 independent real-road journey reviews, and TomTom comparison.
 
 This is an evidence-quality improvement, not proof of road-level navigation readiness. This documentation commit requires fresh CI verification.
+
+## Verified performance-evidence separation — 12 November 2026
+
+- [x] Accepted latency and snap percentile inputs now require a confirmed experimental 200 route with independently checked geometry, finite route distance, reasonable endpoint snaps and an expected reachable journey, or a confirmed 404 no-path with its independent-disconnection-review flag and an expected unreachable journey.
+- [x] Unverified geometry, incomplete journey metadata, HTTP 422 snap failures and unreviewed disconnected-road results are excluded from *accepted* performance distributions, while evidence errors remain visible.
+- [x] Snap endpoints over 200 m remain counted as rejected safety observations without contaminating accepted snap percentiles; empty accepted samples report null quantiles and explicit zero sample counts.
+- [x] Reject server stage timings greater than 60 s from accepted performance samples. This is data-quality screening, not a benchmark or safety certification.
+- [x] Added four targeted acceptance regressions and corrected three outdated assertions exposed by CI. For code commit `3025ae995bc0c44422a133b2656d794501a367e3`, [routing CI run 43065303915](https://github.com/Zux12/Mterms2026/actions/runs/43065303915): **215/215 passed, zero failed, zero skipped** (job logs inspected); [diagnostic CI run 43065303809](https://github.com/Zux12/Mterms2026/actions/runs/43065303809): succeeded.
+- [ ] Execute at least 20 genuine full-graph KL origin/destination journeys, independently review legal turns and restrictions, and compare results with TomTom before approving even a KL pilot.
+- [ ] Verify fresh CI for this documentation-only commit before treating branch HEAD as checked.
+
+These findings certify the offline checker behavior only. No full-graph live routing acceptance, merge, database write, deployment or change to production TomTom routing is authorized.
