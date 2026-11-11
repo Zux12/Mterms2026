@@ -8,6 +8,7 @@ const minCases=20,minimumPerJourneyType=4;
 const cases=JSON.parse(fs.readFileSync(process.argv[2]||'', 'utf8'));
 if(!Array.isArray(cases)||cases.length===0)throw Error('Expected a nonempty JSON array');
 const failures=[],seen=new Set(),snap=[],latency=[],types=new Set();
+let rejectedSnapOver200Meters=0;
 const journeyTypeCounts=Object.fromEntries(requiredJourneyTypes.map(t=>[t,0]));
 let expectedNoPath=0,unexpectedNoPath=0;
 const serverStageKeys=['graphLoadMs','snappingMs','pathSearchMs','serverTotalMs'];
@@ -26,14 +27,22 @@ for(const [i,c] of cases.entries()){
  if(typeof c.ok!=='boolean')failures.push(id+': missing ok boolean');
  if(typeof c.ok==='boolean'&&typeof c.expectedReachable==='boolean'&&c.ok!==c.expectedReachable)
   failures.push(id+': actual reachability differs from independent expectedReachable');
+ // Performance statistics must represent only independently verified,
+ // expected journey outcomes; keep failures visible through validationErrors.
+ const verifiedRoute=c.ok===true&&c.expectedReachable===true&&c.responseStatus===200&&
+  c.routeModeVerified===true&&c.geometryMetricsVerified===true&&c.geometryContinuous===true&&
+  Number.isFinite(c.distanceMeters)&&c.distanceMeters>=0&&
+  ['startSnapMeters','endSnapMeters'].every(k=>Number.isFinite(c[k])&&c[k]>=0&&c[k]<=200);
+ const verifiedNoPath=c.ok===false&&c.expectedReachable===false&&c.responseStatus===404&&
+  c.noPathModeVerified===true&&c.disconnectionReviewed===true;
+ const verifiedOutcome=verifiedRoute||verifiedNoPath;
  if(!Number.isFinite(c.elapsedMs)||c.elapsedMs<0)failures.push(id+': invalid elapsedMs');
- else latency.push(c.elapsedMs);
+ else if(verifiedOutcome)latency.push(c.elapsedMs);
  // Stage timings are optional diagnostics, not proof of safe navigation.
  // Use only complete, internally consistent measured breakdowns. Each stage
  // was rounded independently to 0.1ms by the private evidence collector.
- if(((c.ok===true&&c.responseStatus===200&&c.routeModeVerified===true)||
-     (c.ok===false&&c.responseStatus===404&&c.noPathModeVerified===true))&&
-   serverStageKeys.every(k=>Number.isFinite(c[k])&&c[k]>=0)&&
+ if(verifiedOutcome&&
+   serverStageKeys.every(k=>Number.isFinite(c[k])&&c[k]>=0&&c[k]<=60000)&&
    Math.abs(c.graphLoadMs+c.snappingMs+c.pathSearchMs-c.serverTotalMs)<=0.21){
   serverTimingSamples++;
   for(const k of serverStageKeys)serverStageSamples[k].push(c[k]);
@@ -50,8 +59,10 @@ for(const [i,c] of cases.entries()){
   for(const k of ['startSnapMeters','endSnapMeters']){
    if(!Number.isFinite(c[k])||c[k]<0)failures.push(id+': invalid '+k);
    else{
-    snap.push(c[k]);
-    if(c[k]>200)failures.push(id+': successful route snap exceeds 200 m ('+k+')');
+    if(c[k]>200){
+     rejectedSnapOver200Meters++;
+     failures.push(id+': successful route snap exceeds 200 m ('+k+')');
+    }else if(verifiedRoute)snap.push(c[k]);
    }
   }
   // A self-declared continuous geometry is not enough for acceptance:
@@ -81,7 +92,9 @@ const summary={
  failed:cases.filter(c=>c&&c.ok===false).length,
  expectedNoPath,unexpectedNoPath,
  journeyTypesCovered:[...types].sort(),missingJourneyTypes,
+ snapEndpointSamples:snap.length,
  snapMedianMeters:quantile(snap,.5),snapP95Meters:quantile(snap,.95),snapMaxMeters:quantile(snap,1),
+ latencySamples:latency.length,
  latencyP50Ms:quantile(latency,.5),latencyP95Ms:quantile(latency,.95),latencyMaxMs:quantile(latency,1),
  serverTimingSamples,
  serverTimingByStageMs:Object.fromEntries(serverStageKeys.map(k=>[k,{
@@ -89,7 +102,7 @@ const summary={
   p95:quantile(serverStageSamples[k],.95),
   max:quantile(serverStageSamples[k],1)
  }])),
- snapOver200Meters:snap.filter(x=>x>200).length,
+ snapOver200Meters:rejectedSnapOver200Meters,
  automatedEvidenceGatePassed,manualRoadSafetyReviewRequired:true,
  productionRoutingAuthorized:false,validationErrors:failures
 };
