@@ -115,3 +115,31 @@ test('explicitly failed independent geometry metrics prevent acceptance even wit
  assert.equal(summary.automatedEvidenceGatePassed,false);
  assert.ok(summary.validationErrors.some(x=>x.includes('independent geometry metrics not verified')));
 });
+
+test('reports server stage p50/p95/max only for consistent timing breakdowns',()=>{
+ const rows=twentyValid();
+ Object.assign(rows[0],{graphLoadMs:10,snappingMs:3,pathSearchMs:2,serverTotalMs:15});
+ Object.assign(rows[1],{graphLoadMs:50,snappingMs:4,pathSearchMs:6,serverTotalMs:60});
+ Object.assign(rows[2],{graphLoadMs:5,snappingMs:3,pathSearchMs:2,serverTotalMs:1});
+ const {status,summary}=run(rows);
+ assert.equal(status,0);
+ assert.equal(summary.automatedEvidenceGatePassed,true);
+ assert.equal(summary.serverTimingSamples,2);
+ assert.deepEqual(summary.serverTimingByStageMs.graphLoadMs,{p50:10,p95:50,max:50});
+ assert.deepEqual(summary.serverTimingByStageMs.pathSearchMs,{p50:2,p95:6,max:6});
+ assert.deepEqual(summary.serverTimingByStageMs.serverTotalMs,{p50:15,p95:60,max:60});
+});
+test('no optional server timings yields null distributions instead of misleading zeros',()=>{
+ const {status,summary}=run(twentyValid());
+ assert.equal(status,0);
+ assert.equal(summary.serverTimingSamples,0);
+ assert.deepEqual(summary.serverTimingByStageMs.snappingMs,{p50:null,p95:null,max:null});
+});
+test('partial or nonfinite timings are not counted as complete measurements',()=>{
+ const rows=twentyValid();
+ Object.assign(rows[0],{graphLoadMs:5,snappingMs:3,pathSearchMs:2});
+ Object.assign(rows[1],{graphLoadMs:-1,snappingMs:3,pathSearchMs:2,serverTotalMs:4});
+ const {status,summary}=run(rows);
+ assert.equal(status,0);
+ assert.equal(summary.serverTimingSamples,0);
+});
