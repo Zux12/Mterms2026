@@ -11,7 +11,7 @@ const types=['short-urban','long-corridor','one-way','overpass','disconnected'];
 function sample(i){
  const journeyType=types[i%types.length],ok=journeyType!=='disconnected';
  return {caseId:'synthetic_'+i,journeyType,expectedReachable:ok,ok,
-  elapsedMs:23+i,responseStatus:ok?200:404,...(ok?{routeModeVerified:true,distanceMeters:800+i,startSnapMeters:5,endSnapMeters:6,
+  elapsedMs:23+i,responseStatus:ok?200:404,graphEvidenceVerified:true,...(ok?{routeModeVerified:true,distanceMeters:800+i,startSnapMeters:5,endSnapMeters:6,
    geometryContinuous:true,geometryMetricsVerified:true}:{disconnectionReviewed:true,noPathModeVerified:true})};
 }
 function run(cases){
