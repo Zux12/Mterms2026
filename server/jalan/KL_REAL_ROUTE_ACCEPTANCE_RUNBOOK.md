@@ -107,3 +107,15 @@ A read-only Atlas aggregation located imported start edge `osm-way-1161236396:0:
 - [ ] Complete the full 20-case independently reviewed KL acceptance set
 
 No driver GPS, credentials, MongoDB writes, production merge or TomTom routing changes.
+
+## Actual imported-graph geometry witness — 12 November 2026
+
+A second **read-only** Atlas aggregation retrieved the actual `coordinates` arrays of the four directed edges from `5738558701` to `10800536675` listed in the earlier connectivity witness. Each edge has two coordinate points. Independent haversine summation over those four edges gives approximately **157 metres**, with **0 metres** of coordinate discontinuity at all three joins. Start `[101.7038508, 3.1315707]`, end `[101.7038951, 3.1314573]` (longitude, latitude). All four imported records are tagged `highway=service` and have empty `access` metadata.
+
+- [x] Reconstructed actual directed edge geometry and verified all three coordinate joins
+- [x] Computed approximate **157 m** imported-graph witness length from real stored coordinates
+- [ ] Confirm whether this service-road path is legally driveable, open to the public, and relevant to an independently selected real journey
+- [ ] Confirm whether the full experimental routing engine returns this path and actual route latency
+- [ ] Independently review 20 actual KL journeys
+
+**Interpretation:** The 157 m is the length of this specific directed connectivity witness, not a verified shortest driving route, not a TomTom ETA, and not a route-engine benchmark. Start and end coordinates are imported OSM node coordinates, not user GPS traces. Do not count this witness as one of the 20 independently reviewed acceptance journeys.
