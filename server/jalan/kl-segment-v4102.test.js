@@ -3,7 +3,7 @@
 // Run: node --test server/jalan/kl-segment-v4102.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { calculate, project, distance } = require('./kl-segment-v4102');
+const { calculate, project, distance, noPathResponse } = require('./kl-segment-v4102');
 
 function edge(id, from, to, a, b) {
   return { id, from, to, a, b, len: distance(a, b) };
@@ -58,4 +58,18 @@ test('disconnected directed components yield no route', () => {
   const ab = edge('ab', 'a', 'b', A, B);
   const cd = edge('cd', 'c', 'd', C, [3.142, 101.681]);
   assert.equal(calculate(graph([ab, cd]), snap(ab, 0.3), snap(cd, 0.7)), null);
+});
+
+test('no-path response is explicitly experimental, read-only and carries sanitized stage timings',()=>{
+ const timingMs={graphLoad:10,snapping:5,pathSearch:20,total:35};
+ const response=noPathResponse(timingMs);
+ assert.equal(response.ok,false);
+ assert.equal(response.mode,'EXPERIMENTAL_SEGMENT_ROUTE');
+ assert.equal(response.error,'No directed path found');
+ assert.equal(response.routingActivated,false);
+ assert.equal(response.databaseWrites,0);
+ assert.equal(response.trafficAware,false);
+ assert.equal(response.timingDiagnosticOnly,true);
+ assert.deepEqual(response.timingMs,timingMs);
+ assert.ok(!('geometry' in response));
 });
