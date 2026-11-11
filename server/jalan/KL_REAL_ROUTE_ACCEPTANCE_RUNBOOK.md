@@ -89,3 +89,21 @@ A read-only Atlas aggregation was attempted to fetch all 168,221 directed KL edg
 - [ ] Collect cold/warm route timing and independent 20-journey evidence
 
 Do not silently concatenate truncated pages or claim a partial graph is the complete network. This limit concerns the connected query interface, not the road data itself.
+
+## Actual KL directed origin-to-destination connectivity evidence — 12 November 2026
+
+A read-only Atlas aggregation located imported start edge `osm-way-1161236396:0:F` (`5738558701 → 5738558702`) and used a bounded `$graphLookup` to retrieve downstream directed edge records. The result contained 15 reachable records, with target node `10800536675` present. The returned edge IDs and directed node transitions independently support the following **five-edge** imported-graph path:
+
+1. `osm-way-1161236396:0:F`: `5738558701 → 5738558702`
+2. `osm-way-1161236398:0:F`: `5738558702 → 10800536677`
+3. `osm-way-1161236397:2:R`: `10800536677 → 10800536676`
+4. `osm-way-1161236397:1:R`: `10800536676 → 10800536675`
+
+**Correction:** The actual reconstructed path consists of **four** directed edges, as enumerated above. The 15-record traversal includes other reachable arcs, not 15 path edges. This path is a directed reachability witness, **not** a shortest-path proof or road-legality review.
+
+- [x] One actual imported KL origin-to-destination **directed connectivity witness** established through read-only database query
+- [ ] Execute that origin/destination through the experimental full-graph `/route` implementation, measure distance/latency and compare geometry
+- [ ] Independently check road direction/access and current OSM map data
+- [ ] Complete the full 20-case independently reviewed KL acceptance set
+
+No driver GPS, credentials, MongoDB writes, production merge or TomTom routing changes.
