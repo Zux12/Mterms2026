@@ -25,6 +25,8 @@ function validateCases(cases){
     !/^[a-zA-Z0-9_-]{1,80}$/.test(c.caseId)||ids.has(c.caseId))throw Error('Invalid or duplicate caseId');
   ids.add(c.caseId);
   if(!TYPES.has(c.journeyType)||typeof c.expectedReachable!=='boolean')throw Error('Invalid journey type or expectation');
+  if(c.journeyType==='disconnected'&&c.expectedReachable!==false)
+   throw Error('Disconnected journey must be independently expected unreachable');
   if(!validCoord(c.startLat,c.startLng)||!validCoord(c.endLat,c.endLng))throw Error('Coordinate outside KL pilot bounds');
   if(c.expectedReachable===false&&c.disconnectionReviewed!==true)
    throw Error('Expected unreachable journey requires prior independent disconnection review');
