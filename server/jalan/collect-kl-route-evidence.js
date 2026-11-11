@@ -44,6 +44,17 @@ function routeReply(body){
   body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
   body.turnRestrictionsEnforced===false;
 }
+// Stage timings are advisory only: preserve measured processing costs even for
+// a legitimate directed no-path outcome, without copying URL, GPS or secrets.
+function appendServerTiming(row,body){
+ const timing=body?.timingMs;
+ if(timing&&['graphLoad','snapping','pathSearch','total'].every(k=>Number.isFinite(timing[k])&&timing[k]>=0)){
+  row.graphLoadMs=Math.round(timing.graphLoad*10)/10;
+  row.snappingMs=Math.round(timing.snapping*10)/10;
+  row.pathSearchMs=Math.round(timing.pathSearch*10)/10;
+  row.serverTotalMs=Math.round(timing.total*10)/10;
+ }
+}
 async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,authHeader,authValue,timeoutMs=20000}={}){
  validateCases(cases);const endpoint=endpointUrl(rawEndpoint),out=[];
  if((authHeader&&!authValue)||(!authHeader&&authValue))throw Error('Both authentication header name and value must be supplied');
@@ -68,22 +79,15 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     // Requires graph transition gap diagnostic, NOT merely valid GeoJSON.
     row.geometryContinuous=verifiedGeometry(body);
     row.routeModeVerified=true;
-    // Server-side stage timings are diagnostic, not evidence of route legality.
-    // Reject malformed or negative values rather than silently accepting them.
-    const timing=body.timingMs;
-    if(timing&&['graphLoad','snapping','pathSearch','total'].every(k=>Number.isFinite(timing[k])&&timing[k]>=0)){
-     row.graphLoadMs=Math.round(timing.graphLoad*10)/10;
-     row.snappingMs=Math.round(timing.snapping*10)/10;
-     row.pathSearchMs=Math.round(timing.pathSearch*10)/10;
-     row.serverTotalMs=Math.round(timing.total*10)/10;
-    }
+    appendServerTiming(row,body);
     row.potentialAccessReviewEdges=body.potentialAccessReviewEdges??null;
     row.potentialTurnRestrictionReviewCount=body.potentialTurnRestrictionReviewCount??null;
     row.startSnapAmbiguous=body.startSnapAmbiguous??null;
     row.endSnapAmbiguous=body.endSnapAmbiguous??null;
-   }else if(res.status===404&&body?.ok===false&&body.error==='No directed path found'){
+   }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'){
     row.responseStatus=404;row.ok=false;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
+    appendServerTiming(row,body);
    }else{
     // Authentication failures, 422 snap failures, server outages and
     // unrelated 404s can NEVER be counted as reviewed graph disconnections.
