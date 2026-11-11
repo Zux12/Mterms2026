@@ -119,3 +119,14 @@ A second **read-only** Atlas aggregation retrieved the actual `coordinates` arra
 - [ ] Independently review 20 actual KL journeys
 
 **Interpretation:** The 157 m is the length of this specific directed connectivity witness, not a verified shortest driving route, not a TomTom ETA, and not a route-engine benchmark. Start and end coordinates are imported OSM node coordinates, not user GPS traces. Do not count this witness as one of the 20 independently reviewed acceptance journeys.
+
+
+## Exact-node snap routing regression — 12 November 2026
+
+The experimental Dijkstra preview previously forced traversal of the selected origin road even when the origin snapped **exactly to its upstream node**, and forced traversal of the selected destination road even when the destination snapped **exactly to its downstream node**. Arbitrary closest-edge selection at an intersection could therefore cause detours or false no-path responses. The offline 16-edge imported KL fixture exposed a 157 m/175 m route when a two-edge ~17 m shortcut was available; these were **offline fixture failures**, not production routing observations.
+
+At start snap `t=0`, the preview may now depart from the exact imported `fromNode` along any **directed** outgoing edge. At destination snap `t=1`, it may arrive via any **directed** incoming edge at the exact `toNode`. Interior snaps still require directed partial-edge traversal. Coincident coordinates with different graph node IDs never form a junction. Zero-length virtual connectors are excluded from travelled-road access/turn warnings. These are graph-correctness semantics, **not** legal-access or turn enforcement.
+
+Six new regression tests cover both endpoint alternatives, node-ID isolation, prohibited backwards entry/exit and zero-distance travel. The independent Bellman–Ford oracle now models exact-node alternatives too. [Routing CI 43083765048](https://github.com/Zux12/Mterms2026/actions/runs/43083765048) verified **238/238 tests passed** and [diagnostic CI 43083765056](https://github.com/Zux12/Mterms2026/actions/runs/43083765056) succeeded at `88f247d59be227932bf371657ed394eae76e8388`.
+
+**Next acceptance requirement:** Validate intersection-edge selection and GPS endpoint snaps against the full KL road graph with independent field/road review. No live route request, road-legality verification, TomTom comparison, merge, production deployment or database write occurred in this step.
