@@ -63,3 +63,19 @@ The structural gate now requires **at least 20 actual cases, at least four per j
 For a successful route, the collector sets `geometryContinuous:true` only when returned GeoJSON coordinates are structurally valid **and** the preview's existing ≤2 m graph-transition gap audit reports zero excessive gaps. This check does not verify traffic rules, correct road snapping, grade-separated junctions or map provenance. Any access/turn warnings, snap ambiguity, unusual detours or source restrictions still require manual review.
 
 **Automation checkpoint, 11 November 2026:** verified [185/185 routing/collector/acceptance regressions passed](https://github.com/Zux12/Mterms2026/actions/runs/43001142898) and [diagnostics passed](https://github.com/Zux12/Mterms2026/actions/runs/43001141650) for commit `82c570f8b1ff1fdb3381717c3532e720fbd04ca8`. These are *offline/mocked tests*, not real route execution. The runbook documentation commit needs its own CI.
+
+## Three-branch directed traversal checkpoint — 11 November 2026
+
+Read-only Atlas `$graphLookup` started at all three imported outgoing edges of OSM node `5738558701`, with `maxDepth:6`. The query projected only the start edge, destination, downstream edge count and maximum observed depth.
+
+| Imported start edge | Downstream edge records | Maximum depth observed |
+|---|---:|---:|
+| `osm-way-1161236396:0:F` | 11 | 6 |
+| `osm-way-1161236395:0:F` | 27 | 6 |
+| `osm-way-604900312:0:F` | 15 | 6 |
+
+- [x] Bounded directed traversal on three actual KL branches completed read-only.
+- [ ] Measure full experimental route endpoint latency, GPS snapping and geometry for real origin/destination pairs.
+- [ ] Independently review legal road restrictions and 20 journey cases.
+
+**Caution:** Maximum observed depth equals the query limit; it is not a measurement of maximum reachable path length. These are reachable **edge-record counts**, not distinct road nodes or complete navigable journeys. No live route or TomTom behavior changed.
