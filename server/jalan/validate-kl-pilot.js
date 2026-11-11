@@ -10,6 +10,9 @@ if(!Array.isArray(cases)||cases.length===0)throw Error('Expected a nonempty JSON
 const failures=[],seen=new Set(),snap=[],latency=[],types=new Set();
 const journeyTypeCounts=Object.fromEntries(requiredJourneyTypes.map(t=>[t,0]));
 let expectedNoPath=0,unexpectedNoPath=0;
+const serverStageKeys=['graphLoadMs','snappingMs','pathSearchMs','serverTotalMs'];
+const serverStageSamples=Object.fromEntries(serverStageKeys.map(k=>[k,[]]));
+let serverTimingSamples=0;
 for(const [i,c] of cases.entries()){
  if(!c||typeof c!=='object'||Array.isArray(c)){
   failures.push('case '+i+': expected object');continue;
@@ -25,6 +28,14 @@ for(const [i,c] of cases.entries()){
   failures.push(id+': actual reachability differs from independent expectedReachable');
  if(!Number.isFinite(c.elapsedMs)||c.elapsedMs<0)failures.push(id+': invalid elapsedMs');
  else latency.push(c.elapsedMs);
+ // Stage timings are optional diagnostics, not proof of safe navigation.
+ // Use only complete, internally consistent measured breakdowns. Each stage
+ // was rounded independently to 0.1ms by the private evidence collector.
+ if(serverStageKeys.every(k=>Number.isFinite(c[k])&&c[k]>=0)&&
+   Math.abs(c.graphLoadMs+c.snappingMs+c.pathSearchMs-c.serverTotalMs)<=0.21){
+  serverTimingSamples++;
+  for(const k of serverStageKeys)serverStageSamples[k].push(c[k]);
+ }
  // Explicit HTTP evidence prevents a 422 snap failure, 503 outage or an
  // authentication error from being mislabeled a genuinely disconnected road.
  if(!Number.isInteger(c.responseStatus)||(c.ok===true&&c.responseStatus!==200)||
@@ -56,6 +67,7 @@ for(const [i,c] of cases.entries()){
  }
 }
 snap.sort((a,b)=>a-b);latency.sort((a,b)=>a-b);
+for(const k of serverStageKeys)serverStageSamples[k].sort((a,b)=>a-b);
 const quantile=(arr,p)=>arr.length?arr[Math.ceil(p*arr.length)-1]:null;
 const missingJourneyTypes=requiredJourneyTypes.filter(k=>!types.has(k));
 const insufficientJourneyTypes=requiredJourneyTypes.filter(k=>journeyTypeCounts[k]<minimumPerJourneyType);
@@ -69,6 +81,12 @@ const summary={
  journeyTypesCovered:[...types].sort(),missingJourneyTypes,
  snapMedianMeters:quantile(snap,.5),snapP95Meters:quantile(snap,.95),snapMaxMeters:quantile(snap,1),
  latencyP50Ms:quantile(latency,.5),latencyP95Ms:quantile(latency,.95),latencyMaxMs:quantile(latency,1),
+ serverTimingSamples,
+ serverTimingByStageMs:Object.fromEntries(serverStageKeys.map(k=>[k,{
+  p50:quantile(serverStageSamples[k],.5),
+  p95:quantile(serverStageSamples[k],.95),
+  max:quantile(serverStageSamples[k],1)
+ }])),
  snapOver200Meters:snap.filter(x=>x>200).length,
  automatedEvidenceGatePassed,manualRoadSafetyReviewRequired:true,
  productionRoutingAuthorized:false,validationErrors:failures
