@@ -31,7 +31,9 @@ for(const [i,c] of cases.entries()){
  // Stage timings are optional diagnostics, not proof of safe navigation.
  // Use only complete, internally consistent measured breakdowns. Each stage
  // was rounded independently to 0.1ms by the private evidence collector.
- if(serverStageKeys.every(k=>Number.isFinite(c[k])&&c[k]>=0)&&
+ if(((c.ok===true&&c.responseStatus===200&&c.routeModeVerified===true)||
+     (c.ok===false&&c.responseStatus===404&&c.noPathModeVerified===true))&&
+   serverStageKeys.every(k=>Number.isFinite(c[k])&&c[k]>=0)&&
    Math.abs(c.graphLoadMs+c.snappingMs+c.pathSearchMs-c.serverTotalMs)<=0.21){
   serverTimingSamples++;
   for(const k of serverStageKeys)serverStageSamples[k].push(c[k]);
