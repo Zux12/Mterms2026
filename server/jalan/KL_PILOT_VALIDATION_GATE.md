@@ -243,3 +243,16 @@ This is an evidence-quality improvement, not proof of road-level navigation read
 - [ ] Verify fresh CI for this documentation-only commit before treating branch HEAD as checked.
 
 These findings certify the offline checker behavior only. No full-graph live routing acceptance, merge, database write, deployment or change to production TomTom routing is authorized.
+
+## Local read-only full-graph runner — verified CI checkpoint, 12 November 2026
+
+- [x] Added `server/jalan/run-kl-local-readonly.js`, a loopback-only operator-side runner that reuses the experimental `/route` engine and sanitized journey evidence collector. It requires a separately provisioned **read-only** MongoDB credential, private case input and a new sanitized output path; it does not deploy or change the live TomTom engine.
+- [x] Added static syntax and loopback/sanitized-file safety tests.
+- [x] Commit `e27c5af6e0dfb643a53ce4e3ad3fb8a5ff7be875`: [routing CI run 43067057338](https://github.com/Zux12/Mterms2026/actions/runs/43067057338) **217 tests passed, 0 failed**, confirmed in job logs.
+- [x] [Diagnostic CI run 43067057334](https://github.com/Zux12/Mterms2026/actions/runs/43067057334) succeeded.
+- [ ] Run the local tool with actual read-only Atlas access and independently selected KL cases; capture measured full-graph routes, not just successful static tests.
+- [ ] Complete 20 real-road journeys, independent legal-turn review, TomTom comparisons and performance acceptance.
+
+**Security boundary:** The runner requires read-only credentials but cannot itself prove a supplied database user has read-only permissions. Confirm Atlas privileges independently before running it. No secrets or private journey coordinates belong in Git.
+
+This documentation commit requires its own CI verification.
