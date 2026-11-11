@@ -28,9 +28,12 @@ test('directed Dijkstra agrees with independent Bellman-Ford over 40 seeded netw
   const actual=calculate({edges,adj},snap(start,0),snap(end,1));
   const referenceEdges=[...edges,
    {from:'12',to:start.to,len:start.len},
-   {from:end.from,to:'13',len:end.len}];
-  // The router starts by traversing its selected start edge and ends by
-  // traversing its selected destination edge; model both explicitly.
+   {from:'12',to:start.from,len:0},
+   {from:end.from,to:'13',len:end.len},
+   {from:end.to,to:'13',len:0}];
+  // A snap at t=0 may depart the selected edge's from-node without
+  // traversing that edge. Likewise a t=1 arrival may enter the to-node
+  // from another incoming edge. Model both alternatives independently.
   const expected=reference(referenceEdges,12,13);
   assert.equal(actual===null,expected===null,'trial '+trial);
   if(expected!==null)assert.ok(Math.abs(actual.distanceMeters-expected)<2,'trial '+trial);
