@@ -202,3 +202,25 @@ test('unreasonable server timing is never reported as an accepted performance sa
  assert.equal(r.summary.serverTimingSamples,0);
  assert.equal(r.summary.serverTimingByStageMs.serverTotalMs.p95,null);
 });
+
+test('verified cold and warm routes have separate timing summaries',()=>{
+ const cases=twentyValid();
+ for(const c of cases)Object.assign(c,{graphLoadMs:8,snappingMs:2,pathSearchMs:1,serverTotalMs:11,graphCacheHit:true});
+ Object.assign(cases[0],{graphLoadMs:100,snappingMs:2,pathSearchMs:1,serverTotalMs:103,graphCacheHit:false});
+ const r=run(cases);
+ assert.equal(r.status,0);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.cold.samples,1);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.cold.p50,103);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.warm.samples,19);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.warm.p95,11);
+});
+test('unverified route and malformed cache status never contaminate cold warm metrics',()=>{
+ const cases=twentyValid();
+ for(const c of cases)Object.assign(c,{graphLoadMs:8,snappingMs:2,pathSearchMs:1,serverTotalMs:11,graphCacheHit:'unknown'});
+ Object.assign(cases[0],{graphCacheHit:false,geometryMetricsVerified:false,serverTotalMs:10003,graphLoadMs:10000});
+ const r=run(cases);
+ assert.equal(r.status,1);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.cold.samples,0);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.warm.samples,0);
+ assert.equal(r.summary.graphCacheTimingByStatusMs.cold.p50,null);
+});
