@@ -7,7 +7,7 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - [x] Differential synthetic shortest-path comparison against an independent Bellman–Ford reference.
 - [x] Synthetic large-graph performance measurement completed (not representative of actual KL roads).
 - [x] Route-coordinate gap advisory detects displaced endpoints even when imported directed graph node IDs connect (synthetic regression plus sampled KL chain).
-- [ ] Audit geometry gap counts/distribution on the complete KL graph; zero synthetic or sampled gaps is **not** full-network validation.
+- [x] Audit coordinate consistency across **every imported KL graph-node endpoint** (168,221 directed edges, 336,442 endpoint observations, 103,670 unique node IDs). Every same-ID observation had identical coordinates. This validates imported node-coordinate consistency, **not** physical road connectivity or route legality.
 - [ ] Re-run GitHub Actions against the final proposed commit and capture run IDs.
 
 ## Read-only KL edge identity preflight (11 November 2026)
@@ -16,6 +16,16 @@ This checklist applies to the **experimental, read-only** directed segment-routi
 - The preview graph loader now rejects duplicate or empty/non-string directed IDs instead of accepting a cardinality-only check. This is an in-memory fail-closed guard; no MongoDB indexes, records, schemas, or production routes were changed.
 - Additional read-only full-collection aggregation found **zero** nonnumeric endpoint values, **zero** malformed nested coordinate pairs and **zero** coordinates outside global WGS84 latitude/longitude bounds. These checks are data-shape validation, **not** precision, consistency or road-legality verification.
 - **Still outstanding:** mismatched endpoint coordinates across all graph adjacencies, genuine on-road GPS snapping, representative full routes and turn legality. A zero-duplicate result does not establish route correctness.
+
+## Full-network directed-node geometry audit (11 November 2026)
+
+- Ran a **read-only MongoDB Atlas aggregation** against the complete `jalan_navigation.road_graph_edges_v495` collection. For each directed edge, projected its `fromNode`/start coordinate and `toNode`/end coordinate; combined both endpoint streams; grouped by node identifier; compared latitude/longitude minimum and maximum per node. A longitude/latitude bounding-box diagonal in metres acts as a conservative **upper bound** on within-node endpoint spread.
+- Scope: **168,221** directed edges, **336,442** endpoint observations, **103,670** distinct graph nodes, including **102,676** nodes observed more than once. Nodes with spread upper bound >2 m: **0**; >10 m: **0**; maximum recorded upper bound: **0 m**.
+- Independent randomized read-only adjacency spot-check: **1,000** sampled inbound directed edges, **1,909** corresponding outbound transitions; **3** inbound samples had no outbound edge. Among the connected pairs, **0** geometry gaps >2 m; maximum **0 m**. This is a topology observation, not an assertion that every dead end is wrong.
+- Separate collection-wide shape observations: **zero** equal start/end-coordinate edges; **zero** equal from/to node IDs; **zero** directed edges over 1 km based on approximate chord distance (maximum approximately **870 m**). These do not establish map completeness or route realism.
+- New isolated in-memory `kl-node-geometry-audit-v4102.js` computes and exposes a conservative coordinate-spread advisory when the experimental KL graph loads. Malformed or empty input produces **unknown/null**, never a false zero. Synthetic regressions test exact matches, node coordinate shifts, bounded spread, disconnected IDs and malformed records.
+- Data provenance: OpenStreetMap contributors (ODbL), imported v495. This audit validates **internal imported node-coordinate coherence only**. It does not prove that node identities correspond to lawful street junctions, road geometry is geographically accurate, restrictions are applied, or that the graph can provide safe navigation.
+- All operations on Atlas were read-only. No user GPS traces, secrets, MTERMS records, MongoDB writes, production merges or TomTom routing changes.
 
 ## Real KL graph — must verify before merge
 - [ ] Read-only health confirms expected `road_graph_edges_v495` count (168,221) in `jalan_navigation`.
