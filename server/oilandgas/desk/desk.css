@@ -19,3 +19,5 @@
 .story-picker-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 #story-automatic.secondary{background:white;color:var(--ink);border-color:#d6d9ce}
 @media(max-width:680px){#story-picker{padding:20px}#story-picker .filters{gap:0}.story-picker-actions>button{width:100%}#story-picker .section-heading h2{font-size:25px}}
+
+.weekly-highlight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:680px){.weekly-highlight-grid{grid-template-columns:1fr}}

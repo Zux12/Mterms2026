@@ -1,6 +1,6 @@
 'use strict';
 
-let storySlot, storyLabel, storyPage=0, storyGeneration=0, storyChoice=null, storyBusy=false, storyTimer;
+let storySlot, storyLabel, storyGroup='highlights', storyPage=0, storyGeneration=0, storyChoice=null, storyBusy=false, storyTimer;
 const storyDialog=byId('story-picker');
 const storyLimit=6;
 
@@ -21,15 +21,19 @@ function invalidateStories(){
   byId('story-results-status').textContent='Loading published stories…';
 }
 
-function openStoryPicker(slot,label,row){
+function openStoryPicker(slot,label,row,group='highlights'){
   if(!mayLeave())return;
   closeEntry();
-  storySlot=slot;storyLabel=label;storyPage=0;
+  storySlot=slot;storyLabel=label;storyGroup=group;storyPage=0;
   byId('story-picker-title').textContent='Change '+label.toLowerCase();
-  byId('story-picker-current').textContent=row?'Currently showing “'+row.entry.title+'”.':'This position is currently empty.';
+  byId('story-picker-current').textContent=row?.entry?'Currently showing “'+(row.headline||row.entry.title)+'”.':'This position is currently empty.';
   byId('story-search').value='';
-  byId('story-kind').value='articles';
+  byId('story-kind').value=group==='weekly'&&slot==='research'?'publications':'articles';
   byId('story-save').textContent='Save as '+label;
+  byId('story-automatic').textContent=group==='weekly'?'Use weekly selection':'Use automatic industry news';
+  byId('story-selection').querySelector('.story-help').textContent=group==='weekly'
+    ?'Your selection stays here until you change it or return to the weekly selection.'
+    :'Choosing a story already featured elsewhere moves it to this position.';
   byId('story-picker-message').textContent='';
   storyDialog.showModal();
   byId('story-search').focus();
@@ -93,11 +97,12 @@ async function saveStory(automatic=false){
   controls.forEach(([control])=>{control.disabled=true;});
   byId('story-picker-message').textContent='Saving…';
   try{
-    if(automatic)await api('highlight/automatic',{slot:storySlot});
-    else await api('highlight',{slot:storySlot,kind:storyChoice.kind,reference:storyChoice.reference,image:''});
+    const endpoint=storyGroup==='weekly'?'weekly-pick':'highlight';
+    if(automatic)await api(endpoint+'/automatic',{slot:storySlot});
+    else await api(endpoint,{slot:storySlot,kind:storyChoice.kind,reference:storyChoice.reference,image:''});
     storyDialog.close();
-    byId('message').textContent=storyLabel+(automatic?' now uses automatic industry news.':' updated. Your selection is now on the homepage.');
-    await loadDashboardHighlights();
+    byId('message').textContent=storyLabel+(automatic?(storyGroup==='weekly'?' now follows the weekly selection.':' now uses automatic industry news.'):' updated. Refresh the homepage to see your selection.');
+    await (storyGroup==='weekly'?loadWeeklyDashboard():loadDashboardHighlights());
   }catch(err){
     (storyDialog.open?byId('story-picker-message'):byId('message')).textContent=err.message;
   }finally{
@@ -119,3 +124,26 @@ for(const [id,delta] of [['story-previous',-1],['story-next',1]]){
 }
 byId('story-save').onclick=()=>saveStory();
 byId('story-automatic').onclick=()=>saveStory(true);
+
+let weeklyGeneration=0;
+async function loadWeeklyDashboard(){
+  const generation=++weeklyGeneration,target=byId('dashboard-weekly');
+  target.textContent='Loading top-right stories…';
+  try{
+    const rows=await api('weekly-picks');if(generation!==weeklyGeneration)return;
+    target.replaceChildren();
+    for(const [slot,label] of [['field','From the field'],['research','Research into practice']]){
+      const row=rows.find(r=>r.slot===slot),card=document.createElement('div');card.className='highlight-card';
+      const tag=document.createElement('small');tag.textContent=label;
+      const title=document.createElement('h3');title.textContent=row?.headline||'No published story available';
+      const note=document.createElement('p');note.textContent=row?.mode==='manual'?'Your selection':'Weekly selection';
+      const change=document.createElement('button');change.type='button';change.textContent='Change story';
+      change.setAttribute('aria-label','Change '+label.toLowerCase());
+      change.onclick=()=>openStoryPicker(slot,label,row,'weekly');
+      card.append(tag,title,note,change);target.append(card);
+    }
+  }catch{if(generation===weeklyGeneration)target.textContent='Top-right stories could not load. Use Refresh to try again.';}
+}
+byId('refresh-weekly').onclick=loadWeeklyDashboard;
+new MutationObserver(()=>{if(!office.hidden)loadWeeklyDashboard();}).observe(office,{attributes:true,attributeFilter:['hidden']});
+if(!office.hidden)loadWeeklyDashboard();

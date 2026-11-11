@@ -11,6 +11,7 @@ const manuscriptText = require('./manuscript-text');
 const kinds = ['articles','publications'];
 const site = 'https://oilandgas.eu.com';
 const highlightSlots = require('./highlight-slots');
+const weeklyPicks = require('./weekly-picks');
 const lifetime = 2 * 60 * 60 * 1000;
 const cookieName = '__Secure-oilDesk';
 const cookieOptions = {httpOnly:true, secure:true, sameSite:'strict', path:'/api/oilandgas/editor'};
@@ -85,6 +86,12 @@ router.get('/browse',wrap(async(req,res)=>{
     .sort(order).skip(page*limit).limit(limit+1).toArray();
   res.json({items:rows.slice(0,limit).map(r=>publicEntry(r,kind)),more:rows.length>limit});
 }));
+router.get('/weekly-picks',wrap(async(req,res)=>{
+  const origin=req.get('Origin');
+  if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
+  res.json(await weeklyPicks.resolve(database(),publicEntry));
+}));
+
 router.get('/highlights',wrap(async(req,res)=>{
   const origin=req.get('Origin');
   if ([site,'https://www.oilandgas.eu.com'].includes(origin)) res.set('Access-Control-Allow-Origin',origin).vary('Origin');
@@ -166,6 +173,24 @@ router.use(wrap(async(req,res,next)=>{
   const id=sessionId(req);
   if(!id || !secret() || !(await database().collection('editor_sessions').findOne({_id:id,expiresAt:{$gt:new Date()}}))) fail(401,'Please sign in.');
   next();
+}));
+
+router.post('/weekly-pick/automatic',wrap(async(req,res)=>{
+  const {slot}=req.body || {};
+  if (!weeklyPicks.positions.some(([key])=>key===slot)) fail(400,'Invalid weekly position.');
+  await database().collection('homepage').updateOne({_id:'weekly-picks'},{$unset:{[slot]:''}});
+  res.json({ok:true});
+}));
+
+router.post('/weekly-pick',wrap(async(req,res)=>{
+  const {slot,kind,reference}=req.body || {};
+  if (!weeklyPicks.positions.some(([key])=>key===slot) || !kinds.includes(kind) ||
+      typeof reference!=='string') fail(400,'Invalid weekly selection.');
+  const record=await database().collection(kind).findOne({reference,status:'published',publication:{$exists:true}});
+  if (!record) fail(404,'Choose a published entry.');
+  await database().collection('homepage').updateOne({_id:'weekly-picks'},
+    {$set:{[slot]:{kind,reference,publicationId:record.publicationId??null}}},{upsert:true});
+  res.json({ok:true});
 }));
 
 router.post('/highlight/automatic',wrap(async(req,res)=>{
