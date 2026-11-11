@@ -31,6 +31,8 @@ for(const [i,c] of cases.entries()){
     (c.ok===false&&c.responseStatus!==404))
   failures.push(id+': responseStatus must be HTTP 200 for a route or HTTP 404 for a reviewed no-path');
  if(c.ok===true){
+  // A 200 status alone does not prove the experimental route contract was checked.
+  if(c.routeModeVerified!==true)failures.push(id+': experimental route response not verified');
   if(!Number.isFinite(c.distanceMeters)||c.distanceMeters<0)failures.push(id+': invalid distanceMeters');
   for(const k of ['startSnapMeters','endSnapMeters']){
    if(!Number.isFinite(c[k])||c[k]<0)failures.push(id+': invalid '+k);
@@ -41,6 +43,7 @@ for(const [i,c] of cases.entries()){
   }
   if(c.geometryContinuous!==true)failures.push(id+': geometry continuity not verified');
  }else if(c.ok===false){
+  if(c.noPathModeVerified!==true)failures.push(id+': experimental no-path response not verified');
   if(c.expectedReachable===false)expectedNoPath++;
   else unexpectedNoPath++;
   // An intentionally unreachable case must have independent evidence of
