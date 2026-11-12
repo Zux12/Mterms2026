@@ -33,3 +33,20 @@ test('malformed or empty input never yields enforcement approval',()=>{
  assert.equal(classifyTurnEnforcement([null]).counts.malformed,1);
  assert.throws(()=>classifyTurnEnforcement(null),TypeError);
 });
+
+test('overlapping complexity flags count conditions even on unsupported via-way records',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,viaNodes:[],viaWays:['osm-way-123'],conditional:'Mo-Fr',except:'bus'},
+  {...relation,viaNodes:['a','b'],viaWays:[],applicability:'verified'},
+  {...relation,viaNodes:['a'],viaWays:[],applicability:'verified'}
+ ]);
+ assert.equal(r.independentFlags.viaWay,1);
+ assert.equal(r.independentFlags.missingViaNode,1);
+ assert.equal(r.independentFlags.multipleViaNodes,1);
+ assert.equal(r.independentFlags.conditional,1);
+ assert.equal(r.independentFlags.except,1);
+ assert.equal(r.independentFlags.unverifiedApplicability,1);
+ assert.equal(r.counts.complex,2);
+ assert.equal(r.counts.verifiedSimple,1);
+ assert.equal(r.allRestrictionsReady,false);
+});
