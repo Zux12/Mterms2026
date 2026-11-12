@@ -56,4 +56,4 @@ GitHub Actions run [43242572050](https://github.com/Zux12/Mterms2026/actions/run
 
 ## Extended real-graph browser smoke
 
-The Chromium-to-real-graph job now requests a short public OSM-node route followed by a longer corridor route through the same read-only preview session. The corridor check is **pending CI verification** and is not an independent 20-case journey acceptance result.
+The Chromium-to-real-graph job now requests a short public OSM-node route followed by a longer corridor route through the same read-only preview session. The corridor check **passed** in [GitHub Actions run 43244573738](https://github.com/Zux12/Mterms2026/actions/runs/43244573738), alongside all other jobs. It is not an independent 20-case journey acceptance result.
