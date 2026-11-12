@@ -21,8 +21,10 @@ async function main(){
   throw Error('Missing read-only credentials, preview token or valid port');
  await mongoose.connect(uri,{serverSelectionTimeoutMS:15000,readPreference:'secondaryPreferred'});
  const db=mongoose.connection.useDb('jalan_navigation',{useCache:true}).db;
- if(await db.collection('road_graph_edges_v495').countDocuments()!==168221)
+ if(await db.collection('road_graph_edges_v495').countDocuments()!==168221){
+  await mongoose.disconnect();
   throw Error('KL graph count mismatch');
+ }
  const app=express();
  app.disable('x-powered-by');
  app.use((req,res,next)=>{
