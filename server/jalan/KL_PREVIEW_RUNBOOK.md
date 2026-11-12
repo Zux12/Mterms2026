@@ -41,3 +41,7 @@ Separate app and database credentials, read-only database role, authentication, 
 ## Route-response race safety — 12 November 2026
 
 Chromium fixture test verifies that an in-flight route response is invalidated when the operator swaps endpoints. Delayed results must not repaint the obsolete route. This protects diagnostic UI state only; no live GPS rerouting or road-safety claims follow from the test.
+
+## Browser safety-contract verification — 12 November 2026
+
+Chromium fixture test rejects a preview API response falsely reporting `legalDrivingRouteVerified: true`. The route is not displayed as an experimental preview. This is a defensive UI contract, not an independent determination of legal road access.
