@@ -129,3 +129,25 @@ test('only-turn restriction does not affect vehicles arriving from another road'
  assert.deepEqual(r.pathEdgeIds,[incoming.id,shortcut.id]);
  assert.equal(r.distanceMeters,11);
 });
+
+test('heap frontier preserves globally shortest detour despite expensive first branch',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',1);
+ const banned=e('osm-way-607581032:0:F','v','t',1);
+ const expensive=e('osm-way-999999:0:F','v','a',100);
+ const cheap=e('osm-way-888888:0:F','v','b',2);
+ const cheapFinish=e('osm-way-777777:0:F','b','t',2);
+ const expensiveFinish=e('osm-way-666666:0:F','a','t',1);
+ const r=searchTurnAware(graph([incoming,banned,expensive,cheap,cheapFinish,expensiveFinish]),'s','t',[base]);
+ assert.equal(r.ok,true);
+ assert.equal(r.distanceMeters,5);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,cheap.id,cheapFinish.id]);
+});
+test('heap frontier handles 2000 directed edges and preserves shortest distance',()=>{
+ const edges=[];
+ for(let i=0;i<2000;i++)edges.push(e('osm-way-'+(900000+i)+':0:F','n'+i,'n'+(i+1),1));
+ const r=searchTurnAware(graph(edges),'n0','n2000',[base]);
+ assert.equal(r.ok,true);
+ assert.equal(r.distanceMeters,2000);
+ assert.equal(r.pathEdgeIds.length,2000);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
