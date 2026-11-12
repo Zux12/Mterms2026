@@ -175,10 +175,16 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     appendServerTiming(row,body);
    }else if(res.status===422&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
+    body.turnRestrictionsEnforced===false&&fullGraphReply(body)&&
     body.error==='No nearby directed graph segment within 200 m'){
     // A snap failure is NOT a directed no-path finding. Preserve only sanitized
     // measurements; the existing acceptance validator must reject this case.
     row.responseStatus=422;row.ok=false;row.failureClass='snap-out-of-range';
+    // A 422 is a diagnostic failure, never accepted journey evidence.
+    // Attribute it to KL only after the full v495 graph and advisory flags match.
+    row.graphEvidenceVerified=true;
+    row.graphCacheHit=evidenceBoolean(body.graphCacheHit);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
     row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
     appendServerTiming(row,body);
