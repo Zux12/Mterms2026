@@ -25,3 +25,12 @@ test('duplicate and malformed review records rejected',()=>{
  assert.throws(()=>assessRestrictionReview([complete,complete]),/duplicate/);
  assert.throws(()=>assessRestrictionReview([{...complete,status:'approved'}]),/status/);
 });
+
+test('self-declared complete review is never proof of independently verified road legality',()=>{
+ const r=assessRestrictionReview([complete]);
+ assert.equal(r.accepted,1);
+ assert.equal(r.independentVerificationEstablished,false);
+ assert.equal(r.results[0].independentVerificationEstablished,false);
+ assert.equal(r.results[0].reason,'self-reported-evidence-complete-external-verification-required');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
