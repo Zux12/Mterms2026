@@ -441,3 +441,12 @@ No production merge/deploy, MongoDB writes or live TomTom changes.
 - [ ] Complete 20 reviewed KL journeys and TomTom comparison.
 
 No production merge/deploy, MongoDB writes or live TomTom changes.
+
+## Review-to-manifest reference integrity regression passed — 12 November 2026
+
+- [x] Offline review bundle now requires exact set equality between a review's declared evidence references and the associated manifest's artifact references. Unrelated or omitted evidence cannot be silently counted.
+- [x] **306/306** regression tests passed; full-graph smoke and diagnostic workflows also succeeded in [GitHub Actions run 43187814106](https://github.com/Zux12/Mterms2026/actions/runs/43187814106).
+- [ ] Independently authenticate actual evidence; SHA-256 and matching references only establish metadata consistency, not source truth.
+- [ ] Complete 20 independently reviewed KL journeys and turn-aware route validation.
+
+No production merge/deploy, database writes or TomTom changes.
