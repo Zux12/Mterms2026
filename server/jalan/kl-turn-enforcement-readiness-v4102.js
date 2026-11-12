@@ -19,9 +19,11 @@ function classifyTurnEnforcement(restrictions){
   if(!r||typeof r!=='object'||typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
     typeof r.restriction!=='string'||!Array.isArray(r.viaNodes)||!Array.isArray(r.viaWays)||
     !/^osm-way-\d+$/.test(r.fromWay)||!/^osm-way-\d+$/.test(r.toWay)||
-    r.viaNodes.some(n=>(typeof n!=='string'&& !Number.isInteger(n))||String(n).trim()==='')){
+    r.viaNodes.some(n=>(typeof n!=='string'&& !Number.isSafeInteger(n))||String(n).trim()==='')){
    counts.malformed++;continue;
   }
+  // Verified restrictions must identify one nonempty via-node; fixtures
+  // may use symbolic IDs, but imported real OSM nodes must be numeric.
   if(r.viaNodes.length!==1||r.viaWays.length!==0||
      !/^(no_|only_)[a-z_]+$/.test(r.restriction)){
    counts.complex++;continue;
