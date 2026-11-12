@@ -352,3 +352,13 @@ No production deployment, database writes or TomTom changes.
 - [ ] Validate real one-way/turn restrictions and 20 independently reviewed KL journeys.
 
 **Scope:** A real imported bridge edge is used, but this is not proof of bridge network legality, map-matching correctness, or safe production routing.
+
+## Real three-edge KL bridge junction fixture passed — 12 November 2026
+
+- [x] Verified Atlas v495 bridge=yes/layer=1 directed edges `osm-way-1007589904:6:F`, `osm-way-1007589904:7:F`, and `osm-way-919093801:9:F` share the documented imported node `8536168965`.
+- [x] Regression checks that two directed approaches can reach the departure edge and the reverse movement cannot be fabricated.
+- [x] **277/277** Node regression tests passed; full-graph smoke and diagnostic workflows passed in [GitHub Actions run 43157230227](https://github.com/Zux12/Mterms2026/actions/runs/43157230227).
+- [ ] Identify and independently validate an actual grade-separated bridge-to-ground crossing, including node IDs and layers.
+- [ ] Validate one-way/turn legality and 20 reviewed real KL journeys.
+
+This proves directed connectivity for a bounded imported bridge fixture only; no production routing approval.
