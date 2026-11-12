@@ -17,7 +17,8 @@ const good={
 };
 const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,
  error:'No directed path found',routingActivated:false,databaseWrites:0,
- trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
+ trafficAware:false,legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,
+  turnRestrictionsEnforced:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
 const reply=(status,body,headers={'cache-control':'no-store'})=>async()=>({
  status,headers:new Headers(headers),json:async()=>body
 });
@@ -47,6 +48,39 @@ test('recognized no-path 404 is accepted only with pre-existing independent revi
  assert.equal(out[0].noPathModeVerified,true);
  assert.equal(out[0].pathSearchMs,78.7);
  assert.equal(out[0].serverTotalMs,94.4);
+});
+test('KL no-path evidence refuses claimed legal or access/turn enforcement',async()=>{
+ const c={...base,caseId:'kl-nopath-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,[key]:true})});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].failureClass,'unverified-experimental-response',key);
+  assert.equal(out[0].noPathModeVerified,undefined,key);
+  assert.equal(out[0].graphEvidenceVerified,undefined,key);
+ }
+});
+test('KL no-path evidence requires all three explicit advisory-only flags',async()=>{
+ const c={...base,caseId:'kl-nopath-missing-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const altered={...noPath};delete altered[key];
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,altered)});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].failureClass,'unverified-experimental-response',key);
+  assert.equal(out[0].noPathModeVerified,undefined,key);
+ }
+});
+test('KL no-path rejects non-boolean enforcement metadata without retaining it',async()=>{
+ const c={...base,caseId:'kl-nopath-malformed-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ const payload={secret:'DO_NOT_ARCHIVE_NO_PATH_METADATA'};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,[key]:payload})});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].graphEvidenceVerified,undefined,key);
+  assert.ok(!JSON.stringify(out).includes(payload.secret),key);
+ }
 });
 test('generic HTTP 404 cannot be mistaken for a disconnected road',async()=>{
  const c={...base,expectedReachable:false,disconnectionReviewed:true};
