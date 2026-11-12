@@ -26,6 +26,10 @@ async function main(){
   throw Error('KL graph count mismatch');
  }
  const app=express();
+ // Bounded request concurrency prevents repeated full-graph route searches
+ // from exhausting the owner-only pilot. No user coordinates are logged.
+ let activeRoutes=0;
+ const MAX_ACTIVE_ROUTES=1;
  app.disable('x-powered-by');
  app.use((req,res,next)=>{
   res.set('Cache-Control','no-store');
@@ -35,6 +39,14 @@ async function main(){
  app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
  app.use('/api/jalan/kl',(req,res,next)=>{
   if(!authorized(req.get('x-jalan-preview-token')))return res.status(401).json({ok:false,error:'Preview token required'});
+  if(req.path==='/route'){
+   if(activeRoutes>=MAX_ACTIVE_ROUTES)
+    return res.status(429).json({ok:false,error:'Preview route busy; retry later'});
+   activeRoutes++;
+   let released=false;
+   const release=()=>{if(!released){released=true;activeRoutes--;}};
+   res.once('finish',release);res.once('close',release);
+  }
   next();
  },router);
  const server=app.listen(port,host,()=>process.stdout.write('KL diagnostic preview listening on loopback port '+port+'; no production deployment.\n'));
