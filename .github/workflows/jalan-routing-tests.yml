@@ -7,6 +7,7 @@ on:
     paths:
       - 'server/jalan/**'
       - '.github/workflows/jalan-routing-tests.yml'
+      - '.github/workflows/jalan-kl-fullgraph-manual.yml'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: node --check server/jalan/run-kl-local-readonly.js
-      - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js server/jalan/kl-fullgraph-workflow-security.test.js
+      - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js server/jalan/kl-fullgraph-workflow-security.test.js server/jalan/kl-preview-http-contract-v4102.test.js
       - name: Validate production diagnostics without database writes
         run: |
           node --check server/jalan/routes.js
