@@ -155,10 +155,16 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     appendServerTiming(row,body);
    }else if(res.status===422&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
+    body.turnRestrictionsEnforced===false&&fullGraphReply(body)&&
     body.error==='No nearby directed graph segment within 200 m'){
     // A snap failure is NOT a directed no-path finding. Preserve only sanitized
     // measurements; the existing acceptance validator must reject this case.
     row.responseStatus=422;row.ok=false;row.failureClass='snap-out-of-range';
+    // Diagnostic-only: a snap miss remains invalid acceptance evidence, but
+    // can only be attributed to the complete imported KL graph when proven.
+    row.graphEvidenceVerified=true;
+    row.graphCacheHit=evidenceBoolean(body.graphCacheHit);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
     row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
     appendServerTiming(row,body);
