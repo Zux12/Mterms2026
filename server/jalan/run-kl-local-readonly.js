@@ -8,12 +8,14 @@ const {spawnSync}=require('node:child_process');
 const express=require('express'),mongoose=require('mongoose');
 const {router}=require('./kl-segment-v4102');
 const {collectEvidence,validateCases}=require('./collect-kl-route-evidence');
+let failureStage='initialization';
 async function main(){
  const [input,output]=process.argv.slice(2);
  if(!input||!output||path.resolve(input)===path.resolve(output))
   throw Error('Provide distinct private case input and sanitized output paths');
  if(!process.env.JALAN_READONLY_MONGODB_URI)
   throw Error('A read-only MongoDB connection is required');
+ failureStage='input-validation';
  const cases=validateCases(JSON.parse(fs.readFileSync(input,'utf8')));
  const app=express();
  // Ephemeral per-run token prevents other local processes from casually
@@ -29,25 +31,31 @@ async function main(){
  },router);
  let server;
  try{
+  failureStage='mongodb-connect';
   await mongoose.connect(process.env.JALAN_READONLY_MONGODB_URI,{
    serverSelectionTimeoutMS:15000,readPreference:'secondaryPreferred'
   });
   // Fail closed before opening the loopback endpoint if the complete
   // expected imported graph is unavailable. This is a count check, not
   // proof of road legality or a transactionally consistent snapshot.
+  failureStage='graph-count';
   const edgeCount=await mongoose.connection.useDb('jalan_navigation',{useCache:true})
    .db.collection('road_graph_edges_v495').countDocuments();
   if(edgeCount!==168221)throw Error('Incomplete KL graph');
+  failureStage='loopback-listen';
   server=await new Promise((resolve,reject)=>{
    const s=app.listen(0,'127.0.0.1',()=>resolve(s));s.once('error',reject);
   });
   const port=server.address().port;
   // The first valid route request measures a cold load; subsequent requests
   // should observe the cached graph. This runner deliberately remains sequential.
+  failureStage='route-collection';
   const evidence=await collectEvidence(cases,`http://127.0.0.1:${port}/api/jalan/kl/route`,{
    timeoutMs:60000,authHeader:'x-jalan-local-session',authValue:sessionToken
   });
+  failureStage='evidence-write';
   fs.writeFileSync(output,JSON.stringify(evidence,null,2)+'\n',{flag:'wx',mode:0o600});
+  failureStage='evidence-validation';
   const checked=spawnSync(process.execPath,[path.join(__dirname,'validate-kl-pilot.js'),output],{
    encoding:'utf8',timeout:10000
   });
@@ -61,6 +69,6 @@ async function main(){
 }
 if(require.main===module)main().catch(()=>{
  // Do not print MongoDB URIs, private coordinates, request URLs or stack traces.
- process.stderr.write('Local KL route run failed; check private input, read-only DB access and local dependencies.\n');
+ process.stderr.write('Local KL route run failed at stage: '+failureStage+' (details suppressed).\n');
  process.exitCode=1;
 });
