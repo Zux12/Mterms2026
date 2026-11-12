@@ -27,10 +27,18 @@ small{color:#556677} @media(max-width:720px){main{display:flex;flex-direction:co
 'use strict';
 const map=L.map('map').setView([3.14,101.69],12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
-let routeLayer=null,markers=[],nextPoint='start';
+let routeLayer=null,markers=[],nextPoint='start',routeController=null,requestVersion=0;
+function invalidateRoute(){
+ requestVersion++;
+ if(routeController){routeController.abort();routeController=null;}
+ if(routeLayer){map.removeLayer(routeLayer);routeLayer=null;}
+ for(const m of markers)map.removeLayer(m);
+ markers=[];
+}
 const selectionMarkers={start:null,end:null};
 map.on('click',event=>{
  const id=nextPoint;
+ invalidateRoute();
  const {lat,lng}=event.latlng;
  document.getElementById(id).value=lat.toFixed(6)+', '+lng.toFixed(6);
  if(selectionMarkers[id])map.removeLayer(selectionMarkers[id]);
@@ -62,6 +70,7 @@ document.getElementById('check').addEventListener('click',async()=>{
  finally{check.disabled=false;}
 });
 document.getElementById('swap').addEventListener('click',()=>{
+ invalidateRoute();
  const a=document.getElementById('start'),b=document.getElementById('end');
  const value=a.value;a.value=b.value;b.value=value;
  for(const m of Object.values(selectionMarkers))if(m)map.removeLayer(m);
@@ -73,14 +82,19 @@ document.getElementById('swap').addEventListener('click',()=>{
  status.textContent='Start and destination swapped. Preview route to recalculate.';
 });
 button.addEventListener('click',async()=>{
+ invalidateRoute();
+ const version=requestVersion;
+ routeController=new AbortController();
+ const controller=routeController;
  button.disabled=true;status.textContent='Requesting experimental route…';
  try{
   const [startLat,startLng]=coordinate('start'),[endLat,endLng]=coordinate('end');
   const query=new URLSearchParams({startLat,startLng,endLat,endLng});
   const token=document.getElementById('token').value;
   if(!token)throw Error('Enter the local preview token.');
-  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token}});
+  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token},signal:controller.signal});
   const data=await response.json();
+  if(version!==requestVersion)return;
   if(!response.ok||data.ok!==true)throw Error(data.error||'Route unavailable');
   if(data.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||data.routingActivated!==false||
      data.legalDrivingRouteVerified!==false||data.turnRestrictionsEnforced!==false||
@@ -104,7 +118,7 @@ button.addEventListener('click',async()=>{
    'Possible turn-restriction warnings: '+(data.potentialTurnRestrictionReviewCount??'unavailable')+'\n'+
    'Access caution edges: '+data.potentialAccessReviewEdges+'\n'+
    'Legal driving route verified: NO';
- }catch(error){status.textContent='Preview unavailable: '+error.message;}
- finally{button.disabled=false;}
+ }catch(error){if(version===requestVersion&&error.name!=='AbortError')status.textContent='Preview unavailable: '+error.message;}
+ finally{if(version===requestVersion){routeController=null;button.disabled=false;}else button.disabled=false;}
 });
 </script></body></html>
