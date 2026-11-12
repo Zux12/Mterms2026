@@ -1,6 +1,10 @@
 name: Jalan KL full-graph read-only smoke test
 on:
   workflow_dispatch:
+  push:
+    branches: [jalan-v4102-routing-regression-tests]
+    paths:
+      - '.github/workflows/jalan-kl-fullgraph-manual.yml'
 permissions:
   contents: read
 jobs:
