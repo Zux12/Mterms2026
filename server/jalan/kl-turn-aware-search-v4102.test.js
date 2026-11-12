@@ -51,3 +51,18 @@ test('real imported KL via-node relation redirects across actual directed OSM ed
  assert.deepEqual(result.pathEdgeIds,[incoming.id,alternate.id,finish.id]);
  assert.equal(result.distanceMeters,90);
 });
+
+test('empty restriction input cannot claim turn-compliant route coverage',()=>{
+ const r=searchTurnAware(graph([a,banned]),'s','t',[]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'no-verified-turn-restriction-coverage');
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('same-node route with verified rules is zero length and not production approved',()=>{
+ const r=searchTurnAware(graph([a,banned]),'s','s',[base]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[]);
+ assert.equal(r.distanceMeters,0);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
