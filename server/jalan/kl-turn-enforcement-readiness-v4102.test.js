@@ -94,3 +94,22 @@ test('unsafe numeric via-node identifier is rejected instead of rounded',()=>{
  assert.equal(r.eligible.length,0);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('only_u_turn needs reversal-specific enforcement before it can be activated',()=>{
+ const r=classifyTurnEnforcement([{...relation,applicability:'verified',
+  fromWay:'osm-way-1339792254',toWay:'osm-way-1339792254',restriction:'only_u_turn'}]);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.counts.complex,1);
+ assert.equal(r.independentFlags.unknownRestriction,1);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('unknown restriction labels cannot claim full enforcement coverage',()=>{
+ const r=classifyTurnEnforcement(['no_entry','only_custom_turn'].map(restriction=>
+  ({...relation,applicability:'verified',restriction})));
+ assert.equal(r.counts.complex,2);
+ assert.equal(r.independentFlags.unknownRestriction,2);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+});
