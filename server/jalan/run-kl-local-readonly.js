@@ -67,9 +67,25 @@ async function main(){
   await mongoose.disconnect();
  }
 }
+function safeUriShape(raw){
+ if(typeof raw!=='string'||!raw.trim())return 'empty';
+ if(raw!==raw.trim())return 'leading-or-trailing-whitespace';
+ if(/^['"`]/.test(raw)||/['"`]$/.test(raw))return 'surrounding-quotation-marks';
+ if(/^mongodb(?:\\u002B|\\+)srv:\\/\\//.test(raw)===false&&!raw.startsWith('mongodb://'))return 'missing-mongodb-uri-scheme';
+ if(/[<>]/.test(raw))return 'unreplaced-template-placeholder';
+ if(/[\r\n]/.test(raw))return 'newline-in-secret';
+ try{
+  const u=new URL(raw);
+  if(!u.hostname)return 'missing-host';
+  if(!u.username)return 'missing-database-username';
+  if(!u.password)return 'missing-database-password';
+  if(/[%](?![0-9A-Fa-f]{2})/.test(u.username)||/[%](?![0-9A-Fa-f]{2})/.test(u.password))return 'invalid-percent-encoding';
+  return 'shape-valid';
+ }catch(_){return 'malformed-uri';}
+}
 function safeFailureCategory(error){
  const name=String(error?.name||'');
- if(name==='MongoParseError'||name==='MongoAPIError')return 'connection-uri-format';
+ if(name==='MongoParseError'||name==='MongoAPIError')return 'connection-uri-format ('+safeUriShape(process.env.JALAN_READONLY_MONGODB_URI)+')';
  if(name==='MongoServerSelectionError')return 'server-selection-or-network';
  if(name==='MongoServerError'&&Number(error?.code)===18)return 'authentication-rejected';
  if(name==='MongoNetworkError'||name==='MongoNetworkTimeoutError')return 'network-connectivity';
