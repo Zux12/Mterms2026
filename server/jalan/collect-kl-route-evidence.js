@@ -43,7 +43,12 @@ function verifiedGeometry(body){
     Math.abs(p[0])<=180&&Math.abs(p[1])<=90)&&
   body.geometryGapReviewAvailable===true&&body.geometryGapAdvisoryOnly===true&&
   body.geometryGapCountOverThreshold===0&&
-  Number.isSafeInteger(body.geometryGapTransitionsInspected)&&body.geometryGapTransitionsInspected>=0&&
+  // The router audits every consecutive path edge, including zero-length
+  // virtual node connectors. A claimed clean gap report with fewer inspected
+  // transitions than edgeCount-1 is not complete route evidence.
+  Number.isSafeInteger(body.edgeCount)&&body.edgeCount>=1&&body.edgeCount<=168223&&
+  Number.isSafeInteger(body.geometryGapTransitionsInspected)&&
+  body.geometryGapTransitionsInspected===body.edgeCount-1&&
   Number.isFinite(body.geometryGapThresholdMeters)&&
   body.geometryGapThresholdMeters>=0&&body.geometryGapThresholdMeters<=2&&
   Number.isFinite(body.geometryMaxGapMeters)&&body.geometryMaxGapMeters>=0&&
