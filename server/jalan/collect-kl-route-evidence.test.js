@@ -8,7 +8,7 @@ const good={
  ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,routingActivated:false,
  databaseWrites:0,trafficAware:false,legalDrivingRouteVerified:false,
  accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
- distanceMeters:1571,startSnapMeters:0,endSnapMeters:0,
+ distanceMeters:1571,edgeCount:1,startSnapMeters:0,endSnapMeters:0,
  geometry:{type:'LineString',coordinates:[[101.69,3.14],[101.70,3.15]]},
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,geometryGapThresholdMeters:2,
  geometryGapTransitionsInspected:0,geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,
@@ -436,4 +436,23 @@ test('cacheable GPS-snap HTTP 422 cannot supply trusted failure diagnostics',asy
   assert.equal(out[0].failureClass,'unverified-experimental-response');
   assert.equal(out[0].startSnapMeters,undefined);
  }
+});
+
+test('KL collector rejects incomplete geometry transition coverage and invalid edge counts',async()=>{
+ for(const changed of [
+  {edgeCount:undefined},{edgeCount:0},{edgeCount:2},{edgeCount:'1'},
+  {edgeCount:1.5},{edgeCount:168224},{geometryGapTransitionsInspected:1}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].responseStatus,200);
+  assert.equal(out[0].geometryMetricsVerified,true,'geographic cross-check is independent');
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector accepts complete transition coverage for multi-edge routes',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,{
+  ...good,edgeCount:3,geometryGapTransitionsInspected:2
+ })});
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.equal(out[0].geometryContinuous,true);
 });
