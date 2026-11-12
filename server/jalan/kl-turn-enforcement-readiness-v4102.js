@@ -18,11 +18,8 @@ function classifyTurnEnforcement(restrictions){
   }
   if(!r||typeof r!=='object'||typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
     typeof r.restriction!=='string'||!Array.isArray(r.viaNodes)||!Array.isArray(r.viaWays)||
-    !/^osm-way-\\d+$/.test(r.fromWay)||!/^osm-way-\\d+$/.test(r.toWay)||
+    !/^osm-way-\d+$/.test(r.fromWay)||!/^osm-way-\d+$/.test(r.toWay)||
     r.viaNodes.some(n=>(typeof n!=='string'&& !Number.isInteger(n))||String(n).trim()==='')){
-   counts.malformed++;continue;
-  }
-  if(r.viaNodes.length===1&&!/^\\d+$/.test(String(r.viaNodes[0]))){
    counts.malformed++;continue;
   }
   if(r.viaNodes.length!==1||r.viaWays.length!==0||
