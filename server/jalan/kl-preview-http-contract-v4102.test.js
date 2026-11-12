@@ -19,7 +19,7 @@ const route={
  startSnapMeters:0,endSnapMeters:0,
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,
  geometryGapThresholdMeters:2,geometryGapTransitionsInspected:0,
- geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,distanceMeters:17
+ geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,edgeCount:1,distanceMeters:17
 };
 test('health and route need hardened headers and exact expected KL graph',()=>{
  assert.equal(previewHealthVerified(response(),health),true);
@@ -103,4 +103,15 @@ test('HTTP smoke requires complete and internally consistent geometry gap audit'
   {geometryMaxGapMeters:3}
  ])assert.equal(previewRouteVerified(response(),{...route,...changed},publicJourney),false,
   JSON.stringify(changed));
+});
+
+test('HTTP smoke requires gap transitions to cover every routed edge boundary',()=>{
+ for(const changed of [
+  {edgeCount:undefined},{edgeCount:2},{edgeCount:0},
+  {geometryGapTransitionsInspected:2}
+ ])assert.equal(previewRouteVerified(response(),{...route,...changed},publicJourney),false,
+  JSON.stringify(changed));
+ assert.equal(previewRouteVerified(response(),{
+  ...route,edgeCount:3,geometryGapTransitionsInspected:2
+ },publicJourney),true);
 });
