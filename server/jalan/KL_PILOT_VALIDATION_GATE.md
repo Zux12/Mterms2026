@@ -382,3 +382,13 @@ No merge/deploy, database writes or live TomTom routing changes.
 - [ ] Verify real restriction applicability, enforce complex/conditional rules as appropriate, test on full KL graph, and complete 20 reviewed journeys before any routing activation.
 
 No production merge/deploy, MongoDB writes or live TomTom changes.
+
+## Full imported turn-restriction readiness audit — 12 November 2026
+
+- [x] Read-only GitHub Actions preflight loaded **168,221** directed edges and classified **1,941** imported OSM turn-restriction records.
+- [x] Classifier output: **0 verified simple**, **1,225 simple but unverified**, **716 complex/unsupported**, **0 malformed**, **0 conditional/exception in separately counted eligible class**. This classification reflects the classifier's ordering, not a comprehensive semantic audit of all relation fields.
+- [x] Full-graph job, regression tests and diagnostic workflow passed in [GitHub Actions run 43181128655](https://github.com/Zux12/Mterms2026/actions/runs/43181128655).
+- [ ] **Safety blocker:** no imported restriction is independently verified for enforcement. The separate turn-aware prototype must remain disconnected from production and the experimental route endpoint.
+- [ ] Independent review of source applicability, complex via-way/conditional rules, and 20 KL journeys required before activation.
+
+No database writes, production deploy or live TomTom changes.
