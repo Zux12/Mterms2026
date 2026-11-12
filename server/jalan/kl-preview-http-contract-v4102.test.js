@@ -18,7 +18,8 @@ const route={
   [101.70382,3.13153],[101.7038951,3.1314573]]},
  startSnapMeters:0,endSnapMeters:0,
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,
- geometryGapThresholdMeters:2,distanceMeters:17
+ geometryGapThresholdMeters:2,geometryGapTransitionsInspected:0,
+ geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,distanceMeters:17
 };
 test('health and route need hardened headers and exact expected KL graph',()=>{
  assert.equal(previewHealthVerified(response(),health),true);
@@ -79,4 +80,27 @@ test('HTTP smoke rejects missing, falsified or unreviewed snap and geometry metr
   {endSnapMeters:'0'},{geometryGapReviewAvailable:false},
   {geometryGapCountOverThreshold:1},{geometryGapThresholdMeters:5}
  ])assert.equal(previewRouteVerified(response(),{...route,...changed},publicJourney),false);
+});
+
+test('HTTP smoke rejects a relocated OSM-node journey despite internally consistent snap distances',()=>{
+ // Translate both endpoints ~11 m; the generic collector allows a 200 m
+ // candidate, but this particular smoke must actually exercise the node.
+ const relocated={...route,startSnapMeters:11,endSnapMeters:11,
+  geometry:{...route.geometry,coordinates:
+   route.geometry.coordinates.map(([lng,lat])=>[lng,lat+0.0001])}};
+ const {geometryMatchesJourney}=require('./collect-kl-route-evidence');
+ assert.equal(geometryMatchesJourney(relocated,publicJourney),true);
+ assert.equal(previewRouteVerified(response(),relocated,publicJourney),false);
+});
+test('HTTP smoke requires complete and internally consistent geometry gap audit',()=>{
+ for(const changed of [
+  {geometryGapAdvisoryOnly:false},
+  {geometryGapTransitionsInspected:undefined},
+  {geometryGapTransitionsInspected:-1},
+  {geometryGapThresholdMeters:-1},
+  {geometryMaxGapMeters:undefined},
+  {geometryMaxGapMeters:-0.1},
+  {geometryMaxGapMeters:3}
+ ])assert.equal(previewRouteVerified(response(),{...route,...changed},publicJourney),false,
+  JSON.stringify(changed));
 });
