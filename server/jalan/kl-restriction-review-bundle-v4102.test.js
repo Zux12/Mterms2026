@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {assessReviewBundle}=require('./kl-restriction-review-bundle-v4102');
 const review={restrictionId:'osm-relation-10341546',status:'verified',
- evidenceRefs:['osm:relation/10341546','field:inspection/2026-11-12'],
+ evidenceRefs:['osm:relation/10341546','authority:placeholder'],
  reviewerId:'reviewer-one',reviewedAt:'2026-11-12T08:00:00+08:00',
  sourceVersion:'2026-11-08',restrictionType:'no_right_turn',
  timezone:'Asia/Kuala_Lumpur',roadAccessChecked:true,turnGeometryChecked:true,
@@ -33,4 +33,21 @@ test('single source type cannot count as diverse evidence',()=>{
 test('duplicate and orphan evidence manifests are rejected',()=>{
  assert.throws(()=>assessReviewBundle([review],[manifest,manifest]),/Duplicate/);
  assert.throws(()=>assessReviewBundle([],[manifest]),/Orphan/);
+});
+
+test('unrelated evidence references cannot complete a review bundle',()=>{
+ const mismatched={...review,evidenceRefs:['osm:relation/10341546','field:inspection/2026-11-12']};
+ const r=assessReviewBundle([mismatched],[manifest]);
+ assert.equal(r.results[0].reviewMetadataComplete,true);
+ assert.equal(r.results[0].reviewEvidenceReferencesMatchManifest,false);
+ assert.equal(r.bundleMetadataComplete,0);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('extra manifest artifacts cannot be silently omitted from review evidence refs',()=>{
+ const m={...manifest,artifacts:[...artifacts,{
+  artifactId:'field_photo_001',sha256:'c'.repeat(64),sourceType:'field-photo',
+  capturedAt:'2026-11-12T08:00:00+08:00',reference:'field:inspection/2026-11-12'}]};
+ const r=assessReviewBundle([review],[m]);
+ assert.equal(r.results[0].reviewEvidenceReferencesMatchManifest,false);
+ assert.equal(r.bundleMetadataComplete,0);
 });
