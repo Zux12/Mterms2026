@@ -130,6 +130,22 @@ test('only-turn restriction does not affect vehicles arriving from another road'
  assert.equal(r.distanceMeters,11);
 });
 
+test('turn-aware search refuses an adjacency edge whose origin does not match its node bucket',()=>{
+ const wrong={...a,from:'unrelated-node'};
+ const g={adj:new Map([['s',[wrong]],['v',[banned]]])};
+ assert.throws(()=>searchTurnAware(g,'s','t',[base]),/Invalid graph edge/);
+});
+test('turn-aware search rejects missing OSM identity even on a one-edge route',()=>{
+ const anonymous=e('unattributed-edge','s','t',12);
+ assert.throws(()=>searchTurnAware(graph([anonymous]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+test('turn-aware search refuses finite edge costs that overflow accumulated route distance',()=>{
+ const large=e('osm-way-777777:0:F','s','v',1e308);
+ const more=e('osm-way-888888:0:F','v','t',1e308);
+ assert.throws(()=>searchTurnAware(graph([large,more]),'s','t',[base]),
+  /Invalid accumulated turn-aware route cost/);
+});
 test('heap frontier preserves globally shortest detour despite expensive first branch',()=>{
  const incoming=e('osm-way-1339792254:0:F','s','v',1);
  const banned=e('osm-way-607581032:0:F','v','t',1);
