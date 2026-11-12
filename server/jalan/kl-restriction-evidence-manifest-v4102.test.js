@@ -30,3 +30,14 @@ test('two metadata artifacts from one source are not independent evidence',()=>{
  assert.equal(r.sourceDiversity,false);
  assert.equal(r.independentVerificationEstablished,false);
 });
+
+test('distinct artifact IDs cannot reuse the same reference to inflate provenance',()=>{
+ const duplicated={...base,artifacts:[base.artifacts[0],
+  {...base.artifacts[1],reference:base.artifacts[0].reference}]};
+ assert.throws(()=>validateEvidenceManifest(duplicated),/Invalid evidence artifact metadata/);
+});
+test('byte-identical artifacts cannot claim two evidence source types',()=>{
+ const duplicated={...base,artifacts:[base.artifacts[0],
+  {...base.artifacts[1],sha256:base.artifacts[0].sha256}]};
+ assert.throws(()=>validateEvidenceManifest(duplicated),/Invalid evidence artifact metadata/);
+});
