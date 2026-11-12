@@ -51,3 +51,12 @@ test('extra manifest artifacts cannot be silently omitted from review evidence r
  assert.equal(r.results[0].reviewEvidenceReferencesMatchManifest,false);
  assert.equal(r.bundleMetadataComplete,0);
 });
+
+test('bundle rejects duplicate evidence provenance even with valid review references',()=>{
+ const duplicateDigest={...manifest,artifacts:[artifacts[0],
+  {...artifacts[1],sha256:artifacts[0].sha256}]};
+ assert.throws(()=>assessReviewBundle([review],[duplicateDigest]),/Invalid evidence artifact metadata/);
+ const duplicateReference={...manifest,artifacts:[artifacts[0],
+  {...artifacts[1],reference:artifacts[0].reference}]};
+ assert.throws(()=>assessReviewBundle([review],[duplicateReference]),/Invalid evidence artifact metadata/);
+});
