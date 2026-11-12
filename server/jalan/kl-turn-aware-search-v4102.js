@@ -47,6 +47,8 @@ function searchTurnAware(g,startNode,endNode,restrictions){
     // A true reversal returns to the incoming edge's origin node.
     const forwardContinuation=r.restriction==='no_u_turn'&&
      fromWay===toWay&&cur.prev.from!==e.to;
+    // Do not treat arbitrary reverse-node movement on another way as a
+    // verified U-turn exception. Only same-way forward continuation qualifies.
     if(r.restriction.startsWith('no_')&&toWay===r.toWay&&
        !forwardContinuation)forbidden=true;
     if(r.restriction.startsWith('only_')&&toWay!==r.toWay)forbidden=true;
