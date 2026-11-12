@@ -27,10 +27,13 @@ jobs:
           node server/jalan/routing-diagnostics.test.js
 
   kl-fullgraph:
+    # Secrets never flow to pull_request jobs or arbitrary development refs.
+    # Run authenticated, read-only smoke only on the dedicated isolated branch.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    env:
-      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +41,8 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - name: Verify dedicated read-only connection is configured
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         shell: bash
         run: |
           if [ -z "$JALAN_READONLY_MONGODB_URI" ]; then
@@ -61,6 +66,8 @@ jobs:
              startLat:3.1315707,startLng:101.7038508,endLat:3.128888,endLng:101.7126153}]),{mode:0o600,flag:'wx'});
           NODE
       - name: Run full-graph smoke case (partial 20-case acceptance is expected)
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         shell: bash
         run: |
           set +e
