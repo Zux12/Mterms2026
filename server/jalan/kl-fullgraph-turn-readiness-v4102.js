@@ -25,7 +25,7 @@ async function main(){
     r.productionRoutingAuthorized!==false)
    throw Error('Unexpected turn enforcement activation');
   console.log(JSON.stringify({mode:'READ_ONLY_TURN_READINESS',
-   graphEdges:edges,turnRelations:count,classification:r.counts,
+   graphEdges:edges,turnRelations:count,classification:r.counts,independentFlags:r.independentFlags,
    allRestrictionsReady:false,turnRestrictionsEnforced:false,
    productionRoutingAuthorized:false},null,2));
  }finally{await mongoose.disconnect();}
