@@ -86,3 +86,11 @@ test('verified relation with malformed OSM way or blank via-node identity is blo
  assert.equal(r.allRestrictionsReady,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('unsafe numeric via-node identifier is rejected instead of rounded',()=>{
+ const r=classifyTurnEnforcement([{...relation,applicability:'verified',
+  viaNodes:[Number.MAX_SAFE_INTEGER+2]}]);
+ assert.equal(r.counts.malformed,1);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
