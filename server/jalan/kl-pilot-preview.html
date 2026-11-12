@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JALAN — KL experimental route preview</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{font-family:system-ui,sans-serif;color:#162333;background:#f4f7fa}
+*{box-sizing:border-box}body{margin:0}header{background:#fff;padding:15px 20px;border-bottom:1px solid #dae2e8}
+h1{font-size:21px;margin:0 0 6px}.warning{font-size:13px;color:#853b00}
+main{display:grid;grid-template-columns:minmax(280px,350px) 1fr;min-height:calc(100dvh - 92px)}
+aside{padding:18px;background:white;box-shadow:1px 0 5px #ddd;z-index:500}
+label{display:block;font-weight:600;margin:14px 0 5px}input{width:100%;padding:10px;border:1px solid #aab9c8;border-radius:7px}
+button{border:0;border-radius:7px;padding:11px 15px;background:#155cc1;color:white;font-weight:600;cursor:pointer;margin-top:14px}
+button:disabled{opacity:.5;cursor:wait}#map{min-height:65dvh}#status{white-space:pre-wrap;line-height:1.5;margin-top:15px}
+small{color:#556677} @media(max-width:720px){main{display:flex;flex-direction:column}#map{height:65dvh;min-height:65dvh}aside{box-shadow:none}}
+</style></head><body>
+<header><h1>JALAN · KL route preview</h1><div class="warning">EXPERIMENTAL ONLY — not verified for legal driving, turns, access or traffic. Do not use for live navigation.</div></header>
+<main><aside><p>Enter KL coordinates (latitude, longitude) to preview the imported directed road graph. Results are diagnostic, not driving instructions.</p>
+<label for="start">Start coordinate</label><input id="start" value="3.1390, 101.6869" autocomplete="off">
+<label for="end">Destination coordinate</label><input id="end" value="3.1478, 101.6953" autocomplete="off">
+<button id="route">Preview route</button>
+<div id="status" role="status" aria-live="polite">No route requested.</div>
+<p><small>Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
+</aside><div id="map" aria-label="Experimental route map"></div></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+'use strict';
+const map=L.map('map').setView([3.14,101.69],12);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
+let routeLayer=null,markers=[];
+const button=document.getElementById('route'),status=document.getElementById('status');
+function coordinate(id){
+ const parts=document.getElementById(id).value.split(',').map(x=>Number(x.trim()));
+ if(parts.length!==2||!parts.every(Number.isFinite)||parts[0]<2.5||parts[0]>3.8||parts[1]<100.8||parts[1]>102.3)
+  throw Error('Enter valid KL pilot latitude, longitude.');
+ return parts;
+}
+button.addEventListener('click',async()=>{
+ button.disabled=true;status.textContent='Requesting experimental route…';
+ try{
+  const [startLat,startLng]=coordinate('start'),[endLat,endLng]=coordinate('end');
+  const query=new URLSearchParams({startLat,startLng,endLat,endLng});
+  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json'}});
+  const data=await response.json();
+  if(!response.ok||data.ok!==true)throw Error(data.error||'Route unavailable');
+  if(data.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||data.routingActivated!==false||
+     data.legalDrivingRouteVerified!==false||data.turnRestrictionsEnforced!==false||
+     data.geometry?.type!=='LineString'||!Array.isArray(data.geometry.coordinates)||
+     data.geometry.coordinates.length<2)throw Error('Unexpected or unsafe preview response');
+  const coords=data.geometry.coordinates.map(c=>{
+   if(!Array.isArray(c)||c.length<2||!Number.isFinite(c[0])||!Number.isFinite(c[1]))
+    throw Error('Invalid route geometry');
+   return [c[1],c[0]];
+  });
+  if(routeLayer)map.removeLayer(routeLayer);
+  for(const m of markers)map.removeLayer(m);
+  routeLayer=L.polyline(coords,{color:'#155cc1',weight:5}).addTo(map);
+  markers=[L.circleMarker(coords[0],{radius:7,color:'#17803d'}).addTo(map),
+   L.circleMarker(coords[coords.length-1],{radius:7,color:'#c34530'}).addTo(map)];
+  map.fitBounds(routeLayer.getBounds(),{padding:[30,30]});
+  status.textContent='Distance: '+(data.distanceMeters/1000).toFixed(2)+' km\n'+
+   'Illustrative ETA (not traffic-aware): '+data.illustrativeEtaMinutes+' min\n'+
+   'Possible turn-restriction warnings: '+(data.potentialTurnRestrictionReviewCount??'unavailable')+'\n'+
+   'Access caution edges: '+data.potentialAccessReviewEdges+'\n'+
+   'Legal driving route verified: NO';
+ }catch(error){status.textContent='Preview unavailable: '+error.message;}
+ finally{button.disabled=false;}
+});
+</script></body></html>
