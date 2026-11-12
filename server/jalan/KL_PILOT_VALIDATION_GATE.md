@@ -362,3 +362,13 @@ No production deployment, database writes or TomTom changes.
 - [ ] Validate one-way/turn legality and 20 reviewed real KL journeys.
 
 This proves directed connectivity for a bounded imported bridge fixture only; no production routing approval.
+
+## Second real KL no-right-turn audit witness passed — 12 November 2026
+
+- [x] Actual Atlas v493 relation `osm-relation-10341546`, `no_right_turn`, via-node `5757831665`, matched to v495 directed edges `osm-way-1339792254:9:F` → `osm-way-607581032:0:F`.
+- [x] Opposite-direction edge is not falsely flagged by the audit.
+- [x] **278/278** regression tests passed; full-graph and diagnostic jobs succeeded in [GitHub Actions run 43177882482](https://github.com/Zux12/Mterms2026/actions/runs/43177882482).
+- [ ] **Safety blocker:** Turn restrictions are *advisory only* and not enforced in Dijkstra route search. A route with zero warnings does not prove legality.
+- [ ] Complete 20 independently reviewed real KL journeys and TomTom comparisons before production approval.
+
+No merge/deploy, database writes or live TomTom routing changes.
