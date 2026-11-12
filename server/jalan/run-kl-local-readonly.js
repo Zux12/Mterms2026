@@ -67,8 +67,16 @@ async function main(){
   await mongoose.disconnect();
  }
 }
-if(require.main===module)main().catch(()=>{
+function safeFailureCategory(error){
+ const name=String(error?.name||'');
+ if(name==='MongoParseError'||name==='MongoAPIError')return 'connection-uri-format';
+ if(name==='MongoServerSelectionError')return 'server-selection-or-network';
+ if(name==='MongoServerError'&&Number(error?.code)===18)return 'authentication-rejected';
+ if(name==='MongoNetworkError'||name==='MongoNetworkTimeoutError')return 'network-connectivity';
+ return 'other';
+}
+if(require.main===module)main().catch((error)=>{
  // Do not print MongoDB URIs, private coordinates, request URLs or stack traces.
- process.stderr.write('Local KL route run failed at stage: '+failureStage+' (details suppressed).\n');
+ process.stderr.write('Local KL route run failed at stage: '+failureStage+'; category: '+safeFailureCategory(error)+' (details suppressed).\n');
  process.exitCode=1;
 });
