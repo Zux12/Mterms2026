@@ -106,7 +106,15 @@ async function realGraphBrowser(){
   const status=await page.locator('#status').innerText();
   if(!status.includes('Distance: 0.02 km')||!status.includes('Legal driving route verified: NO'))
    throw Error('Real graph browser route contract mismatch');
-  process.stdout.write('Chromium and real read-only KL graph browser-to-backend smoke passed.\\n');
+  await page.locator('#end').fill('3.128888, 101.7126153');
+  await page.locator('#route').click();
+  await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:90000});
+  const corridor=await page.locator('#status').innerText();
+  const match=/Distance: ([0-9.]+) km/.exec(corridor);
+  if(!match||Number(match[1])<1||!corridor.includes('Legal driving route verified: NO'))
+   throw Error('Real graph corridor route browser contract mismatch');
+  if(errors.length)throw Error('Browser script error after corridor route');
+  process.stdout.write('Chromium and real read-only KL graph browser-to-backend short and corridor routes passed.\\n');
  }finally{
   if(browser)await browser.close();
   const exited=child.exitCode!==null||child.signalCode!==null;
