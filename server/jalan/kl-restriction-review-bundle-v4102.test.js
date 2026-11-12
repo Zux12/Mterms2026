@@ -51,3 +51,13 @@ test('extra manifest artifacts cannot be silently omitted from review evidence r
  assert.equal(r.results[0].reviewEvidenceReferencesMatchManifest,false);
  assert.equal(r.bundleMetadataComplete,0);
 });
+
+test('OSM snapshot and review note alone do not establish external corroboration',()=>{
+ const m={...manifest,artifacts:[artifacts[0],
+  {...artifacts[1],sourceType:'review-note'}]};
+ const r=assessReviewBundle([review],[m]);
+ assert.equal(r.results[0].evidenceSourceDiversity,true);
+ assert.equal(r.results[0].externalCorroborationMetadataPresent,false);
+ assert.equal(r.bundleMetadataComplete,0);
+ assert.equal(r.independentVerificationEstablished,false);
+});
