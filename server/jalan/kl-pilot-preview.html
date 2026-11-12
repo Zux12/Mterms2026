@@ -66,6 +66,9 @@ document.getElementById('swap').addEventListener('click',()=>{
  for(const m of Object.values(selectionMarkers))if(m)map.removeLayer(m);
  selectionMarkers.start=null;selectionMarkers.end=null;
  nextPoint='start';
+ if(routeLayer){map.removeLayer(routeLayer);routeLayer=null;}
+ for(const m of markers)map.removeLayer(m);
+ markers=[];
  status.textContent='Start and destination swapped. Preview route to recalculate.';
 });
 button.addEventListener('click',async()=>{
