@@ -53,3 +53,7 @@ Chromium browser smoke verifies that manually editing a start coordinate invalid
 ## Real Chromium-to-imported-graph integration — 12 November 2026
 
 GitHub Actions run [43242572050](https://github.com/Zux12/Mterms2026/actions/runs/43242572050) passed all four jobs: regression, fixture Chromium browser, real read-only graph Chromium browser, and KL full-graph. The real-browser job launches the isolated loopback preview with a random session token, verifies graph health, and renders the public OSM-node 17 m smoke route through the actual imported graph. It does **not** independently verify legal turn/access restrictions, traffic, GPS navigation, or public deployment.
+
+## Extended real-graph browser smoke
+
+The Chromium-to-real-graph job now requests a short public OSM-node route followed by a longer corridor route through the same read-only preview session. The corridor check is **pending CI verification** and is not an independent 20-case journey acceptance result.
