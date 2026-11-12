@@ -86,3 +86,25 @@ test('no-u-turn prohibits immediate reverse transition at restricted junction',(
  assert.equal(result.ok,false);
  assert.equal(result.reason,'no-turn-compliant-path');
 });
+
+test('turn restrictions apply only to matching incoming OSM way at the junction',()=>{
+ const otherIncoming=e('osm-way-777777:0:F','s','v',10);
+ const otherwiseRestricted=e('osm-way-607581032:0:F','v','t',10);
+ const r=searchTurnAware(graph([otherIncoming,otherwiseRestricted]),'s','t',[base]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[otherIncoming.id,otherwiseRestricted.id]);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('multiple verified restrictions at one junction all apply before selecting a detour',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const first=e('osm-way-607581032:0:F','v','t',10);
+ const second=e('osm-way-888888:0:F','v','t',12);
+ const allowed=e('osm-way-999999:0:F','v','x',15);
+ const finish=e('osm-way-444444:0:F','x','t',15);
+ const rules=[base,{...base,restrictionId:'osm-relation-10341547',toWay:'osm-way-888888'}];
+ const r=searchTurnAware(graph([incoming,first,second,allowed,finish]),'s','t',rules);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,allowed.id,finish.id]);
+ assert.equal(r.distanceMeters,40);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
