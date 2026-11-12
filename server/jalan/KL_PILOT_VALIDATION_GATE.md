@@ -372,3 +372,13 @@ This proves directed connectivity for a bounded imported bridge fixture only; no
 - [ ] Complete 20 independently reviewed real KL journeys and TomTom comparisons before production approval.
 
 No merge/deploy, database writes or live TomTom routing changes.
+
+## Isolated turn-aware search prototype regression passed — 12 November 2026
+
+- [x] Separate edge-state shortest-path prototype supports verified simple via-node `no_*` and `only_*` rules, without integration into the experimental HTTP endpoint or production.
+- [x] Fail-closed readiness classifier rejects imported `applicability=unverified`, conditional/exception and via-way records. Actual v493 restrictions remain unverified.
+- [x] Six prototype tests passed including real imported KL `osm-relation-10341546` and matching directed road edge identifiers; its detour edges are deliberately artificial fixture links, **not verified real-road detours**.
+- [x] **288/288** regression tests passed; isolated full-graph smoke and diagnostic workflows passed in [GitHub Actions run 43179411016](https://github.com/Zux12/Mterms2026/actions/runs/43179411016).
+- [ ] Verify real restriction applicability, enforce complex/conditional rules as appropriate, test on full KL graph, and complete 20 reviewed journeys before any routing activation.
+
+No production merge/deploy, MongoDB writes or live TomTom changes.
