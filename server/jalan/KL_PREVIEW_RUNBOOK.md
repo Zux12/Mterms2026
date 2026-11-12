@@ -45,3 +45,7 @@ Chromium fixture test verifies that an in-flight route response is invalidated w
 ## Browser safety-contract verification — 12 November 2026
 
 Chromium fixture test rejects a preview API response falsely reporting `legalDrivingRouteVerified: true`. The route is not displayed as an experimental preview. This is a defensive UI contract, not an independent determination of legal road access.
+
+## Manual endpoint changes — 12 November 2026
+
+Chromium browser smoke verifies that manually editing a start coordinate invalidates any previously displayed route. A fresh route request is required after endpoint changes. The same invalidation behavior applies to map clicks and endpoint swaps.
