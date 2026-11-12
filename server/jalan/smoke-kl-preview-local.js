@@ -4,6 +4,10 @@
 const {spawn}=require('node:child_process');
 const {randomBytes}=require('node:crypto');
 const {setTimeout:delay}=require('node:timers/promises');
+const {geometryMatchesJourney,verifiedGeometry}=require('./collect-kl-route-evidence');
+// These are public OSM coordinates for one KL pilot smoke, never user GPS.
+const SMOKE_JOURNEY=Object.freeze({startLat:3.1315707,startLng:101.7038508,
+ endLat:3.1314573,endLng:101.7038951});
 
 // Pure HTTP-contract predicates also exercised without Atlas by node:test.
 // These checks are smoke diagnostics, not independent road-legality approval.
@@ -19,7 +23,7 @@ function previewHealthVerified(response,body) {
  return secureHeaders(response)&&response.status===200&&body?.ok===true&&
   body.readOnly===true&&body.liveRouting===false&&body.graphEdges===168221;
 }
-function previewRouteVerified(response,body) {
+function previewRouteVerified(response,body,journey=SMOKE_JOURNEY) {
  const coords=body?.geometry?.coordinates;
  return secureHeaders(response)&&response.status===200&&body?.ok===true&&
   body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
@@ -31,7 +35,10 @@ function previewRouteVerified(response,body) {
   coords.every(p=>Array.isArray(p)&&p.length===2&&
     Number.isFinite(p[0])&&Math.abs(p[0])<=180&&
     Number.isFinite(p[1])&&Math.abs(p[1])<=90)&&
-  body.distanceMeters===17;
+  body.distanceMeters===17&&
+  // Cross-check reported snap distances and route length against actual
+  // GeoJSON, instead of trusting a syntactically valid unrelated polyline.
+  verifiedGeometry(body)&&geometryMatchesJourney(body,journey);
 }
 async function main(){
  if(!process.env.JALAN_READONLY_MONGODB_URI)throw Error('Read-only connection missing');
@@ -63,8 +70,7 @@ async function main(){
   const health=await get('/api/jalan/kl/health',{headers});
   if(!previewHealthVerified(health,await health.json()))
    throw Error('Preview graph health or response hardening failed');
-  const q=new URLSearchParams({startLat:'3.1315707',startLng:'101.7038508',
-   endLat:'3.1314573',endLng:'101.7038951'});
+  const q=new URLSearchParams(Object.entries(SMOKE_JOURNEY).map(([k,v])=>[k,String(v)]));
   const routePath='/api/jalan/kl/route?'+q;
   const unauthRoute=await get(routePath);
   if(!previewDenied(unauthRoute,await unauthRoute.json()))

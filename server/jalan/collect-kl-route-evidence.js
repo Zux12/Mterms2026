@@ -197,4 +197,4 @@ if(require.main===module)main().catch(e=>{
   /^(Usage:|Expected |Invalid |Coordinate |Both |Input and output|Do not |Endpoint |Use HTTPS|JALAN_EXPERIMENTAL_ROUTE_URL|Authentication)/.test(e.message)?e.message:'check local configuration and file permissions')+'\n');
  process.exitCode=1;
 });
-module.exports={endpointUrl,validateCases,verifiedGeometry,routeReply,collectEvidence};
+module.exports={endpointUrl,validateCases,verifiedGeometry,geometryMatchesJourney,routeReply,collectEvidence};
