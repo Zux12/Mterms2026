@@ -8,6 +8,7 @@ function unavailable(){
   strongLargestComponentNodes:null,strongLargestComponentShare:null,
   strongSingletonComponentCount:null,strongSourceComponentCount:null,
   strongSinkComponentCount:null,strongNodeCount:null,strongEdgeCount:null,
+  strongInternalEdgeCount:null,strongCrossComponentEdgeCount:null,strongInternalEdgeShare:null,
   strongConnectivityAdvisoryOnly:true,roadLegalityVerified:false
  };
 }
@@ -58,9 +59,11 @@ function auditStrongComponents(edges){
   sizes.push(count);
  }
  const incoming=new Uint8Array(sizes.length),outgoing=new Uint8Array(sizes.length);
+ let internalEdges=0,crossEdges=0;
  for(const [from,to] of arcs){
   const a=group[from],b=group[to];
-  if(a!==b){outgoing[a]=1;incoming[b]=1;}
+  if(a!==b){outgoing[a]=1;incoming[b]=1;crossEdges++;}
+  else internalEdges++;
  }
  let sources=0,sinks=0,largest=0,singletons=0;
  for(let i=0;i<sizes.length;i++){
@@ -74,6 +77,11 @@ function auditStrongComponents(edges){
   strongLargestComponentNodes:largest,strongLargestComponentShare:largest/n,
   strongSingletonComponentCount:singletons,strongSourceComponentCount:sources,
   strongSinkComponentCount:sinks,strongNodeCount:n,strongEdgeCount:edges.length,
+  // Directed edges inside SCCs support mutual node reachability in this import.
+  // Cross-SCC edges are traversable one way only at the component level.
+  // Neither ratio proves access/turn legality, travel quality or safe navigation.
+  strongInternalEdgeCount:internalEdges,strongCrossComponentEdgeCount:crossEdges,
+  strongInternalEdgeShare:internalEdges/edges.length,
   strongConnectivityAdvisoryOnly:true,roadLegalityVerified:false
  };
 }
