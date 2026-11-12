@@ -36,3 +36,18 @@ test('conditional and via-way restrictions never activate prototype',()=>{
   assert.equal(searchTurnAware(graph([a,banned]),'s','t',[relation]).reason,
    'turn-restrictions-not-fully-verified');
 });
+
+test('real imported KL via-node relation redirects across actual directed OSM edges',()=>{
+ // Atlas v493/v495 12 Nov 2026: genuine node IDs and edge identities.
+ // Detour legs are fixture-only; real alternate-route availability remains unverified.
+ const incoming=e('osm-way-1339792254:9:F','2911228074','5757831665',50);
+ const restricted=e('osm-way-607581032:0:F','5757831665','5757831664',10);
+ const alternate=e('osm-way-999991:0:F','5757831665','fixture-detour',20);
+ const finish=e('osm-way-999992:0:F','fixture-detour','5757831664',20);
+ const relation={...base,viaNodes:['5757831665']};
+ const result=searchTurnAware(graph([incoming,restricted,alternate,finish]),
+  '2911228074','5757831664',[relation]);
+ assert.equal(result.ok,true);
+ assert.deepEqual(result.pathEdgeIds,[incoming.id,alternate.id,finish.id]);
+ assert.equal(result.distanceMeters,90);
+});
