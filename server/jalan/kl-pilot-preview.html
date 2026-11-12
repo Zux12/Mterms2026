@@ -15,7 +15,7 @@ small{color:#556677} @media(max-width:720px){main{display:flex;flex-direction:co
 </style></head><body>
 <header><h1>JALAN · KL route preview</h1><div class="warning">EXPERIMENTAL ONLY — not verified for legal driving, turns, access or traffic. Do not use for live navigation.</div></header>
 <main><aside><p>Enter KL coordinates (latitude, longitude) to preview the imported directed road graph. Results are diagnostic, not driving instructions.</p>
-<label for="start">Start coordinate</label><input id="start" value="3.1390, 101.6869" autocomplete="off">
+<label for="token">Local preview token</label><input id="token" type="password" autocomplete="off" placeholder="Enter locally configured preview token">\n<label for="start">Start coordinate</label><input id="start" value="3.1390, 101.6869" autocomplete="off">
 <label for="end">Destination coordinate</label><input id="end" value="3.1478, 101.6953" autocomplete="off">
 <button id="route">Preview route</button>
 <div id="status" role="status" aria-live="polite">No route requested.</div>
@@ -39,7 +39,7 @@ button.addEventListener('click',async()=>{
  try{
   const [startLat,startLng]=coordinate('start'),[endLat,endLng]=coordinate('end');
   const query=new URLSearchParams({startLat,startLng,endLat,endLng});
-  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json'}});
+  const token=document.getElementById('token').value;\n  if(!token)throw Error('Enter the local preview token.');\n  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token}});
   const data=await response.json();
   if(!response.ok||data.ok!==true)throw Error(data.error||'Route unavailable');
   if(data.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||data.routingActivated!==false||
