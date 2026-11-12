@@ -37,3 +37,7 @@ Separate app and database credentials, read-only database role, authentication, 
 - Chromium test on Ubuntu 24.04 verifies the preview page, Leaflet map panes, authenticated graph readiness, fixture route rendering, endpoint swapping, and clicking the map to update coordinates.
 - Passing browser checks use a **fixture route API**, while the separate full-graph HTTP smoke uses real read-only imported KL edges. Neither establishes road legality or an interactive public deployment.
 - The browser suite is intentionally separate from full-graph tests so visual/DOM regressions are distinguishable from imported-road graph issues.
+
+## Route-response race safety — 12 November 2026
+
+Chromium fixture test verifies that an in-flight route response is invalidated when the operator swaps endpoints. Delayed results must not repaint the obsolete route. This protects diagnostic UI state only; no live GPS rerouting or road-safety claims follow from the test.
