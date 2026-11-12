@@ -71,7 +71,7 @@ function safeUriShape(raw){
  if(typeof raw!=='string'||!raw.trim())return 'empty';
  if(raw!==raw.trim())return 'leading-or-trailing-whitespace';
  if(/^['"`]/.test(raw)||/['"`]$/.test(raw))return 'surrounding-quotation-marks';
- if(/^mongodb(?:\\u002B|\\+)srv:\\/\\//.test(raw)===false&&!raw.startsWith('mongodb://'))return 'missing-mongodb-uri-scheme';
+ if(!raw.startsWith('mongodb+srv://')&&!raw.startsWith('mongodb://'))return 'missing-mongodb-uri-scheme';
  if(/[<>]/.test(raw))return 'unreplaced-template-placeholder';
  if(/[\r\n]/.test(raw))return 'newline-in-secret';
  try{
