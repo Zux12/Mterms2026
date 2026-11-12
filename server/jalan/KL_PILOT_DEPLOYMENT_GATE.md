@@ -28,3 +28,7 @@
 Do not deploy this branch into the existing MTERMS2026 production service or merge the draft PR as a shortcut. This checklist is a decision record; it does not authorize deployment or verify that the missing requirements are met.
 
 Next engineering milestone: create an **isolated, private test deployment** only after service isolation and access controls can be demonstrated. Do not expose the current loopback preview through a public tunnel or reverse proxy.
+
+## CI milestone — 12 November 2026
+
+Real Chromium against the read-only imported KL graph has passed for both the short public-node route and a longer corridor route (Actions run 43244573738). This validates a narrow browser-to-backend flow only. Public deployment remains on hold because authentication, operational isolation, legal access and independent journey acceptance have not been demonstrated in an externally reachable environment.
