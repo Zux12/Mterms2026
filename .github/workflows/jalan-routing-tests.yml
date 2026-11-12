@@ -94,6 +94,8 @@ jobs:
           console.log('KL corridor candidate metres:',corridor.distanceMeters,'warm server total ms:',corridor.serverTotalMs);
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
+      - name: Audit complete imported KL turn-restriction readiness (read-only)
+        run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Remove private local inputs and sanitized evidence
         if: always()
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
