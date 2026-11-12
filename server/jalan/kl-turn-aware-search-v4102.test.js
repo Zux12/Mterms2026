@@ -66,3 +66,23 @@ test('same-node route with verified rules is zero length and not production appr
  assert.equal(r.distanceMeters,0);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('no-u-turn allows forward continuation on same OSM way but blocks reversal',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const forward=e('osm-way-1339792254:1:F','v','t',10);
+ const reverse=e('osm-way-1339792254:0:R','v','s',10);
+ const restriction={...base,toWay:base.fromWay,restriction:'no_u_turn'};
+ const result=searchTurnAware(graph([incoming,forward,reverse]),'s','t',[restriction]);
+ assert.equal(result.ok,true);
+ assert.deepEqual(result.pathEdgeIds,[incoming.id,forward.id]);
+ assert.equal(result.productionRoutingAuthorized,false);
+});
+test('no-u-turn prohibits immediate reverse transition at restricted junction',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const reverse=e('osm-way-1339792254:0:R','v','s',10);
+ const restriction={...base,toWay:base.fromWay,restriction:'no_u_turn'};
+ // With a different start, the shortest return to s must not reverse at v.
+ const result=searchTurnAware(graph([incoming,reverse]),'s','missing',[restriction]);
+ assert.equal(result.ok,false);
+ assert.equal(result.reason,'no-turn-compliant-path');
+});
