@@ -4,6 +4,35 @@
 const {spawn}=require('node:child_process');
 const {randomBytes}=require('node:crypto');
 const {setTimeout:delay}=require('node:timers/promises');
+
+// Pure HTTP-contract predicates also exercised without Atlas by node:test.
+// These checks are smoke diagnostics, not independent road-legality approval.
+function secureHeaders(response) {
+ return response?.headers?.get('cache-control')==='no-store' &&
+  response.headers.get('x-powered-by')===null;
+}
+function previewDenied(response,body) {
+ return secureHeaders(response)&&response.status===401&&body?.ok===false&&
+  body.error==='Preview token required';
+}
+function previewHealthVerified(response,body) {
+ return secureHeaders(response)&&response.status===200&&body?.ok===true&&
+  body.readOnly===true&&body.liveRouting===false&&body.graphEdges===168221;
+}
+function previewRouteVerified(response,body) {
+ const coords=body?.geometry?.coordinates;
+ return secureHeaders(response)&&response.status===200&&body?.ok===true&&
+  body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
+  body.graphEdges===168221&&body.graphVersion==='road_graph_edges_v495'&&
+  body.routingActivated===false&&body.legalDrivingRouteVerified===false&&
+  body.accessRestrictionsEnforced===false&&body.turnRestrictionsEnforced===false&&
+  body.trafficAware===false&&body.databaseWrites===0&&
+  body.geometry?.type==='LineString'&&Array.isArray(coords)&&coords.length>=2&&
+  coords.every(p=>Array.isArray(p)&&p.length===2&&
+    Number.isFinite(p[0])&&Math.abs(p[0])<=180&&
+    Number.isFinite(p[1])&&Math.abs(p[1])<=90)&&
+  body.distanceMeters===17;
+}
 async function main(){
  if(!process.env.JALAN_READONLY_MONGODB_URI)throw Error('Read-only connection missing');
  const port=18865,token=randomBytes(32).toString('hex');
@@ -28,22 +57,24 @@ async function main(){
   const html=await (await get('/')).text();
   if(!html.includes('EXPERIMENTAL ONLY')||!html.includes('Check graph connection'))
    throw Error('Expected experimental UI not served');
-  if((await get('/api/jalan/kl/health')).status!==401)
+  const unauthHealth=await get('/api/jalan/kl/health');
+  if(!previewDenied(unauthHealth,await unauthHealth.json()))
    throw Error('Unauthenticated preview health was accessible');
   const health=await get('/api/jalan/kl/health',{headers});
-  const h=await health.json();
-  if(health.status!==200||h.ok!==true||h.readOnly!==true||
-    h.liveRouting!==false||h.graphEdges!==168221)throw Error('Preview graph health contract failed');
+  if(!previewHealthVerified(health,await health.json()))
+   throw Error('Preview graph health or response hardening failed');
   const q=new URLSearchParams({startLat:'3.1315707',startLng:'101.7038508',
    endLat:'3.1314573',endLng:'101.7038951'});
-  const response=await get('/api/jalan/kl/route?'+q,{headers});
-  const route=await response.json();
-  if(response.status!==200||route.ok!==true||
-    route.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||
-    route.routingActivated!==false||route.legalDrivingRouteVerified!==false||
-    route.turnRestrictionsEnforced!==false||route.databaseWrites!==0||
-    route.geometry?.type!=='LineString'||route.distanceMeters!==17)
-   throw Error('Preview route safety/geometry contract failed');
+  const routePath='/api/jalan/kl/route?'+q;
+  const unauthRoute=await get(routePath);
+  if(!previewDenied(unauthRoute,await unauthRoute.json()))
+   throw Error('Unauthenticated preview route was accessible');
+  const wrongTokenRoute=await get(routePath,{headers:{'x-jalan-preview-token':'invalid-token'}});
+  if(!previewDenied(wrongTokenRoute,await wrongTokenRoute.json()))
+   throw Error('Incorrect preview token was accepted');
+  const response=await get(routePath,{headers});
+  if(!previewRouteVerified(response,await response.json()))
+   throw Error('Preview route provenance, safety, geometry or response hardening failed');
   process.stdout.write('KL preview UI, authentication, health and read-only route HTTP smoke passed.\n');
  }finally{
   child.kill('SIGTERM');
@@ -51,4 +82,5 @@ async function main(){
   if(child.exitCode===null)child.kill('SIGKILL');
  }
 }
-main().catch(()=>{process.stderr.write('KL preview HTTP smoke failed (details suppressed).\n');process.exitCode=1;});
+if(require.main===module)main().catch(()=>{process.stderr.write('KL preview HTTP smoke failed (details suppressed).\n');process.exitCode=1;});
+module.exports={secureHeaders,previewDenied,previewHealthVerified,previewRouteVerified};
