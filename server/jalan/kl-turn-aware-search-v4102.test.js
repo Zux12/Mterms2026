@@ -108,3 +108,24 @@ test('multiple verified restrictions at one junction all apply before selecting 
  assert.equal(r.distanceMeters,40);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('only-turn restriction at junction permits the named outgoing way but not shorter alternative',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const required=e('osm-way-607581032:0:F','v','t',20);
+ const shortcut=e('osm-way-999999:0:F','v','t',1);
+ const rule={...base,restriction:'only_right_turn'};
+ const r=searchTurnAware(graph([incoming,required,shortcut]),'s','t',[rule]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,required.id]);
+ assert.equal(r.distanceMeters,30);
+});
+test('only-turn restriction does not affect vehicles arriving from another road',()=>{
+ const incoming=e('osm-way-888888:0:F','s','v',10);
+ const shortcut=e('osm-way-999999:0:F','v','t',1);
+ const required=e('osm-way-607581032:0:F','v','t',20);
+ const rule={...base,restriction:'only_right_turn'};
+ const r=searchTurnAware(graph([incoming,required,shortcut]),'s','t',[rule]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,shortcut.id]);
+ assert.equal(r.distanceMeters,11);
+});
