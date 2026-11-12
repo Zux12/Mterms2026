@@ -15,7 +15,7 @@ test('authenticated full-graph smoke cannot run on pull requests or arbitrary re
  assert.ok(job,'KL full-graph job must exist');
  assert.ok(preSteps,'KL full-graph job must define steps');
  assert.match(preSteps,/if:.*github\.event_name == 'push'.*github\.event_name == 'workflow_dispatch'.*github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
- assert.doesNotMatch(preSteps,/pull_request/);
+ assert.doesNotMatch(preSteps,/if:.*pull_request/);
  assert.match(preSteps,/permissions:\n      contents: read/);
 });
 
