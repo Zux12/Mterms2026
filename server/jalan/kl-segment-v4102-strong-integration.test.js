@@ -21,6 +21,9 @@ test('cached graph summaries distinguish weak connection from directed strong re
  assert.equal(d.strongTopology.strongConnectivityAvailable,true);
  assert.equal(d.strongTopology.strongComponentCount,2);
  assert.equal(d.strongTopology.strongLargestComponentNodes,2);
+ assert.equal(d.strongTopology.strongInternalEdgeCount,4);
+ assert.equal(d.strongTopology.strongCrossComponentEdgeCount,1);
+ assert.equal(d.strongTopology.strongInternalEdgeShare,4/5);
  assert.equal(d.strongTopology.strongSourceComponentCount,1);
  assert.equal(d.strongTopology.strongSinkComponentCount,1);
  assert.equal(d.strongTopology.strongConnectivityAdvisoryOnly,true);
