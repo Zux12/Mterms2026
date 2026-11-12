@@ -312,3 +312,14 @@ This documentation commit also requires fresh CI. Do not mistake offline synthet
 - [ ] Verify road access, turn legality, overpasses and TomTom comparisons.
 
 These are imported-road smoke tests, not evidence of legal driving or production navigation readiness. No production merge, database writes or TomTom changes.
+
+## Longer KL corridor full-graph smoke test passed — 12 November 2026
+
+- [x] Fourth imported-road smoke case (distinct longer corridor) completed using full **168,221-edge** directed graph.
+- [x] Longer corridor returned **2,297 m** at **26.3 ms** warm server processing time.
+- [x] Same run: 17 m cold route **45,835.7 ms** server total (graph load **45,777.7 ms**), 17 m warm **31.3 ms**, 67 m warm **23.9 ms**.
+- [x] [GitHub Actions run 43153116660](https://github.com/Zux12/Mterms2026/actions/runs/43153116660): `test` and `kl-fullgraph` jobs passed; diagnostic workflow passed.
+- [ ] Independently review driving legality, one-way and grade-separated crossings, and compare with TomTom.
+- [ ] Complete 20 independently reviewed real KL journeys.
+
+This is a technical route calculation only, not verified legal-road or production navigation acceptance.
