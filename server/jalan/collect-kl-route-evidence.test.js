@@ -11,6 +11,7 @@ const good={
  distanceMeters:1571,startSnapMeters:0,endSnapMeters:0,
  geometry:{type:'LineString',coordinates:[[101.69,3.14],[101.70,3.15]]},
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,geometryGapThresholdMeters:2,
+ geometryGapTransitionsInspected:0,geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,
  potentialAccessReviewEdges:1,potentialTurnRestrictionReviewCount:0,
  startSnapAmbiguous:false,endSnapAmbiguous:true
 };
@@ -358,4 +359,39 @@ test('reviewed no-path replies preserve only boolean cache-state diagnostics',as
   ...noPath,mode:'NOT_JALAN',graphCacheHit:true
  })});
  assert.equal(unrelated[0].graphCacheHit,undefined);
+});
+
+// A syntactically valid route with matching endpoints is not complete pilot
+// evidence if its server-side geometry gap audit is missing or inconsistent.
+test('KL collector rejects missing geometry gap audit fields as continuity evidence',async()=>{
+ for(const changed of [
+  {geometryGapAdvisoryOnly:undefined},{geometryGapTransitionsInspected:undefined},
+  {geometryMaxGapMeters:undefined},{geometryGapThresholdMeters:undefined},
+  {geometryGapReviewAvailable:false}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].responseStatus,200);
+  assert.equal(out[0].geometryMetricsVerified,true,'endpoint/distance cross-check remains independent');
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector rejects contradictory geometry-gap audits even with clean geometry',async()=>{
+ for(const changed of [
+  {geometryGapAdvisoryOnly:false},{geometryGapTransitionsInspected:-1},
+  {geometryGapTransitionsInspected:0.5},{geometryGapThresholdMeters:-1},
+  {geometryGapThresholdMeters:3},{geometryMaxGapMeters:-0.1},
+  {geometryMaxGapMeters:3},{geometryGapCountOverThreshold:1}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector does not persist arbitrary malformed geometry audit metadata',async()=>{
+ const secret='PRIVATE_KL_GAP_REVIEW_TOKEN';
+ const body={...good,geometryGapTransitionsInspected:{secret},
+  geometryMaxGapMeters:[secret],geometryGapAdvisoryOnly:secret};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].geometryContinuous,false);
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.ok(!JSON.stringify(out).includes(secret));
 });
