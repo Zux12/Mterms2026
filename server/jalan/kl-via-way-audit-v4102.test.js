@@ -93,3 +93,19 @@ test('mixed/unsupported relations remain in unassessed total but are excluded fr
  assert.equal(r.viaWayNoTurnCandidateCount,1);
  assert.equal(r.viaWayOnlyDesignatedExitPatternCount,0);
 });
+
+test('second real Atlas KL no-right-turn relation is flagged but not enforced',()=>{
+ // Read-only Atlas v493/v495 snapshot 12 Nov 2026. The via-node is
+ // 5757831665 and both directed edges meet at that actual imported node.
+ const incoming=e('osm-way-1339792254:9:F','2911228074','5757831665');
+ const outgoing=e('osm-way-607581032:0:F','5757831665','5757831664');
+ const relation={restrictionId:'osm-relation-10341546',
+  fromWay:'osm-way-1339792254',toWay:'osm-way-607581032',
+  viaNodes:['5757831665'],viaWays:[],restriction:'no_right_turn',
+  applicability:'unverified',conditional:'',except:''};
+ const matched=auditTurnCandidates([incoming,outgoing],[relation]);
+ assert.equal(matched.potentialTurnRestrictionReviewCount,1);
+ assert.equal(matched.turnRestrictionsEnforced,false);
+ const wrongDirection=e('osm-way-607581032:0:R','5757831664','5757831665');
+ assert.equal(auditTurnCandidates([incoming,wrongDirection],[relation]).potentialTurnRestrictionReviewCount,0);
+});
