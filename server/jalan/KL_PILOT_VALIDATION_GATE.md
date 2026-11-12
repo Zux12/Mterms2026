@@ -289,3 +289,14 @@ This documentation commit also requires fresh CI. Do not mistake offline synthet
 - [ ] Validate Peninsular Malaysia coverage before any wider rollout.
 
 **Scope:** A successful full-graph *smoke* route proves the engine can load the imported graph and calculate this one route; it does not prove road legality, navigation readiness, traffic-aware routing, or the 20-journey acceptance gate. No Heroku production deployment, MongoDB writes or TomTom changes.
+
+## Full-graph cold/warm benchmark passed — 12 November 2026
+
+- [x] Two consecutive real imported KL 17 m routes completed in the same isolated Node.js process with all **168,221 directed edges** loaded.
+- [x] Cold graph load: **45,064.1 ms**; cold server total: **45,120.6 ms**.
+- [x] Warm graph cache lookup: **0.1 ms**; warm server total: **27.6 ms**.
+- [x] [GitHub Actions run 43151202147](https://github.com/Zux12/Mterms2026/actions/runs/43151202147): `kl-fullgraph` and regression test jobs both succeeded. These are single-run diagnostics, not population latency estimates.
+- [ ] Repeat warm tests over diverse independently reviewed KL routes; capture p50/p95 and road-safety issues.
+- [ ] Complete 20 independently reviewed KL journeys and TomTom/road-legality checks.
+
+**Scope:** This proves successful cold/warm full-graph routing for one selected imported road pair, not production navigation readiness. No Heroku deployment, database writes or TomTom changes.
