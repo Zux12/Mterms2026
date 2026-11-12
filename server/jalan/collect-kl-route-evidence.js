@@ -111,6 +111,16 @@ function privateResponseHeadersVerified(response){
 function evidenceNonnegativeNumber(v){return Number.isFinite(v)&&v>=0?v:null;}
 function evidenceCount(v){return Number.isSafeInteger(v)&&v>=0?v:null;}
 function evidenceBoolean(v){return typeof v==='boolean'?v:null;}
+// A claimed HTTP 422 must be supported by the router's rounded snap
+// measurements. The server rounds to integer metres, so a true distance
+// just above 200 m may be reported as exactly 200 m. Both distances inside
+// that rounded boundary (or unavailable) cannot establish a snap miss.
+// Fail closed on nonnumeric/unsafe values; never serialize response metadata.
+function snapMissMetricsVerified(body){
+ const a=body?.startSnapMeters,b=body?.endSnapMeters;
+ return [a,b].every(v=>v===null||(Number.isFinite(v)&&v>=0&&v<=400000))&&
+  [a,b].some(v=>Number.isFinite(v)&&v>=200);
+}
 // Stage timings are advisory only: preserve measured processing costs even for
 // a legitimate directed no-path outcome, without copying URL, GPS or secrets.
 function appendServerTiming(row,body){
@@ -177,6 +187,7 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
     body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
     body.turnRestrictionsEnforced===false&&fullGraphReply(body)&&
+    snapMissMetricsVerified(body)&&
     body.error==='No nearby directed graph segment within 200 m'){
     // A snap failure is NOT a directed no-path finding. Preserve only sanitized
     // measurements; the existing acceptance validator must reject this case.

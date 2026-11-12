@@ -484,7 +484,7 @@ test('KL 422 snap diagnostic refuses unsupported or missing road safety flags',a
   error:'No nearby directed graph segment within 200 m',
   routingActivated:false,databaseWrites:0,trafficAware:false,
   legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
-  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241};
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
  for(const flag of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced'])
   for(const value of [true,undefined]){
    const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,[flag]:value})});
@@ -497,7 +497,7 @@ test('KL 422 evidence retains only sanitized boolean graph cache state',async()=
   error:'No nearby directed graph segment within 200 m',
   routingActivated:false,databaseWrites:0,trafficAware:false,
   legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
-  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241};
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{
   ...snap,graphCacheHit:{secret:'PRIVATE_SNAP_CACHE_TOKEN'}
  })});
@@ -505,4 +505,65 @@ test('KL 422 evidence retains only sanitized boolean graph cache state',async()=
  assert.equal(out[0].graphEvidenceVerified,true);
  assert.equal(out[0].graphCacheHit,null);
  assert.ok(!JSON.stringify(out).includes('PRIVATE_SNAP_CACHE_TOKEN'));
+});
+
+test('KL 422 snap evidence rejects responses with both reported snaps inside the 200 m boundary',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,
+  startSnapMeters:0,endSnapMeters:199};
+ for(const metrics of [
+  {},{startSnapMeters:199,endSnapMeters:199},
+  {startSnapMeters:null,endSnapMeters:null},
+  {startSnapMeters:undefined,endSnapMeters:100}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].startSnapMeters,undefined);
+ }
+});
+
+test('KL 422 snap evidence allows rounded 200 m miss and either endpoint beyond threshold',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221};
+ for(const metrics of [
+  {startSnapMeters:200,endSnapMeters:0},
+  {startSnapMeters:0,endSnapMeters:201},
+  {startSnapMeters:280,endSnapMeters:null}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'snap-out-of-range');
+  assert.equal(out[0].responseStatus,422);
+  assert.equal(out[0].graphEvidenceVerified,true);
+  assert.equal(out[0].noPathModeVerified,undefined);
+  assert.equal(out[0].ok,false);
+ }
+});
+
+test('KL 422 snap evidence rejects malformed or implausible distance metrics without leaking metadata',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,
+  startSnapMeters:250,endSnapMeters:0};
+ for(const metrics of [
+  {startSnapMeters:'250'},
+  {startSnapMeters:Infinity},
+  {startSnapMeters:-1,endSnapMeters:230},
+  {startSnapMeters:{secret:'DO_NOT_COPY_422'},endSnapMeters:250},
+  {startSnapMeters:400001},
+  {endSnapMeters:undefined}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.ok(!JSON.stringify(out).includes('DO_NOT_COPY_422'));
+ }
 });
