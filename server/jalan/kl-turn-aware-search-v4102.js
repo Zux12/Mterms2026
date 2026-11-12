@@ -4,6 +4,30 @@
 // No production integration; unverified/complex restrictions are a safety blocker.
 const {classifyTurnEnforcement}=require('./kl-turn-enforcement-readiness-v4102');
 const {wayOf}=require('./kl-turn-audit-v4102');
+// Binary min-heap avoids re-sorting the entire frontier on each expansion.
+class MinQueue {
+ constructor(){this.a=[];}
+ get length(){return this.a.length;}
+ push(x){
+  const a=this.a;let i=a.length;a.push(x);
+  while(i>0){const p=(i-1)>>1;if(a[p].cost<=x.cost)break;a[i]=a[p];i=p;}
+  a[i]=x;
+ }
+ pop(){
+  const a=this.a,first=a[0],last=a.pop();
+  if(a.length){
+   let i=0;
+   while(2*i+1<a.length){
+    let c=2*i+1;
+    if(c+1<a.length&&a[c+1].cost<a[c].cost)c++;
+    if(a[c].cost>=last.cost)break;
+    a[i]=a[c];i=c;
+   }
+   a[i]=last;
+  }
+  return first;
+ }
+}
 function searchTurnAware(g,startNode,endNode,restrictions){
  if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string')
   throw new TypeError('Directed adjacency and node IDs required');
@@ -21,12 +45,13 @@ function searchTurnAware(g,startNode,endNode,restrictions){
   if(!rules.has(k))rules.set(k,[]);
   rules.get(k).push(r);
  }
- const queue=[{node:startNode,prev:null,cost:0,key:JSON.stringify([startNode,null])}];
- const dist=new Map([[queue[0].key,0]]),previous=new Map();
+ const queue=new MinQueue();
+ const initial={node:startNode,prev:null,cost:0,key:JSON.stringify([startNode,null])};
+ queue.push(initial);
+ const dist=new Map([[initial.key,0]]),previous=new Map();
  let visited=0;
  while(queue.length){
-  queue.sort((a,b)=>a.cost-b.cost);
-  const cur=queue.shift();
+  const cur=queue.pop();
   if(cur.cost!==dist.get(cur.key))continue;
   if(++visited>400000)throw Error('Turn-aware search visit limit');
   if(cur.node===endNode){
