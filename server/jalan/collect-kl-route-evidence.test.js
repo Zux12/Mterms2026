@@ -18,17 +18,21 @@ const good={
 const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,
  error:'No directed path found',routingActivated:false,databaseWrites:0,
  trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
-const reply=(status,body)=>async()=>({status,json:async()=>body});
+const reply=(status,body,headers={'cache-control':'no-store'})=>async()=>({
+ status,headers:new Headers(headers),json:async()=>body
+});
 test('collects actual experimental response metadata but never writes coordinates or secrets to evidence',async()=>{
  let request;
  const out=await collectEvidence([base],url,{fetchImpl:async(u,o)=>{
-  request={u,o};return {status:200,json:async()=>good};
+  request={u,o};return {status:200,headers:new Headers({'cache-control':'no-store'}),json:async()=>good};
  },authHeader:'Authorization',authValue:'Bearer secret-local-only'});
  assert.equal(out.length,1);assert.equal(out[0].responseStatus,200);assert.equal(out[0].ok,true);
  assert.equal(out[0].geometryContinuous,true);
  assert.equal(out[0].endSnapAmbiguous,true);
  assert.equal(request.o.headers.Authorization,'Bearer secret-local-only');
- assert.equal(request.o.redirect,'error');assert.ok(request.u.includes('startLat=3.14'));
+ assert.equal(request.o.redirect,'error');assert.equal(request.o.cache,'no-store');
+ assert.equal(request.o.headers['cache-control'],'no-store');
+ assert.ok(request.u.includes('startLat=3.14'));
  const serialized=JSON.stringify(out);
  assert.ok(!serialized.includes('101.69'));assert.ok(!serialized.includes('secret-local-only'));
  assert.ok(!serialized.includes('coordinates'));
@@ -394,4 +398,42 @@ test('KL collector does not persist arbitrary malformed geometry audit metadata'
  assert.equal(out[0].geometryContinuous,false);
  assert.equal(out[0].geometryMetricsVerified,true);
  assert.ok(!JSON.stringify(out).includes(secret));
+});
+
+test('cacheable or server-identifying successful replies cannot supply private KL route evidence',async()=>{
+ for(const headers of [{},{'cache-control':'public, max-age=300'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,good,headers)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].geometryMetricsVerified,undefined);
+  assert.equal(out[0].distanceMeters,undefined);
+  assert.ok(!JSON.stringify(out).includes('101.69'));
+ }
+});
+
+test('cacheable disconnected-road HTTP 404 cannot count as independently reviewed no-path',async()=>{
+ const c={...base,journeyType:'disconnected',expectedReachable:false,disconnectionReviewed:true};
+ for(const headers of [{},{'cache-control':'max-age=60'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,noPath,headers)});
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].noPathModeVerified,undefined);
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+ }
+});
+
+test('cacheable GPS-snap HTTP 422 cannot supply trusted failure diagnostics',async()=>{
+ const miss={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  startSnapMeters:240};
+ for(const headers of [{},{'cache-control':'public, max-age=60'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,miss,headers)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].startSnapMeters,undefined);
+ }
 });
