@@ -113,3 +113,16 @@ test('unknown restriction labels cannot claim full enforcement coverage',()=>{
  assert.equal(r.eligible.length,0);
  assert.equal(r.allRestrictionsReady,false);
 });
+
+test('zero-padded OSM way aliases cannot become verified turn rules',()=>{
+ const aliases=[
+  {...relation,applicability:'verified',fromWay:'osm-way-01339792254'},
+  {...relation,applicability:'verified',toWay:'osm-way-0607581032'},
+  {...relation,applicability:'verified',fromWay:'osm-way-0'}
+ ];
+ const r=classifyTurnEnforcement(aliases);
+ assert.equal(r.counts.malformed,3);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
