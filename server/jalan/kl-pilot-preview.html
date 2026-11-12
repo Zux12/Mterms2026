@@ -78,6 +78,8 @@ button.addEventListener('click',async()=>{
    return [c[1],c[0]];
   });
   if(routeLayer)map.removeLayer(routeLayer);
+  for(const m of Object.values(selectionMarkers))if(m)map.removeLayer(m);
+  selectionMarkers.start=null;selectionMarkers.end=null;
   for(const m of markers)map.removeLayer(m);
   routeLayer=L.polyline(coords,{color:'#155cc1',weight:5}).addTo(map);
   markers=[L.circleMarker(coords[0],{radius:7,color:'#17803d'}).addTo(map),
