@@ -3,7 +3,15 @@
 // Applies ONLY independently verified, simple, unconditional via-node rules.
 // No production integration; unverified/complex restrictions are a safety blocker.
 const {classifyTurnEnforcement}=require('./kl-turn-enforcement-readiness-v4102');
-const {wayOf}=require('./kl-turn-audit-v4102');
+// Edge IDs are authoritative in this prototype. A caller-supplied roadId
+// must never override their OSM identity and silently bypass a turn rule.
+function verifiedWayOf(edge){
+ const m=/^(osm-way-\\d+):\\d+:[FR]$/.exec(edge?.id||'');
+ if(!m)throw Error('Missing OSM way identity for turn-aware search');
+ if(edge.roadId!==undefined&&edge.roadId!==m[1])
+  throw Error('Conflicting OSM way identity for turn-aware search');
+ return m[1];
+}
 // Binary min-heap avoids re-sorting the entire frontier on each expansion.
 class MinQueue {
  constructor(){this.a=[];}
@@ -68,8 +76,7 @@ function searchTurnAware(g,startNode,endNode,restrictions){
       typeof e.from!=='string'||e.from!==cur.node||
       typeof e.to!=='string'||!e.to||!Number.isFinite(e.len)||e.len<0)
     throw Error('Invalid graph edge');
-   const fromWay=cur.prev?wayOf(cur.prev):null,toWay=wayOf(e);
-   if(!toWay||(cur.prev&&!fromWay))throw Error('Missing OSM way identity for turn-aware search');
+   const fromWay=cur.prev?verifiedWayOf(cur.prev):null,toWay=verifiedWayOf(e);
    const applicable=fromWay?(rules.get(JSON.stringify([fromWay,cur.node]))||[]):[];
    let forbidden=false;
    for(const r of applicable){
