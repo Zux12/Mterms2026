@@ -44,16 +44,17 @@ jobs:
             echo "Missing JALAN_READONLY_MONGODB_URI repository secret; no database connection attempted."
             exit 1
           fi
-      - name: Create public OSM-node smoke case (not private GPS)
+      - name: Create two public OSM-node smoke cases (not private GPS)
         run: |
           node - <<'NODE'
           const fs=require('node:fs');
-          fs.writeFileSync('/tmp/jalan-kl-cases.json',JSON.stringify([{
+          const smoke={
             caseId:'osm_kl_directed_smoke_001',journeyType:'short-urban',
             expectedReachable:true,
             startLat:3.1315707,startLng:101.7038508,
             endLat:3.1314573,endLng:101.7038951
-          }]),{mode:0o600,flag:'wx'});
+          };
+          fs.writeFileSync('/tmp/jalan-kl-cases.json',JSON.stringify([smoke,{...smoke,caseId:'osm_kl_directed_smoke_002'}]),{mode:0o600,flag:'wx'});
           NODE
       - name: Run full-graph smoke case (partial 20-case acceptance is expected)
         shell: bash
@@ -63,21 +64,27 @@ jobs:
           code=$?
           set -e
           if [ "$code" -ne 2 ]; then
-            echo "Expected partial-evidence exit 2 for one-case smoke test; received $code"
+            echo "Expected partial-evidence exit 2 for two-case smoke test; received $code"
             exit 1
           fi
           node - <<'NODE'
           const fs=require('node:fs');
           const rows=JSON.parse(fs.readFileSync('/tmp/jalan-kl-sanitized.json','utf8'));
-          const r=rows[0];
-          if(rows.length!==1||r.caseId!=='osm_kl_directed_smoke_001'||
-             r.ok!==true||r.responseStatus!==200||r.routeModeVerified!==true||
-             r.geometryContinuous!==true||r.geometryMetricsVerified!==true||
-             !Number.isFinite(r.distanceMeters)||r.distanceMeters<0||
-             r.graphCacheHit!==false||!Number.isFinite(r.serverTotalMs))
-             throw Error('Full-graph smoke evidence did not meet the expected route contract');
-          console.log('Full-graph KL smoke route passed; distance metres:',r.distanceMeters);
-          console.log('Graph load ms:',r.graphLoadMs,'server total ms:',r.serverTotalMs);
+          if(rows.length!==2)throw Error('Expected two route samples');
+          for(const [i,r] of rows.entries()){
+            if(r.caseId!==`osm_kl_directed_smoke_00${i+1}`||
+               r.ok!==true||r.responseStatus!==200||r.routeModeVerified!==true||
+               r.geometryContinuous!==true||r.geometryMetricsVerified!==true||
+               r.distanceMeters!==17||!Number.isFinite(r.serverTotalMs)||
+               r.graphCacheHit!==(i===1))
+               throw Error('Full-graph smoke evidence did not meet the expected route contract');
+          }
+          const [cold,warm]=rows;
+          if(!Number.isFinite(warm.graphLoadMs)||warm.graphLoadMs<0)
+            throw Error('Missing warm graph load measurement');
+          console.log('Full-graph KL cold and warm routes passed; distance metres:',cold.distanceMeters);
+          console.log('Cold graph load ms:',cold.graphLoadMs,'cold server total ms:',cold.serverTotalMs);
+          console.log('Warm graph load ms:',warm.graphLoadMs,'warm server total ms:',warm.serverTotalMs);
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
       - name: Remove private local inputs and sanitized evidence
