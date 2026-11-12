@@ -1,6 +1,13 @@
 'use strict';
 // Fail-closed classification for a FUTURE turn-aware router. Does not alter
 // existing routing or claim that imported OSM restrictions are legally verified.
+// Only enforce types with explicitly modelled via-node semantics. In particular,
+// only_u_turn requires reversal-specific matching; treating any same-way
+// continuation as its permitted exit would authorize an illegal movement.
+const SUPPORTED_SIMPLE_RESTRICTIONS=new Set([
+ 'no_left_turn','no_right_turn','no_straight_on','no_u_turn',
+ 'only_left_turn','only_right_turn','only_straight_on'
+]);
 function classifyTurnEnforcement(restrictions){
  if(!Array.isArray(restrictions))throw new TypeError('Expected restrictions array');
  const counts={total:restrictions.length,verifiedSimple:0,unverified:0,conditionalOrExcept:0,complex:0,malformed:0};
@@ -14,7 +21,7 @@ function classifyTurnEnforcement(restrictions){
    if(!!r.conditional)independentFlags.conditional++;
    if(!!r.except)independentFlags.except++;
    if(r.applicability!=='verified')independentFlags.unverifiedApplicability++;
-   if(typeof r.restriction==='string'&&!/^(no_|only_)[a-z_]+$/.test(r.restriction))independentFlags.unknownRestriction++;
+   if(typeof r.restriction==='string'&&!SUPPORTED_SIMPLE_RESTRICTIONS.has(r.restriction))independentFlags.unknownRestriction++;
   }
   if(!r||typeof r!=='object'||typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
     typeof r.restriction!=='string'||!Array.isArray(r.viaNodes)||!Array.isArray(r.viaWays)||
@@ -25,7 +32,7 @@ function classifyTurnEnforcement(restrictions){
   // Verified restrictions must identify one nonempty via-node; fixtures
   // may use symbolic IDs, but imported real OSM nodes must be numeric.
   if(r.viaNodes.length!==1||r.viaWays.length!==0||
-     !/^(no_|only_)[a-z_]+$/.test(r.restriction)){
+     !SUPPORTED_SIMPLE_RESTRICTIONS.has(r.restriction)){
    counts.complex++;continue;
   }
   if(r.conditional||r.except){counts.conditionalOrExcept++;continue;}

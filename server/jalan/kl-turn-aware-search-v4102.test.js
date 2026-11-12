@@ -167,3 +167,14 @@ test('heap frontier handles 2000 directed edges and preserves shortest distance'
  assert.equal(r.pathEdgeIds.length,2000);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('only_u_turn must not treat forward continuation as a legal U-turn',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const forward=e('osm-way-1339792254:1:F','v','t',10);
+ const reverse=e('osm-way-1339792254:0:R','v','s',10);
+ const restriction={...base,toWay:base.fromWay,restriction:'only_u_turn'};
+ const r=searchTurnAware(graph([incoming,forward,reverse]),'s','t',[restriction]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'turn-restrictions-not-fully-verified');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
