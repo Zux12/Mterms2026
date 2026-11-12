@@ -343,3 +343,12 @@ This is a technical route calculation only, not verified legal-road or productio
 - [ ] Complete 20 independent real-world KL journey acceptance cases.
 
 No production deployment, database writes or TomTom changes.
+
+## Real imported KL bridge fixture regression passed — 12 November 2026
+
+- [x] Two tests built around actual Atlas v495 directed bridge edge `osm-way-1007589904:7:F` passed: forward-only traversal and no transfer to unrelated fixture nodes.
+- [x] **276/276** regression tests passed, zero failures; isolated full-graph smoke and diagnostic workflows also succeeded in [run 43155551248](https://github.com/Zux12/Mterms2026/actions/runs/43155551248).
+- [ ] Verify actual bridge-to-ground crossings using independently inspected OSM node connectivity and bridge/layer metadata; the second test uses a deliberately unrelated fixture edge, not an independently identified actual crossing.
+- [ ] Validate real one-way/turn restrictions and 20 independently reviewed KL journeys.
+
+**Scope:** A real imported bridge edge is used, but this is not proof of bridge network legality, map-matching correctness, or safe production routing.
