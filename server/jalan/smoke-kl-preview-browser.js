@@ -28,6 +28,7 @@ async function main(){
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
   await page.locator('#token').fill('browser-fixture-token');
+  await page.locator('.leaflet-container').waitFor({timeout:15000});
   await page.locator('#check').click();
   await page.getByText('KL graph available:',{exact:false}).waitFor({timeout:15000});
   await page.locator('#start').fill('3.1315707, 101.7038508');
@@ -36,6 +37,13 @@ async function main(){
   await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:15000});
   await page.locator('#swap').click();
   await page.getByText('Start and destination swapped.',{exact:false}).waitFor({timeout:15000});
+  if(await page.locator('.leaflet-interactive').count()===0)
+   throw Error('Map interaction layers not rendered');
+  // Clicking the map should populate coordinates and invalidate old route output.
+  const before=await page.locator('#start').inputValue();
+  await page.locator('#map').click({position:{x:120,y:120}});
+  const after=await page.locator('#start').inputValue();
+  if(after===before||!after.includes(','))throw Error('Map click did not select a coordinate');
   if(errors.length)throw Error('Browser script error');
   process.stdout.write('Chromium pilot browser interactions passed against local fixture API.\n');
  }finally{
