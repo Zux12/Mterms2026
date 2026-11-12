@@ -432,3 +432,12 @@ No production merge/deploy, database writes or TomTom changes.
 - [ ] Complete 20 reviewed KL journeys and TomTom/road-legality checks before production approval.
 
 No production merge/deploy, MongoDB writes or live TomTom changes.
+
+## Independent verification distinction regression passed — 12 November 2026
+
+- [x] **296/296** Node regression tests passed, zero failures. Full-graph smoke and diagnostic workflows also passed in [GitHub Actions run 43186858430](https://github.com/Zux12/Mterms2026/actions/runs/43186858430).
+- [x] Review evidence checker now explicitly reports `independentVerificationEstablished:false` even for self-declared complete forms; it does not edit Atlas or authorize routing.
+- [ ] Establish trustworthy external evidence review and verification of actual road legality. Neither the offline form nor the imported OSM restriction is independently verified.
+- [ ] Complete 20 reviewed KL journeys and TomTom comparison.
+
+No production merge/deploy, MongoDB writes or live TomTom changes.
