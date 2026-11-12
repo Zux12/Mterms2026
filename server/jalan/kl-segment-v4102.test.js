@@ -69,6 +69,9 @@ test('no-path response is explicitly experimental, read-only and carries sanitiz
  assert.equal(response.routingActivated,false);
  assert.equal(response.databaseWrites,0);
  assert.equal(response.trafficAware,false);
+ assert.equal(response.legalDrivingRouteVerified,false);
+ assert.equal(response.accessRestrictionsEnforced,false);
+ assert.equal(response.turnRestrictionsEnforced,false);
  assert.equal(response.timingDiagnosticOnly,true);
  assert.deepEqual(response.timingMs,timingMs);
  assert.ok(!('geometry' in response));
