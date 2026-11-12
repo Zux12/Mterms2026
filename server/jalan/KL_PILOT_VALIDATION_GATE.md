@@ -277,3 +277,15 @@ This documentation update requires its own CI verification. Keep PR draft and To
 - [ ] Execute full-graph cold/warm routes against actual KL graph and record independent 20-journey acceptance evidence.
 
 This documentation commit also requires fresh CI. Do not mistake offline synthetic timing fixtures for actual route latency.
+
+## First full-graph smoke test passed — 12 November 2026
+
+- [x] **Full 168,221-edge graph loaded** by experimental `kl-segment-v4102` engine from MongoDB Atlas with a dedicated `jalan_readonly` account, in the isolated GitHub Actions `kl-fullgraph` job.
+- [x] One real imported KL node-to-node smoke route calculated successfully: **17 m**; sanitized geometry and response checks passed.
+- [x] First-request graph loading **39,941.6 ms**; first-request server total **40,009.3 ms**. These are cold-load values only; warm route performance is **not yet measured**.
+- [x] [GitHub Actions run 43149841538](https://github.com/Zux12/Mterms2026/actions/runs/43149841538), successful rerun of failed `kl-fullgraph` job; existing routing regression job also passed.
+- [ ] Run a warm-cache follow-up route and measure warm latency.
+- [ ] Complete 20 independently reviewed real KL journeys, legal-access review and TomTom comparison.
+- [ ] Validate Peninsular Malaysia coverage before any wider rollout.
+
+**Scope:** A successful full-graph *smoke* route proves the engine can load the imported graph and calculate this one route; it does not prove road legality, navigation readiness, traffic-aware routing, or the 20-journey acceptance gate. No Heroku production deployment, MongoDB writes or TomTom changes.
