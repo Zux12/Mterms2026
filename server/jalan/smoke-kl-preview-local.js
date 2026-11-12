@@ -36,6 +36,19 @@ function previewRouteVerified(response,body,journey=SMOKE_JOURNEY) {
     Number.isFinite(p[0])&&Math.abs(p[0])<=180&&
     Number.isFinite(p[1])&&Math.abs(p[1])<=90)&&
   body.distanceMeters===17&&
+  // Public OSM fixture points are actual graph nodes: a 17 m route snapped
+  // to a different road 10+ m away is not valid smoke evidence, even if
+  // the reported snap distances accurately describe that wrong road.
+  Number.isFinite(body.startSnapMeters)&&body.startSnapMeters>=0&&body.startSnapMeters<=2&&
+  Number.isFinite(body.endSnapMeters)&&body.endSnapMeters>=0&&body.endSnapMeters<=2&&
+  // Require the complete gap audit, not just a self-reported zero count.
+  body.geometryGapAdvisoryOnly===true&&
+  Number.isSafeInteger(body.geometryGapTransitionsInspected)&&
+  body.geometryGapTransitionsInspected>=0&&
+  Number.isFinite(body.geometryGapThresholdMeters)&&
+  body.geometryGapThresholdMeters>=0&&body.geometryGapThresholdMeters<=2&&
+  Number.isFinite(body.geometryMaxGapMeters)&&body.geometryMaxGapMeters>=0&&
+  body.geometryMaxGapMeters<=body.geometryGapThresholdMeters&&
   // Cross-check reported snap distances and route length against actual
   // GeoJSON, instead of trusting a syntactically valid unrelated polyline.
   verifiedGeometry(body)&&geometryMatchesJourney(body,journey);
