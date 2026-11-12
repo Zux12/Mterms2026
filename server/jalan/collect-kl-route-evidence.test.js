@@ -339,3 +339,23 @@ test('incomplete-graph HTTP 404 cannot masquerade as reviewed KL disconnection',
   assert.equal(out[0].graphEvidenceVerified,undefined);
  }
 });
+
+test('reviewed no-path replies preserve only boolean cache-state diagnostics',async()=>{
+ const c={...base,caseId:'kl-no-path-cache',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const cached of [false,true]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,graphCacheHit:cached})});
+  assert.equal(out[0].responseStatus,404);
+  assert.equal(out[0].graphCacheHit,cached);
+  assert.equal(out[0].noPathModeVerified,true);
+ }
+ const bad=await collectEvidence([c],url,{fetchImpl:reply(404,{
+  ...noPath,graphCacheHit:{secret:'SECRET_CACHE_METADATA'}
+ })});
+ assert.equal(bad[0].graphCacheHit,null);
+ assert.ok(!JSON.stringify(bad).includes('SECRET_CACHE_METADATA'));
+ const unrelated=await collectEvidence([c],url,{fetchImpl:reply(404,{
+  ...noPath,mode:'NOT_JALAN',graphCacheHit:true
+ })});
+ assert.equal(unrelated[0].graphCacheHit,undefined);
+});

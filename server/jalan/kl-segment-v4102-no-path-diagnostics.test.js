@@ -52,3 +52,17 @@ test('no-path replies tag complete graph provenance only when v495 cardinality i
   assert.equal(incomplete.graphEdges,null);
  }
 });
+
+test('no-path response reports cold and warm graph state without reflecting untrusted metadata',()=>{
+ const time={graphLoad:10,snapping:2,pathSearch:8,total:20};
+ for(const cached of [false,true]){
+  const reply=noPathResponse(time,100,168221,cached);
+  assert.equal(reply.graphCacheHit,cached);
+  assert.equal(reply.graphEdges,168221);
+ }
+ for(const invalid of [undefined,null,0,1,'true',{secret:'SECRET_CACHE_METADATA'}]){
+  const reply=noPathResponse(time,100,168221,invalid);
+  assert.equal(reply.graphCacheHit,null);
+  assert.ok(!JSON.stringify(reply).includes('SECRET_CACHE_METADATA'));
+ }
+});

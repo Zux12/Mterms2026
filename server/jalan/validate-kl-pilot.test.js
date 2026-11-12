@@ -317,3 +317,23 @@ test('missing full-graph provenance invalidates expected disconnection and no-pa
  assert.equal(summary.noPathSearchVisitSamples,0);
  assert.ok(summary.validationErrors.some(e=>e.includes('full KL graph evidence not verified')));
 });
+
+test('verified disconnected searches contribute to cold/warm timing but unreviewed no-path does not',()=>{
+ const cases=twentyValid();
+ for(const c of cases)Object.assign(c,{
+  graphLoadMs:8,snappingMs:2,pathSearchMs:1,serverTotalMs:11,graphCacheHit:true
+ });
+ Object.assign(cases[16],{
+  graphLoadMs:100,snappingMs:2,pathSearchMs:8,serverTotalMs:110,graphCacheHit:false
+ });
+ const accepted=run(cases);
+ assert.equal(accepted.status,0);
+ assert.equal(accepted.summary.graphCacheTimingByStatusMs.cold.samples,1);
+ assert.equal(accepted.summary.graphCacheTimingByStatusMs.cold.p50,110);
+ assert.equal(accepted.summary.graphCacheTimingByStatusMs.warm.samples,19);
+ cases[16].disconnectionReviewed=false;
+ const rejected=run(cases);
+ assert.equal(rejected.status,1);
+ assert.equal(rejected.summary.graphCacheTimingByStatusMs.cold.samples,0);
+ assert.equal(rejected.summary.graphCacheTimingByStatusMs.warm.samples,19);
+});
