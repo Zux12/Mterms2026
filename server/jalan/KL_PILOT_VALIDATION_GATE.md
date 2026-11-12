@@ -333,3 +333,13 @@ This is a technical route calculation only, not verified legal-road or productio
 - [ ] Obtain 20 independent reviewed real-world KL cases before acceptance.
 
 **Risk:** The 2,297 m route has not been manually inspected for road legality. A fast route is not necessarily a safe or lawful route.
+
+## Grade-separated junction regression gate passed — 12 November 2026
+
+- [x] Three new controlled topology regression tests passed: disconnected overpass/underpass cannot teleport, explicitly shared junction permits transfer, overlapping unrelated edges cannot become reverse twins.
+- [x] **274/274** Node regression tests passed, with zero failures.
+- [x] Isolated full-graph smoke job and diagnostic workflow also passed in [GitHub Actions run 43153915099](https://github.com/Zux12/Mterms2026/actions/runs/43153915099).
+- [ ] Independently verify real KL overpass, underpass, ramp and turn-restriction source data. Synthetic topology tests are not legal-driving proof.
+- [ ] Complete 20 independent real-world KL journey acceptance cases.
+
+No production deployment, database writes or TomTom changes.
