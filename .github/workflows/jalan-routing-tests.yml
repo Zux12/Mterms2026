@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: node --check server/jalan/run-kl-local-readonly.js
-      - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js
+      - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js server/jalan/kl-fullgraph-workflow-security.test.js
       - name: Validate production diagnostics without database writes
         run: |
           node --check server/jalan/routes.js
@@ -27,10 +27,13 @@ jobs:
           node server/jalan/routing-diagnostics.test.js
 
   kl-fullgraph:
+    # Authenticated full-graph validation is limited to the isolated trusted branch.
+    # Pull-request jobs and arbitrary refs must never receive the read-only credential.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    env:
-      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +41,8 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - name: Verify dedicated read-only connection is configured
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         shell: bash
         run: |
           if [ -z "$JALAN_READONLY_MONGODB_URI" ]; then
@@ -61,6 +66,8 @@ jobs:
              startLat:3.1315707,startLng:101.7038508,endLat:3.128888,endLng:101.7126153}]),{mode:0o600,flag:'wx'});
           NODE
       - name: Run full-graph smoke case (partial 20-case acceptance is expected)
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         shell: bash
         run: |
           set +e
@@ -95,7 +102,13 @@ jobs:
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
       - name: Audit complete imported KL turn-restriction readiness (read-only)
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
-      - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)\n        run: node server/jalan/smoke-kl-preview-local.js\n      - name: Remove private local inputs and sanitized evidence
+      - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
+        env:
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+        run: node server/jalan/smoke-kl-preview-local.js
+      - name: Remove private local inputs and sanitized evidence
         if: always()
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
