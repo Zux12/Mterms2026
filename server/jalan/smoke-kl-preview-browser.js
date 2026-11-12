@@ -6,12 +6,14 @@ const express=require('express');
 const path=require('node:path');
 async function main(){
  const app=express();
+ let delayNextRoute=false;
  app.get('/',(_,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
  app.get('/api/jalan/kl/health',(req,res)=>{
   if(req.get('x-jalan-preview-token')!=='browser-fixture-token')return res.sendStatus(401);
   res.json({ok:true,readOnly:true,liveRouting:false,graphEdges:168221,graphCached:true});
  });
- app.get('/api/jalan/kl/route',(req,res)=>{
+ app.get('/api/jalan/kl/route',async(req,res)=>{
+  if(delayNextRoute){delayNextRoute=false;await new Promise(resolve=>setTimeout(resolve,600));}
   if(req.get('x-jalan-preview-token')!=='browser-fixture-token')return res.sendStatus(401);
   res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
    legalDrivingRouteVerified:false,turnRestrictionsEnforced:false,
@@ -44,6 +46,13 @@ async function main(){
   await page.locator('#map').click({position:{x:120,y:120}});
   const after=await page.locator('#start').inputValue();
   if(after===before||!after.includes(','))throw Error('Map click did not select a coordinate');
+  // A delayed response for the old destination must not repaint the route.
+  delayNextRoute=true;
+  await page.locator('#route').click();
+  await page.locator('#swap').click();
+  await page.waitForTimeout(900);
+  if((await page.locator('#status').innerText()).includes('Legal driving route verified: NO'))
+   throw Error('Stale route response repainted after endpoint swap');
   if(errors.length)throw Error('Browser script error');
   process.stdout.write('Chromium pilot browser interactions passed against local fixture API.\n');
  }finally{
