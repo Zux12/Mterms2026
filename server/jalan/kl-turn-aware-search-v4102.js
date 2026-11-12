@@ -43,7 +43,12 @@ function searchTurnAware(g,startNode,endNode,restrictions){
    const applicable=fromWay?(rules.get(JSON.stringify([fromWay,cur.node]))||[]):[];
    let forbidden=false;
    for(const r of applicable){
-    if(r.restriction.startsWith('no_')&&toWay===r.toWay)forbidden=true;
+    // A no_u_turn on the same OSM way must not block forward travel.
+    // A true reversal returns to the incoming edge's origin node.
+    const forwardContinuation=r.restriction==='no_u_turn'&&
+     fromWay===toWay&&cur.prev.from!==e.to;
+    if(r.restriction.startsWith('no_')&&toWay===r.toWay&&
+       !forwardContinuation)forbidden=true;
     if(r.restriction.startsWith('only_')&&toWay!==r.toWay)forbidden=true;
    }
    if(forbidden)continue;
