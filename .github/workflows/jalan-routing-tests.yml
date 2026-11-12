@@ -24,7 +24,7 @@ jobs:
           node --check server/jalan/routing-diagnostics.js
           node server/jalan/routing-diagnostics.test.js
 
-    kl-fullgraph:
+  kl-fullgraph:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
