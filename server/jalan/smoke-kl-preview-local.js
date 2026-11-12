@@ -46,9 +46,11 @@ async function main(){
    throw Error('Preview route safety/geometry contract failed');
   process.stdout.write('KL preview UI, authentication, health and read-only route HTTP smoke passed.\n');
  }finally{
-  child.kill('SIGTERM');
-  await Promise.race([new Promise(resolve=>child.once('exit',resolve)),delay(4000)]);
-  if(child.exitCode===null)child.kill('SIGKILL');
+  const exited=child.exitCode!==null||child.signalCode!==null;
+  const waitForExit=exited?Promise.resolve():new Promise(resolve=>child.once('exit',resolve));
+  if(!exited)child.kill('SIGTERM');
+  await Promise.race([waitForExit,delay(4000)]);
+  if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');
  }
 }
 main().catch(()=>{process.stderr.write('KL preview HTTP smoke failed (details suppressed).\n');process.exitCode=1;});
