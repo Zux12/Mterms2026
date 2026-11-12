@@ -24,10 +24,16 @@ function assessReviewBundle(reviewRecords,manifests){
   const referencesMatch=!!bundle&&Array.isArray(declared)&&
    declared.length===bundle.references.size&&
    declared.every(ref=>bundle.references.has(ref));
-  const metadataReady=r.reviewAccepted&&!!manifest&&manifest.sourceDiversity&&referencesMatch;
+  // The OSM snapshot and a review-note alone are not independently
+  // corroborating sources. Require at least one external road evidence type.
+  const corroboration=!!manifest&&manifest.sourceTypes.some(t=>
+   ['road-authority','field-photo','independent-map'].includes(t));
+  const metadataReady=r.reviewAccepted&&!!manifest&&manifest.sourceDiversity&&
+   referencesMatch&&corroboration;
   return {restrictionId:r.restrictionId,reviewMetadataComplete:r.reviewAccepted,
    evidenceMetadataComplete:!!manifest?.metadataComplete,
    evidenceSourceDiversity:!!manifest?.sourceDiversity,
+   externalCorroborationMetadataPresent:!!corroboration,
    reviewEvidenceReferencesMatchManifest:!!referencesMatch,
    manifestSha256:manifest?.manifestSha256??null,
    bundleMetadataComplete:!!metadataReady,
