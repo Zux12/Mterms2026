@@ -17,7 +17,8 @@ small{color:#556677} @media(max-width:720px){main{display:flex;flex-direction:co
 <main><aside><p>Enter KL coordinates (latitude, longitude) to preview the imported directed road graph. Results are diagnostic, not driving instructions.</p>
 <label for="token">Local preview token</label><input id="token" type="password" autocomplete="off" placeholder="Enter locally configured preview token">\n<label for="start">Start coordinate</label><input id="start" value="3.1390, 101.6869" autocomplete="off">
 <label for="end">Destination coordinate</label><input id="end" value="3.1478, 101.6953" autocomplete="off">
-<p><small>Click the map to select the start, then click again to select the destination. Subsequent clicks alternate between the two.</small></p>\n<button id="swap" type="button">Swap points</button> <button id="check" type="button">Check graph connection</button> <button id="route" type="button">Preview route</button>
+<p><small>Click the map to select the start, then click again to select the destination. Subsequent clicks alternate between the two.</small></p>
+<button id="swap" type="button">Swap points</button> <button id="check" type="button">Check graph connection</button> <button id="route" type="button">Preview route</button>
 <div id="status" role="status" aria-live="polite">No route requested.</div>
 <p><small>Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
 </aside><div id="map" aria-label="Experimental route map"></div></main>
@@ -76,7 +77,9 @@ button.addEventListener('click',async()=>{
  try{
   const [startLat,startLng]=coordinate('start'),[endLat,endLng]=coordinate('end');
   const query=new URLSearchParams({startLat,startLng,endLat,endLng});
-  const token=document.getElementById('token').value;\n  if(!token)throw Error('Enter the local preview token.');\n  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token}});
+  const token=document.getElementById('token').value;
+  if(!token)throw Error('Enter the local preview token.');
+  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token}});
   const data=await response.json();
   if(!response.ok||data.ok!==true)throw Error(data.error||'Route unavailable');
   if(data.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||data.routingActivated!==false||
