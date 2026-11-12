@@ -178,3 +178,28 @@ test('only_u_turn must not treat forward continuation as a legal U-turn',()=>{
  assert.equal(r.reason,'turn-restrictions-not-fully-verified');
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('a forged incoming roadId cannot evade a verified turn prohibition',()=>{
+ const spoofed={...a,roadId:'osm-way-999999'};
+ assert.throws(()=>searchTurnAware(graph([spoofed,banned]),'s','t',[base]),
+  /Conflicting OSM way identity/);
+});
+test('a forged outgoing roadId cannot evade a verified turn prohibition',()=>{
+ const spoofed={...banned,roadId:'osm-way-999999'};
+ assert.throws(()=>searchTurnAware(graph([a,spoofed]),'s','t',[base]),
+  /Conflicting OSM way identity/);
+});
+test('a noncanonical directed edge ID cannot be laundered through roadId',()=>{
+ const spoofed={...banned,id:'custom-road-edge',roadId:base.toWay};
+ assert.throws(()=>searchTurnAware(graph([a,spoofed]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+test('matching roadId metadata preserves an allowed detour',()=>{
+ const edges=[a,banned,detour,returnEdge].map(edge=>({
+  ...edge,roadId:edge.id.split(':')[0]
+ }));
+ const r=searchTurnAware(graph(edges),'s','t',[base]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[a.id,detour.id,returnEdge.id]);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
