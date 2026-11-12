@@ -14,8 +14,11 @@ const route={
  graphVersion:'road_graph_edges_v495',routingActivated:false,
  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,
  turnRestrictionsEnforced:false,trafficAware:false,databaseWrites:0,
- geometry:{type:'LineString',coordinates:[[101.70385,3.13157],[101.70389,3.13146]]},
- distanceMeters:17
+ geometry:{type:'LineString',coordinates:[[101.7038508,3.1315707],
+  [101.70382,3.13153],[101.7038951,3.1314573]]},
+ startSnapMeters:0,endSnapMeters:0,
+ geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,
+ geometryGapThresholdMeters:2,distanceMeters:17
 };
 test('health and route need hardened headers and exact expected KL graph',()=>{
  assert.equal(previewHealthVerified(response(),health),true);
@@ -54,4 +57,26 @@ test('route smoke rejects malformed GeoJSON, illegal coordinates and false dista
   {type:'LineString',coordinates:[[101,3],[101,NaN]]}
  ]) assert.equal(previewRouteVerified(response(),{...route,geometry}),false);
  assert.equal(previewRouteVerified(response(),{...route,distanceMeters:0}),false);
+});
+
+const publicJourney={startLat:3.1315707,startLng:101.7038508,
+ endLat:3.1314573,endLng:101.7038951};
+test('HTTP smoke accepts independently consistent public OSM route geometry',()=>{
+ assert.equal(previewRouteVerified(response(),route,publicJourney),true);
+});
+test('HTTP smoke rejects displaced or shortened geometry despite plausible 17m claim',()=>{
+ const displaced={...route,geometry:{...route.geometry,coordinates:
+  route.geometry.coordinates.map(([lng,lat])=>[lng,lat+0.002])}};
+ const shortened={...route,geometry:{...route.geometry,coordinates:
+  [route.geometry.coordinates[0],route.geometry.coordinates[2]]}};
+ assert.equal(previewRouteVerified(response(),displaced,publicJourney),false);
+ assert.equal(previewRouteVerified(response(),shortened,publicJourney),false);
+ assert.equal(previewRouteVerified(response(),route,{...publicJourney,endLat:3.133}),false);
+});
+test('HTTP smoke rejects missing, falsified or unreviewed snap and geometry metrics',()=>{
+ for(const changed of [
+  {startSnapMeters:undefined},{endSnapMeters:200},
+  {endSnapMeters:'0'},{geometryGapReviewAvailable:false},
+  {geometryGapCountOverThreshold:1},{geometryGapThresholdMeters:5}
+ ])assert.equal(previewRouteVerified(response(),{...route,...changed},publicJourney),false);
 });
