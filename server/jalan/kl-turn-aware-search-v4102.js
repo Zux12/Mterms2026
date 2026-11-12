@@ -6,7 +6,7 @@ const {classifyTurnEnforcement}=require('./kl-turn-enforcement-readiness-v4102')
 // Edge IDs are authoritative in this prototype. A caller-supplied roadId
 // must never override their OSM identity and silently bypass a turn rule.
 function verifiedWayOf(edge){
- const m=/^(osm-way-\\d+):\\d+:[FR]$/.exec(edge?.id||'');
+ const m=/^(osm-way-\d+):\d+:[FR]$/.exec(edge?.id||'');
  if(!m)throw Error('Missing OSM way identity for turn-aware search');
  if(edge.roadId!==undefined&&edge.roadId!==m[1])
   throw Error('Conflicting OSM way identity for turn-aware search');
