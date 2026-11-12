@@ -9,16 +9,18 @@ function validateEvidenceManifest(manifest){
    !ID.test(manifest.restrictionId||'')||
    !Array.isArray(manifest.artifacts)||manifest.artifacts.length<2)
   throw Error('Invalid restriction evidence manifest');
- const seen=new Set(),sources=new Set();
+ const seen=new Set(),references=new Set(),digests=new Set(),sources=new Set();
  const artifacts=manifest.artifacts.map(a=>{
   if(!a||typeof a!=='object'||Array.isArray(a)||
     !/^[a-zA-Z0-9_-]{5,80}$/.test(a.artifactId||'')||
     seen.has(a.artifactId)||!SHA.test(a.sha256||'')||
     !['osm-snapshot','field-photo','road-authority','independent-map','review-note'].includes(a.sourceType)||
     typeof a.capturedAt!=='string'||!Number.isFinite(Date.parse(a.capturedAt))||
-    typeof a.reference!=='string'||a.reference.length<5||a.reference.length>200)
+    typeof a.reference!=='string'||a.reference.length<5||a.reference.length>200||
+    references.has(a.reference)||digests.has(a.sha256))
    throw Error('Invalid evidence artifact metadata');
-  seen.add(a.artifactId);sources.add(a.sourceType);
+  seen.add(a.artifactId);references.add(a.reference);digests.add(a.sha256);
+  sources.add(a.sourceType);
   return {artifactId:a.artifactId,sha256:a.sha256,sourceType:a.sourceType,
    capturedAt:a.capturedAt,reference:a.reference};
  });
