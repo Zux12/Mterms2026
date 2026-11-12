@@ -35,10 +35,19 @@ function validateCases(cases){
 }
 function verifiedGeometry(body){
  const g=body?.geometry?.coordinates;
+ // The gap report is advisory, not proof of legal road connectivity. Even
+ // so, incomplete or internally contradictory audits must not be accepted
+ // as positive geometry-continuity evidence for the 20-journey pilot gate.
  return body?.geometry?.type==='LineString'&&Array.isArray(g)&&g.length>=2&&
-  g.every(p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1]))&&
-  body.geometryGapReviewAvailable===true&&body.geometryGapCountOverThreshold===0&&
-  Number.isFinite(body.geometryGapThresholdMeters)&&body.geometryGapThresholdMeters<=2;
+  g.every(p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&
+    Math.abs(p[0])<=180&&Math.abs(p[1])<=90)&&
+  body.geometryGapReviewAvailable===true&&body.geometryGapAdvisoryOnly===true&&
+  body.geometryGapCountOverThreshold===0&&
+  Number.isSafeInteger(body.geometryGapTransitionsInspected)&&body.geometryGapTransitionsInspected>=0&&
+  Number.isFinite(body.geometryGapThresholdMeters)&&
+  body.geometryGapThresholdMeters>=0&&body.geometryGapThresholdMeters<=2&&
+  Number.isFinite(body.geometryMaxGapMeters)&&body.geometryMaxGapMeters>=0&&
+  body.geometryMaxGapMeters<=body.geometryGapThresholdMeters;
 }
 // Independently cross-check experimental GeoJSON against the private input
 // coordinates while they are in memory. Never serialize those coordinates.
