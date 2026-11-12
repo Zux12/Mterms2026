@@ -484,7 +484,7 @@ test('KL 422 snap diagnostic refuses unsupported or missing road safety flags',a
   error:'No nearby directed graph segment within 200 m',
   routingActivated:false,databaseWrites:0,trafficAware:false,
   legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
-  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241};
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
  for(const flag of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced'])
   for(const value of [true,undefined]){
    const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,[flag]:value})});
