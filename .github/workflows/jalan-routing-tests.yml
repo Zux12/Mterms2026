@@ -118,3 +118,22 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Verify KL pilot browser controls in Chromium (fixture API, no database)
         run: node server/jalan/smoke-kl-preview-browser.js
+
+  browser-realgraph:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    env:
+      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+      JALAN_BROWSER_REAL_GRAPH: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Chromium against real imported KL graph through isolated loopback server
+        run: node server/jalan/smoke-kl-preview-browser.js
