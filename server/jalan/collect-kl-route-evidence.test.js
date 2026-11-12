@@ -497,7 +497,7 @@ test('KL 422 evidence retains only sanitized boolean graph cache state',async()=
   error:'No nearby directed graph segment within 200 m',
   routingActivated:false,databaseWrites:0,trafficAware:false,
   legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
-  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241};
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{
   ...snap,graphCacheHit:{secret:'PRIVATE_SNAP_CACHE_TOKEN'}
  })});
