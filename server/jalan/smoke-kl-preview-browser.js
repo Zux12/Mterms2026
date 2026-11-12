@@ -53,6 +53,18 @@ async function main(){
   await page.waitForTimeout(900);
   if((await page.locator('#status').innerText()).includes('Legal driving route verified: NO'))
    throw Error('Stale route response repainted after endpoint swap');
+  // The browser must not render a route if the API claims turn enforcement
+  // or legal driving verification; the preview contract requires both false.
+  await page.route('**/api/jalan/kl/route?*',async route=>{
+   const unsafe={ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
+    legalDrivingRouteVerified:true,turnRestrictionsEnforced:false,
+    geometry:{type:'LineString',coordinates:[[101.7038508,3.1315707],[101.7038951,3.1314573]]}};
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(unsafe)});
+  });
+  await page.locator('#route').click();
+  await page.getByText('Unexpected or unsafe preview response',{exact:false}).waitFor({timeout:15000});
+  if((await page.locator('#status').innerText()).includes('Legal driving route verified: NO'))
+   throw Error('Unsafe route rendered');
   if(errors.length)throw Error('Browser script error');
   process.stdout.write('Chromium pilot browser interactions passed against local fixture API.\n');
  }finally{
