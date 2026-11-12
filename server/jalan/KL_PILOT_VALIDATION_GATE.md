@@ -413,3 +413,12 @@ Read-only Atlas inspection established that the **two unknown-pattern records in
 - [ ] Independently inspect original OSM relation semantics, time zone and applicability before any conditional enforcement.
 
 No changes to production routing, database records or TomTom.
+
+## Unusual imported turn relations regression passed — 12 November 2026
+
+- [x] Actual v493 relation `osm-relation-15702066` (empty base restriction, two via-ways) and `osm-relation-15951715` (empty base restriction, conditional no-right-turn) are both excluded from automatic enforcement by the fail-closed classifier.
+- [x] **290/290** regression tests passed, zero failures. Full-graph smoke and diagnostic workflows also passed in [GitHub Actions run 43182432118](https://github.com/Zux12/Mterms2026/actions/runs/43182432118).
+- [ ] Independently verify conditional relation time windows, local timezone and original OSM source before attempting conditional enforcement.
+- [ ] Review 20 real KL journeys and actual road legality; current engine remains advisory-only.
+
+No production merge/deploy, database writes or TomTom changes.
