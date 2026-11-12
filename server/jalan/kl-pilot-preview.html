@@ -36,6 +36,12 @@ function invalidateRoute(){
  markers=[];
 }
 const selectionMarkers={start:null,end:null};
+for(const id of ['start','end']){
+ document.getElementById(id).addEventListener('input',()=>{
+  invalidateRoute();
+  status.textContent='Coordinates changed. Preview route to recalculate.';
+ });
+}
 map.on('click',event=>{
  const id=nextPoint;
  invalidateRoute();
