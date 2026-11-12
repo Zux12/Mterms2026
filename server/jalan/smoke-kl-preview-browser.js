@@ -2,9 +2,12 @@
 // Real Chromium DOM smoke against a local fixture server. This checks browser
 // interactions only; full-graph HTTP integration is separately tested read-only.
 const {chromium}=require('playwright');
+const {spawn}=require('node:child_process');
+const {randomBytes}=require('node:crypto');
 const express=require('express');
 const path=require('node:path');
 async function main(){
+ if(process.env.JALAN_BROWSER_REAL_GRAPH==='1')return realGraphBrowser();
  const app=express();
  let delayNextRoute=false;
  app.get('/',(_,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
@@ -72,6 +75,45 @@ async function main(){
  }finally{
   if(browser)await browser.close();
   await new Promise(resolve=>server.close(resolve));
+ }
+}
+async function realGraphBrowser(){
+ if(!process.env.JALAN_READONLY_MONGODB_URI)throw Error('Read-only graph credential unavailable');
+ const port=18866,token=randomBytes(32).toString('hex');
+ const child=spawn(process.execPath,[path.join(__dirname,'run-kl-preview-local.js')],{
+  env:{...process.env,JALAN_PREVIEW_TOKEN:token,JALAN_PREVIEW_PORT:String(port)},stdio:'ignore'});
+ let browser;
+ try{
+  let ready=false;
+  for(let i=0;i<45;i++){
+   if(child.exitCode!==null)throw Error('Local graph preview exited');
+   try{if((await fetch('http://127.0.0.1:'+port+'/')).ok){ready=true;break;}}catch(_){}
+   await new Promise(resolve=>setTimeout(resolve,1000));
+  }
+  if(!ready)throw Error('Local graph preview startup timeout');
+  browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+  const page=await browser.newPage();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://127.0.0.1:'+port+'/',{waitUntil:'domcontentloaded'});
+  await page.locator('#token').fill(token);
+  await page.locator('#check').click();
+  await page.getByText('KL graph available:',{exact:false}).waitFor({timeout:15000});
+  await page.locator('#start').fill('3.1315707, 101.7038508');
+  await page.locator('#end').fill('3.1314573, 101.7038951');
+  await page.locator('#route').click();
+  await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:90000});
+  if(errors.length)throw Error('Browser script error');
+  const status=await page.locator('#status').innerText();
+  if(!status.includes('Distance: 0.02 km')||!status.includes('Legal driving route verified: NO'))
+   throw Error('Real graph browser route contract mismatch');
+  process.stdout.write('Chromium and real read-only KL graph browser-to-backend smoke passed.\\n');
+ }finally{
+  if(browser)await browser.close();
+  const exited=child.exitCode!==null||child.signalCode!==null;
+  const wait=exited?Promise.resolve():new Promise(resolve=>child.once('exit',resolve));
+  if(!exited)child.kill('SIGTERM');
+  await Promise.race([wait,new Promise(resolve=>setTimeout(resolve,4000))]);
+  if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');
  }
 }
 main().catch(e=>{
