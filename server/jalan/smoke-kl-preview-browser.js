@@ -37,6 +37,8 @@ async function main(){
   await page.locator('#end').fill('3.1314573, 101.7038951');
   await page.locator('#route').click();
   await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:15000});
+  await page.locator('#start').fill('3.130000, 101.700000');
+  await page.getByText('Coordinates changed. Preview route to recalculate.',{exact:false}).waitFor({timeout:15000});
   await page.locator('#swap').click();
   await page.getByText('Start and destination swapped.',{exact:false}).waitFor({timeout:15000});
   if(await page.locator('.leaflet-pane').count()===0)
