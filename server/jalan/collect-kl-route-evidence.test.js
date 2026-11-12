@@ -16,7 +16,9 @@ const good={
 };
 const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,
  error:'No directed path found',routingActivated:false,databaseWrites:0,
- trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
+ trafficAware:false,legalDrivingRouteVerified:false,
+ accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+ timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
 const reply=(status,body)=>async()=>({status,json:async()=>body});
 test('collects actual experimental response metadata but never writes coordinates or secrets to evidence',async()=>{
  let request;
@@ -42,6 +44,33 @@ test('recognized no-path 404 is accepted only with pre-existing independent revi
  assert.equal(out[0].noPathModeVerified,true);
  assert.equal(out[0].pathSearchMs,78.7);
  assert.equal(out[0].serverTotalMs,94.4);
+});
+test('no-path rejects false claims that a legal route was verified',async()=>{
+ const c={...base,caseId:'kl-legal-contract',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,legalDrivingRouteVerified:true})});
+ assert.equal(out[0].responseStatus,0);
+ assert.equal(out[0].failureClass,'unverified-experimental-response');
+ assert.equal(out[0].noPathModeVerified,undefined);
+});
+test('no-path rejects contradictory access or turn enforcement claims',async()=>{
+ const c={...base,caseId:'kl-enforcement-contract',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const flag of ['accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,[flag]:true})});
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].noPathModeVerified,undefined);
+ }
+});
+test('no-path requires explicit advisory-only flags rather than assuming missing values',async()=>{
+ const c={...base,caseId:'kl-missing-contract',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const flag of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const invalid={...noPath};delete invalid[flag];
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,invalid)});
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+ }
 });
 test('generic HTTP 404 cannot be mistaken for a disconnected road',async()=>{
  const c={...base,expectedReachable:false,disconnectionReviewed:true};
