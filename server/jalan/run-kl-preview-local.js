@@ -2,7 +2,6 @@
 // Owner-operated, loopback-only experimental preview. No deployment, no DB writes.
 // Requires JALAN_READONLY_MONGODB_URI and JALAN_PREVIEW_TOKEN from environment.
 // The token is entered in the browser and never placed in URLs or logs.
-const fs=require('node:fs');
 const path=require('node:path');
 const {timingSafeEqual}=require('node:crypto');
 const express=require('express');
@@ -28,7 +27,7 @@ async function main(){
  app.disable('x-powered-by');
  app.use((req,res,next)=>{
   res.set('Cache-Control','no-store');
-  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self';");
+  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self';");
   next();
  });
  app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
