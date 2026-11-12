@@ -37,9 +37,14 @@ function searchTurnAware(g,startNode,endNode,restrictions){
     turnRestrictionsEnforced:true,productionRoutingAuthorized:false};
   }
   for(const e of g.adj.get(cur.node)||[]){
-   if(!e||typeof e.to!=='string'||!Number.isFinite(e.len)||e.len<0)throw Error('Invalid graph edge');
+   // This isolated prototype must not mistake malformed adjacency for a legal turn.
+   // A missing initial-leg way ID is unsafe too: later turn-state keys depend on it.
+   if(!e||typeof e.id!=='string'||!e.id.trim()||
+      typeof e.from!=='string'||e.from!==cur.node||
+      typeof e.to!=='string'||!e.to||!Number.isFinite(e.len)||e.len<0)
+    throw Error('Invalid graph edge');
    const fromWay=cur.prev?wayOf(cur.prev):null,toWay=wayOf(e);
-   if(cur.prev&&(!fromWay||!toWay))throw Error('Missing OSM way identity for turn-aware search');
+   if(!toWay||(cur.prev&&!fromWay))throw Error('Missing OSM way identity for turn-aware search');
    const applicable=fromWay?(rules.get(JSON.stringify([fromWay,cur.node]))||[]):[];
    let forbidden=false;
    for(const r of applicable){
@@ -55,6 +60,8 @@ function searchTurnAware(g,startNode,endNode,restrictions){
    }
    if(forbidden)continue;
    const key=JSON.stringify([e.to,e.id]),nd=cur.cost+e.len;
+   // Infinity must be a hard data/scale error, not a misleading no-path result.
+   if(!Number.isFinite(nd))throw Error('Invalid accumulated turn-aware route cost');
    if(nd<(dist.get(key)??Infinity)){
     dist.set(key,nd);previous.set(key,{parent:cur.key,edge:e});
     queue.push({node:e.to,prev:e,cost:nd,key});
