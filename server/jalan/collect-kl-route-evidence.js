@@ -91,6 +91,14 @@ function routeReply(body){
 function fullGraphReply(body){
  return body?.graphVersion==='road_graph_edges_v495'&&body?.graphEdges===168221;
 }
+// Private journey requests include coordinates in the query string. The
+// preview promises uncacheable, fingerprint-minimized responses. Do not accept
+// cached or server-identifying replies as durable pilot evidence, including
+// a supposed reviewed disconnection or GPS-snap failure.
+function privateResponseHeadersVerified(response){
+ return response?.headers?.get?.('cache-control')==='no-store'&&
+  response.headers.get('x-powered-by')===null;
+}
 // The response body is untrusted diagnostic input. Keep only scalar fields
 // of the expected type in the durable evidence file, never opaque strings,
 // objects or arrays that may accidentally contain URL/GPS/token material.
@@ -125,15 +133,15 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
  for(const c of cases){ // Sequential to avoid load spikes against experimental graph.
   const u=new URL(endpoint);
   for(const k of ['startLat','startLng','endLat','endLng'])u.searchParams.set(k,String(c[k]));
-  const headers={accept:'application/json'};
+  const headers={accept:'application/json','cache-control':'no-store'};
   if(authHeader)headers[authHeader]=authValue;
   const row={caseId:c.caseId,journeyType:c.journeyType,expectedReachable:c.expectedReachable};
   const start=performance.now();
   try{
-   const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',signal:AbortSignal.timeout(timeoutMs)});
+   const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});
    let body=null;try{body=await res.json();}catch(_){} // Do not log response bodies.
    row.elapsedMs=Math.round((performance.now()-start)*10)/10;
-   if(res.status===200&&routeReply(body)&&fullGraphReply(body)){
+   if(res.status===200&&privateResponseHeadersVerified(res)&&routeReply(body)&&fullGraphReply(body)){
     row.responseStatus=200;row.ok=true;row.graphEvidenceVerified=true;
     row.distanceMeters=evidenceNonnegativeNumber(body.distanceMeters);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
@@ -148,7 +156,7 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
     row.startSnapAmbiguous=evidenceBoolean(body.startSnapAmbiguous);
     row.endSnapAmbiguous=evidenceBoolean(body.endSnapAmbiguous);
-   }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'&&fullGraphReply(body)){
+   }else if(res.status===404&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'&&fullGraphReply(body)){
     row.responseStatus=404;row.ok=false;row.graphEvidenceVerified=true;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
     // Confirm a recognized experimental no-path response, not just HTTP 404.
@@ -160,7 +168,7 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.searchVisitedNodes=Number.isSafeInteger(body.searchVisitedNodes)&&
       body.searchVisitedNodes>=0&&body.searchVisitedNodes<=400000?body.searchVisitedNodes:null;
     appendServerTiming(row,body);
-   }else if(res.status===422&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
+   }else if(res.status===422&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
     body.error==='No nearby directed graph segment within 200 m'){
     // A snap failure is NOT a directed no-path finding. Preserve only sanitized
