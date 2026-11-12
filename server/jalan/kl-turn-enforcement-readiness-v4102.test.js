@@ -50,3 +50,26 @@ test('overlapping complexity flags count conditions even on unsupported via-way 
  assert.equal(r.counts.verifiedSimple,1);
  assert.equal(r.allRestrictionsReady,false);
 });
+
+test('real Atlas unusual records remain excluded from automatic enforcement',()=>{
+ // v493 records inspected read-only 12 Nov 2026. One via-way with empty
+ // restriction; one time-conditional no-right-turn with empty base tag.
+ const unusual=[
+  {restrictionId:'osm-relation-15702066',fromWay:'osm-way-251290736',
+   toWay:'osm-way-941597500',viaNodes:[],
+   viaWays:['osm-way-941597502','osm-way-941597499'],
+   restriction:'',conditional:'',except:'',applicability:'unverified'},
+  {restrictionId:'osm-relation-15951715',fromWay:'osm-way-1179663427',
+   toWay:'osm-way-1179663405',viaNodes:['2084225783'],viaWays:[],
+   restriction:'',conditional:'no_right_turn @ (Sa;Su;Mo-Fr 00:00-07:00,09:00-24:00)',
+   except:'',applicability:'requires-conditional-evaluation'}
+ ];
+ const r=classifyTurnEnforcement(unusual);
+ assert.equal(r.independentFlags.unknownRestriction,2);
+ assert.equal(r.independentFlags.viaWay,1);
+ assert.equal(r.independentFlags.conditional,1);
+ assert.equal(r.counts.complex,2);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
