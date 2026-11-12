@@ -402,3 +402,14 @@ No database writes, production deploy or live TomTom changes.
 - [ ] Independently validate applicability and route legality before any turn-aware routing activation.
 
 Counts overlap; do not sum the independent flags. No production merge/deploy, database writes or TomTom changes.
+
+## Unusual imported turn relation investigation — 12 November 2026
+
+Read-only Atlas inspection established that the **two unknown-pattern records include the single conditional record**, rather than three distinct records:
+
+- `osm-relation-15702066`: empty `restriction`; from `osm-way-251290736`, to `osm-way-941597500`, via-ways `osm-way-941597502` and `osm-way-941597499`. Unverified applicability; cannot infer a turn prohibition.
+- `osm-relation-15951715`: empty base `restriction`, conditional `no_right_turn @ (Sa;Su;Mo-Fr 00:00-07:00,09:00-24:00)`, via-node `2084225783`; applicability `requires-conditional-evaluation`. Must not be treated as an unconditional prohibition.
+- [x] Both actual imported records added to fail-closed regression coverage.
+- [ ] Independently inspect original OSM relation semantics, time zone and applicability before any conditional enforcement.
+
+No changes to production routing, database records or TomTom.
