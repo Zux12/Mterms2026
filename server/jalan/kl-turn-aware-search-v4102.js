@@ -7,9 +7,14 @@ const {wayOf}=require('./kl-turn-audit-v4102');
 function searchTurnAware(g,startNode,endNode,restrictions){
  if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string')
   throw new TypeError('Directed adjacency and node IDs required');
+ if(!Array.isArray(restrictions)||restrictions.length===0)
+  return {ok:false,reason:'no-verified-turn-restriction-coverage',
+   turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
  const readiness=classifyTurnEnforcement(restrictions);
  if(!readiness.allRestrictionsReady)return {ok:false,reason:'turn-restrictions-not-fully-verified',
   eligibleCount:readiness.eligible.length,counts:readiness.counts,productionRoutingAuthorized:false};
+ if(startNode===endNode)return {ok:true,distanceMeters:0,pathEdgeIds:[],visited:0,
+  turnRestrictionsEnforced:true,productionRoutingAuthorized:false};
  const rules=new Map();
  for(const r of readiness.eligible){
   const k=JSON.stringify([r.fromWay,r.viaNode]);
