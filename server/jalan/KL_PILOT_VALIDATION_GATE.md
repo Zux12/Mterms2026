@@ -300,3 +300,15 @@ This documentation commit also requires fresh CI. Do not mistake offline synthet
 - [ ] Complete 20 independently reviewed KL journeys and TomTom/road-legality checks.
 
 **Scope:** This proves successful cold/warm full-graph routing for one selected imported road pair, not production navigation readiness. No Heroku deployment, database writes or TomTom changes.
+
+## Distinct full-graph KL journey smoke test — 12 November 2026
+
+- [x] Three route requests completed against all **168,221** imported directed edges in one isolated read-only runner process, covering two distinct OSM-node journey pairs.
+- [x] First (cold) 17 m route: **33,567.9 ms** graph load, **33,636.9 ms** server total.
+- [x] Repeated (warm) 17 m route: **33.1 ms** server total.
+- [x] Distinct (warm) 67 m route: **22.1 ms** server total.
+- [x] [GitHub Actions run 43151980140](https://github.com/Zux12/Mterms2026/actions/runs/43151980140) succeeded for both `test` and `kl-fullgraph` jobs; diagnostic workflow also succeeded.
+- [ ] Independently select and review 20 genuine KL journeys spanning all five required classes.
+- [ ] Verify road access, turn legality, overpasses and TomTom comparisons.
+
+These are imported-road smoke tests, not evidence of legal driving or production navigation readiness. No production merge, database writes or TomTom changes.
