@@ -359,3 +359,49 @@ test('reviewed no-path replies preserve only boolean cache-state diagnostics',as
  })});
  assert.equal(unrelated[0].graphCacheHit,undefined);
 });
+
+const strongSample={
+ ...good,strongConnectivityAvailable:true,strongConnectivityAdvisoryOnly:true,
+ roadLegalityVerified:false,strongNodeCount:8,strongEdgeCount:168221,
+ strongComponentCount:3,strongLargestComponentNodes:6,strongLargestComponentShare:6/8,
+ strongSingletonComponentCount:2,strongSourceComponentCount:2,strongSinkComponentCount:2,
+ strongInternalEdgeCount:168210,strongCrossComponentEdgeCount:11,
+ strongInternalEdgeShare:168210/168221
+};
+test('verified full-graph SCC summary is bounded, scalar and never includes road nodes or private inputs',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,{
+  ...strongSample,untrustedNodeIds:['secret-osm-list'],untrustedMongoUri:'mongodb://secret-url'
+ })});
+ assert.equal(out[0].ok,true);
+ assert.equal(out[0].strongTopologyDiagnosticVerified,true);
+ assert.equal(out[0].strongNodeCount,8);
+ assert.equal(out[0].strongEdgeCount,168221);
+ assert.equal(out[0].strongComponentCount,3);
+ assert.equal(out[0].strongInternalEdgeCount+out[0].strongCrossComponentEdgeCount,168221);
+ const serialized=JSON.stringify(out);
+ assert.ok(!serialized.includes('secret-osm-list'));
+ assert.ok(!serialized.includes('secret-url'));
+ assert.ok(!serialized.includes('startLat'));
+ assert.equal(out[0].roadLegalityVerified,undefined);
+});
+test('inconsistent full-graph SCC summaries fail closed without disqualifying the route itself',async()=>{
+ for(const override of [
+  {strongEdgeCount:168220},
+  {strongCrossComponentEdgeCount:12},
+  {strongLargestComponentShare:0.5},
+  {strongSourceComponentCount:4},
+  {roadLegalityVerified:true},
+  {strongConnectivityAdvisoryOnly:false},
+  {strongNodeCount:0}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...strongSample,...override})});
+  assert.equal(out[0].ok,true);
+  assert.equal(out[0].strongTopologyDiagnosticVerified,undefined);
+  assert.equal(out[0].strongComponentCount,undefined);
+ }
+});
+test('SCC diagnostics are never fabricated when route responses omit graph-wide metrics',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,good)});
+ assert.equal(out[0].ok,true);
+ assert.equal(out[0].strongTopologyDiagnosticVerified,undefined);
+});

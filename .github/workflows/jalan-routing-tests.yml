@@ -82,6 +82,17 @@ jobs:
                r.graphCacheHit!==(i>0))
                throw Error('Full-graph smoke evidence did not meet the expected route contract');
           }
+          // Full-graph SCC counts are advisory connectivity evidence only.
+          // They must be internally consistent and stable across cached runs.
+          const fields=['strongNodeCount','strongEdgeCount','strongComponentCount',
+            'strongLargestComponentNodes','strongSingletonComponentCount',
+            'strongSourceComponentCount','strongSinkComponentCount',
+            'strongInternalEdgeCount','strongCrossComponentEdgeCount'];
+          for(const r of rows){
+            if(r.strongTopologyDiagnosticVerified!==true||r.strongEdgeCount!==168221||
+               fields.some(k=>!Number.isSafeInteger(r[k])||r[k]!==rows[0][k]))
+              throw Error('Full-graph SCC diagnostic missing, invalid or inconsistent');
+          }
           const [cold,warm,alternate]=rows;
           if(!Number.isFinite(warm.graphLoadMs)||warm.graphLoadMs<0)
             throw Error('Missing warm graph load measurement');
@@ -89,6 +100,8 @@ jobs:
           console.log('Cold graph load ms:',cold.graphLoadMs,'cold server total ms:',cold.serverTotalMs);
           console.log('Warm graph load ms:',warm.graphLoadMs,'warm server total ms:',warm.serverTotalMs);
           console.log('Distinct KL route metres:',alternate.distanceMeters,'warm server total ms:',alternate.serverTotalMs);
+          console.log('Imported KL strong components:',cold.strongComponentCount,'of',cold.strongNodeCount,'nodes; cross-component directed edges:',cold.strongCrossComponentEdgeCount);
+          console.log('SCC counts are connectivity diagnostics, not legal-road or route-quality acceptance.');
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
       - name: Remove private local inputs and sanitized evidence

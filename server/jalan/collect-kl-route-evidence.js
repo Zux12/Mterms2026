@@ -89,6 +89,34 @@ function fullGraphReply(body){
 function evidenceNonnegativeNumber(v){return Number.isFinite(v)&&v>=0?v:null;}
 function evidenceCount(v){return Number.isSafeInteger(v)&&v>=0?v:null;}
 function evidenceBoolean(v){return typeof v==='boolean'?v:null;}
+// Preserve bounded graph-wide SCC counts only for real full-graph route
+// responses. These are internal-consistency-checked diagnostics, NOT evidence
+// of legal or safe navigation. Never store raw nodes, edges, URLs or GPS.
+function appendStrongTopology(row,body){
+ const n=body?.strongNodeCount,e=body?.strongEdgeCount,k=body?.strongComponentCount;
+ const largest=body?.strongLargestComponentNodes,one=body?.strongSingletonComponentCount;
+ const sources=body?.strongSourceComponentCount,sinks=body?.strongSinkComponentCount;
+ const inside=body?.strongInternalEdgeCount,cross=body?.strongCrossComponentEdgeCount;
+ const valid=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
+ if(body?.strongConnectivityAvailable!==true||
+    body?.strongConnectivityAdvisoryOnly!==true||
+    body?.roadLegalityVerified!==false||
+    e!==168221||!valid(n,1,2*e)||!valid(k,1,n)||
+    !valid(largest,1,n)||!valid(one,0,k)||
+    !valid(sources,1,k)||!valid(sinks,1,k)||
+    !valid(inside,0,e)||!valid(cross,0,e)||inside+cross!==e||
+    !Number.isFinite(body?.strongLargestComponentShare)||
+    !Number.isFinite(body?.strongInternalEdgeShare)||
+    Math.abs(body.strongLargestComponentShare-largest/n)>1e-10||
+    Math.abs(body.strongInternalEdgeShare-inside/e)>1e-10)return;
+ row.strongTopologyDiagnosticVerified=true;
+ for(const key of ['strongNodeCount','strongEdgeCount','strongComponentCount',
+  'strongLargestComponentNodes','strongSingletonComponentCount',
+  'strongSourceComponentCount','strongSinkComponentCount',
+  'strongInternalEdgeCount','strongCrossComponentEdgeCount']){
+  row[key]=body[key];
+ }
+}
 // Stage timings are advisory only: preserve measured processing costs even for
 // a legitimate directed no-path outcome, without copying URL, GPS or secrets.
 function appendServerTiming(row,body){
@@ -133,6 +161,7 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.geometryMetricsVerified=geometryMatchesJourney(body,c);
     row.geometryContinuous=verifiedGeometry(body)&&row.geometryMetricsVerified;
     row.routeModeVerified=true;
+    appendStrongTopology(row,body);
     row.graphCacheHit=evidenceBoolean(body.graphCacheHit);
     appendServerTiming(row,body);
     row.potentialAccessReviewEdges=evidenceCount(body.potentialAccessReviewEdges);
