@@ -17,7 +17,7 @@ small{color:#556677} @media(max-width:720px){main{display:flex;flex-direction:co
 <main><aside><p>Enter KL coordinates (latitude, longitude) to preview the imported directed road graph. Results are diagnostic, not driving instructions.</p>
 <label for="token">Local preview token</label><input id="token" type="password" autocomplete="off" placeholder="Enter locally configured preview token">\n<label for="start">Start coordinate</label><input id="start" value="3.1390, 101.6869" autocomplete="off">
 <label for="end">Destination coordinate</label><input id="end" value="3.1478, 101.6953" autocomplete="off">
-<button id="route">Preview route</button>
+<button id="check" type="button">Check graph connection</button> <button id="route" type="button">Preview route</button>
 <div id="status" role="status" aria-live="polite">No route requested.</div>
 <p><small>Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
 </aside><div id="map" aria-label="Experimental route map"></div></main>
@@ -34,6 +34,22 @@ function coordinate(id){
   throw Error('Enter valid KL pilot latitude, longitude.');
  return parts;
 }
+document.getElementById('check').addEventListener('click',async()=>{
+ const check=document.getElementById('check');
+ check.disabled=true;status.textContent='Checking isolated KL graph…';
+ try{
+  const token=document.getElementById('token').value;
+  if(!token)throw Error('Enter the local preview token.');
+  const response=await fetch('/api/jalan/kl/health',{headers:{'x-jalan-preview-token':token}});
+  const data=await response.json();
+  if(!response.ok||data.ok!==true||data.readOnly!==true||
+     data.liveRouting!==false||data.graphEdges!==168221)
+   throw Error(data.error||'Graph not ready or unexpected preview configuration');
+  status.textContent='KL graph available: '+data.graphEdges.toLocaleString()+
+   ' directed edges.\nRead-only: YES\nLive routing: NO\nGraph cached: '+(data.graphCached?'YES':'NO');
+ }catch(error){status.textContent='Connection unavailable: '+error.message;}
+ finally{check.disabled=false;}
+});
 button.addEventListener('click',async()=>{
  button.disabled=true;status.textContent='Requesting experimental route…';
  try{
