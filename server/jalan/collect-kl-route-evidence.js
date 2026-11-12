@@ -171,7 +171,9 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
     row.startSnapAmbiguous=evidenceBoolean(body.startSnapAmbiguous);
     row.endSnapAmbiguous=evidenceBoolean(body.endSnapAmbiguous);
-   }else if(res.status===404&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'&&fullGraphReply(body)){
+   }else if(res.status===404&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
+    body.turnRestrictionsEnforced===false&&body.error==='No directed path found'&&fullGraphReply(body)){
     row.responseStatus=404;row.ok=false;row.graphEvidenceVerified=true;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
     // Confirm a recognized experimental no-path response, not just HTTP 404.
