@@ -73,3 +73,16 @@ test('real Atlas unusual records remain excluded from automatic enforcement',()=
  assert.equal(r.allRestrictionsReady,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('verified relation with malformed OSM way or blank via-node identity is blocked',()=>{
+ const bad=[
+  {...relation,applicability:'verified',fromWay:''},
+  {...relation,applicability:'verified',toWay:'not-an-osm-way'},
+  {...relation,applicability:'verified',viaNodes:['  ']}
+ ];
+ const r=classifyTurnEnforcement(bad);
+ assert.equal(r.counts.malformed,3);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
