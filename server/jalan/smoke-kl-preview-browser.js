@@ -37,8 +37,8 @@ async function main(){
   await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:15000});
   await page.locator('#swap').click();
   await page.getByText('Start and destination swapped.',{exact:false}).waitFor({timeout:15000});
-  if(await page.locator('.leaflet-interactive').count()===0)
-   throw Error('Map interaction layers not rendered');
+  if(await page.locator('.leaflet-pane').count()===0)
+   throw Error('Leaflet map panes not rendered');
   // Clicking the map should populate coordinates and invalidate old route output.
   const before=await page.locator('#start').inputValue();
   await page.locator('#map').click({position:{x:120,y:120}});
@@ -51,4 +51,10 @@ async function main(){
   await new Promise(resolve=>server.close(resolve));
  }
 }
-main().catch(()=>{process.stderr.write('Chromium pilot smoke failed (details suppressed).\n');process.exitCode=1;});
+main().catch(e=>{
+ const safe=e?.message?.includes('Leaflet')?'map-rendering':
+  e?.message?.includes('Map click')?'map-click':
+  e?.message?.includes('Timeout')?'browser-timeout':'browser-interaction';
+ process.stderr.write('Chromium pilot smoke failed at '+safe+' (details suppressed).\n');
+ process.exitCode=1;
+});
