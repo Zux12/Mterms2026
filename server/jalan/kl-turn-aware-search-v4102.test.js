@@ -129,3 +129,26 @@ test('only-turn restriction does not affect vehicles arriving from another road'
  assert.deepEqual(r.pathEdgeIds,[incoming.id,shortcut.id]);
  assert.equal(r.distanceMeters,11);
 });
+
+
+test('turn-aware prototype rejects adjacency entries whose origin disagrees with the current node',()=>{
+ // An inconsistent imported edge cannot be accepted as a traversable connection.
+ const inconsistent={...a,from:'different-osm-node'};
+ const badGraph={adj:new Map([['s',[inconsistent]],['v',[banned]]])};
+ assert.throws(()=>searchTurnAware(badGraph,'s','t',[base]),/Invalid graph edge/);
+});
+
+test('turn-aware prototype requires a verifiable OSM way on the initial edge',()=>{
+ // A single-edge path used to bypass the way-identity check entirely.
+ const unnamed=e('anonymous-edge','s','t',12);
+ assert.throws(()=>searchTurnAware(graph([unnamed]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+
+test('turn-aware prototype rejects a finite-edge path whose accumulated cost overflows',()=>{
+ // A rejected numerical overflow must not be misclassified as a legal no-path result.
+ const huge=e('osm-way-777777:0:F','s','v',1e308);
+ const alsoHuge=e('osm-way-888888:0:F','v','t',1e308);
+ assert.throws(()=>searchTurnAware(graph([huge,alsoHuge]),'s','t',[base]),
+  /Invalid accumulated turn-aware route cost/);
+});
