@@ -1,5 +1,6 @@
 name: Jalan routing regression tests
 on:
+  workflow_dispatch:
   push:
     branches: [jalan-v4102-routing-regression-tests]
   pull_request:
