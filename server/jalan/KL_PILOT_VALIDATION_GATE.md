@@ -392,3 +392,13 @@ No production merge/deploy, MongoDB writes or live TomTom changes.
 - [ ] Independent review of source applicability, complex via-way/conditional rules, and 20 KL journeys required before activation.
 
 No database writes, production deploy or live TomTom changes.
+
+## Overlapping turn restriction risk audit — 12 November 2026
+
+- [x] Full Atlas read-only audit of **1,941** v493 turn relations passed in [GitHub Actions run 43181561560](https://github.com/Zux12/Mterms2026/actions/runs/43181561560).
+- [x] Independent flags: **1,941 unverified applicability**, **715 via-way**, **715 missing via-node** (overlapping via-way records), **1 conditional**, **0 exception**, **2 unknown restriction patterns**, **0 multiple via-node**.
+- [x] Both `test` and `kl-fullgraph` jobs and diagnostic workflow passed.
+- [ ] Inspect the two unknown-pattern records and one conditional record; independent flags are descriptive, not authorization to enforce.
+- [ ] Independently validate applicability and route legality before any turn-aware routing activation.
+
+Counts overlap; do not sum the independent flags. No production merge/deploy, database writes or TomTom changes.
