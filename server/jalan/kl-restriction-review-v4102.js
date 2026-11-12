@@ -2,6 +2,8 @@
 // Offline review-evidence gate. A review record never edits Atlas, never
 // changes imported applicability and never authorizes production routing.
 const VALID=new Set(['pending','verified','rejected']);
+// Self-declared metadata cannot independently authenticate a reviewer or prove
+// that a real road restriction exists. Never elevate it to routing approval.
 function assessRestrictionReview(records){
  if(!Array.isArray(records))throw new TypeError('Expected review records');
  const seen=new Set(),results=[];
@@ -22,11 +24,12 @@ function assessRestrictionReview(records){
    r.turnGeometryChecked===true&&r.conditionalRulesChecked===true;
   const accepted=r.status==='verified'&&evidence&&independent&&semantics;
   results.push({restrictionId:r.restrictionId,reviewAccepted:!!accepted,
-   reason:accepted?'review-evidence-complete':'manual-review-incomplete'});
+   independentVerificationEstablished:false,
+   reason:accepted?'self-reported-evidence-complete-external-verification-required':'manual-review-incomplete'});
  }
  return {total:results.length,accepted:results.filter(x=>x.reviewAccepted).length,
   pending:results.filter(x=>!x.reviewAccepted).length,results,
-  atlasRecordsUpdated:false,turnRestrictionsEnforced:false,
+  independentVerificationEstablished:false,atlasRecordsUpdated:false,turnRestrictionsEnforced:false,
   productionRoutingAuthorized:false};
 }
 module.exports={assessRestrictionReview};
