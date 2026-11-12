@@ -323,3 +323,13 @@ These are imported-road smoke tests, not evidence of legal driving or production
 - [ ] Complete 20 independently reviewed real KL journeys.
 
 This is a technical route calculation only, not verified legal-road or production navigation acceptance.
+
+## Four-case full-graph smoke result — 12 November 2026
+
+- [x] Fourth imported-road route candidate calculated successfully: **2,297 m**, warm server total **26.3 ms**.
+- [x] Same isolated read-only run: cold 17 m route **45,835.7 ms**, repeated warm 17 m route **31.3 ms**, distinct warm 67 m route **23.9 ms**.
+- [x] [GitHub Actions run 43153116660](https://github.com/Zux12/Mterms2026/actions/runs/43153116660): full-graph and regression jobs passed.
+- [ ] Test one-way restrictions and grade-separated junctions with independently reviewed OSM ground truth. Existing `potentialTurnRestrictionReviewCount` is advisory only and cannot establish legality.
+- [ ] Obtain 20 independent reviewed real-world KL cases before acceptance.
+
+**Risk:** The 2,297 m route has not been manually inspected for road legality. A fast route is not necessarily a safe or lawful route.
