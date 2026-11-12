@@ -10,6 +10,8 @@ const {router}=require('./kl-segment-v4102');
 const token=process.env.JALAN_PREVIEW_TOKEN;
 const uri=process.env.JALAN_READONLY_MONGODB_URI;
 const host='127.0.0.1';
+if(process.env.JALAN_PREVIEW_HOST&&process.env.JALAN_PREVIEW_HOST!==host)
+ throw Error('KL preview cannot bind to a non-loopback host');
 const port=Number(process.env.JALAN_PREVIEW_PORT||8765);
 function authorized(received){
  if(typeof received!=='string'||typeof token!=='string')return false;
