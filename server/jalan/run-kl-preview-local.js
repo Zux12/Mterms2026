@@ -26,6 +26,8 @@ async function main(){
   throw Error('KL graph count mismatch');
  }
  const app=express();
+ const routeRequests=new Map();
+ const WINDOW_MS=60_000,MAX_ROUTE_REQUESTS_PER_WINDOW=12;
  // Bounded request concurrency prevents repeated full-graph route searches
  // from exhausting the owner-only pilot. No user coordinates are logged.
  let activeRoutes=0;
@@ -40,6 +42,12 @@ async function main(){
  app.use('/api/jalan/kl',(req,res,next)=>{
   if(!authorized(req.get('x-jalan-preview-token')))return res.status(401).json({ok:false,error:'Preview token required'});
   if(req.path==='/route'){
+   const now=Date.now();
+   const key=req.socket.remoteAddress||'local';
+   const recent=(routeRequests.get(key)||[]).filter(t=>now-t<WINDOW_MS);
+   if(recent.length>=MAX_ROUTE_REQUESTS_PER_WINDOW)
+    return res.status(429).json({ok:false,error:'Preview route request limit reached; retry later'});
+   recent.push(now);routeRequests.set(key,recent);
    if(activeRoutes>=MAX_ACTIVE_ROUTES)
     return res.status(429).json({ok:false,error:'Preview route busy; retry later'});
    activeRoutes++;
