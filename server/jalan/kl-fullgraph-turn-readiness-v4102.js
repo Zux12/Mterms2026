@@ -3,6 +3,7 @@
 // Invoke in isolated CI with JALAN_READONLY_MONGODB_URI repository secret.
 const mongoose=require('mongoose');
 const {classifyTurnEnforcement}=require('./kl-turn-enforcement-readiness-v4102');
+const {searchTurnAware}=require('./kl-turn-aware-search-v4102');
 async function main(){
  if(!process.env.JALAN_READONLY_MONGODB_URI)throw Error('Read-only URI not configured');
  try{
@@ -24,8 +25,16 @@ async function main(){
   if(r.allRestrictionsReady||r.turnRestrictionsEnforced!==false||
     r.productionRoutingAuthorized!==false)
    throw Error('Unexpected turn enforcement activation');
+  // Real imported restriction collection is passed to the separate turn-aware
+  // prototype. It MUST fail closed before traversing even an available graph.
+  // This is a full-import safety gate, NOT a successful turn-aware route.
+  const guard=searchTurnAware({adj:new Map()},'5738558701','10800536675',rows);
+  if(guard.ok!==false||guard.reason!=='turn-restrictions-not-fully-verified'||
+     guard.productionRoutingAuthorized!==false||guard.eligibleCount!==0)
+   throw Error('Turn-aware full-import fail-closed gate violated');
   console.log(JSON.stringify({mode:'READ_ONLY_TURN_READINESS',
    graphEdges:edges,turnRelations:count,classification:r.counts,independentFlags:r.independentFlags,
+   fullImportTurnAwareGuard:'blocked-unverified-restrictions',
    allRestrictionsReady:false,turnRestrictionsEnforced:false,
    productionRoutingAuthorized:false},null,2));
  }finally{await mongoose.disconnect();}
