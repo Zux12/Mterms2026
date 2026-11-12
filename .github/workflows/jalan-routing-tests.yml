@@ -104,7 +104,7 @@ jobs:
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
 
   browser-preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
