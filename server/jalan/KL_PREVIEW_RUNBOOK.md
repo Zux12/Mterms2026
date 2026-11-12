@@ -25,7 +25,7 @@ The server binds only to `127.0.0.1`. It is not accessible remotely and must not
 - Preview routes do **not** enforce turn, vehicle-access, permit, or conditional restrictions and are not traffic-aware.
 - Route ETA is illustrative, using a fixed assumed speed; never treat it as a driving ETA.
 - Automated HTTP smoke verifies the API contract, not a real browser's JavaScript rendering.
-- The 20 independently reviewed KL journey acceptance gate remains incomplete.
+- The loopback pilot permits one in-flight route calculation at a time; overlapping requests return HTTP 429. This is a local resource guard, not production-grade distributed rate limiting.\n- The 20 independently reviewed KL journey acceptance gate remains incomplete.
 - Do not connect this preview to production MTERMS2026 or live TomTom routing.
 
 ## Before any external pilot deployment
