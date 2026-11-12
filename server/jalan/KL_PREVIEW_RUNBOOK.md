@@ -49,3 +49,7 @@ Chromium fixture test rejects a preview API response falsely reporting `legalDri
 ## Manual endpoint changes — 12 November 2026
 
 Chromium browser smoke verifies that manually editing a start coordinate invalidates any previously displayed route. A fresh route request is required after endpoint changes. The same invalidation behavior applies to map clicks and endpoint swaps.
+
+## Real Chromium-to-imported-graph integration — 12 November 2026
+
+GitHub Actions run [43242572050](https://github.com/Zux12/Mterms2026/actions/runs/43242572050) passed all four jobs: regression, fixture Chromium browser, real read-only graph Chromium browser, and KL full-graph. The real-browser job launches the isolated loopback preview with a random session token, verifies graph health, and renders the public OSM-node 17 m smoke route through the actual imported graph. It does **not** independently verify legal turn/access restrictions, traffic, GPS navigation, or public deployment.
