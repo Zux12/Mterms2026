@@ -96,6 +96,6 @@ jobs:
           NODE
       - name: Audit complete imported KL turn-restriction readiness (read-only)
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
-      - name: Remove private local inputs and sanitized evidence
+      - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)\n        run: node server/jalan/smoke-kl-preview-local.js\n      - name: Remove private local inputs and sanitized evidence
         if: always()
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
