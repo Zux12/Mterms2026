@@ -203,3 +203,19 @@ test('matching roadId metadata preserves an allowed detour',()=>{
  assert.deepEqual(r.pathEdgeIds,[a.id,detour.id,returnEdge.id]);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('zero-padded incoming OSM way identity cannot evade an enforced turn rule',()=>{
+ const alias={...a,id:'osm-way-01339792254:9:F'};
+ assert.throws(()=>searchTurnAware(graph([alias,banned]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+test('zero-padded outgoing OSM way identity cannot evade an enforced turn rule',()=>{
+ const alias={...banned,id:'osm-way-0607581032:0:F'};
+ assert.throws(()=>searchTurnAware(graph([a,alias]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+test('zero-padded edge segment index is rejected before route acceptance',()=>{
+ const alias={...banned,id:'osm-way-607581032:00:F'};
+ assert.throws(()=>searchTurnAware(graph([a,alias]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
