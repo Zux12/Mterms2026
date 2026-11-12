@@ -422,3 +422,13 @@ No changes to production routing, database records or TomTom.
 - [ ] Review 20 real KL journeys and actual road legality; current engine remains advisory-only.
 
 No production merge/deploy, database writes or TomTom changes.
+
+## Full-import turn-aware prototype fail-closed gate passed — 12 November 2026
+
+- [x] Separate turn-aware shortest-path prototype was invoked with the actual complete imported v493 restriction collection (**1,941 records**) in isolated read-only GitHub Actions.
+- [x] Prototype returned `blocked-unverified-restrictions`; zero imported records eligible, no graph traversal or turn-aware route activated.
+- [x] Both `kl-fullgraph` and `test` jobs and diagnostic workflow passed in [GitHub Actions run 43183221932](https://github.com/Zux12/Mterms2026/actions/runs/43183221932).
+- [ ] Test real full-graph turn-aware routing only after independently verified restriction coverage; never silently ignore unverified, via-way or conditional records.
+- [ ] Complete 20 reviewed KL journeys and TomTom/road-legality checks before production approval.
+
+No production merge/deploy, MongoDB writes or live TomTom changes.
