@@ -81,6 +81,7 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 - Created repository handover to solve cross-chat continuity and prevent repeating previously completed stages.
 - Confirmed from GitHub: backend PR #33 still the most recently updated open JALAN PR at this point, head `852f991e20275b0229c76b9aac694a0efd9b8383`; CI run `43383992182` completed success.
 - Confirmed frontend repo `Zux12/jalan-navigation` exists, `main` latest commit observed `42724ae699fa730f5db86e6f0b5effbe84f23c7f` (2026-11-08 17:13:04 UTC); do not confuse this with later private Heroku pilot development.
+- Confirmed hourly automation `Automation_58b16b1f255481919896294bf0c8d181` is enabled, and UPDATED its prompt to read and maintain this file on meaningful runs (next scheduled 16:00 MYT at time of update).
 - No code, Heroku deployment or MongoDB data touched by this handover update.
 - Next: validate actual current Heroku private pilot/deployed revision; reconcile stacked PRs; obtain full-KL/20-journey acceptance evidence.
 
