@@ -67,3 +67,17 @@ test('private pilot release gate distinguishes new code slug from config-only re
  assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"),
   'deployment secrets remain restricted to the trusted branch');
 });
+
+test('merging routing safeguards cannot automatically deploy the Heroku pilot',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const triggers=yaml.split('permissions:')[0];
+ assert.match(triggers,/on:\s*\n\s*workflow_dispatch:/);
+ assert.doesNotMatch(triggers,/\n\s*push:/,
+  'private pilot deployment must not be triggered by merge or push');
+ assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"),
+  'manual deployment remains locked to trusted branch');
+ assert.ok(yaml.includes('Verify authenticated private pilot after deployed revision'),
+  'manual deployment must retain postdeploy private route verification');
+});
