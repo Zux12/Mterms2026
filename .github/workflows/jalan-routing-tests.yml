@@ -139,3 +139,19 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Chromium against real imported KL graph through isolated loopback server
         run: node server/jalan/smoke-kl-preview-browser.js
+
+  heroku-readonly:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify existing Heroku account and original app without mutations
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/check-heroku-access-readonly.js
