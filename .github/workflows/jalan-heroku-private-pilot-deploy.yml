@@ -103,3 +103,7 @@ jobs:
             process.exitCode=1;
           });
           NODE
+      # The independent trusted-branch smoke job can finish before deployment.
+      # Validate the newly deployed revision, not merely the preceding release.
+      - name: Verify authenticated private pilot after deployed revision
+        run: node server/jalan/smoke-heroku-private-pilot.js
