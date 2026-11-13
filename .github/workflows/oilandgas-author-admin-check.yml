@@ -1,0 +1,30 @@
+name: Check Oil and Gas author admin
+
+on:
+  pull_request:
+    paths:
+      - "server/oilandgas/authors-admin.js"
+      - "server/oilandgas/editor.js"
+      - "server/oilandgas/desk/authors.js"
+      - "server/oilandgas/desk/authors.css"
+      - "server/oilandgas/desk/desk.html"
+      - "scripts/check-oilandgas-author-admin.js"
+      - ".github/workflows/oilandgas-author-admin-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check server/oilandgas/authors-admin.js
+          node --check server/oilandgas/editor.js
+          node --check server/oilandgas/desk/authors.js
+          node --check server/oilandgas/desk/desk.js
+      - name: Verify the editor access boundary and form
+        run: node scripts/check-oilandgas-author-admin.js
