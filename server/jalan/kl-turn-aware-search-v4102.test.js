@@ -398,3 +398,16 @@ test('full-graph validation cannot be bypassed by absent endpoints',()=>{
  assert.throws(()=>searchTurnAware(graph([malformed]),'origin','destination',[base]),
   /Missing OSM way identity/);
 });
+
+test('decimal-form numeric graph junction aliases cannot evade verified via-node turn matching',()=>{
+ const incoming=e('osm-way-1339792254:9:F','2911228074','5757831665.0',10);
+ const banned=e('osm-way-607581032:0:F','5757831665.0','5757831664',10);
+ const relation={...base,viaNodes:['5757831665']};
+ assert.throws(()=>searchTurnAware(graph([incoming,banned]),'2911228074','5757831664',[relation]),
+  /Invalid graph edge/);
+});
+test('scientific-notation route endpoints are rejected rather than accepted as fixture IDs',()=>{
+ const incoming=e('osm-way-1339792254:9:F','5757831665e0','t',10);
+ assert.throws(()=>searchTurnAware(graph([incoming]),'5757831665e0','t',[base]),
+  /Directed adjacency and node IDs required/);
+});
