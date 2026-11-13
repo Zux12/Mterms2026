@@ -52,7 +52,7 @@ jobs:
           cat > "$askpass" <<'SCRIPT'
           #!/bin/sh
           case "$1" in
-            *Username*) printf '\n';;
+            *Username*) printf '%s\n' 'heroku';;
             *Password*) printf '%s\n' "$HEROKU_API_KEY";;
             *) exit 1;;
           esac
