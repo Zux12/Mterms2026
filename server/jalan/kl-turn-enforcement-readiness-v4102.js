@@ -54,4 +54,5 @@ function classifyTurnEnforcement(restrictions){
  return {counts,independentFlags,eligible,allRestrictionsReady:counts.total>0&&counts.verifiedSimple===counts.total,
   turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
 }
-module.exports={classifyTurnEnforcement};
+// Share the same canonical junction-ID contract with the isolated graph search.
+module.exports={classifyTurnEnforcement,canonicalViaNode};
