@@ -94,3 +94,105 @@ test('unsafe numeric via-node identifier is rejected instead of rounded',()=>{
  assert.equal(r.eligible.length,0);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('only_u_turn needs reversal-specific enforcement before it can be activated',()=>{
+ const r=classifyTurnEnforcement([{...relation,applicability:'verified',
+  fromWay:'osm-way-1339792254',toWay:'osm-way-1339792254',restriction:'only_u_turn'}]);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.counts.complex,1);
+ assert.equal(r.independentFlags.unknownRestriction,1);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('unknown restriction labels cannot claim full enforcement coverage',()=>{
+ const r=classifyTurnEnforcement(['no_entry','only_custom_turn'].map(restriction=>
+  ({...relation,applicability:'verified',restriction})));
+ assert.equal(r.counts.complex,2);
+ assert.equal(r.independentFlags.unknownRestriction,2);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+});
+
+test('zero-padded OSM way aliases cannot become verified turn rules',()=>{
+ const aliases=[
+  {...relation,applicability:'verified',fromWay:'osm-way-01339792254'},
+  {...relation,applicability:'verified',toWay:'osm-way-0607581032'},
+  {...relation,applicability:'verified',fromWay:'osm-way-0'}
+ ];
+ const r=classifyTurnEnforcement(aliases);
+ assert.equal(r.counts.malformed,3);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('padded via-node identities never qualify as verified turn restrictions',()=>{
+ const aliases=['5757831665 ',' 5757831665','v ','\t5757831665'];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+});
+test('noncanonical numeric via-node aliases and nonpositive numbers fail closed',()=>{
+ const aliases=['05757831665','0','+5757831665','-1',0,-1];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('canonical numeric and symbolic via-node identities remain eligible for fixtures',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,restrictionId:'fixture-relation',applicability:'verified',viaNodes:['v']}
+ ]);
+ assert.equal(r.counts.verifiedSimple,2);
+ assert.deepEqual(r.eligible.map(x=>x.viaNode),['5757831665','v']);
+ assert.equal(r.allRestrictionsReady,true);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('numeric-looking OSM via-node aliases cannot be treated as symbolic fixture IDs',()=>{
+ const aliases=['5757831665.0','5.757831665e9','0x157','0b101','1_000','.5','NaN','Infinity','123node'];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('verified relations without a traceable nonblank identity fail closed',()=>{
+ const badIds=['',' ',undefined,null,17,'osm-relation-10341546 '];
+ const r=classifyTurnEnforcement(badIds.map(restrictionId=>
+  ({...relation,restrictionId,applicability:'verified'})));
+ assert.equal(r.counts.malformed,badIds.length);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('one verified relation identity cannot count as two independently reviewed turns',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,applicability:'verified',toWay:'osm-way-888888'}
+ ]);
+ assert.equal(r.counts.verifiedSimple,1);
+ assert.equal(r.counts.malformed,1);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('distinct auditable verified relation identities retain eligibility',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,restrictionId:'osm-relation-10341547',applicability:'verified',
+   toWay:'osm-way-888888'}
+ ]);
+ assert.equal(r.counts.verifiedSimple,2);
+ assert.equal(r.counts.malformed,0);
+ assert.equal(r.allRestrictionsReady,true);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
