@@ -53,3 +53,17 @@ test('pilot deployment attributes authenticated smoke to a newer succeeded Herok
  assert.ok(yaml.includes("latest.status==='succeeded'"));
  assert.ok(yaml.includes("github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
 });
+
+test('private pilot release gate distinguishes new code slug from config-only release',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ assert.ok(yaml.includes('slugId:latest.slug.id'),
+  'pre-push baseline must record code slug identity');
+ assert.ok(yaml.includes('latest.slug.id!==base.slugId'),
+  'post-push release must point to a different code slug');
+ assert.ok(yaml.includes("latest.status==='succeeded'"),
+  'changed code release must also have succeeded');
+ assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"),
+  'deployment secrets remain restricted to the trusted branch');
+});
