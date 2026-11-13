@@ -40,6 +40,16 @@ async function main(){
   await page.locator('#end').fill('3.1314573, 101.7038951');
   await page.locator('#route').click();
   await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:15000});
+  if((await page.locator('#trip-distance').innerText())!=='0.02 km')
+   throw Error('Trip dashboard distance did not update');
+  await page.context().grantPermissions(['geolocation'],{origin:'http://127.0.0.1:'+server.address().port});
+  await page.context().setGeolocation({latitude:3.138888,longitude:101.688888,accuracy:12});
+  await page.locator('#gps').click();
+  await page.getByText('GPS position captured once',{exact:false}).waitFor({timeout:15000});
+  if((await page.locator('#start').inputValue())!=='3.138888, 101.688888')
+   throw Error('Explicit GPS action failed to populate start');
+  if((await page.locator('#trip-distance').innerText())!=='—')
+   throw Error('GPS point change did not invalidate old route summary');
   await page.locator('#start').fill('3.130000, 101.700000');
   await page.getByText('Coordinates changed. Preview route to recalculate.',{exact:false}).waitFor({timeout:15000});
   await page.locator('#swap').click();
