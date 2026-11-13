@@ -126,3 +126,30 @@ test('zero-padded OSM way aliases cannot become verified turn rules',()=>{
  assert.equal(r.allRestrictionsReady,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('padded via-node identities never qualify as verified turn restrictions',()=>{
+ const aliases=['5757831665 ',' 5757831665','v ','\t5757831665'];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.allRestrictionsReady,false);
+});
+test('noncanonical numeric via-node aliases and nonpositive numbers fail closed',()=>{
+ const aliases=['05757831665','0','+5757831665','-1',0,-1];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.eligible.length,0);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('canonical numeric and symbolic via-node identities remain eligible for fixtures',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,restrictionId:'fixture-relation',applicability:'verified',viaNodes:['v']}
+ ]);
+ assert.equal(r.counts.verifiedSimple,2);
+ assert.deepEqual(r.eligible.map(x=>x.viaNode),['5757831665','v']);
+ assert.equal(r.allRestrictionsReady,true);
+ assert.equal(r.productionRoutingAuthorized,false);
+});

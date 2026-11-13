@@ -219,3 +219,11 @@ test('zero-padded edge segment index is rejected before route acceptance',()=>{
  assert.throws(()=>searchTurnAware(graph([a,alias]),'s','t',[base]),
   /Missing OSM way identity/);
 });
+
+test('a padded via-node restriction cannot silently authorize a banned direct turn',()=>{
+ const relation={...base,viaNodes:['v '],applicability:'verified'};
+ const r=searchTurnAware(graph([a,banned]),'s','t',[relation]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'turn-restrictions-not-fully-verified');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
