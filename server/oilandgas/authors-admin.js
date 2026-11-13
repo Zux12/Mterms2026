@@ -63,11 +63,9 @@ function createAuthorsRouter(database) {
       }
       const db=database();
       // Only permit editing an author who appears in a published byline.
-      const literal=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
       const docs=await Promise.all(['articles','publications'].map(k=>db.collection(k)
-        .find({status:'published',publication:{$exists:true},
-          'publication.byline':{$regex:literal,$options:'i'}},{projection:{'publication.byline':1}})
-        .limit(100).toArray()));
+        .find({status:'published',publication:{$exists:true}},
+          {projection:{'publication.byline':1}}).toArray()));
       const exists=docs.flat().some(r=>splitAuthors(r.publication?.byline).some(n=>keyOf(n)===id));
       if (!exists) return res.status(404).json({error:'Author was not found in published records.'});
       await db.collection('author_admin_details').updateOne({_id:id},
