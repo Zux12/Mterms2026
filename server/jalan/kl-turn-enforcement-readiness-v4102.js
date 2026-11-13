@@ -15,7 +15,11 @@ const SUPPORTED_SIMPLE_RESTRICTIONS=new Set([
 function canonicalViaNode(n){
  if(typeof n==='number')return Number.isSafeInteger(n)&&n>0;
  if(typeof n!=='string'||!n||n.trim()!==n)return false;
- return !/^[+-]?\d+$/.test(n)||/^[1-9]\d*$/.test(n);
+ // Numeric-looking aliases (decimal, exponent, hex, etc.) must not be treated
+ // as symbolic fixture IDs; only the canonical positive decimal OSM ID is safe.
+ if(/^[+-]?(?:\d|\.\d)/.test(n)||/^(?:NaN|[+-]?Infinity)$/i.test(n))
+  return /^[1-9]\d*$/.test(n);
+ return true;
 }
 function classifyTurnEnforcement(restrictions){
  if(!Array.isArray(restrictions))throw new TypeError('Expected restrictions array');
