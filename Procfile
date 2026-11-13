@@ -1,1 +1,1 @@
-web: node server/jalan/run-kl-preview-railway.js
+web: node server/app.js
