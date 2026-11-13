@@ -1,7 +1,7 @@
 # PROJECT JALAN — MASTER HANDOVER & ENGINEERING LOG
 
 **READ THIS FILE FIRST IN EVERY NEW CHAT OR AUTOMATED DEVELOPMENT RUN.**
-**Updated:** 2026-11-13 (Malaysia time, UTC+08)
+**Updated:** 2026-11-14 (Malaysia time, UTC+08)
 **Owner's priority:** Get an operational, reliable JALAN web navigation app into the owner's hands for testing, then prepare distribution and later Apple App Store work. Avoid repeating completed work.
 
 ## 1. Current position (do not accidentally reset progress)
@@ -83,6 +83,14 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 6. Keep short but information-rich, append new log entries newest first, preserve prior important milestones. Keep all credentials out of GitHub.
 
 ## 8. Latest activity / chronological log (newest first)
+
+### 2026-11-14 ~01:xx MYT — PR #37 rebased by merge onto current trusted KL source; CI not yet evidenced
+- **Read this main handover FIRST** and checked both GitHub repository heads, all open PRs and latest workflow runs. Trusted JALAN branch remains `beb1dc449079104e6724adff65eeb59e04902bbd`; `jalan-navigation` main remains `42724ae699fa730f5db86e6f0b5effbe84f23c7f`. Latest existing authenticated fullgraph regression [43454600352](https://github.com/Zux12/Mterms2026/actions/runs/43454600352) succeeded, and last known manually approved private Heroku release check remains [43445270220](https://github.com/Zux12/Mterms2026/actions/runs/43445270220); **no new live physical Safari or Heroku runtime inspection was possible**.
+- **Meaningful isolated consolidation:** updated existing [draft PR #37](https://github.com/Zux12/Mterms2026/pull/37) with explicit two-parent merge commit [`29379639055d0861e346e2b8f433d90d5ff2d432`](https://github.com/Zux12/Mterms2026/commit/29379639055d0861e346e2b8f433d90d5ff2d432), preserving current trusted branch's #38 access-caution UI and `preloadGraph`, #39/#41 destination-access graph code and manual-only Heroku workflows, without wholesale replacement. Collector/collector tests are unchanged from the previously reviewed draft; ported the missing 404/422 advisory flags and full-v495 422 provenance specifically into the **newer trusted** `kl-segment-v4102.js`, plus three existing no-path assertions. Verified compare trusted..PR #37 is now **5 commits ahead, zero behind, exactly four JALAN-only files changed**. It remains **DRAFT, unmerged and undeployed**.
+- GitHub Actions lookup for the new head immediately after pushing showed **no run yet**; therefore **no new tests are claimed passed**. Only existing CI supports the pre-merge pieces. No secrets, database writes, TomTom routing changes, production Mterms modifications or auto-deployment.
+- **NEXT EXACT STEP:** inspect PR #37 head CI as it arrives, verify combined 200/404/422 response contracts with targeted tests and authenticated read-only KL HTTP (trusted context only, no PR secrets); independently check current Heroku deployed revision and physical iPhone/Safari; obtain signage/stopping/walking eligibility for Leboh Pasar Besar and 20 independent KL legal-road vs TomTom reviews before any routing promotion or Peninsular rollout. Imported turn enforcement remains blocked (0 verified-simple / 1,941 relations), historical engineering estimate **~93%** unchanged.
+
+
 
 ### 2026-11-13 late night MYT — PR #37 consolidation contract review; no code or release change
 - **Started by rereading this handover on `main`**, then audited both repos, PR #37/#41, latest commits, existing trusted Heroku runner/route handler, acceptance runbook, and completed read-only [full-KL CI 43454600352](https://github.com/Zux12/Mterms2026/actions/runs/43454600352): all seven recorded jobs succeeded. Frontend `jalan-navigation` main still `42724ae6`; trusted JALAN backend still `beb1dc44`. Did not rerun previously successful tests. Existing last manually proven private Heroku deployment remains [43445270220](https://github.com/Zux12/Mterms2026/actions/runs/43445270220) at trusted source `524b7102`; current live revision/physical Safari not independently queried. Anonymous external Heroku URL fetch returned a browser-gateway access error, which **does not prove service downtime or HTTP 401**.
