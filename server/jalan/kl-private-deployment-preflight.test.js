@@ -110,3 +110,22 @@ test('private pilot deployment verifies the actual pushed Git SHA against Heroku
  assert.ok(yaml.includes('jalan-expected-heroku-commit"'),
   'temporary expected SHA must be included in cleanup');
 });
+
+test('private Heroku deployment validates authenticated mobile UI only after route smoke',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const release=yml.indexOf('Confirm newer successful Heroku release (read-only)');
+ const http=yml.indexOf('run: node server/jalan/smoke-heroku-private-pilot.js');
+ const install=yml.indexOf('npx playwright install --with-deps chromium');
+ const mobile=yml.indexOf('run: node server/jalan/smoke-heroku-private-mobile.js');
+ assert.ok(release>0&&http>release&&install>http&&mobile>install);
+ assert.ok(yml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
+ const source=fs.readFileSync(path.join(__dirname,'smoke-heroku-private-mobile.js'),'utf8');
+ assert.ok(source.includes('isMobile:true,hasTouch:true'));
+ assert.ok(source.includes('width:390,height:844'));
+ assert.ok(source.includes('origin:origin.origin'),'Basic auth must be scoped to canonical pilot origin');
+ assert.ok(source.includes('EXPERIMENTAL ONLY'));
+ assert.ok(source.includes('Legal driving route verified: NO'));
+ assert.ok(!source.includes('console.log(token)')&&!source.includes('console.log(password)'));
+});
