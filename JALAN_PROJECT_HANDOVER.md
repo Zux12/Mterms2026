@@ -77,6 +77,15 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 
 ## 8. Latest activity / chronological log (newest first)
 
+### 2026-11-13 — Continued review: validated next gate, no redundant reruns
+- Re-read current handover and both repositories; latest JALAN backend remains draft PR #33 (head `852f991e20275b0229c76b9aac694a0efd9b8383`, CI `43383992182` passed). No newer frontend main commit beyond `42724ae699fa730f5db86e6f0b5effbe84f23c7f` was observed. Hourly JALAN automation remains enabled.
+- Examined EXISTING `server/jalan/KL_REAL_ROUTE_ACCEPTANCE_RUNBOOK.md`, `KL_PILOT_VALIDATION_GATE.md`, `KL_ENDPOINT_ROAD_REVIEW_QUEUE.md`, and `.github/workflows/jalan-kl-fullgraph-manual.yml` at PR #33 head. **Do not recreate these runbooks, collector, 20-case gate or six-node queue.** The protected fullgraph workflow is restricted to trusted branch `jalan-v4102-routing-regression-tests`; a skipped PR job must not be counted as a pass. Previously documented real Atlas topology/geometry checks and directed connectivity witnesses are already done and should not be re-run as substitute for 20 actual journeys.
+- Verified GitHub compare `main...PR33`: development diverged by **380 commits ahead / 4 behind** from main, with many experimental files and workflows. This is **not** a safe direct merge or deployment candidate. Reconcile ancestry and production delta first; do not squash blindly.
+- Attempted unauthenticated external availability checks of historical private Heroku pilot URL and GitHub Pages frontend; web tool could not access them, and container network DNS failed. **Uptime/deployment SHA remain UNVERIFIED**; do not interpret connectivity limitations as outage or success. Plugin search found no Heroku connector. No Heroku/Atlas modifications.
+- No code changes, no duplicated offline tests, no deployment. Maintained previously reported **~93%** engineering estimate without claiming new production readiness.
+- **Next executable priority:** inspect Heroku app/release/commit and private pilot browser using legitimately available operator access (not network guesses); use the existing trusted protected workflow for one authenticated full-KL smoke only if its current success has not already been recorded; begin independent 20-case road reviews with real evidentiary inputs and TomTom comparison. Record precise results in existing runbooks and this file. If deployment access unavailable, focus on safe PR ancestry/release-delta review; do not manufacture acceptance.
+
+
 ### 2026-11-13 — Master handover documentation
 - Created repository handover to solve cross-chat continuity and prevent repeating previously completed stages.
 - Confirmed from GitHub: backend PR #33 still the most recently updated open JALAN PR at this point, head `852f991e20275b0229c76b9aac694a0efd9b8383`; CI run `43383992182` completed success.
