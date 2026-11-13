@@ -37,7 +37,8 @@ jobs:
       - name: Verify narrowly scoped experimental entrypoint
         shell: bash
         run: |
-          test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
+          # The GitHub branch must retain the production-safe entrypoint.
+          test "$(cat Procfile)" = "web: node server/app.js"
           node --check server/jalan/run-kl-preview-railway.js
           node --check server/jalan/configure-heroku-private-pilot.js
           test -n "$HEROKU_API_KEY"
@@ -48,6 +49,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Override the Heroku entrypoint only inside this disposable runner.
+          # Never commit the pilot Procfile back to GitHub or change MTERMS2026.
+          printf '%s\\n' 'web: node server/jalan/run-kl-preview-railway.js' > Procfile
+          test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
+          git add -- Procfile
+          git -c user.name='JALAN Pilot CI' -c user.email='jalan-pilot-ci@users.noreply.github.com' commit -m 'Heroku-only: isolated KL pilot entrypoint'
           askpass="$RUNNER_TEMP/jalan-heroku-askpass.sh"
           cat > "$askpass" <<'SCRIPT'
           #!/bin/sh
