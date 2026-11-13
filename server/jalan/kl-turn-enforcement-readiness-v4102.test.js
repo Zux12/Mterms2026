@@ -153,3 +153,13 @@ test('canonical numeric and symbolic via-node identities remain eligible for fix
  assert.equal(r.allRestrictionsReady,true);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('numeric-looking OSM via-node aliases cannot be treated as symbolic fixture IDs',()=>{
+ const aliases=['5757831665.0','5.757831665e9','0x157','0b101','1_000','.5','NaN','Infinity','123node'];
+ const r=classifyTurnEnforcement(aliases.map(viaNode=>
+  ({...relation,applicability:'verified',viaNodes:[viaNode]})));
+ assert.equal(r.counts.malformed,aliases.length);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
