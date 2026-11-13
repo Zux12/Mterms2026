@@ -21,11 +21,17 @@ function accessCaution(e){return [e.access,e.vehicle,e.motorVehicle].some(v=>ACC
 function pilot(p){return p.every(Number.isFinite)&&p[0]>=2.5&&p[0]<=3.8&&p[1]>=100.8&&p[1]<=102.3;}
 class Heap{constructor(){this.a=[];}push(x){const a=this.a;let i=a.length;a.push(x);while(i){const j=(i-1)>>1;if(a[j].d<=x.d)break;a[i]=a[j];i=j;}a[i]=x;}pop(){const a=this.a,first=a[0],last=a.pop();if(a.length){let i=0;while(2*i+1<a.length){let j=2*i+1;if(j+1<a.length&&a[j+1].d<a[j].d)j++;if(a[j].d>=last.d)break;a[i]=a[j];i=j;}a[i]=last;}return first;}}
 async function load(){if(graph)return graph;if(loading)return loading;loading=(async()=>{const col=mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL);if(await col.countDocuments()!==COUNT)throw Error('Graph count mismatch');const adj=new Map(),edges=[],accessMetadata=new Map(),edgeIds=createEdgeIdGuard();for await(const e of col.find({},{projection:{edgeId:1,fromNode:1,toNode:1,coordinates:1,access:1,vehicle:1,motorVehicle:1}}).batchSize(1000)){if(!e.edgeId||!e.fromNode||!e.toNode||!Array.isArray(e.coordinates)||e.coordinates.length!==2)throw Error('Invalid edge');edgeIds.record(e.edgeId);const a=[e.coordinates[0][1],e.coordinates[0][0]],b=[e.coordinates[1][1],e.coordinates[1][0]];if(!a.every(Number.isFinite)||!b.every(Number.isFinite))throw Error('Invalid geometry');const edge={id:e.edgeId,from:String(e.fromNode),to:String(e.toNode),a,b,len:distance(a,b),potentialAccessCaution:accessCaution(e)};
-if(edge.potentialAccessCaution)accessMetadata.set(edge.id,{
- access:ACCESS_CAUTION.has(e.access)?e.access:null,
- vehicle:ACCESS_CAUTION.has(e.vehicle)?e.vehicle:null,
- motorVehicle:ACCESS_CAUTION.has(e.motorVehicle)?e.motorVehicle:null
-});
+if(edge.potentialAccessCaution){
+ const flaggedTag=v=>{
+  const tag=String(v||'').toLowerCase();
+  return ACCESS_CAUTION.has(tag)?tag:null;
+ };
+ accessMetadata.set(edge.id,{
+  access:flaggedTag(e.access),
+  vehicle:flaggedTag(e.vehicle),
+  motorVehicle:flaggedTag(e.motorVehicle)
+ });
+}
 edges.push(edge);if(!adj.has(edge.from))adj.set(edge.from,[]);adj.get(edge.from).push(edge);}if(edges.length!==COUNT||edgeIds.checked!==COUNT)throw Error('Graph changed');
 // Advisory-only import; a broken or incomplete restriction collection must
 // never produce a misleading zero-warning result or make preview routing fail.
