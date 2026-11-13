@@ -39,7 +39,7 @@ async function main(){
   res.set('X-Content-Type-Options','nosniff');
   res.set('Referrer-Policy','no-referrer');
   res.set('X-Frame-Options','DENY');
-  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none';");
+  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none';");
   next();
  });
  // Railway health probe reveals no route, DB fields, or authentication state.
