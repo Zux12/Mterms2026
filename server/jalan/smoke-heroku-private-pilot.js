@@ -39,6 +39,18 @@ async function main(){
   health.liveRouting!==false)
   throw Error('Read-only imported graph health mismatch');
  console.log('Private JALAN authenticated page and full-graph health verified.');
+ // Graph import and topology audits can exceed Heroku's 30-second HTTP deadline.
+ // Poll the non-mutating health endpoint until startup warmup has completed.
+ let ready=health.graphCached===true;
+ for(let i=0;!ready&&i<24;i++){
+  await new Promise(resolve=>setTimeout(resolve,8000));
+  const check=await (await request('/api/jalan/kl/health')).json();
+  if(check.ok!==true||check.graphEdges!==168221||check.readOnly!==true)
+   throw Error('Graph health changed during warmup');
+  ready=check.graphCached===true;
+ }
+ if(!ready)throw Error('Private KL graph preloading did not complete');
+ console.log('Heroku KL road graph cache is warm and ready for bounded route requests.');
  const route='/api/jalan/kl/route?startLat=3.1315707&startLng=101.7038508&endLat=3.1314573&endLng=101.7038951';
  const response=await (await request(route,120000)).json();
  if(response.ok!==true||response.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||
