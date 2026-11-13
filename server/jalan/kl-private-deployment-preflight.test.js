@@ -32,8 +32,8 @@ test('private Heroku deployment enforces post-deployment authenticated smoke',()
  assert.ok(push>0,'Heroku deployment command must exist');
  assert.ok(anonymous>push,'anonymous access must be blocked after deployment');
  assert.ok(authenticated>anonymous,'authenticated verification must follow deployment and privacy probe');
- assert.match(yaml.slice(authenticated),/run: node server\\/jalan\\/smoke-heroku-private-pilot\\.js/,
-  'run the existing read-only authenticated route and health smoke post-deploy');
- assert.match(yaml,/if: github\\.ref == 'refs\\/heads\\/jalan-v4102-routing-regression-tests'/,
-  'deployment must remain gated to the established trusted branch');
+ assert.ok(yaml.slice(authenticated).includes('run: node server/jalan/smoke-heroku-private-pilot.js'),
+  'run existing read-only authenticated route and health smoke post-deploy');
+ assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"),
+  'deployment must remain gated to established trusted branch');
 });
