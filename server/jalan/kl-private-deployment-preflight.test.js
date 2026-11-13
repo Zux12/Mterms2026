@@ -37,3 +37,19 @@ test('private Heroku deployment enforces post-deployment authenticated smoke',()
  assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"),
   'deployment must remain gated to established trusted branch');
 });
+
+test('pilot deployment attributes authenticated smoke to a newer succeeded Heroku release',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const before=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main');
+ const privacy=yaml.indexOf('Verify canonical private pilot URL rejects anonymous visitors');
+ const verify=yaml.indexOf('Confirm newer successful Heroku release (read-only)');
+ const auth=yaml.indexOf('Verify authenticated private pilot after deployed revision');
+ assert.ok(before>0&&before<push);
+ assert.ok(privacy>push&&verify>privacy&&auth>verify);
+ assert.ok(yaml.includes('latest.version>base.version&&latest.id!==base.id'));
+ assert.ok(yaml.includes("latest.status==='succeeded'"));
+ assert.ok(yaml.includes("github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
+});
