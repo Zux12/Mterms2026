@@ -81,7 +81,42 @@ async function main(){
   if((await page.locator('#status').innerText()).includes('Legal driving route verified: NO'))
    throw Error('Unsafe route rendered');
   if(errors.length)throw Error('Browser script error');
-  process.stdout.write('Chromium pilot browser interactions passed against local fixture API.\n');
+  // Exercise the owner's narrow-screen controls in a touch-enabled mobile
+  // Chromium context. These are fixture checks, not live-device acceptance.
+  const mobile=await browser.newPage({viewport:{width:390,height:844},
+   deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const mobileErrors=[];
+  mobile.on('pageerror',e=>mobileErrors.push(e.message));
+  await mobile.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
+  await mobile.locator('.leaflet-container').waitFor({timeout:15000});
+  if(!(await mobile.locator('#gps-note').innerText()).includes('GPS is off.'))
+   throw Error('Mobile GPS opt-in notice missing before location action');
+  const layout=await mobile.evaluate(()=>{
+   const map=document.getElementById('map').getBoundingClientRect();
+   return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
+    mapWidth:map.width,mapHeight:map.height};
+  });
+  if(layout.scrollWidth>layout.width+2||layout.mapWidth<250||layout.mapHeight<200)
+   throw Error('Mobile viewport overflows or map has unusable dimensions');
+  await mobile.locator('#token').fill('browser-fixture-token');
+  await mobile.locator('#start').fill('3.1315707, 101.7038508');
+  await mobile.locator('#end').fill('3.1314573, 101.7038951');
+  await mobile.locator('#route').click();
+  await mobile.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:15000});
+  if((await mobile.locator('#trip-distance').innerText())!=='0.02 km')
+   throw Error('Mobile route dashboard failed to update');
+  await mobile.locator('#center').click();
+  if((await mobile.locator('.leaflet-overlay-pane path').count())===0)
+   throw Error('Mobile fit-route map overlay not rendered');
+  await mobile.context().grantPermissions(['geolocation'],
+   {origin:'http://127.0.0.1:'+server.address().port});
+  await mobile.context().setGeolocation({latitude:3.138888,longitude:101.688888,accuracy:12});
+  await mobile.locator('#gps').click();
+  await mobile.getByText('GPS position captured once',{exact:false}).waitFor({timeout:15000});
+  if((await mobile.locator('#trip-distance').innerText())!=='—')
+   throw Error('Mobile explicit GPS action did not invalidate stale route');
+  if(mobileErrors.length)throw Error('Mobile browser script error');
+  process.stdout.write('Chromium desktop and touch-mobile pilot interactions passed against local fixture API.\n');
  }finally{
   if(browser)await browser.close();
   await new Promise(resolve=>server.close(resolve));
