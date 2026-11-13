@@ -38,6 +38,26 @@ class MinQueue {
   return first;
  }
 }
+// Preflight the entire supplied graph before certifying any turn-compliant route.
+// A reused edge ID would collapse distinct edge-state Dijkstra keys; inspecting
+// only the winning path can miss a collision in a later/unreachable bucket.
+function validateDirectedGraph(g){
+ const edgeIds=new Set();
+ for(const [node,edges] of g.adj){
+  if(typeof node!=='string'||!canonicalViaNode(node)||!Array.isArray(edges))
+   throw Error('Invalid graph adjacency');
+  for(const edge of edges){
+   if(!edge||typeof edge.id!=='string'||!edge.id.trim()||
+      typeof edge.from!=='string'||edge.from!==node||!canonicalViaNode(edge.from)||
+      typeof edge.to!=='string'||!canonicalViaNode(edge.to)||
+      !Number.isFinite(edge.len)||edge.len<0)
+    throw Error('Invalid graph edge');
+   verifiedWayOf(edge);
+   if(edgeIds.has(edge.id))throw Error('Duplicate graph edge identity');
+   edgeIds.add(edge.id);
+  }
+ }
+}
 function searchTurnAware(g,startNode,endNode,restrictions){
  if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string'||
     !canonicalViaNode(startNode)||!canonicalViaNode(endNode))
@@ -48,6 +68,7 @@ function searchTurnAware(g,startNode,endNode,restrictions){
  const readiness=classifyTurnEnforcement(restrictions);
  if(!readiness.allRestrictionsReady)return {ok:false,reason:'turn-restrictions-not-fully-verified',
   eligibleCount:readiness.eligible.length,counts:readiness.counts,productionRoutingAuthorized:false};
+ validateDirectedGraph(g);
  if(startNode===endNode)return {ok:true,distanceMeters:0,pathEdgeIds:[],visited:0,
   turnRestrictionsEnforced:true,productionRoutingAuthorized:false};
  const rules=new Map();
