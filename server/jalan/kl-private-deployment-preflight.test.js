@@ -94,3 +94,19 @@ test('trusted routing regression cannot automatically provision Heroku pilot',()
  assert.match(yaml,/^  heroku-runtime:/m);
  assert.match(yaml,/^  heroku-authenticated-pilot:/m);
 });
+
+test('private pilot deployment verifies the actual pushed Git SHA against Heroku slug metadata',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const commit=yaml.indexOf("git -c user.name='JALAN Pilot CI'");
+ const expected=yaml.indexOf('git rev-parse HEAD > "$RUNNER_TEMP/jalan-expected-heroku-commit"');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main');
+ const metadata=yaml.indexOf("'/slugs/'");
+ const auth=yaml.indexOf('Verify authenticated private pilot after deployed revision');
+ assert.ok(commit>0&&expected>commit&&push>expected);
+ assert.ok(metadata>push&&auth>metadata,'slug provenance must precede authenticated route smoke');
+ assert.ok(yaml.includes('slug.commit!==expected'),'mismatch must fail closed');
+ assert.ok(yaml.includes('jalan-expected-heroku-commit"'),
+  'temporary expected SHA must be included in cleanup');
+});
