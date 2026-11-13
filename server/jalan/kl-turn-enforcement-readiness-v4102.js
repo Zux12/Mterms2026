@@ -8,6 +8,15 @@ const SUPPORTED_SIMPLE_RESTRICTIONS=new Set([
  'no_left_turn','no_right_turn','no_straight_on','no_u_turn',
  'only_left_turn','only_right_turn','only_straight_on'
 ]);
+// A verified restriction must refer to the exact graph junction identity.
+// Numeric OSM IDs must be positive and canonical; padded/sign-prefixed aliases
+// or whitespace would silently miss the corresponding directed graph node.
+// Symbolic fixture IDs (such as 'v') remain supported for isolated tests.
+function canonicalViaNode(n){
+ if(typeof n==='number')return Number.isSafeInteger(n)&&n>0;
+ if(typeof n!=='string'||!n||n.trim()!==n)return false;
+ return !/^[+-]?\d+$/.test(n)||/^[1-9]\d*$/.test(n);
+}
 function classifyTurnEnforcement(restrictions){
  if(!Array.isArray(restrictions))throw new TypeError('Expected restrictions array');
  const counts={total:restrictions.length,verifiedSimple:0,unverified:0,conditionalOrExcept:0,complex:0,malformed:0};
@@ -26,7 +35,7 @@ function classifyTurnEnforcement(restrictions){
   if(!r||typeof r!=='object'||typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
     typeof r.restriction!=='string'||!Array.isArray(r.viaNodes)||!Array.isArray(r.viaWays)||
     !/^osm-way-[1-9]\d*$/.test(r.fromWay)||!/^osm-way-[1-9]\d*$/.test(r.toWay)||
-    r.viaNodes.some(n=>(typeof n!=='string'&& !Number.isSafeInteger(n))||String(n).trim()==='')){
+    r.viaNodes.some(n=>!canonicalViaNode(n))){
    counts.malformed++;continue;
   }
   // Verified restrictions must identify one nonempty via-node; fixtures
