@@ -160,22 +160,8 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: node server/jalan/check-heroku-access-readonly.js
 
-  heroku-provision-pilot:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
-    runs-on: ubuntu-latest
-    timeout-minutes: 4
-    needs: heroku-readonly
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Create isolated empty Heroku pilot app (no deploy)
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: node server/jalan/provision-heroku-pilot.js
+  # Existing Heroku pilot was provisioned previously. Test workflows must be
+  # read-only; never re-provision an app automatically on routine branch pushes.
 
   heroku-runtime:
     if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
