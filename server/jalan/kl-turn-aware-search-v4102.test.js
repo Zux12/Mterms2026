@@ -78,14 +78,13 @@ test('no-u-turn allows forward continuation on same OSM way but blocks reversal'
  assert.deepEqual(result.pathEdgeIds,[incoming.id,forward.id]);
  assert.equal(result.productionRoutingAuthorized,false);
 });
-test('no-u-turn prohibits immediate reverse transition at restricted junction',()=>{
- const incoming=e('osm-way-1339792254:0:F','s','v',10);
- const reverse=e('osm-way-1339792254:0:R','v','s',10);
- const restriction={...base,toWay:base.fromWay,restriction:'no_u_turn'};
- // With a different start, the shortest return to s must not reverse at v.
- const result=searchTurnAware(graph([incoming,reverse]),'s','missing',[restriction]);
+test('no-u-turn prohibits an otherwise reachable reversal-dependent exit',()=>{
+ // The exit is reachable only if a banned U-turn is allowed; an absent
+ // destination would not test the restriction at all.
+ const result=onlyTurnReversalTrap('no_u_turn');
  assert.equal(result.ok,false);
  assert.equal(result.reason,'no-turn-compliant-path');
+ assert.equal(result.productionRoutingAuthorized,false);
 });
 
 test('turn restrictions apply only to matching incoming OSM way at the junction',()=>{
@@ -363,4 +362,39 @@ test('source-only junction with an outgoing directed edge remains valid for zero
  assert.deepEqual(r.pathEdgeIds,[]);
  assert.equal(r.turnRestrictionsEnforced,false);
  assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('sink-only origin is missing outgoing road coverage, not a turn-rule failure',()=>{
+ const originIncoming=e('osm-way-700001:0:F','elsewhere','origin',4);
+ const destinationIncoming=e('osm-way-700002:0:F','elsewhere2','destination',4);
+ const r=searchTurnAware(graph([originIncoming,destinationIncoming]),
+  'origin','destination',[base]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'start-has-no-outgoing-directed-road-edge');
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('source-only destination is missing incoming road coverage, not a turn-rule failure',()=>{
+ const startOutgoing=e('osm-way-700003:0:F','origin','between',4);
+ const destinationOutgoing=e('osm-way-700004:0:F','destination','elsewhere',4);
+ const r=searchTurnAware(graph([startOutgoing,destinationOutgoing]),
+  'origin','destination',[base]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'end-has-no-incoming-directed-road-edge');
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('disconnected but incident endpoints retain explicit no-compliant-path result',()=>{
+ const outgoing=e('osm-way-700005:0:F','origin','left',4);
+ const incoming=e('osm-way-700006:0:F','right','destination',4);
+ const r=searchTurnAware(graph([outgoing,incoming]),
+  'origin','destination',[base]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'no-turn-compliant-path');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('full-graph validation cannot be bypassed by absent endpoints',()=>{
+ const malformed=e('osm-way-0700007:0:F','unrelated','elsewhere',5);
+ assert.throws(()=>searchTurnAware(graph([malformed]),'origin','destination',[base]),
+  /Missing OSM way identity/);
 });
