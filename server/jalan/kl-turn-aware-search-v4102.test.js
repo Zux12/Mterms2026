@@ -420,3 +420,14 @@ test('duplicate verified restriction identity cannot authorize a route',()=>{
  assert.equal(r.reason,'turn-restrictions-not-fully-verified');
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+// Denied readiness must never be reported as an enforced turn check.
+test('incomplete verified restriction coverage explicitly reports no turn enforcement',()=>{
+ const conflicting={...base,toWay:'osm-way-999991'};
+ const r=searchTurnAware(graph([a,banned,detour,returnEdge]),'s','t',
+  [base,conflicting]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'turn-restrictions-not-fully-verified');
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
