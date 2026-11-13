@@ -6,6 +6,12 @@ name: JALAN private Heroku pilot deployment
 # only on the designated trusted JALAN branch.
 on:
   workflow_dispatch:
+    inputs:
+      validation_only:
+        description: 'Validate existing private pilot without redeploying'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
