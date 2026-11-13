@@ -78,6 +78,16 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 
 ## 8. Latest activity / chronological log (newest first)
 
+### 2026-11-13 — Prevent automatic Heroku provisioning during trusted routing CI (draft PR #34)
+- Checked newest master handover, open draft PR #34/#35 and enabled hourly automation; did not re-run prior full-KL, pilot deploy or route tests.
+- **Identified and closed a second branch-push side effect:** the trusted `.github/workflows/jalan-routing-tests.yml` still had a `heroku-provision-pilot` job that called `server/jalan/provision-heroku-pilot.js` on routine trusted-branch pushes. Manual-only deployment gating in PR #34 did not prevent this provisioning action on merge.
+- On the EXISTING isolated draft [PR #34](https://github.com/Zux12/Mterms2026/pull/34), **removed only the auto-provision job from the routing regression workflow**. Kept existing `heroku-readonly`, `heroku-runtime`, `heroku-authenticated-pilot`, browser preview and trusted-only fullgraph jobs. The historical pilot already exists; provisioning script not deleted and no runtime changes made.
+- Added one targeted regression to `server/jalan/kl-private-deployment-preflight.test.js` proving regression CI cannot invoke provisioning while retaining read-only Heroku verification. Commits `7f15667826b9e6a49b5c10a60e6e622f1058fe54`, `9301c609d51a54ae38d790f7ab64aa8a15f74df8`.
+- GitHub Actions [run 43400721308](https://github.com/Zux12/Mterms2026/actions/runs/43400721308) began; targeted `kl-private-deployment-preflight.test.js` step **PASSED**, full `test` and `browser-preview` jobs **in progress at time of log**. Credentialed graph/Heroku tests skipped on untrusted draft as designed. **Do not claim final CI success until inspected.**
+- PR #35 still separate draft for safe default-branch workflow registration; no PR merged, no Heroku deployment, no MongoDB writes, no production TomTom change, and original Mterms unchanged. Baseline historical engineering ~93% unchanged.
+- **Next:** confirm run 43400721308 final status; review PR #35 and #34 release sequencing/security and actual Heroku release only after controlled trusted manual process; obtain 20 independently reviewed real-road KL cases with TomTom evidence. Do not create more duplicate workflows or automatically merge/deploy.
+
+
 ### 2026-11-13 — Manual deployment workflow registration blocker resolved in draft PR #35 (not merged)
 - Re-read latest handover, PR #34 and hourly task; historical ~93% engineering estimate unchanged. Did NOT repeat passed route, browser, Heroku, or graph checks.
 - **GitHub documentation check**: `workflow_dispatch` workflow must exist on repository **default branch** before normal manual dispatch can be triggered, even when selecting a different branch. The manually gated Heroku workflow being developed in PR #34 exists only on the trusted experimental lineage, **not on `main`**. Therefore PR #34's manual-only release trigger alone would not offer a usable Run workflow option. GitHub docs: https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow
