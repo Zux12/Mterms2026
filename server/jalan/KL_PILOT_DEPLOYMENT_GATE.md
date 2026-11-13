@@ -32,3 +32,7 @@ Next engineering milestone: create an **isolated, private test deployment** only
 ## CI milestone — 12 November 2026
 
 Real Chromium against the read-only imported KL graph has passed for both the short public-node route and a longer corridor route (Actions run 43244573738). This validates a narrow browser-to-backend flow only. Public deployment remains on hold because authentication, operational isolation, legal access and independent journey acceptance have not been demonstrated in an externally reachable environment.
+
+## Automated private deployment preflight
+
+Run `node server/jalan/kl-private-deployment-preflight.js /path/to/private-checklist.json` with a locally maintained checklist. The preflight fails closed (exit 2) if any declared security/isolation gate is absent. Its checks are **self-declared configuration assertions**; they are not independent infrastructure verification. Never put secrets, private hostnames, credentials, or private journey coordinates into the checklist or repository. A passing result never authorizes public driving directions or a production deployment.
