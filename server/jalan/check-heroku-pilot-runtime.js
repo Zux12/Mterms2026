@@ -22,7 +22,7 @@ async function main(){
  console.log('Formation: '+JSON.stringify(Array.isArray(formations)?formations.map(x=>({type:x.type,quantity:x.quantity,size:x.size})):[]));
  console.log('Dynos: '+JSON.stringify(Array.isArray(dynos)?dynos.map(x=>({type:x.type,state:x.state})):[]));
  const canonical=new URL(app.web_url);
- if(canonical.protocol!=='https:'||!/^[a-z0-9-]+\\.herokuapp\\.com$/.test(canonical.hostname))
+ if(canonical.protocol!=='https:'||!/^[a-z0-9-]+\.herokuapp\.com$/.test(canonical.hostname))
   throw Error('Unexpected Heroku app canonical URL');
  console.log('Canonical pilot URL: '+canonical.origin);
  const result=await fetch(canonical.origin+'/',{
