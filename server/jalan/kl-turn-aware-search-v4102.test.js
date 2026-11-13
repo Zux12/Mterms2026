@@ -64,6 +64,7 @@ test('same-node route with verified rules is zero length and not production appr
  assert.equal(r.ok,true);
  assert.deepEqual(r.pathEdgeIds,[]);
  assert.equal(r.distanceMeters,0);
+ assert.equal(r.turnRestrictionsEnforced,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
 
@@ -326,5 +327,40 @@ test('distinct segment identities of the same OSM way remain valid directed edge
  assert.equal(r.ok,true);
  assert.equal(r.distanceMeters,5);
  assert.deepEqual(r.pathEdgeIds,[first.id,second.id]);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('empty directed graph cannot certify a zero-hop road route',()=>{
+ const r=searchTurnAware({adj:new Map()},'s','s',[base]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'node-has-no-directed-road-edge');
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('isolated adjacency bucket cannot masquerade as road incidence',()=>{
+ const unrelated=e('osm-way-999999:0:F','other','far',3);
+ const g=graph([unrelated]);
+ g.adj.set('orphan',[]);
+ const r=searchTurnAware(g,'orphan','orphan',[base]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'node-has-no-directed-road-edge');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('sink-only node with an incoming directed edge remains valid for zero-hop',()=>{
+ const r=searchTurnAware(graph([e('osm-way-999999:0:F','s','sink',2)]),
+  'sink','sink',[base]);
+ assert.equal(r.ok,true);
+ assert.equal(r.distanceMeters,0);
+ assert.deepEqual(r.pathEdgeIds,[]);
+ assert.equal(r.turnRestrictionsEnforced,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('source-only junction with an outgoing directed edge remains valid for zero-hop',()=>{
+ const r=searchTurnAware(graph([e('osm-way-999999:0:F','source','t',2)]),
+  'source','source',[base]);
+ assert.equal(r.ok,true);
+ assert.equal(r.distanceMeters,0);
+ assert.deepEqual(r.pathEdgeIds,[]);
+ assert.equal(r.turnRestrictionsEnforced,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
