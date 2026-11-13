@@ -90,7 +90,11 @@ function searchTurnAware(g,startNode,endNode,restrictions){
     // verified U-turn exception. Only same-way forward continuation qualifies.
     if(r.restriction.startsWith('no_')&&toWay===r.toWay&&
        !forwardContinuation)forbidden=true;
-    if(r.restriction.startsWith('only_')&&toWay!==r.toWay)forbidden=true;
+    // A matching OSM way is not enough for an only-turn rule: the reverse
+    // directed edge can carry the same way identity but represents a U-turn.
+    // None of the currently supported only_* types authorizes reversal.
+    if(r.restriction.startsWith('only_')&&
+       (toWay!==r.toWay||e.to===cur.prev.from))forbidden=true;
    }
    if(forbidden)continue;
    const key=JSON.stringify([e.to,e.id]),nd=cur.cost+e.len;
