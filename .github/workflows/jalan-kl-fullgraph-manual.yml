@@ -9,6 +9,8 @@ permissions:
   contents: read
 jobs:
   kl-fullgraph:
+    # Credentialed job is limited to the established trusted validation branch.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
