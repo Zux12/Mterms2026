@@ -81,3 +81,16 @@ test('merging routing safeguards cannot automatically deploy the Heroku pilot',(
  assert.ok(yaml.includes('Verify authenticated private pilot after deployed revision'),
   'manual deployment must retain postdeploy private route verification');
 });
+
+test('trusted routing regression cannot automatically provision Heroku pilot',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-routing-tests.yml'),'utf8');
+ assert.doesNotMatch(yaml,/^  heroku-provision-pilot:/m,
+  'routing regression must not run a mutating provisioning job');
+ assert.doesNotMatch(yaml,/run: node server\/jalan\/provision-heroku-pilot\.js/,
+  'existing pilot must not be re-provisioned by test workflow');
+ assert.match(yaml,/^  heroku-readonly:/m);
+ assert.match(yaml,/^  heroku-runtime:/m);
+ assert.match(yaml,/^  heroku-authenticated-pilot:/m);
+});
