@@ -20,7 +20,7 @@ async function main(){
   if(!source||!target||source.potentialAccessCaution||
      !target.potentialAccessCaution)throw Error('Expected public OSM graph fixture changed');
   const start=source.a,dest=target.b;
-  const r=compareDestinationAccess(g,start,dest,{maxWalkMeters:150,maxCandidates:8});
+  const r=compareDestinationAccess(g,start,dest,{maxWalkMeters:150,maxCandidates:16,maxPerWay:2});
   if(!r.ok||!r.baseline.found||r.baseline.accessCautionEdges<1||
      r.productionRoutingAuthorized!==false||r.routeLegalityVerified!==false||
      r.reviewedCandidates<1)

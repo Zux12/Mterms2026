@@ -18,11 +18,12 @@ function filteredGraph(g){
  }
  return {edges,adj,turnRestrictions:g.turnRestrictions??null};
 }
-function candidateSnaps(g,destination,{maxWalkMeters=150,maxCandidates=8}={}){
+function candidateSnaps(g,destination,{maxWalkMeters=150,maxCandidates=16,maxPerWay=2}={}){
  if(!Array.isArray(destination)||destination.length!==2||
     !destination.every(Number.isFinite)||maxWalkMeters<=0||
     maxWalkMeters>200||!Number.isSafeInteger(maxCandidates)||maxCandidates<1||
-    maxCandidates>32)throw new TypeError('Invalid bounded destination review');
+    maxCandidates>32||!Number.isSafeInteger(maxPerWay)||maxPerWay<1||maxPerWay>4)
+  throw new TypeError('Invalid bounded destination review');
  const rows=[];
  for(const e of g.edges){
   const snap=project(destination,e.a,e.b);
@@ -31,12 +32,16 @@ function candidateSnaps(g,destination,{maxWalkMeters=150,maxCandidates=8}={}){
   }
  }
  rows.sort((a,b)=>a.walkMeters-b.walkMeters||a.edge.id.localeCompare(b.edge.id));
- // Different segments of one OSM way are distinct directed arrival options.
- // Deduplicate on edgeId, not on coordinates; never bridge disconnected IDs.
- const ids=new Set(),out=[];
+ // Nearby service roads may have many tiny segments and both directions.
+ // Restrict each OSM way to a small number of representative directed edges
+ // so the bounded review samples DISTINCT local streets, not only 8 fragments
+ // of an unreachable service road. Do NOT connect unrelated way/node IDs.
+ const ids=new Set(),perWay=new Map(),out=[];
  for(const c of rows){
-  if(ids.has(c.edge.id))continue;
+  const way=c.edge.id.split(':')[0];
+  if(ids.has(c.edge.id)||(perWay.get(way)||0)>=maxPerWay)continue;
   ids.add(c.edge.id);
+  perWay.set(way,(perWay.get(way)||0)+1);
   out.push(c);
   if(out.length===maxCandidates)break;
  }
