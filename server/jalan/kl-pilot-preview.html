@@ -41,6 +41,7 @@ small{color:#556677}.trip-metrics{display:grid;grid-template-columns:repeat(2,mi
 <div class="trip-metric wide"><span>Route status</span><strong id="trip-safety" style="font-size:14px">Not verified for legal driving</strong></div>
 </section>
 <div id="status" role="status" aria-live="polite">No route requested.</div>
+<details id="access-review" hidden><summary>Inspect access-caution edges (advisory only)</summary><pre id="access-review-text" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px"></pre><small>Public OSM way and directed-edge IDs with imported access tags. This is not a road-permission decision.</small></details>
 <p><small>Private experimental diagnostic preview only. Never use for live driving. Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
 </aside><div id="map" aria-label="Experimental route map"></div></main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -50,6 +51,8 @@ const map=L.map('map').setView([3.14,101.69],12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
 let routeLayer=null,markers=[],nextPoint='start',routeController=null,requestVersion=0,gpsMarker=null;
 function invalidateRoute(){
+ document.getElementById('access-review').hidden=true;
+ document.getElementById('access-review-text').textContent='';
  document.getElementById('trip-distance').textContent='—';
  document.getElementById('trip-eta').textContent='—';
  document.getElementById('trip-safety').textContent='Not verified for legal driving';
@@ -178,6 +181,24 @@ button.addEventListener('click',async()=>{
   document.getElementById('trip-distance').textContent=(data.distanceMeters/1000).toFixed(2)+' km';
   document.getElementById('trip-eta').textContent=data.illustrativeEtaMinutes+' min';
   document.getElementById('trip-safety').textContent='Experimental only · driving legality unverified';
+  const accessReview=document.getElementById('access-review');
+  const accessReviewText=document.getElementById('access-review-text');
+  if(data.potentialAccessReviewEdges>0){
+   accessReview.hidden=false;
+   const flagged=Array.isArray(data.accessCautionDetails)?data.accessCautionDetails:[];
+   const rows=flagged.map((edge,i)=>{
+    const id=String(edge.edgeId||'unknown').replace(/[^a-z0-9:_-]/gi,'');
+    const tags=['access','vehicle','motorVehicle']
+     .filter(k=>typeof edge[k]==='string'&&edge[k])
+     .map(k=>k+': '+edge[k]).join(', ');
+    return (i+1)+'. '+id+'  '+(tags||'Tag unavailable');
+   });
+   if(!rows.length)rows.push('Specific imported access tags unavailable; do not assume this route is unrestricted.');
+   if(data.accessCautionDetailsTruncated||flagged.length<data.potentialAccessReviewEdges)
+    rows.push('Additional flagged directed edges are not shown.');
+   accessReviewText.textContent=rows.join('\\n');
+  }
+
   status.textContent='Distance: '+(data.distanceMeters/1000).toFixed(2)+' km\n'+
    'Illustrative ETA (not traffic-aware): '+data.illustrativeEtaMinutes+' min\n'+
    'Possible turn-restriction warnings: '+(data.potentialTurnRestrictionReviewCount??'unavailable')+'\n'+

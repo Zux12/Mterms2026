@@ -20,7 +20,19 @@ const ACCESS_CAUTION=new Set(['destination','customers','permit','private','no',
 function accessCaution(e){return [e.access,e.vehicle,e.motorVehicle].some(v=>ACCESS_CAUTION.has(String(v||'').toLowerCase()));}
 function pilot(p){return p.every(Number.isFinite)&&p[0]>=2.5&&p[0]<=3.8&&p[1]>=100.8&&p[1]<=102.3;}
 class Heap{constructor(){this.a=[];}push(x){const a=this.a;let i=a.length;a.push(x);while(i){const j=(i-1)>>1;if(a[j].d<=x.d)break;a[i]=a[j];i=j;}a[i]=x;}pop(){const a=this.a,first=a[0],last=a.pop();if(a.length){let i=0;while(2*i+1<a.length){let j=2*i+1;if(j+1<a.length&&a[j+1].d<a[j].d)j++;if(a[j].d>=last.d)break;a[i]=a[j];i=j;}a[i]=last;}return first;}}
-async function load(){if(graph)return graph;if(loading)return loading;loading=(async()=>{const col=mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL);if(await col.countDocuments()!==COUNT)throw Error('Graph count mismatch');const adj=new Map(),edges=[],edgeIds=createEdgeIdGuard();for await(const e of col.find({},{projection:{edgeId:1,fromNode:1,toNode:1,coordinates:1,access:1,vehicle:1,motorVehicle:1}}).batchSize(1000)){if(!e.edgeId||!e.fromNode||!e.toNode||!Array.isArray(e.coordinates)||e.coordinates.length!==2)throw Error('Invalid edge');edgeIds.record(e.edgeId);const a=[e.coordinates[0][1],e.coordinates[0][0]],b=[e.coordinates[1][1],e.coordinates[1][0]];if(!a.every(Number.isFinite)||!b.every(Number.isFinite))throw Error('Invalid geometry');const edge={id:e.edgeId,from:String(e.fromNode),to:String(e.toNode),a,b,len:distance(a,b),potentialAccessCaution:accessCaution(e)};edges.push(edge);if(!adj.has(edge.from))adj.set(edge.from,[]);adj.get(edge.from).push(edge);}if(edges.length!==COUNT||edgeIds.checked!==COUNT)throw Error('Graph changed');
+async function load(){if(graph)return graph;if(loading)return loading;loading=(async()=>{const col=mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL);if(await col.countDocuments()!==COUNT)throw Error('Graph count mismatch');const adj=new Map(),edges=[],accessMetadata=new Map(),edgeIds=createEdgeIdGuard();for await(const e of col.find({},{projection:{edgeId:1,fromNode:1,toNode:1,coordinates:1,access:1,vehicle:1,motorVehicle:1}}).batchSize(1000)){if(!e.edgeId||!e.fromNode||!e.toNode||!Array.isArray(e.coordinates)||e.coordinates.length!==2)throw Error('Invalid edge');edgeIds.record(e.edgeId);const a=[e.coordinates[0][1],e.coordinates[0][0]],b=[e.coordinates[1][1],e.coordinates[1][0]];if(!a.every(Number.isFinite)||!b.every(Number.isFinite))throw Error('Invalid geometry');const edge={id:e.edgeId,from:String(e.fromNode),to:String(e.toNode),a,b,len:distance(a,b),potentialAccessCaution:accessCaution(e)};
+if(edge.potentialAccessCaution){
+ const flaggedTag=v=>{
+  const tag=String(v||'').toLowerCase();
+  return ACCESS_CAUTION.has(tag)?tag:null;
+ };
+ accessMetadata.set(edge.id,{
+  access:flaggedTag(e.access),
+  vehicle:flaggedTag(e.vehicle),
+  motorVehicle:flaggedTag(e.motorVehicle)
+ });
+}
+edges.push(edge);if(!adj.has(edge.from))adj.set(edge.from,[]);adj.get(edge.from).push(edge);}if(edges.length!==COUNT||edgeIds.checked!==COUNT)throw Error('Graph changed');
 // Advisory-only import; a broken or incomplete restriction collection must
 // never produce a misleading zero-warning result or make preview routing fail.
 let turnRestrictions=null;
@@ -32,7 +44,7 @@ try{
  if(docs.length!==n)throw Error('Turn relation count changed during load');
  turnRestrictions=docs;
 }catch(e){console.warn('KL turn advisory unavailable:',e.message);}
-return {adj,edges,turnRestrictions,...graphDiagnostics(edges)};})();try{graph=await loading;return graph;}finally{loading=null;}}
+return {adj,edges,accessMetadata,turnRestrictions,...graphDiagnostics(edges)};})();try{graph=await loading;return graph;}finally{loading=null;}}
 // Summaries are calculated once per isolated graph load, using no database
 // writes. Weak connectivity cannot substitute for directed reachability.
 function graphDiagnostics(edges){return {nodeGeometry:auditGraphNodeGeometry(edges),
@@ -104,6 +116,15 @@ if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineStrin
 // Exclude only these *virtual* edges from warnings; retain the original path
 // and every real graph edge (including zero-length imported ones) for routing.
 const advisoryPath=path.filter(e=>!(e.virtualPartial&&e.len===0));
+// An optional private diagnostic: identify EXACT travelled directed edges whose
+// imported OSM access/vehicle/motor_vehicle tags triggered this caution count.
+// Do not attach coordinates or raw GPS; no legal road-access decision is made.
+const accessCautionPath=advisoryPath.filter(e=>e.potentialAccessCaution);
+const accessCautionDetails=g.accessMetadata instanceof Map?
+ accessCautionPath.slice(0,40).map(e=>({
+  edgeId:e.id,
+  ...(g.accessMetadata.get(e.id)||{access:null,vehicle:null,motorVehicle:null})
+ })):null;
 // Advisory only: OSM node ID connectivity can conceal displaced endpoints.
 // Zero-length virtual connectors are not travelled roads for turn/access QA,
 // but must remain in geometry QA: their endpoints can reveal displaced
@@ -120,7 +141,8 @@ const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
  ...geometryGapAudit,
  ...plausibilityAudit,
- potentialAccessReviewEdges:advisoryPath.filter(e=>e.potentialAccessCaution).length,
+ potentialAccessReviewEdges:accessCautionPath.length,
+ accessCautionDetails,accessCautionDetailsTruncated:accessCautionPath.length>40,
  advisoryEdgesInspected:advisoryPath.length,
  turnReviewAvailable:turnAudit!==null,
  potentialTurnRestrictionReviewCount:turnAudit?turnAudit.potentialTurnRestrictionReviewCount:null,
