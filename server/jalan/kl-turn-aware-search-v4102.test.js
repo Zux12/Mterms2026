@@ -301,3 +301,30 @@ test('canonical numeric junction IDs still enforce the verified no-turn detour',
  assert.equal(r.distanceMeters,25);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('reused directed edge ID in another junction fails even when a shorter route returns first',()=>{
+ const good=e('osm-way-999999:0:F','s','t',2);
+ const collision=e('osm-way-999999:0:F','unrelated','elsewhere',3);
+ assert.throws(()=>searchTurnAware(graph([good,collision]),'s','t',[base]),
+  /Duplicate graph edge identity/);
+});
+test('two identical adjacency entries cannot share a directed edge-state key',()=>{
+ const direct=e('osm-way-999999:0:F','s','t',2);
+ assert.throws(()=>searchTurnAware(graph([direct,direct]),'s','t',[base]),
+  /Duplicate graph edge identity/);
+});
+test('unreachable invalid edge cannot be hidden behind an accepted turn-aware route',()=>{
+ const direct=e('osm-way-999999:0:F','s','t',2);
+ const invalid=e('osm-way-0999999:0:F','elsewhere','far-away',3);
+ assert.throws(()=>searchTurnAware(graph([direct,invalid]),'s','t',[base]),
+  /Missing OSM way identity/);
+});
+test('distinct segment identities of the same OSM way remain valid directed edges',()=>{
+ const first=e('osm-way-999999:0:F','s','v',2);
+ const second=e('osm-way-999999:1:F','v','t',3);
+ const r=searchTurnAware(graph([first,second]),'s','t',[base]);
+ assert.equal(r.ok,true);
+ assert.equal(r.distanceMeters,5);
+ assert.deepEqual(r.pathEdgeIds,[first.id,second.id]);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
