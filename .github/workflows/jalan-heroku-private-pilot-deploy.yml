@@ -179,3 +179,9 @@ jobs:
       # Validate the newly deployed revision, not merely the preceding release.
       - name: Verify authenticated private pilot after deployed revision
         run: node server/jalan/smoke-heroku-private-pilot.js
+      - name: Install browser dependencies for private mobile acceptance
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Verify authenticated 390px private mobile pilot after deployed revision
+        run: node server/jalan/smoke-heroku-private-mobile.js
