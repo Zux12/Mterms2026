@@ -22,6 +22,7 @@ jobs:
       - run: node server/jalan/check-kl-preview-browser-script.js
       - run: node --test server/jalan/kl-private-deployment-preflight.test.js
       - run: node --test server/jalan/kl-railway-auth.test.js
+      - run: node --test server/jalan/kl-destination-access-experiment.test.js
       - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js
       - name: Validate production diagnostics without database writes
         run: |
@@ -99,6 +100,8 @@ jobs:
           console.log('KL corridor candidate metres:',corridor.distanceMeters,'warm server total ms:',corridor.serverTotalMs);
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
+      - name: Compare public OSM destination-access arrival against full read-only KL graph
+        run: node server/jalan/smoke-kl-destination-access-realgraph.js
       - name: Audit complete imported KL turn-restriction readiness (read-only)
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
