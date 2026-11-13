@@ -59,10 +59,11 @@ jobs:
             const rows=await r.json();
             if(!Array.isArray(rows)||!rows.length)throw Error('Missing Heroku release baseline');
             const latest=rows.reduce((a,b)=>Number(a.version)>Number(b.version)?a:b);
-            if(!Number.isInteger(latest.version)||!latest.id)
-              throw Error('Invalid Heroku release baseline');
+            if(!Number.isInteger(latest.version)||!latest.id||!latest.slug?.id)
+              throw Error('Invalid Heroku release or missing baseline code slug');
             fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'jalan-pilot-release-baseline.json'),
-              JSON.stringify({id:latest.id,version:latest.version}),{mode:0o600,flag:'wx'});
+              JSON.stringify({id:latest.id,version:latest.version,slugId:latest.slug.id}),
+              {mode:0o600,flag:'wx'});
             console.log('Captured previous Heroku release version '+latest.version);
           })().catch(e=>{console.error(String(e.message).slice(0,150));process.exitCode=1});
           NODE
@@ -144,7 +145,10 @@ jobs:
               latest=rows.reduce((a,b)=>Number(a.version)>Number(b.version)?a:b);
               if(!Number.isInteger(latest.version)||!latest.id)
                 throw Error('Malformed Heroku release status');
-              if(latest.version>base.version&&latest.id!==base.id){
+              // A config-only release may advance the version without deploying code.
+              // Require a genuinely different slug before accepting this Git push.
+              if(latest.version>base.version&&latest.id!==base.id&&
+                 latest.slug?.id&&latest.slug.id!==base.slugId){
                 if(latest.status==='succeeded'){
                   console.log('Verified new Heroku pilot release: version '+latest.version+
                     ', release ID '+latest.id+', status succeeded');
@@ -154,7 +158,7 @@ jobs:
               }
               await new Promise(resolve=>setTimeout(resolve,10000));
             }
-            throw Error('No newer succeeded Heroku release than baseline '+base.version);
+            throw Error('No newer succeeded code-slug release than baseline '+base.version);
           })().catch(e=>{console.error(String(e.message).slice(0,170));process.exitCode=1});
           NODE
       - name: Remove release baseline file
