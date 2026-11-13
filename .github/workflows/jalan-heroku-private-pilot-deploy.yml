@@ -61,17 +61,38 @@ jobs:
           export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
           git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main
           rm -f "$askpass"
-      - name: Verify private pilot responds and rejects anonymous visitors
+      - name: Verify canonical private pilot URL rejects anonymous visitors
         shell: bash
         run: |
           set -euo pipefail
-          for i in $(seq 1 18); do
-            status="$(curl -L -sS --max-time 12 -o /dev/null -w '%{http_code}' https://jalan-kl-private-pilot.herokuapp.com/ || true)"
-            if [ "$status" = 401 ]; then
-              echo "JALAN pilot is responding and rejects unauthenticated requests (401)."
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "Private pilot did not return expected 401; inspect dyno logs before use."
-          exit 1
+          node <<'NODE'
+          (async () => {
+            const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot',{
+              headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
+                Accept:'application/vnd.heroku+json; version=3'},
+              signal:AbortSignal.timeout(15000)});
+            if(!r.ok)throw Error('Heroku app lookup failed with HTTP '+r.status);
+            const app=await r.json();
+            const url=new URL(app.web_url);
+            if(url.protocol!=='https:'||!/^[a-z0-9-]+\\.herokuapp\\.com$/.test(url.hostname))
+              throw Error('Heroku canonical domain mismatch');
+            console.log('Checking Heroku canonical domain '+url.hostname);
+            let last='none';
+            for(let i=0;i<18;i++){
+              try{
+                const check=await fetch(url.origin+'/',{
+                  signal:AbortSignal.timeout(12000),redirect:'manual'});
+                last=String(check.status);
+                if(check.status===401){
+                  console.log('Private pilot responds with expected HTTP 401 to anonymous visitors.');
+                  return;
+                }
+              }catch{last='unreachable';}
+              await new Promise(resolve=>setTimeout(resolve,10000));
+            }
+            throw Error('Pilot did not reject anonymous visitors as expected; last status '+last);
+          })().catch(e=>{
+            console.error('Private deployment verification failed: '+String(e.message).slice(0,170));
+            process.exitCode=1;
+          });
+          NODE
