@@ -67,7 +67,12 @@ async function main(){
   }
   next();
  },router);
- const server=app.listen(port,'0.0.0.0',()=>process.stdout.write('Private experimental JALAN pilot listening; no production routing.\n'));
+ const server=app.listen(port,'0.0.0.0',()=>{
+  process.stdout.write('Private experimental JALAN pilot listening; no production routing.\\n');
+  // Warm the imported graph asynchronously outside Heroku's 30-second HTTP request deadline.
+  preloadGraph().then(()=>process.stdout.write('Private KL graph preloaded.\\n'))
+   .catch(()=>process.stderr.write('Private KL graph preload failed; diagnostic routing not ready.\\n'));
+ });
  const stop=async()=>{server.close();await mongoose.disconnect();};
  process.once('SIGTERM',stop);process.once('SIGINT',stop);
 }
