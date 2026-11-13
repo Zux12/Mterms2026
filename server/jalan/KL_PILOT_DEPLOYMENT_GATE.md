@@ -36,3 +36,7 @@ Real Chromium against the read-only imported KL graph has passed for both the sh
 ## Automated private deployment preflight
 
 Run `node server/jalan/kl-private-deployment-preflight.js /path/to/private-checklist.json` with a locally maintained checklist. The preflight fails closed (exit 2) if any declared security/isolation gate is absent. Its checks are **self-declared configuration assertions**; they are not independent infrastructure verification. Never put secrets, private hostnames, credentials, or private journey coordinates into the checklist or repository. A passing result never authorizes public driving directions or a production deployment.
+
+## Hosting decision — Railway isolated pilot
+
+Railway has been selected as a candidate for a **separate private test environment**. Provisioning is **blocked until the owner connects Railway** and the actual environment can be inspected. Do not claim that a Railway app, access policy, deployment, or read-only database connection exists until verified. Do not reuse the MTERMS2026 production application, its environment variables, or its write-enabled credentials. The existing loopback-only preview must not be exposed directly. Public navigation remains prohibited.
