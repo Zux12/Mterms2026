@@ -37,7 +37,7 @@ async function main(){
  app.disable('x-powered-by');
  app.use((req,res,next)=>{
   res.set('Cache-Control','no-store');
-  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self';");
+  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self';");
   next();
  });
  app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
