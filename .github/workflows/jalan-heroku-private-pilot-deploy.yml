@@ -1,0 +1,25 @@
+name: JALAN private Heroku pilot deployment
+
+# Registration-only definition on the repository default branch.
+# GitHub requires the workflow file on default before workflow_dispatch
+# can select an alternate branch. The actual release implementation lives
+# only on the designated trusted JALAN branch.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registration-only:
+    # On default branch this job can only print guidance. When an operator
+    # selects the trusted branch, GitHub must use that branch's reviewed
+    # workflow definition; this stub has no Heroku keys or deploy actions.
+    if: github.ref != 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain safe deployment selection
+        run: |
+          echo "Registration only: no deployment or credentials available."
+          echo "After release review, manually select the trusted JALAN branch."
+          echo "Do not select main for a pilot deployment."
