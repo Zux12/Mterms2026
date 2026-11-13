@@ -21,3 +21,19 @@ test('all declared private pilot gates can pass without authorizing public navig
  assert.equal(r.productionRoutingAuthorized,false);
  assert.equal(r.externalDrivingNavigationAuthorized,false);
 });
+
+test('private Heroku deployment enforces post-deployment authenticated smoke',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main');
+ const anonymous=yaml.indexOf('Verify canonical private pilot URL rejects anonymous visitors');
+ const authenticated=yaml.indexOf('Verify authenticated private pilot after deployed revision');
+ assert.ok(push>0,'Heroku deployment command must exist');
+ assert.ok(anonymous>push,'anonymous access must be blocked after deployment');
+ assert.ok(authenticated>anonymous,'authenticated verification must follow deployment and privacy probe');
+ assert.match(yaml.slice(authenticated),/run: node server\\/jalan\\/smoke-heroku-private-pilot\\.js/,
+  'run the existing read-only authenticated route and health smoke post-deploy');
+ assert.match(yaml,/if: github\\.ref == 'refs\\/heads\\/jalan-v4102-routing-regression-tests'/,
+  'deployment must remain gated to the established trusted branch');
+});
