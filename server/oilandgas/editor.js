@@ -48,7 +48,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
-for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css']) {
+for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css','authors.js','authors.css']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
 
@@ -174,6 +174,8 @@ router.use(wrap(async(req,res,next)=>{
   if(!id || !secret() || !(await database().collection('editor_sessions').findOne({_id:id,expiresAt:{$gt:new Date()}}))) fail(401,'Please sign in.');
   next();
 }));
+// Keep author email and affiliation records behind the Editor's Desk login.
+router.use('/authors', require('./authors-admin')(database));
 
 router.post('/weekly-pick/automatic',wrap(async(req,res)=>{
   const {slot}=req.body || {};
