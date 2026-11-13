@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>JALAN — Private KL route explorer</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -11,7 +11,20 @@ aside{padding:18px;background:white;box-shadow:1px 0 5px #ddd;z-index:500}
 label{display:block;font-weight:600;margin:14px 0 5px}input{width:100%;padding:10px;border:1px solid #aab9c8;border-radius:7px}
 button{border:0;border-radius:7px;padding:11px 15px;background:#155cc1;color:white;font-weight:600;cursor:pointer;margin-top:14px}
 button:disabled{opacity:.5;cursor:wait}#map{min-height:65dvh}#status{white-space:pre-wrap;line-height:1.5;margin-top:15px}
-small{color:#556677}.trip-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.trip-metric{padding:12px;border:1px solid #d9e3ef;border-radius:12px;background:#f7faff}.trip-metric strong{display:block;font-size:21px}.trip-metric span{font-size:12px;color:#53667b}.trip-metric.wide{grid-column:1/-1}.action-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.action-row button{margin:0}.secondary{background:#e9f1fd;color:#1655a0;border:1px solid #b7cae4}.gps-note{font-size:12px;line-height:1.5;color:#485f75;min-height:18px}.trip-metric strong{font-variant-numeric:tabular-nums}@media(max-width:720px){main{display:flex;flex-direction:column}#map{height:65dvh;min-height:65dvh}aside{box-shadow:none}}
+small{color:#556677}.trip-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.trip-metric{padding:12px;border:1px solid #d9e3ef;border-radius:12px;background:#f7faff}.trip-metric strong{display:block;font-size:21px}.trip-metric span{font-size:12px;color:#53667b}.trip-metric.wide{grid-column:1/-1}.action-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.action-row button{margin:0}.secondary{background:#e9f1fd;color:#1655a0;border:1px solid #b7cae4}.gps-note{font-size:12px;line-height:1.5;color:#485f75;min-height:18px}.trip-metric strong{font-variant-numeric:tabular-nums}/* On iPhone Safari, avoid drawing trip text beneath the translucent status bar
+   when navigating a long scrolling page. This is visual spacing only. */
+@media(max-width:720px){
+ main{display:flex;flex-direction:column}
+ #map{height:65dvh;min-height:65dvh}
+ aside{box-shadow:none}
+ html{scroll-padding-top:calc(12px + env(safe-area-inset-top, 0px))}
+ body{padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px)}
+ body::before{content:"";position:fixed;top:0;left:0;right:0;
+  height:env(safe-area-inset-top, 0px);background:#f4f7fa;
+  z-index:1000;pointer-events:none}
+ .trip-metric.wide{min-height:76px}
+ #trip-safety{line-height:1.4;overflow-wrap:anywhere}
+}
 </style></head><body>
 <header><h1>JALAN · Private KL route explorer</h1><div class="warning">EXPERIMENTAL ONLY — not verified for legal driving, turns, access or traffic. Do not use for live navigation.</div></header>
 <main><aside><p>Explore KL routes on the imported road graph. For stationary testing only; these are not driving instructions.</p>
@@ -28,6 +41,7 @@ small{color:#556677}.trip-metrics{display:grid;grid-template-columns:repeat(2,mi
 <div class="trip-metric wide"><span>Route status</span><strong id="trip-safety" style="font-size:14px">Not verified for legal driving</strong></div>
 </section>
 <div id="status" role="status" aria-live="polite">No route requested.</div>
+<details id="access-review" hidden><summary>Inspect access-caution edges (advisory only)</summary><pre id="access-review-text" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px"></pre><small>Public OSM way and directed-edge IDs with imported access tags. This is not a road-permission decision.</small></details>
 <p><small>Private experimental diagnostic preview only. Never use for live driving. Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
 </aside><div id="map" aria-label="Experimental route map"></div></main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -37,6 +51,8 @@ const map=L.map('map').setView([3.14,101.69],12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
 let routeLayer=null,markers=[],nextPoint='start',routeController=null,requestVersion=0,gpsMarker=null;
 function invalidateRoute(){
+ document.getElementById('access-review').hidden=true;
+ document.getElementById('access-review-text').textContent='';
  document.getElementById('trip-distance').textContent='—';
  document.getElementById('trip-eta').textContent='—';
  document.getElementById('trip-safety').textContent='Not verified for legal driving';
@@ -165,6 +181,24 @@ button.addEventListener('click',async()=>{
   document.getElementById('trip-distance').textContent=(data.distanceMeters/1000).toFixed(2)+' km';
   document.getElementById('trip-eta').textContent=data.illustrativeEtaMinutes+' min';
   document.getElementById('trip-safety').textContent='Experimental only · driving legality unverified';
+  const accessReview=document.getElementById('access-review');
+  const accessReviewText=document.getElementById('access-review-text');
+  if(data.potentialAccessReviewEdges>0){
+   accessReview.hidden=false;
+   const flagged=Array.isArray(data.accessCautionDetails)?data.accessCautionDetails:[];
+   const rows=flagged.map((edge,i)=>{
+    const id=String(edge.edgeId||'unknown').replace(/[^a-z0-9:_-]/gi,'');
+    const tags=['access','vehicle','motorVehicle']
+     .filter(k=>typeof edge[k]==='string'&&edge[k])
+     .map(k=>k+': '+edge[k]).join(', ');
+    return (i+1)+'. '+id+'  '+(tags||'Tag unavailable');
+   });
+   if(!rows.length)rows.push('Specific imported access tags unavailable; do not assume this route is unrestricted.');
+   if(data.accessCautionDetailsTruncated||flagged.length<data.potentialAccessReviewEdges)
+    rows.push('Additional flagged directed edges are not shown.');
+   accessReviewText.textContent=rows.join('\\n');
+  }
+
   status.textContent='Distance: '+(data.distanceMeters/1000).toFixed(2)+' km\n'+
    'Illustrative ETA (not traffic-aware): '+data.illustrativeEtaMinutes+' min\n'+
    'Possible turn-restriction warnings: '+(data.potentialTurnRestrictionReviewCount??'unavailable')+'\n'+

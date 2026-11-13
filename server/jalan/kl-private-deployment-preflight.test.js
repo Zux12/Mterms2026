@@ -158,3 +158,15 @@ test('manual validation-only retry pins supported Chromium OS and skips Heroku w
  assert.ok(yaml.includes('run: node server/jalan/smoke-heroku-private-mobile.js'));
  assert.ok(registration.includes('workflow_dispatch:'),'manual dispatch remains available');
 });
+
+test('private pilot iPhone safe area keeps route status below top browser chrome',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const html=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.html'),'utf8');
+ assert.match(html,/viewport-fit=cover/);
+ assert.match(html,/padding-top:env\(safe-area-inset-top, 0px\)/);
+ assert.match(html,/height:env\(safe-area-inset-top, 0px\)/);
+ assert.match(html,/position:fixed;top:0;left:0;right:0/);
+ assert.match(html,/pointer-events:none/);
+ assert.match(html,/#trip-safety\{line-height:1\.4;overflow-wrap:anywhere\}/);
+ assert.match(html,/Legal driving route verified: NO/);
+});

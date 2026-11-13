@@ -95,3 +95,26 @@ test('real imported KL four-edge service-road witness is routed by calculate on 
  assert.deepEqual(route.geometry.at(-1),[101.7038951,3.1314573]);
  assert.equal(route.geometryGapsOver2Meters??0,0);
 });
+
+test('read-only route reports flagged OSM edge identities without revealing coordinates in caution metadata',()=>{
+ const ab={...edge('osm-way-112233:0:F','a','b',A,B),potentialAccessCaution:true};
+ const bc={...edge('osm-way-112234:0:F','b','c',B,C),potentialAccessCaution:false};
+ const g=graph([ab,bc]);
+ g.accessMetadata=new Map([[ab.id,{access:'destination',vehicle:null,motorVehicle:null}]]);
+ const result=calculate(g,snap(ab,0),snap(bc,1));
+ assert.equal(result.potentialAccessReviewEdges,1);
+ assert.deepEqual(result.accessCautionDetails,[{
+  edgeId:'osm-way-112233:0:F',access:'destination',vehicle:null,motorVehicle:null
+ }]);
+ assert.equal(result.accessCautionDetailsTruncated,false);
+ assert.equal(result.productionRoutingAuthorized,undefined);
+ assert.equal(JSON.stringify(result.accessCautionDetails).includes('coordinates'),false);
+});
+
+test('missing per-edge tag metadata does not present a false all-clear',()=>{
+ const ab={...edge('osm-way-112233:0:F','a','b',A,B),potentialAccessCaution:true};
+ const g=graph([ab]);
+ const result=calculate(g,snap(ab,0.2),snap(ab,0.8));
+ assert.equal(result.potentialAccessReviewEdges,1);
+ assert.equal(result.accessCautionDetails,null);
+});

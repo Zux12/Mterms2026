@@ -20,7 +20,19 @@ const ACCESS_CAUTION=new Set(['destination','customers','permit','private','no',
 function accessCaution(e){return [e.access,e.vehicle,e.motorVehicle].some(v=>ACCESS_CAUTION.has(String(v||'').toLowerCase()));}
 function pilot(p){return p.every(Number.isFinite)&&p[0]>=2.5&&p[0]<=3.8&&p[1]>=100.8&&p[1]<=102.3;}
 class Heap{constructor(){this.a=[];}push(x){const a=this.a;let i=a.length;a.push(x);while(i){const j=(i-1)>>1;if(a[j].d<=x.d)break;a[i]=a[j];i=j;}a[i]=x;}pop(){const a=this.a,first=a[0],last=a.pop();if(a.length){let i=0;while(2*i+1<a.length){let j=2*i+1;if(j+1<a.length&&a[j+1].d<a[j].d)j++;if(a[j].d>=last.d)break;a[i]=a[j];i=j;}a[i]=last;}return first;}}
-async function load(){if(graph)return graph;if(loading)return loading;loading=(async()=>{const col=mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL);if(await col.countDocuments()!==COUNT)throw Error('Graph count mismatch');const adj=new Map(),edges=[],edgeIds=createEdgeIdGuard();for await(const e of col.find({},{projection:{edgeId:1,fromNode:1,toNode:1,coordinates:1,access:1,vehicle:1,motorVehicle:1}}).batchSize(1000)){if(!e.edgeId||!e.fromNode||!e.toNode||!Array.isArray(e.coordinates)||e.coordinates.length!==2)throw Error('Invalid edge');edgeIds.record(e.edgeId);const a=[e.coordinates[0][1],e.coordinates[0][0]],b=[e.coordinates[1][1],e.coordinates[1][0]];if(!a.every(Number.isFinite)||!b.every(Number.isFinite))throw Error('Invalid geometry');const edge={id:e.edgeId,from:String(e.fromNode),to:String(e.toNode),a,b,len:distance(a,b),potentialAccessCaution:accessCaution(e)};edges.push(edge);if(!adj.has(edge.from))adj.set(edge.from,[]);adj.get(edge.from).push(edge);}if(edges.length!==COUNT||edgeIds.checked!==COUNT)throw Error('Graph changed');
+async function load(){if(graph)return graph;if(loading)return loading;loading=(async()=>{const col=mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL);if(await col.countDocuments()!==COUNT)throw Error('Graph count mismatch');const adj=new Map(),edges=[],accessMetadata=new Map(),edgeIds=createEdgeIdGuard();for await(const e of col.find({},{projection:{edgeId:1,fromNode:1,toNode:1,coordinates:1,access:1,vehicle:1,motorVehicle:1}}).batchSize(1000)){if(!e.edgeId||!e.fromNode||!e.toNode||!Array.isArray(e.coordinates)||e.coordinates.length!==2)throw Error('Invalid edge');edgeIds.record(e.edgeId);const a=[e.coordinates[0][1],e.coordinates[0][0]],b=[e.coordinates[1][1],e.coordinates[1][0]];if(!a.every(Number.isFinite)||!b.every(Number.isFinite))throw Error('Invalid geometry');const edge={id:e.edgeId,from:String(e.fromNode),to:String(e.toNode),a,b,len:distance(a,b),potentialAccessCaution:accessCaution(e)};
+if(edge.potentialAccessCaution){
+ const flaggedTag=v=>{
+  const tag=String(v||'').toLowerCase();
+  return ACCESS_CAUTION.has(tag)?tag:null;
+ };
+ accessMetadata.set(edge.id,{
+  access:flaggedTag(e.access),
+  vehicle:flaggedTag(e.vehicle),
+  motorVehicle:flaggedTag(e.motorVehicle)
+ });
+}
+edges.push(edge);if(!adj.has(edge.from))adj.set(edge.from,[]);adj.get(edge.from).push(edge);}if(edges.length!==COUNT||edgeIds.checked!==COUNT)throw Error('Graph changed');
 // Advisory-only import; a broken or incomplete restriction collection must
 // never produce a misleading zero-warning result or make preview routing fail.
 let turnRestrictions=null;
@@ -32,7 +44,7 @@ try{
  if(docs.length!==n)throw Error('Turn relation count changed during load');
  turnRestrictions=docs;
 }catch(e){console.warn('KL turn advisory unavailable:',e.message);}
-return {adj,edges,turnRestrictions,...graphDiagnostics(edges)};})();try{graph=await loading;return graph;}finally{loading=null;}}
+return {adj,edges,accessMetadata,turnRestrictions,...graphDiagnostics(edges)};})();try{graph=await loading;return graph;}finally{loading=null;}}
 // Summaries are calculated once per isolated graph load, using no database
 // writes. Weak connectivity cannot substitute for directed reachability.
 function graphDiagnostics(edges){return {nodeGeometry:auditGraphNodeGeometry(edges),
@@ -104,6 +116,15 @@ if (geometry.length === 1) geometry.push([...geometry[0]]); // GeoJSON LineStrin
 // Exclude only these *virtual* edges from warnings; retain the original path
 // and every real graph edge (including zero-length imported ones) for routing.
 const advisoryPath=path.filter(e=>!(e.virtualPartial&&e.len===0));
+// An optional private diagnostic: identify EXACT travelled directed edges whose
+// imported OSM access/vehicle/motor_vehicle tags triggered this caution count.
+// Do not attach coordinates or raw GPS; no legal road-access decision is made.
+const accessCautionPath=advisoryPath.filter(e=>e.potentialAccessCaution);
+const accessCautionDetails=g.accessMetadata instanceof Map?
+ accessCautionPath.slice(0,40).map(e=>({
+  edgeId:e.id,
+  ...(g.accessMetadata.get(e.id)||{access:null,vehicle:null,motorVehicle:null})
+ })):null;
 // Advisory only: OSM node ID connectivity can conceal displaced endpoints.
 // Zero-length virtual connectors are not travelled roads for turn/access QA,
 // but must remain in geometry QA: their endpoints can reveal displaced
@@ -120,7 +141,8 @@ const viaWayAudit=Array.isArray(g.turnRestrictions)?auditViaWayPathCandidates(
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited,
  ...geometryGapAudit,
  ...plausibilityAudit,
- potentialAccessReviewEdges:advisoryPath.filter(e=>e.potentialAccessCaution).length,
+ potentialAccessReviewEdges:accessCautionPath.length,
+ accessCautionDetails,accessCautionDetailsTruncated:accessCautionPath.length>40,
  advisoryEdgesInspected:advisoryPath.length,
  turnReviewAvailable:turnAudit!==null,
  potentialTurnRestrictionReviewCount:turnAudit?turnAudit.potentialTurnRestrictionReviewCount:null,
@@ -149,14 +171,8 @@ function noPathResponse(timingMs,visitedNodes=null,graphEdges=null,graphCacheHit
   // graph internals or reflecting arbitrary response metadata.
   graphCacheHit:typeof graphCacheHit==='boolean'?graphCacheHit:null,
   searchVisitedNodes:Number.isSafeInteger(visitedNodes)&&visitedNodes>=0&&visitedNodes<=400000?visitedNodes:null,
-  timingDiagnosticOnly:true,trafficAware:false,
-  // A disconnected graph is not evidence that the route or road laws were checked.
-  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,
-  turnRestrictionsEnforced:false,routingActivated:false,databaseWrites:0};
+  timingDiagnosticOnly:true,trafficAware:false,legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,routingActivated:false,databaseWrites:0};
 }
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,turnReviewAvailable:!!graph&&Array.isArray(graph.turnRestrictions),nodeGeometry:graph?.nodeGeometry??null,graphTopology:graph?.topology??null,graphStrongTopology:graph?.strongTopology??null,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
-router.get('/route',async(req,res)=>{try{const s=[Number(req.query.startLat),Number(req.query.startLng)],t=[Number(req.query.endLat),Number(req.query.endLng)];if(!pilot(s)||!pilot(t))return res.status(400).json({ok:false,error:'Both coordinates must be in the KL pilot region'});const started=process.hrtime.bigint();const graphCacheHit=!!graph;const g=await load();const loaded=process.hrtime.bigint();const a=nearest(g.edges,s),b=nearest(g.edges,t);const snapped=process.hrtime.bigint();if(!a||!b||a.meters>200||b.meters>200)return res.status(422).json({ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',error:'No nearby directed graph segment within 200 m',startSnapMeters:a?Math.round(a.meters):null,endSnapMeters:b?Math.round(b.meters):null,timingMs:{graphLoad:Number(loaded-started)/1e6,snapping:Number(snapped-loaded)/1e6,pathSearch:0,total:Number(snapped-started)/1e6},graphVersion:COL,graphEdges:g.edges.length,graphCacheHit,
-  timingDiagnosticOnly:true,trafficAware:false,legalDrivingRouteVerified:false,
-  accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
-  routingActivated:false,databaseWrites:0});const searchDiagnostics={};const r=calculate(g,a,b,searchDiagnostics);const routed=process.hrtime.bigint();const timingMs={graphLoad:Number(loaded-started)/1e6,snapping:Number(snapped-loaded)/1e6,pathSearch:Number(routed-snapped)/1e6,total:Number(routed-started)/1e6};if(!r)return res.status(404).json(noPathResponse(timingMs,searchDiagnostics.visited,g.edges.length,graphCacheHit));res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphEdges:g.edges.length,graphVersion:COL,graphCacheHit,timingMs,timingDiagnosticOnly:true,...routeAsGeoJSON(r),...g.nodeGeometry,...g.topology,...g.strongTopology,startSnapMeters:Math.round(a.meters),endSnapMeters:Math.round(b.meters),startSnapCandidatesWithin200m:a.candidatesWithin200,endSnapCandidatesWithin200m:b.candidatesWithin200,startSnapAmbiguous:a.ambiguousSnap,endSnapAmbiguous:b.ambiguousSnap,snapAmbiguityAdvisoryOnly:true,illustrativeEtaMinutes:Math.round(r.distanceMeters/1000/30*60*10)/10,etaAssumedSpeedKmh:30,trafficAware:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,turnReviewSource:'OSM_v493_UNVERIFIED_VIA_NODE_AND_VIA_WAY_PATH_CANDIDATES',legalDrivingRouteVerified:false,routingActivated:false,databaseWrites:0});}catch(e){console.error('KL 3C:',e.message);res.status(503).json({ok:false,error:'KL preview temporarily unavailable'});}});
+router.get('/route',async(req,res)=>{try{const s=[Number(req.query.startLat),Number(req.query.startLng)],t=[Number(req.query.endLat),Number(req.query.endLng)];if(!pilot(s)||!pilot(t))return res.status(400).json({ok:false,error:'Both coordinates must be in the KL pilot region'});const started=process.hrtime.bigint();const graphCacheHit=!!graph;const g=await load();const loaded=process.hrtime.bigint();const a=nearest(g.edges,s),b=nearest(g.edges,t);const snapped=process.hrtime.bigint();if(!a||!b||a.meters>200||b.meters>200)return res.status(422).json({ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',error:'No nearby directed graph segment within 200 m',startSnapMeters:a?Math.round(a.meters):null,endSnapMeters:b?Math.round(b.meters):null,timingMs:{graphLoad:Number(loaded-started)/1e6,snapping:Number(snapped-loaded)/1e6,pathSearch:0,total:Number(snapped-started)/1e6},graphVersion:COL,graphEdges:g.edges.length,graphCacheHit,timingDiagnosticOnly:true,trafficAware:false,legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,routingActivated:false,databaseWrites:0});const searchDiagnostics={};const r=calculate(g,a,b,searchDiagnostics);const routed=process.hrtime.bigint();const timingMs={graphLoad:Number(loaded-started)/1e6,snapping:Number(snapped-loaded)/1e6,pathSearch:Number(routed-snapped)/1e6,total:Number(routed-started)/1e6};if(!r)return res.status(404).json(noPathResponse(timingMs,searchDiagnostics.visited,g.edges.length,graphCacheHit));res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphEdges:g.edges.length,graphVersion:COL,graphCacheHit,timingMs,timingDiagnosticOnly:true,...routeAsGeoJSON(r),...g.nodeGeometry,...g.topology,...g.strongTopology,startSnapMeters:Math.round(a.meters),endSnapMeters:Math.round(b.meters),startSnapCandidatesWithin200m:a.candidatesWithin200,endSnapCandidatesWithin200m:b.candidatesWithin200,startSnapAmbiguous:a.ambiguousSnap,endSnapAmbiguous:b.ambiguousSnap,snapAmbiguityAdvisoryOnly:true,illustrativeEtaMinutes:Math.round(r.distanceMeters/1000/30*60*10)/10,etaAssumedSpeedKmh:30,trafficAware:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,turnReviewSource:'OSM_v493_UNVERIFIED_VIA_NODE_AND_VIA_WAY_PATH_CANDIDATES',legalDrivingRouteVerified:false,routingActivated:false,databaseWrites:0});}catch(e){console.error('KL 3C:',e.message);res.status(503).json({ok:false,error:'KL preview temporarily unavailable'});}});
 module.exports={router,project,nearest,calculate,distance,accessCaution,routeAsGeoJSON,noPathResponse,graphDiagnostics,preloadGraph:load};
