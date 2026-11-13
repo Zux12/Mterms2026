@@ -411,3 +411,12 @@ test('scientific-notation route endpoints are rejected rather than accepted as f
  assert.throws(()=>searchTurnAware(graph([incoming]),'5757831665e0','t',[base]),
   /Directed adjacency and node IDs required/);
 });
+
+test('duplicate verified restriction identity cannot authorize a route',()=>{
+ const conflicting={...base,toWay:'osm-way-999991'};
+ const r=searchTurnAware(graph([a,banned,detour,returnEdge]),'s','t',
+  [base,conflicting]);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'turn-restrictions-not-fully-verified');
+ assert.equal(r.productionRoutingAuthorized,false);
+});

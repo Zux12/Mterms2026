@@ -25,6 +25,9 @@ function classifyTurnEnforcement(restrictions){
  if(!Array.isArray(restrictions))throw new TypeError('Expected restrictions array');
  const counts={total:restrictions.length,verifiedSimple:0,unverified:0,conditionalOrExcept:0,complex:0,malformed:0};
  const eligible=[];
+ // Verified relation identities must be unique so one evidence item cannot
+ // masquerade as multiple independently reviewed turn restrictions.
+ const verifiedRelationIds=new Set();
  const independentFlags={viaWay:0,multipleViaNodes:0,missingViaNode:0,conditional:0,except:0,unverifiedApplicability:0,unknownRestriction:0};
  for(const r of restrictions){
   if(r&&typeof r==='object'){
@@ -36,7 +39,9 @@ function classifyTurnEnforcement(restrictions){
    if(r.applicability!=='verified')independentFlags.unverifiedApplicability++;
    if(typeof r.restriction==='string'&&!SUPPORTED_SIMPLE_RESTRICTIONS.has(r.restriction))independentFlags.unknownRestriction++;
   }
-  if(!r||typeof r!=='object'||typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
+  if(!r||typeof r!=='object'||typeof r.restrictionId!=='string'||
+    !r.restrictionId||r.restrictionId.trim()!==r.restrictionId||
+    typeof r.fromWay!=='string'||typeof r.toWay!=='string'||
     typeof r.restriction!=='string'||!Array.isArray(r.viaNodes)||!Array.isArray(r.viaWays)||
     !/^osm-way-[1-9]\d*$/.test(r.fromWay)||!/^osm-way-[1-9]\d*$/.test(r.toWay)||
     r.viaNodes.some(n=>!canonicalViaNode(n))){
@@ -51,8 +56,10 @@ function classifyTurnEnforcement(restrictions){
   if(r.conditional||r.except){counts.conditionalOrExcept++;continue;}
   // This explicit gate intentionally rejects imported applicability=unverified.
   if(r.applicability!=='verified'){counts.unverified++;continue;}
+  if(verifiedRelationIds.has(r.restrictionId)){counts.malformed++;continue;}
+  verifiedRelationIds.add(r.restrictionId);
   counts.verifiedSimple++;
-  eligible.push({restrictionId:String(r.restrictionId||''),fromWay:r.fromWay,
+  eligible.push({restrictionId:r.restrictionId,fromWay:r.fromWay,
     viaNode:String(r.viaNodes[0]),toWay:r.toWay,restriction:r.restriction});
  }
  return {counts,independentFlags,eligible,allRestrictionsReady:counts.total>0&&counts.verifiedSimple===counts.total,

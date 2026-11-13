@@ -163,3 +163,36 @@ test('numeric-looking OSM via-node aliases cannot be treated as symbolic fixture
  assert.equal(r.allRestrictionsReady,false);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+test('verified relations without a traceable nonblank identity fail closed',()=>{
+ const badIds=['',' ',undefined,null,17,'osm-relation-10341546 '];
+ const r=classifyTurnEnforcement(badIds.map(restrictionId=>
+  ({...relation,restrictionId,applicability:'verified'})));
+ assert.equal(r.counts.malformed,badIds.length);
+ assert.equal(r.counts.verifiedSimple,0);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('one verified relation identity cannot count as two independently reviewed turns',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,applicability:'verified',toWay:'osm-way-888888'}
+ ]);
+ assert.equal(r.counts.verifiedSimple,1);
+ assert.equal(r.counts.malformed,1);
+ assert.equal(r.allRestrictionsReady,false);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+
+test('distinct auditable verified relation identities retain eligibility',()=>{
+ const r=classifyTurnEnforcement([
+  {...relation,applicability:'verified'},
+  {...relation,restrictionId:'osm-relation-10341547',applicability:'verified',
+   toWay:'osm-way-888888'}
+ ]);
+ assert.equal(r.counts.verifiedSimple,2);
+ assert.equal(r.counts.malformed,0);
+ assert.equal(r.allRestrictionsReady,true);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
