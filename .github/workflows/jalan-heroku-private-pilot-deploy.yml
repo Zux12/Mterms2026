@@ -1,14 +1,8 @@
 name: JALAN private Heroku pilot deployment
 
+# A merge/push is not release approval. Deploy the private pilot only by
+# explicitly dispatching this workflow on the established trusted branch.
 on:
-  push:
-    branches: [jalan-v4102-routing-regression-tests]
-    paths:
-      - 'server/jalan/configure-heroku-private-pilot.js'
-      - 'server/jalan/run-kl-preview-railway.js'
-      - 'server/jalan/kl-pilot-preview.html'
-      - 'Procfile'
-      - '.github/workflows/jalan-heroku-private-pilot-deploy.yml'
   workflow_dispatch:
 
 permissions:
