@@ -1,0 +1,28 @@
+[
+  {
+    "restrictionId": "osm-relation-10341546",
+    "status": "pending",
+    "evidenceRefs": [],
+    "reviewerId": "",
+    "reviewedAt": "",
+    "sourceVersion": "2026-11-08T14:42:51Z",
+    "restrictionType": "no_right_turn",
+    "timezone": "Asia/Kuala_Lumpur",
+    "roadAccessChecked": false,
+    "turnGeometryChecked": false,
+    "conditionalRulesChecked": false
+  },
+  {
+    "restrictionId": "osm-relation-15951715",
+    "status": "pending",
+    "evidenceRefs": [],
+    "reviewerId": "",
+    "reviewedAt": "",
+    "sourceVersion": "2026-11-08T14:42:51Z",
+    "restrictionType": "no_right_turn",
+    "timezone": "Asia/Kuala_Lumpur",
+    "roadAccessChecked": false,
+    "turnGeometryChecked": false,
+    "conditionalRulesChecked": false
+  }
+]

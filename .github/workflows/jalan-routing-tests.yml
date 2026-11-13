@@ -1,0 +1,208 @@
+name: Jalan routing regression tests
+on:
+  workflow_dispatch:
+  push:
+    branches: [jalan-v4102-routing-regression-tests]
+  pull_request:
+    paths:
+      - 'server/jalan/**'
+      - '.github/workflows/jalan-routing-tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server/jalan/run-kl-local-readonly.js
+      - run: node server/jalan/check-kl-preview-browser-script.js
+      - run: node --test server/jalan/kl-private-deployment-preflight.test.js
+      - run: node --test server/jalan/kl-railway-auth.test.js
+      - run: node --test server/jalan/kl-restriction-evidence-package-v4102.test.js server/jalan/kl-external-evidence-review-v4102.test.js server/jalan/kl-restriction-review-bundle-v4102.test.js server/jalan/kl-restriction-evidence-manifest-v4102.test.js server/jalan/kl-restriction-review-sample-v4102.test.js server/jalan/kl-restriction-review-v4102.test.js server/jalan/kl-turn-aware-search-v4102.test.js server/jalan/kl-turn-enforcement-readiness-v4102.test.js server/jalan/kl-real-imported-grade-separation-v4102.test.js server/jalan/kl-grade-separation-v4102.test.js server/jalan/kl-real-imported-subgraph-v4102.test.js server/jalan/kl-segment-v4102*.test.js server/jalan/kl-via-way-audit-v4102.test.js server/jalan/kl-via-way-only-exit-v4102.test.js server/jalan/kl-edge-identity-v4102.test.js server/jalan/validate-kl-pilot.test.js server/jalan/collect-kl-route-evidence.test.js
+      - name: Validate production diagnostics without database writes
+        run: |
+          node --check server/jalan/routes.js
+          node --check server/jalan/routing-diagnostics.js
+          node server/jalan/routing-diagnostics.test.js
+
+  kl-fullgraph:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify dedicated read-only connection is configured
+        shell: bash
+        run: |
+          if [ -z "$JALAN_READONLY_MONGODB_URI" ]; then
+            echo "Missing JALAN_READONLY_MONGODB_URI repository secret; no database connection attempted."
+            exit 1
+          fi
+      - name: Create four public OSM-node smoke cases (not private GPS)
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const smoke={
+            caseId:'osm_kl_directed_smoke_001',journeyType:'short-urban',
+            expectedReachable:true,
+            startLat:3.1315707,startLng:101.7038508,
+            endLat:3.1314573,endLng:101.7038951
+          };
+          fs.writeFileSync('/tmp/jalan-kl-cases.json',JSON.stringify([smoke,{...smoke,caseId:'osm_kl_directed_smoke_002'},
+            {caseId:'osm_kl_directed_smoke_003',journeyType:'short-urban',expectedReachable:true,
+             startLat:3.130908,startLng:101.7036171,endLat:3.1313468,endLng:101.7039025},
+            {caseId:'osm_kl_corridor_smoke_004',journeyType:'long-corridor',expectedReachable:true,
+             startLat:3.1315707,startLng:101.7038508,endLat:3.128888,endLng:101.7126153}]),{mode:0o600,flag:'wx'});
+          NODE
+      - name: Run full-graph smoke case (partial 20-case acceptance is expected)
+        shell: bash
+        run: |
+          set +e
+          node server/jalan/run-kl-local-readonly.js /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then
+            echo "Expected partial-evidence exit 2 for four-case smoke test; received $code"
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const rows=JSON.parse(fs.readFileSync('/tmp/jalan-kl-sanitized.json','utf8'));
+          if(rows.length!==4)throw Error('Expected four route samples');
+          for(const [i,r] of rows.entries()){
+            if(r.caseId!==(i===3?'osm_kl_corridor_smoke_004':`osm_kl_directed_smoke_00${i+1}`)||
+               r.ok!==true||r.responseStatus!==200||r.routeModeVerified!==true||
+               r.geometryContinuous!==true||r.geometryMetricsVerified!==true||
+               (i<2?r.distanceMeters!==17:!(Number.isFinite(r.distanceMeters)&&r.distanceMeters>=0))||
+               !Number.isFinite(r.serverTotalMs)||
+               r.graphCacheHit!==(i>0))
+               throw Error('Full-graph smoke evidence did not meet the expected route contract');
+          }
+          const [cold,warm,alternate,corridor]=rows;
+          if(!Number.isFinite(warm.graphLoadMs)||warm.graphLoadMs<0)
+            throw Error('Missing warm graph load measurement');
+          console.log('Full-graph KL cold and warm routes passed; distance metres:',cold.distanceMeters);
+          console.log('Cold graph load ms:',cold.graphLoadMs,'cold server total ms:',cold.serverTotalMs);
+          console.log('Warm graph load ms:',warm.graphLoadMs,'warm server total ms:',warm.serverTotalMs);
+          console.log('Distinct KL route metres:',alternate.distanceMeters,'warm server total ms:',alternate.serverTotalMs);
+          console.log('KL corridor candidate metres:',corridor.distanceMeters,'warm server total ms:',corridor.serverTotalMs);
+          console.log('Partial evidence only; 20-case manual acceptance remains pending.');
+          NODE
+      - name: Audit complete imported KL turn-restriction readiness (read-only)
+        run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
+      - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
+        run: node server/jalan/smoke-kl-preview-local.js
+      - name: Remove private local inputs and sanitized evidence
+        if: always()
+        run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
+
+  browser-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Verify KL pilot browser controls in Chromium (fixture API, no database)
+        run: node server/jalan/smoke-kl-preview-browser.js
+
+  browser-realgraph:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    env:
+      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+      JALAN_BROWSER_REAL_GRAPH: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Chromium against real imported KL graph through isolated loopback server
+        run: node server/jalan/smoke-kl-preview-browser.js
+
+  heroku-readonly:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify existing Heroku account and original app without mutations
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/check-heroku-access-readonly.js
+
+  heroku-provision-pilot:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    needs: heroku-readonly
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Create isolated empty Heroku pilot app (no deploy)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/provision-heroku-pilot.js
+
+  heroku-runtime:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    needs: heroku-readonly
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Report isolated Heroku JALAN runtime without secrets
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/check-heroku-pilot-runtime.js
+
+  heroku-authenticated-pilot:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    needs: heroku-readonly
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify authenticated private Heroku map health and read-only route
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/smoke-heroku-private-pilot.js

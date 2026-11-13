@@ -1,0 +1,105 @@
+name: JALAN private Heroku pilot deployment
+
+on:
+  push:
+    branches: [jalan-v4102-routing-regression-tests]
+    paths:
+      - 'server/jalan/configure-heroku-private-pilot.js'
+      - 'server/jalan/run-kl-preview-railway.js'
+      - 'server/jalan/kl-pilot-preview.html'
+      - 'Procfile'
+      - '.github/workflows/jalan-heroku-private-pilot-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jalan-heroku-private-pilot-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify narrowly scoped experimental entrypoint
+        shell: bash
+        run: |
+          # The GitHub branch must retain the production-safe entrypoint.
+          test "$(cat Procfile)" = "web: node server/app.js"
+          node --check server/jalan/run-kl-preview-railway.js
+          node --check server/jalan/configure-heroku-private-pilot.js
+          test -n "$HEROKU_API_KEY"
+          test -n "$JALAN_READONLY_MONGODB_URI"
+      - name: Configure JALAN pilot credentials only (never mterm2026)
+        run: node server/jalan/configure-heroku-private-pilot.js
+      - name: Deploy experimental branch to dedicated Heroku Git remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Override the Heroku entrypoint only inside this disposable runner.
+          # Never commit the pilot Procfile back to GitHub or change MTERMS2026.
+          printf '%s\n' 'web: node server/jalan/run-kl-preview-railway.js' > Procfile
+          test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
+          git add -- Procfile
+          git -c user.name='JALAN Pilot CI' -c user.email='jalan-pilot-ci@users.noreply.github.com' commit -m 'Heroku-only: isolated KL pilot entrypoint'
+          askpass="$RUNNER_TEMP/jalan-heroku-askpass.sh"
+          cat > "$askpass" <<'SCRIPT'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' 'heroku';;
+            *Password*) printf '%s\n' "$HEROKU_API_KEY";;
+            *) exit 1;;
+          esac
+          SCRIPT
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main
+          rm -f "$askpass"
+      - name: Verify canonical private pilot URL rejects anonymous visitors
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          (async () => {
+            const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot',{
+              headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
+                Accept:'application/vnd.heroku+json; version=3'},
+              signal:AbortSignal.timeout(15000)});
+            if(!r.ok)throw Error('Heroku app lookup failed with HTTP '+r.status);
+            const app=await r.json();
+            const url=new URL(app.web_url);
+            if(url.protocol!=='https:'||!/^[a-z0-9-]+\.herokuapp\.com$/.test(url.hostname))
+              throw Error('Heroku canonical domain mismatch');
+            console.log('Checking Heroku canonical domain '+url.hostname);
+            let last='none';
+            for(let i=0;i<18;i++){
+              try{
+                const check=await fetch(url.origin+'/',{
+                  signal:AbortSignal.timeout(12000),redirect:'manual'});
+                last=String(check.status);
+                if(check.status===401){
+                  console.log('Private pilot responds with expected HTTP 401 to anonymous visitors.');
+                  return;
+                }
+              }catch{last='unreachable';}
+              await new Promise(resolve=>setTimeout(resolve,10000));
+            }
+            throw Error('Pilot did not reject anonymous visitors as expected; last status '+last);
+          })().catch(e=>{
+            console.error('Private deployment verification failed: '+String(e.message).slice(0,170));
+            process.exitCode=1;
+          });
+          NODE
