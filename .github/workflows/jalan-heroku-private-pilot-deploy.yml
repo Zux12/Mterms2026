@@ -74,7 +74,7 @@ jobs:
             if(!r.ok)throw Error('Heroku app lookup failed with HTTP '+r.status);
             const app=await r.json();
             const url=new URL(app.web_url);
-            if(url.protocol!=='https:'||!/^[a-z0-9-]+\\.herokuapp\\.com$/.test(url.hostname))
+            if(url.protocol!=='https:'||!/^[a-z0-9-]+\.herokuapp\.com$/.test(url.hostname))
               throw Error('Heroku canonical domain mismatch');
             console.log('Checking Heroku canonical domain '+url.hostname);
             let last='none';
