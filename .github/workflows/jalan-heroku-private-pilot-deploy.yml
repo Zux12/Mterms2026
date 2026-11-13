@@ -1,0 +1,77 @@
+name: JALAN private Heroku pilot deployment
+
+on:
+  push:
+    branches: [jalan-v4102-routing-regression-tests]
+    paths:
+      - 'server/jalan/configure-heroku-private-pilot.js'
+      - 'server/jalan/run-kl-preview-railway.js'
+      - 'server/jalan/kl-pilot-preview.html'
+      - 'Procfile'
+      - '.github/workflows/jalan-heroku-private-pilot-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jalan-heroku-private-pilot-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify narrowly scoped experimental entrypoint
+        shell: bash
+        run: |
+          test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
+          node --check server/jalan/run-kl-preview-railway.js
+          node --check server/jalan/configure-heroku-private-pilot.js
+          test -n "$HEROKU_API_KEY"
+          test -n "$JALAN_READONLY_MONGODB_URI"
+      - name: Configure JALAN pilot credentials only (never mterm2026)
+        run: node server/jalan/configure-heroku-private-pilot.js
+      - name: Deploy experimental branch to dedicated Heroku Git remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/jalan-heroku-askpass.sh"
+          cat > "$askpass" <<'SCRIPT'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\\n' 'heroku';;
+            *Password*) printf '%s\\n' "$HEROKU_API_KEY";;
+            *) exit 1;;
+          esac
+          SCRIPT
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main
+          rm -f "$askpass"
+      - name: Verify private pilot responds and rejects anonymous visitors
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            status="$(curl -L -sS --max-time 12 -o /dev/null -w '%{http_code}' https://jalan-kl-private-pilot.herokuapp.com/ || true)"
+            if [ "$status" = 401 ]; then
+              echo "JALAN pilot is responding and rejects unauthenticated requests (401)."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Private pilot did not return expected 401; inspect dyno logs before use."
+          exit 1
