@@ -41,8 +41,9 @@ class MinQueue {
 // Preflight the entire supplied graph before certifying any turn-compliant route.
 // A reused edge ID would collapse distinct edge-state Dijkstra keys; inspecting
 // only the winning path can miss a collision in a later/unreachable bucket.
-function validateDirectedGraph(g){
+function validateDirectedGraph(g,incidentNode=null){
  const edgeIds=new Set();
+ let hasIncidentEdge=false;
  for(const [node,edges] of g.adj){
   if(typeof node!=='string'||!canonicalViaNode(node)||!Array.isArray(edges))
    throw Error('Invalid graph adjacency');
@@ -55,8 +56,11 @@ function validateDirectedGraph(g){
    verifiedWayOf(edge);
    if(edgeIds.has(edge.id))throw Error('Duplicate graph edge identity');
    edgeIds.add(edge.id);
+   if(incidentNode!==null&&(edge.from===incidentNode||edge.to===incidentNode))
+    hasIncidentEdge=true;
   }
  }
+ return hasIncidentEdge;
 }
 function searchTurnAware(g,startNode,endNode,restrictions){
  if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string'||
@@ -68,9 +72,16 @@ function searchTurnAware(g,startNode,endNode,restrictions){
  const readiness=classifyTurnEnforcement(restrictions);
  if(!readiness.allRestrictionsReady)return {ok:false,reason:'turn-restrictions-not-fully-verified',
   eligibleCount:readiness.eligible.length,counts:readiness.counts,productionRoutingAuthorized:false};
- validateDirectedGraph(g);
- if(startNode===endNode)return {ok:true,distanceMeters:0,pathEdgeIds:[],visited:0,
-  turnRestrictionsEnforced:true,productionRoutingAuthorized:false};
+ const isZeroHop=startNode===endNode;
+ const hasIncidentEdge=validateDirectedGraph(g,isZeroHop?startNode:null);
+ if(isZeroHop){
+  // An empty or isolated adjacency bucket is not evidence of a real road.
+  // A sink-only junction still qualifies because it has an incoming arc.
+  if(!hasIncidentEdge)return {ok:false,reason:'node-has-no-directed-road-edge',
+   turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
+  return {ok:true,distanceMeters:0,pathEdgeIds:[],visited:0,
+   turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
+ }
  const rules=new Map();
  for(const r of readiness.eligible){
   const k=JSON.stringify([r.fromWay,r.viaNode]);
