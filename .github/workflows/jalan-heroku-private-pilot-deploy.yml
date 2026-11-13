@@ -71,6 +71,9 @@ jobs:
           test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
           git add -- Procfile
           git -c user.name='JALAN Pilot CI' -c user.email='jalan-pilot-ci@users.noreply.github.com' commit -m 'Heroku-only: isolated KL pilot entrypoint'
+          # This temporary Procfile commit is the exact SHA pushed to Heroku,
+          # not the source branch SHA; record it for verified slug provenance.
+          git rev-parse HEAD > "$RUNNER_TEMP/jalan-expected-heroku-commit"
           askpass="$RUNNER_TEMP/jalan-heroku-askpass.sh"
           cat > "$askpass" <<'SCRIPT'
           #!/bin/sh
@@ -144,6 +147,20 @@ jobs:
               if(latest.version>base.version&&latest.id!==base.id&&
                  latest.slug?.id&&latest.slug.id!==base.slugId){
                 if(latest.status==='succeeded'){
+                  // Compare Heroku's deployed slug identity against the exact
+                  // runner commit pushed to the dedicated Heroku Git remote.
+                  const expected=fs.readFileSync(path.join(process.env.RUNNER_TEMP,
+                    'jalan-expected-heroku-commit'),'utf8').trim();
+                  if(!/^[a-f0-9]{40}$/.test(expected))throw Error('Missing expected Git SHA');
+                  const slugResponse=await fetch(
+                    'https://api.heroku.com/apps/jalan-kl-private-pilot/slugs/'+encodeURIComponent(latest.slug.id),{
+                      headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
+                        Accept:'application/vnd.heroku+json; version=3'},
+                      signal:AbortSignal.timeout(15000),redirect:'error'});
+                  if(!slugResponse.ok)throw Error('Heroku slug metadata HTTP '+slugResponse.status);
+                  const slug=await slugResponse.json();
+                  if(slug.id!==latest.slug.id||!slug.commit||slug.commit!==expected)
+                    throw Error('New Heroku slug Git SHA does not match pushed revision');
                   console.log('Verified new Heroku pilot release: version '+latest.version+
                     ', release ID '+latest.id+', status succeeded');
                   return;
@@ -157,7 +174,7 @@ jobs:
           NODE
       - name: Remove release baseline file
         if: always()
-        run: rm -f "$RUNNER_TEMP/jalan-pilot-release-baseline.json"
+        run: rm -f "$RUNNER_TEMP/jalan-pilot-release-baseline.json" "$RUNNER_TEMP/jalan-expected-heroku-commit"
       # The independent trusted-branch smoke job can finish before deployment.
       # Validate the newly deployed revision, not merely the preceding release.
       - name: Verify authenticated private pilot after deployed revision
