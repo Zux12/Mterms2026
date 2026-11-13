@@ -227,3 +227,44 @@ test('a padded via-node restriction cannot silently authorize a banned direct tu
  assert.equal(r.reason,'turn-restrictions-not-fully-verified');
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+function onlyTurnReversalTrap(restriction){
+ // Entry from another way is barred from taking the exit directly. Without
+ // reversal enforcement, the search can return to 's' under a new incoming
+ // identity and incorrectly escape by making an immediate U-turn at 'v'.
+ const entering=e('osm-way-111111:0:F','q','s',2);
+ const incoming=e('osm-way-1339792254:0:F','s','v',3);
+ const reverse=e('osm-way-1339792254:0:R','v','s',3);
+ const exit=e('osm-way-444444:0:F','s','target',2);
+ const entryRule={...base,restrictionId:'fixture-entry-block',
+  fromWay:'osm-way-111111',toWay:'osm-way-444444',viaNodes:['s']};
+ const onlyRule={...base,restrictionId:'fixture-only-rule',
+  toWay:base.fromWay,viaNodes:['v'],restriction};
+ return searchTurnAware(graph([entering,incoming,reverse,exit]),
+  'q','target',[entryRule,onlyRule]);
+}
+test('only_straight_on cannot be satisfied by reversing along the same OSM way',()=>{
+ const r=onlyTurnReversalTrap('only_straight_on');
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'no-turn-compliant-path');
+ assert.equal(r.productionRoutingAuthorized,false);
+});
+test('only_left_turn and only_right_turn also reject immediate reversal aliases',()=>{
+ for(const label of ['only_left_turn','only_right_turn']){
+  const r=onlyTurnReversalTrap(label);
+  assert.equal(r.ok,false,label);
+  assert.equal(r.reason,'no-turn-compliant-path',label);
+  assert.equal(r.productionRoutingAuthorized,false,label);
+ }
+});
+test('same-way forward travel remains permitted under verified only_straight_on',()=>{
+ const incoming=e('osm-way-1339792254:0:F','s','v',10);
+ const forward=e('osm-way-1339792254:1:F','v','t',10);
+ const reverse=e('osm-way-1339792254:0:R','v','s',1);
+ const rule={...base,toWay:base.fromWay,restriction:'only_straight_on'};
+ const r=searchTurnAware(graph([incoming,reverse,forward]),'s','t',[rule]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,forward.id]);
+ assert.equal(r.distanceMeters,20);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
