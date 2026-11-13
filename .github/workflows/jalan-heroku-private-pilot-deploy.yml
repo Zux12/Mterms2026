@@ -51,7 +51,7 @@ jobs:
           set -euo pipefail
           # Override the Heroku entrypoint only inside this disposable runner.
           # Never commit the pilot Procfile back to GitHub or change MTERMS2026.
-          printf '%s\\n' 'web: node server/jalan/run-kl-preview-railway.js' > Procfile
+          printf '%s\n' 'web: node server/jalan/run-kl-preview-railway.js' > Procfile
           test "$(cat Procfile)" = "web: node server/jalan/run-kl-preview-railway.js"
           git add -- Procfile
           git -c user.name='JALAN Pilot CI' -c user.email='jalan-pilot-ci@users.noreply.github.com' commit -m 'Heroku-only: isolated KL pilot entrypoint'
