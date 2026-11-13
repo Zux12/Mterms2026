@@ -21,7 +21,11 @@ async function main(){
  console.log('Latest release status: '+(Array.isArray(releases)?releases[0]?.status:'unknown'));
  console.log('Formation: '+JSON.stringify(Array.isArray(formations)?formations.map(x=>({type:x.type,quantity:x.quantity,size:x.size})):[]));
  console.log('Dynos: '+JSON.stringify(Array.isArray(dynos)?dynos.map(x=>({type:x.type,state:x.state})):[]));
- const result=await fetch('https://'+APP+'.herokuapp.com/',{
+ const canonical=new URL(app.web_url);
+ if(canonical.protocol!=='https:'||!/^[a-z0-9-]+\\.herokuapp\\.com$/.test(canonical.hostname))
+  throw Error('Unexpected Heroku app canonical URL');
+ console.log('Canonical pilot URL: '+canonical.origin);
+ const result=await fetch(canonical.origin+'/',{
   signal:AbortSignal.timeout(15000),redirect:'manual'});
  console.log('Unauthenticated HTTP status: '+result.status);
  if(result.status!==401)process.exitCode=2;
