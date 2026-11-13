@@ -189,3 +189,20 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: node server/jalan/check-heroku-pilot-runtime.js
+
+  heroku-authenticated-pilot:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    needs: heroku-readonly
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify authenticated private Heroku map health and read-only route
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/smoke-heroku-private-pilot.js
