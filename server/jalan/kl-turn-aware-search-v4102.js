@@ -71,7 +71,8 @@ function searchTurnAware(g,startNode,endNode,restrictions){
    turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
  const readiness=classifyTurnEnforcement(restrictions);
  if(!readiness.allRestrictionsReady)return {ok:false,reason:'turn-restrictions-not-fully-verified',
-  eligibleCount:readiness.eligible.length,counts:readiness.counts,productionRoutingAuthorized:false};
+  eligibleCount:readiness.eligible.length,counts:readiness.counts,
+  turnRestrictionsEnforced:false,productionRoutingAuthorized:false};
  const isZeroHop=startNode===endNode;
  const incidence=validateDirectedGraph(g,startNode,endNode);
  if(isZeroHop){
