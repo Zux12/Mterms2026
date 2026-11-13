@@ -45,6 +45,27 @@ jobs:
           test -n "$JALAN_READONLY_MONGODB_URI"
       - name: Configure JALAN pilot credentials only (never mterm2026)
         run: node server/jalan/configure-heroku-private-pilot.js
+      - name: Record pre-push Heroku release baseline (non-secret)
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),path=require('node:path');
+          (async()=>{
+            const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot/releases',{
+              headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
+                Accept:'application/vnd.heroku+json; version=3'},
+              signal:AbortSignal.timeout(15000),redirect:'error'});
+            if(!r.ok)throw Error('Heroku releases lookup HTTP '+r.status);
+            const rows=await r.json();
+            if(!Array.isArray(rows)||!rows.length)throw Error('Missing Heroku release baseline');
+            const latest=rows.reduce((a,b)=>Number(a.version)>Number(b.version)?a:b);
+            if(!Number.isInteger(latest.version)||!latest.id)
+              throw Error('Invalid Heroku release baseline');
+            fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'jalan-pilot-release-baseline.json'),
+              JSON.stringify({id:latest.id,version:latest.version}),{mode:0o600,flag:'wx'});
+            console.log('Captured previous Heroku release version '+latest.version);
+          })().catch(e=>{console.error(String(e.message).slice(0,150));process.exitCode=1});
+          NODE
       - name: Deploy experimental branch to dedicated Heroku Git remote
         shell: bash
         run: |
@@ -103,6 +124,42 @@ jobs:
             process.exitCode=1;
           });
           NODE
+      - name: Confirm newer successful Heroku release (read-only)
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),path=require('node:path');
+          const filename=path.join(process.env.RUNNER_TEMP,'jalan-pilot-release-baseline.json');
+          (async()=>{
+            const base=JSON.parse(fs.readFileSync(filename,'utf8'));
+            let latest=null;
+            for(let i=0;i<18;i++){
+              const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot/releases',{
+                headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
+                  Accept:'application/vnd.heroku+json; version=3'},
+                signal:AbortSignal.timeout(15000),redirect:'error'});
+              if(!r.ok)throw Error('Heroku release status HTTP '+r.status);
+              const rows=await r.json();
+              if(!Array.isArray(rows)||!rows.length)throw Error('Missing Heroku release result');
+              latest=rows.reduce((a,b)=>Number(a.version)>Number(b.version)?a:b);
+              if(!Number.isInteger(latest.version)||!latest.id)
+                throw Error('Malformed Heroku release status');
+              if(latest.version>base.version&&latest.id!==base.id){
+                if(latest.status==='succeeded'){
+                  console.log('Verified new Heroku pilot release: version '+latest.version+
+                    ', release ID '+latest.id+', status succeeded');
+                  return;
+                }
+                if(latest.status==='failed')throw Error('New Heroku release failed');
+              }
+              await new Promise(resolve=>setTimeout(resolve,10000));
+            }
+            throw Error('No newer succeeded Heroku release than baseline '+base.version);
+          })().catch(e=>{console.error(String(e.message).slice(0,170));process.exitCode=1});
+          NODE
+      - name: Remove release baseline file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/jalan-pilot-release-baseline.json"
       # The independent trusted-branch smoke job can finish before deployment.
       # Validate the newly deployed revision, not merely the preceding release.
       - name: Verify authenticated private pilot after deployed revision
