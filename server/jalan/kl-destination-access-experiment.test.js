@@ -80,3 +80,26 @@ test('noncanonical source edge IDs rejected by experimental filtering',()=>{
  const bad=graph([edge('fake','a','b',A,B)]);
  assert.throws(()=>filteredGraph(bad),/Noncanonical/);
 });
+
+test('candidate diversity prevents one segmented inaccessible way from crowding out another street',()=>{
+ const e=[];
+ // Six short fragments of one disconnected service way would previously
+ // occupy all candidate slots before a reachable public OSM road.
+ const target=[3.14,101.681],start=[3.14,101.68];
+ e.push(edge('osm-way-100:0:F','start','gate',start,target));
+ for(let i=0;i<6;i++){
+  const x=101.6811+i*0.00001;
+  e.push(edge('osm-way-200:'+i+':F','isolate'+i,'isolated'+i,
+   [3.14002,x],[3.14003,x]));
+ }
+ e.push(edge('osm-way-300:0:F','gate','reach',target,[3.1402,101.681]));
+ const g=filteredGraph(graph(e));
+ const snaps=candidateSnaps(g,[3.14002,101.68113],
+  {maxWalkMeters:90,maxCandidates:4,maxPerWay:2});
+ assert.ok(snaps.some(x=>x.edge.id==='osm-way-300:0:F'),
+  'distinct reachable OSM way must get an opportunity');
+ assert.equal(snaps.filter(x=>x.edge.id.startsWith('osm-way-200:')).length,2);
+ assert.ok(snaps.length<=4);
+ assert.throws(()=>candidateSnaps(g,target,{maxPerWay:0}),/Invalid/);
+ assert.throws(()=>candidateSnaps(g,target,{maxPerWay:5}),/Invalid/);
+});
