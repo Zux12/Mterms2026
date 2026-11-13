@@ -129,3 +129,32 @@ test('private Heroku deployment validates authenticated mobile UI only after rou
  assert.ok(source.includes('Legal driving route verified: NO'));
  assert.ok(!source.includes('console.log(token)')&&!source.includes('console.log(password)'));
 });
+
+test('manual validation-only retry pins supported Chromium OS and skips Heroku writes',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const registration=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ assert.match(yaml,/runs-on: ubuntu-24\.04/,
+  'Playwright 1.58.2 unsupported on ubuntu-26.04; pin supported OS');
+ assert.match(yaml,/validation_only:/);
+ assert.match(yaml,/if: \$\{\{ inputs\.validation_only \}\}/,
+  'validation-only mode must be explicit and visible in logs');
+ for(const name of [
+  'Configure JALAN pilot credentials only (never mterm2026)',
+  'Record pre-push Heroku release baseline (non-secret)',
+  'Deploy experimental branch to dedicated Heroku Git remote',
+  'Verify canonical private pilot URL rejects anonymous visitors',
+  'Confirm newer successful Heroku release (read-only)'
+ ]){
+  const start=yaml.indexOf('      - name: '+name);
+  assert.ok(start>0,name+' step must exist');
+  const region=yaml.slice(start,start+250);
+  assert.ok(region.includes('if: ${{ !inputs.validation_only }}'),
+    name+' must not run during validation-only retry');
+ }
+ assert.ok(yaml.includes('run: node server/jalan/smoke-heroku-private-pilot.js'));
+ assert.ok(yaml.includes('run: node server/jalan/smoke-heroku-private-mobile.js'));
+ assert.ok(registration.includes('workflow_dispatch:'),'manual dispatch remains available');
+});
