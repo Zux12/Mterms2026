@@ -1,0 +1,15 @@
+'use strict';
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const editor=fs.readFileSync('server/oilandgas/editor.js','utf8');
+const api=fs.readFileSync('server/oilandgas/authors-admin.js','utf8');
+const html=fs.readFileSync('server/oilandgas/desk/desk.html','utf8');
+const js=fs.readFileSync('server/oilandgas/desk/authors.js','utf8');
+assert(editor.indexOf("router.use('/authors', require('./authors-admin')(database));") > editor.indexOf("router.use(wrap(async(req,res,next)=>{"), 'Author API must be mounted after authentication.');
+assert(api.includes("Cache-Control', 'no-store, private"),'Private responses must not be cached.');
+assert(api.includes("db.collection('author_admin_details')"),'Author overrides must be stored separately.');
+assert(api.includes("record.authors.find"),'Emails must only come from explicit author records.');
+assert(!api.includes("db.collection('members')"),'Do not expose member emails as author data.');
+assert(html.includes('id="authors-admin-heading"') && html.includes('id="author-edit-email"'));
+assert(js.includes("textContent") && !js.includes("innerHTML"),'Use DOM text-only rendering for untrusted data.');
+console.log('Oil & Gas private author admin checks passed.');
