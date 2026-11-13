@@ -100,6 +100,8 @@ jobs:
           console.log('KL corridor candidate metres:',corridor.distanceMeters,'warm server total ms:',corridor.serverTotalMs);
           console.log('Partial evidence only; 20-case manual acceptance remains pending.');
           NODE
+      - name: Compare public OSM destination-access arrival against full read-only KL graph
+        run: node server/jalan/smoke-kl-destination-access-realgraph.js
       - name: Audit complete imported KL turn-restriction readiness (read-only)
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
