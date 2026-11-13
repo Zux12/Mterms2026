@@ -42,6 +42,29 @@ Source: `jalan_navigation.road_graph_edges_v495` and `road_network_v493`, existi
 
 **Engineering decision:** Do not clear the six warnings or change `access=destination` to unrestricted. Do not certify the current route as safe or legal. Keep TomTom authoritative for live routes. For a future *experimental* candidate, compare destination-aware restricted access versus a separately calculated, accessible public-road arrival point; require an actual eligibility rule, directed connectivity, barriers/road-sign evidence, and owner-visible uncertainty before allowing any routing change.
 
+## Full imported KL graph comparison — 13 November 2026
+
+Read-only trusted GitHub Actions experiments used **all 168,221 imported directed KL road edges** and public OSM-road fixture endpoints. **These public fixtures are NOT the owner's complete 3.19 km origin/destination** and do not constitute the 20 independently reviewed driving journeys.
+
+| Test / evidence | Original restricted approach | Experimental unflagged arrival |
+|---|---:|---:|
+| Approximate public-OSM driving distance from local fixture start | **87 m** | **10 m** (selected candidate) |
+| `access=destination` caution edges traversed | **6** | **0** (on selected candidate path) |
+| Selected public directed OSM edge | Restricted two-way sequence | `osm-way-784531130:1:F` |
+| Nearest straight-line last leg to fixture destination | N/A | **78.9 m** |
+| Directed imported graph reachable | Yes | **Yes** |
+| Verified vehicle stopping permission | No | **No** |
+| Verified walking connection, barriers or crossings | No | **No** |
+| Actual driving/legal route approved | **NO** | **NO** |
+
+**First comparison** [Actions 43453353742](https://github.com/Zux12/Mterms2026/actions/runs/43453353742) reviewed eight closest directed candidate edges, all on disconnected service roads `osm-way-1323547305` and `osm-way-1323547306`, at **34.7–42 m straight line** from the public fixture endpoint. **None** was directed-reachable after caution edges were excluded. This demonstrates that the nearest road is not necessarily a valid driving arrival.
+
+**Improved distinct-way comparison** [Actions 43454600352](https://github.com/Zux12/Mterms2026/actions/runs/43454600352) bounded the search to 16 candidate directed edges, maximum two per OSM way, within 150m straight line. Nine candidates are directed-reachable without caution edges, seven are disconnected. Selected candidate `osm-way-784531130:1:F` is **Leboh Pasar Besar**, imported `highway=tertiary`, `oneway=yes` forward, `surface=asphalt`, no explicit `access`, `vehicle` or `motorVehicle` restriction. **Absence of a caution tag does not prove stopping or local access is permitted.**
+
+The selected candidate's **10m driving + 78.9m straight-line final leg** is **not** a verified alternative driving+walking itinerary; an actual pedestrian path can be longer, blocked or unavailable. Roadside stop restrictions, signage, pedestrian crossings and the destination boundary remain unverified. The two comparisons are controlled graph experiments, not proofs of legal driving directions, and not production JALAN routing changes.
+
+**Engineering conclusion:** Finding a directed-reachable, less-restricted public OSM arrival is feasible *in this imported graph* near the sampled restricted approach. Do **not** automatically snap user destinations to it or clear the six warnings. Next independently verify safe vehicle stopping, pedestrian accessibility, destination-only permission, and real route geometry against a current authorized road routing provider. Turn-aware enforcement is **not** authorized: full graph turn-readiness audit reports zero verified-simple restrictions and 1,941 total relation records.
+
 ## Next acceptance actions
 1. Verify on-street/authoritative local signage or current road restrictions at entry from Leboh Pasar Besar and at the Junction of Jalan Mahkamah Persekutuan / Jalan Mahkamah Tinggi; a tagged OSM way is not a road permit.
 2. Establish whether the requested destination is **inside the legitimately served access-only area**, or requires a nearby public road drop-off and short final walking distance. Use only consenting, non-sensitive public test points.
