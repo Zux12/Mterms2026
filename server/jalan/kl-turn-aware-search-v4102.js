@@ -2,7 +2,7 @@
 // Experimental edge-state Dijkstra on an already loaded directed graph.
 // Applies ONLY independently verified, simple, unconditional via-node rules.
 // No production integration; unverified/complex restrictions are a safety blocker.
-const {classifyTurnEnforcement}=require('./kl-turn-enforcement-readiness-v4102');
+const {classifyTurnEnforcement,canonicalViaNode}=require('./kl-turn-enforcement-readiness-v4102');
 // Edge IDs are authoritative in this prototype. A caller-supplied roadId
 // must never override their OSM identity and silently bypass a turn rule.
 function verifiedWayOf(edge){
@@ -39,7 +39,8 @@ class MinQueue {
  }
 }
 function searchTurnAware(g,startNode,endNode,restrictions){
- if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string')
+ if(!g||!(g.adj instanceof Map)||typeof startNode!=='string'||typeof endNode!=='string'||
+    !canonicalViaNode(startNode)||!canonicalViaNode(endNode))
   throw new TypeError('Directed adjacency and node IDs required');
  if(!Array.isArray(restrictions)||restrictions.length===0)
   return {ok:false,reason:'no-verified-turn-restriction-coverage',
@@ -75,8 +76,9 @@ function searchTurnAware(g,startNode,endNode,restrictions){
    // Validate the entire directed connection, including the first edge of a path.
    // A mismatched origin or missing identity cannot establish legal adjacency.
    if(!e||typeof e.id!=='string'||!e.id.trim()||
-      typeof e.from!=='string'||e.from!==cur.node||
-      typeof e.to!=='string'||!e.to||!Number.isFinite(e.len)||e.len<0)
+      // Graph junction aliases must not bypass verified via-node rules.
+      typeof e.from!=='string'||e.from!==cur.node||!canonicalViaNode(e.from)||
+      typeof e.to!=='string'||!canonicalViaNode(e.to)||!Number.isFinite(e.len)||e.len<0)
     throw Error('Invalid graph edge');
    const fromWay=cur.prev?verifiedWayOf(cur.prev):null,toWay=verifiedWayOf(e);
    const applicable=fromWay?(rules.get(JSON.stringify([fromWay,cur.node]))||[]):[];

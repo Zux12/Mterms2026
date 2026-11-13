@@ -268,3 +268,36 @@ test('same-way forward travel remains permitted under verified only_straight_on'
  assert.equal(r.distanceMeters,20);
  assert.equal(r.productionRoutingAuthorized,false);
 });
+
+
+test('zero-padded imported graph junction ID cannot bypass a verified no-turn rule',()=>{
+ const incoming=e('osm-way-1339792254:9:F','2911228074','05757831665',10);
+ const outgoing=e('osm-way-607581032:0:F','05757831665','5757831664',10);
+ const relation={...base,viaNodes:['5757831665']};
+ assert.throws(()=>searchTurnAware(graph([incoming,outgoing]),'2911228074','5757831664',[relation]),
+  /Invalid graph edge/);
+});
+test('whitespace-padded symbolic graph junction ID cannot bypass a verified rule',()=>{
+ const incoming=e('osm-way-1339792254:9:F','s','v ',10);
+ const outgoing=e('osm-way-607581032:0:F','v ','t',10);
+ assert.throws(()=>searchTurnAware(graph([incoming,outgoing]),'s','t',[base]),
+  /Invalid graph edge/);
+});
+test('noncanonical graph route endpoint is rejected before a zero-length or direct route',()=>{
+ const incoming=e('osm-way-1339792254:0:F','05757831665','t',10);
+ assert.throws(()=>searchTurnAware(graph([incoming]),'05757831665','t',[base]),
+  /Directed adjacency and node IDs required/);
+});
+test('canonical numeric junction IDs still enforce the verified no-turn detour',()=>{
+ const incoming=e('osm-way-1339792254:9:F','2911228074','5757831665',10);
+ const banned=e('osm-way-607581032:0:F','5757831665','5757831664',2);
+ const detour=e('osm-way-999991:0:F','5757831665','x',7);
+ const finish=e('osm-way-999992:0:F','x','5757831664',8);
+ const relation={...base,viaNodes:['5757831665']};
+ const r=searchTurnAware(graph([incoming,banned,detour,finish]),
+  '2911228074','5757831664',[relation]);
+ assert.equal(r.ok,true);
+ assert.deepEqual(r.pathEdgeIds,[incoming.id,detour.id,finish.id]);
+ assert.equal(r.distanceMeters,25);
+ assert.equal(r.productionRoutingAuthorized,false);
+});
