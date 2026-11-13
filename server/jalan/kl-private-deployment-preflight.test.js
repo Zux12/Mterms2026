@@ -102,7 +102,7 @@ test('private pilot deployment verifies the actual pushed Git SHA against Heroku
  const commit=yaml.indexOf("git -c user.name='JALAN Pilot CI'");
  const expected=yaml.indexOf('git rev-parse HEAD > "$RUNNER_TEMP/jalan-expected-heroku-commit"');
  const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main');
- const metadata=yaml.indexOf("'/slugs/'");
+ const metadata=yaml.indexOf('/slugs/');
  const auth=yaml.indexOf('Verify authenticated private pilot after deployed revision');
  assert.ok(commit>0&&expected>commit&&push>expected);
  assert.ok(metadata>push&&auth>metadata,'slug provenance must precede authenticated route smoke');
