@@ -1,0 +1,46 @@
+# JALAN — manual private-pilot release, rollback and source-isolation runbook
+**Written:** 2026-11-14 MYT. **Status:** reviewed source-level RELEASE PLAN ONLY; no manual deployment/rollback or live capacity measurement occurred.
+**Authority:** [Pre-phone gate](JALAN_PRE_PHONE_RELEASE_GATE.md), [public/private source audit](JALAN_PUBLIC_FRONTEND_NONPHONE_AUDIT.md), and [master handover](JALAN_PROJECT_HANDOVER.md).
+This is a controlled operator procedure, **not authorization to put experimental KL routes into public driving service**.
+
+## 1. Three completely different release surfaces
+| Surface | Controlled source | Current role | Update/rollback boundary |
+|---|---|---|---|
+| Original Mterms + Oil & Gas | `Zux12/Mterms2026/main` | Shared application and existing data | Do not replace `server/app.js`, original `Procfile`, `package.json` or shared Heroku service. Broad [integration PR #2](https://github.com/Zux12/Mterms2026/pull/2) is draft/unsafe for wholesale merge. |
+| Dedicated private KL Heroku pilot | `Zux12/Mterms2026/jalan-v4102-routing-regression-tests` | Authenticated, **experimental** road graph and isolated private HTML | **Manual-only** `.github/workflows/jalan-heroku-private-pilot-deploy.yml` on trusted ref; runner creates its own temporary pilot `Procfile` commit and pushes only to `jalan-kl-private-pilot` Heroku Git. Does not modify `main` or original Mterms app. |
+| Public GitHub Pages V4.7.4 | `Zux12/jalan-navigation/main` | Separate TomTom-first/OSRM prototype; optional legacy KL3C consent panel | GitHub Pages build follows public repo changes. Its KL3C endpoint still targets original Mterms; it is **not** private Heroku. Public frontend fixes require their own PR, mock/browser checks, and separately evidenced Pages deployment. |
+
+**Production routing boundary:** TomTom traffic-aware routing stays primary when configured. The private graph is never promoted to production or treated as legal without independent field/authority evidence. Browser-held TomTom keys and public original-Mterms KL3C coordinate exposure are separate N11 risks, not resolved merely by releasing the private preview.
+
+## 2. Release-candidate preflight — all checks must be independently evidenced
+1. Freeze a trusted **source SHA** on the dedicated pilot branch, record merge ancestry and reviewed file changes. Existing reference: `a2267ac636cb73805eb3b1cd51cb0f735a8ddfa3`, with [protected seven-job CI 43564400866](https://github.com/Zux12/Mterms2026/actions/runs/43564400866). Do not assume this SHA is currently deployed; the last independently proven manual code release remains [43445270220](https://github.com/Zux12/Mterms2026/actions/runs/43445270220).
+2. Finish applicable **non-phone** N11 browser/390px, no-key/invalid-key, permissions, route-error/fallback, public-page privacy and dependency checks. Do not conflate the separate Pages build with the private pilot.
+3. Read-only record existing Heroku **app identity, release version/ID, code slug ID/commit, dyno state, last success** and anonymous HTTP 401. Never print auth headers, tokens, route coordinates or MongoDB URI. Do not treat a new config-only Heroku release number as a code deployment.
+4. Confirm `Procfile` at trusted source still says `web: node server/app.js` and workflow still declares **only** `workflow_dispatch`, `contents:read`, trusted ref guard and `concurrency` serialization; protected fullgraph/Heroku checks must not run on arbitrary draft branches. Source workflow currently overrides the `Procfile` **only inside the disposable runner**.
+5. Reconfirm isolated read-only Atlas credentials and full-KL graph provenance as in protected 168,221-edge checks; neither graph import count nor fixture success proves legal turns. Turn enforcement stays disabled (1,941 unresolved imported restriction records and no accepted independent legal verification).
+6. Confirm the legacy Pages KL3C coordinate-consent guard remains default-off; no secret/route data is placed in an artifact or PR. **If any preflight is red or unverified, do not release.**
+
+## 3. Single authorized manual pilot promotion
+An authorized operator reviews the frozen SHA and starts `JALAN private Heroku pilot deployment` on **`jalan-v4102-routing-regression-tests`**, with `validation_only=false`, exactly once. An automation must not turn a push/merge into implicit release authorization.
+
+The workflow snapshots previous release and slug, creates a temporary runner-only pilot `Procfile` commit, pushes to **the dedicated** `jalan-kl-private-pilot` remote (its forced remote update is **not** a Github branch merge), and checks a **newer successful release with a different code slug whose `slug.commit` equals that temporary pushed commit**, followed by anonymous 401, authenticated private page/graph/route checks and authenticated 390px Chromium. Record public GitHub Actions run URL, trusted source SHA, new release version and slug ID **without secrets**. A passing protected CI job before deployment is not proof of the deployed version.
+
+A `validation_only=true` dispatch runs existing pilot authentication/390px checks **without** a new Heroku push; use only when fresh evidence is warranted, not on every hourly schedule. Browser mock tests and desktop emulation cannot establish native iPhone safe area, road legality, live TomTom traffic, or actual vehicle GPS behavior.
+
+## 4. Stop / rollback decision and operator control
+**Do not continue as if successful** if the workflow returns red, the slug ID/commit is not the newly pushed commit, anonymous access is not 401, read-only graph or 200/404/422 semantics regress, 390px UI fails, or the original Mterms app appears affected. Preserve CI diagnostic evidence (no tokens, no route coordinates) and keep public/production TomTom isolated.
+
+**Rollback is manual, not an automatic action in this workflow.** Before any release, capture a *previous known-good* Heroku code-release version and code slug metadata. If the new private pilot release is unhealthy, an authorized Heroku operator may explicitly restore that previously verified Heroku release (Heroku release rollback or a reviewed manual re-promotion of the previously known-good code), **after checking that its configuration and slug still match the intended isolated pilot**. Heroku rollback may also restore prior configuration: verify auth, database read-only access, application identity and config changes before invoking. Do not guess the release number, issue rollback to the shared Mterms app, force-update GitHub refs, or delete production data.
+
+After restoration, prove **fresh** anonymous 401 and authenticated private page/graph/route/390px smoke again. Record the actual restored release/slug and whether all checks passed. An untested rollback procedure remains a *plan*, not a verified recovery time or recovery success guarantee.
+
+For a **public Pages** regression, use a separately reviewed revert/change on `jalan-navigation` and confirm its new Pages deployment; a Heroku rollback cannot revert static Pages JavaScript. Never silently switch to OSRM for a failed TomTom traffic-aware route and present OSRM's ETA as traffic-aware.
+
+## 5. Read-only operation, monitoring and scale gates
+- Record basic availability/dyno state, latest release status, unauthorized 401, authenticated route response types, cold graph-load failures, memory/quota pressure, route 5xx/timeout rate and browser JS errors without real location coordinates. Do not claim continuous monitoring exists just because periodic CI passed.
+- Historical cold full-KL load was roughly 34 seconds in [protected run 43383229543](https://github.com/Zux12/Mterms2026/actions/runs/43383229543); this is **not** a service-level target or measured capacity. No verified multiuser load, autoscaling, Atlas tier-limit or traffic-quota benchmark exists. Keep private, low-concurrency pilot; performance/load and privacy review are outstanding before production use.
+- Independent external road/turn/access evidence, accurate grade separation, 20/20 independently sourced KL cases and field signage review remain separate driving-authorization gates. Never count synthetic fixtures or a pilot 404 as an independently verified closed road.
+- **Peninsular expansion** starts only after KL gates and agreed workload/provenance review: inventory OSM schema/coverage and road signs city by city, validate geography and graph resources in isolated read-only/staging contexts, add independent route categories and TomTom comparisons before incremental manual promotion. Sabah/Sarawak is later. No permanent block based on a scheduled DBKL temporary lane closure without time-specific evidence.
+
+## 6. Current release decision
+**HOLD — NO NEW RELEASE AUTHORIZED.** N11 public desktop/error/provider/security checks, real pilot release of the newer snap-distance UI, actual capacity and full legal on-road reviews are not complete. The private source baseline and last verified Heroku release are different; no phone-test readiness is asserted. This runbook closes the missing **documented staged-release/rollback design** subtask of N12, **not** rollback execution, service capacity acceptance or N13 release verification.
