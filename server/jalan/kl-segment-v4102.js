@@ -24,9 +24,11 @@ for(const e of next){const nd=cur.d+e.len;if(nd<(dist.get(e.to)??Infinity)){dist
 if(!dist.has(END))return null;const path=[];let n=END;while(n!==START){const p=prev.get(n);if(!p||path.length>COUNT)throw Error('Path reconstruction');path.push(p.e);n=p.from;}path.reverse();const geometry=[];for(const e of path){for(const p of e.coords){const q=[p[1],p[0]],last=geometry[geometry.length-1];if(!last||last[0]!==q[0]||last[1]!==q[1])geometry.push(q);}}
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited};}
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
-// Private coordinates supplied in a JSON request body avoid Heroku's
-// default request-path/query logging. Old GET remains for compatibility and
-// must be retired or independently redacted before privacy approval.
+// JSON-body coordinates avoid route coordinates in default router URL logs.
+// Original Mterms still parses JSON globally (5 MB) before mounting /api/jalan:
+// this endpoint's 1 KB Content-Length policy is checked AFTER that parser,
+// so it does NOT cap upstream parse memory or replace server log redaction.
+// Legacy GET remains accessible to direct clients and needs separate mitigation.
 function parsePostedCoordinates(req){
  const b=req.body,keys=b&&typeof b==='object'&&!Array.isArray(b)?Object.keys(b).sort():[];
  if(!req.is('application/json')||Object.keys(req.query||{}).length||
@@ -35,11 +37,24 @@ function parsePostedCoordinates(req){
     keys.some(k=>typeof b[k]!=='number'||!Number.isFinite(b[k])))return null;
  return {start:[b.startLat,b.startLng],end:[b.endLat,b.endLng]};
 }
+// Fail closed for missing transfer length, chunked bodies, or compression.
+// This bounds the declared HTTP request body for route processing only; the
+// shared application's global 5 MB JSON parser has already consumed the body.
+function postTransportPolicy(req,res,next){
+ const type=String(req.headers['content-type']||'').split(';')[0].trim().toLowerCase();
+ if(type!=='application/json')return res.status(415).json({ok:false,error:'JSON content type required'});
+ const encoding=String(req.headers['content-encoding']||'identity').trim().toLowerCase();
+ if(encoding!=='identity')return res.status(415).json({ok:false,error:'Compressed JSON is not supported'});
+ const declared=String(req.headers['content-length']||'');
+ if(!/^[1-9][0-9]*$/.test(declared))return res.status(411).json({ok:false,error:'Content-Length required for JSON route'});
+ if(Number(declared)>1024)return res.status(413).json({ok:false,error:'JSON route request exceeds 1024 bytes'});
+ next();
+}
 async function handleRoute(req,res){try{
  const posted=req.method==='POST'?parsePostedCoordinates(req):null;
  if(req.method==='POST'&&!posted)return res.status(400).json({ok:false,error:'Four numeric JSON coordinates required; URL query not accepted'});
  const s=posted?posted.start:[Number(req.query.startLat),Number(req.query.startLng)],
        t=posted?posted.end:[Number(req.query.endLat),Number(req.query.endLng)];if(!pilot(s)||!pilot(t))return res.status(400).json({ok:false,error:'Both coordinates must be in the KL pilot region'});const g=await load(),a=nearest(g.edges,s),b=nearest(g.edges,t);if(!a||!b||a.meters>200||b.meters>200)return res.status(422).json({ok:false,error:'No nearby directed graph segment within 200 m',startSnapMeters:a?Math.round(a.meters):null,endSnapMeters:b?Math.round(b.meters):null});const r=calculate(g,a,b);if(!r)return res.status(404).json({ok:false,error:'No directed path found'});res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',geometry:{type:'LineString',coordinates:r.geometry},...r,startSnapMeters:Math.round(a.meters),endSnapMeters:Math.round(b.meters),illustrativeEtaMinutes:Math.round(r.distanceMeters/1000/30*60*10)/10,etaAssumedSpeedKmh:30,trafficAware:false,turnRestrictionsEnforced:false,legalDrivingRouteVerified:false,routingActivated:false,databaseWrites:0});}catch(e){console.error('KL 3C:',e.message);res.status(503).json({ok:false,error:'KL preview temporarily unavailable'});}}
 router.get('/route',handleRoute); // legacy compatibility; URL coords can be logged
-router.post('/route',express.json({limit:'1kb'}),handleRoute); // JSON-body option; no silent GET fallback
+router.post('/route',postTransportPolicy,handleRoute); // upstream global JSON parser required; no GET fallback
 module.exports={router,project,calculate,distance,parsePostedCoordinates};
