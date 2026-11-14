@@ -1,7 +1,7 @@
 # PROJECT JALAN — MASTER HANDOVER & ENGINEERING LOG
 
 **READ THIS FILE FIRST IN EVERY NEW CHAT OR AUTOMATED DEVELOPMENT RUN.**
-**Updated:** 2026-11-14 (Malaysia time, UTC+08)
+**Updated:** 2026-11-15 (Malaysia time, UTC+08)
 **Owner's priority:** Get an operational, reliable JALAN web navigation app into the owner's hands for testing, then prepare distribution and later Apple App Store work. Avoid repeating completed work.
 
 ## 1. Current position (do not accidentally reset progress)
@@ -83,6 +83,16 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 6. Keep short but information-rich, append new log entries newest first, preserve prior important milestones. Keep all credentials out of GitHub.
 
 ## 8. Latest activity / chronological log (newest first)
+
+
+### 2026-11-15 ~01:03 MYT — Public opt-in observation consent revocation fixed in source; Pages postmerge unverified (N11 partial)
+- **Prerequisites:** Read master handover, pre-phone gate, and frontend non-phone audit first; inspected latest GitHub branches, PRs, commits and CI. Previous protected [backend run 43607313132](https://github.com/Zux12/Mterms2026/actions/runs/43607313132) still has **7/7 passed**, including prior authenticated dedicated Heroku v15 checks; this is historical evidence, not a newly deployed private snap-distance interface. Independent legal KL acceptance remains **0/20**; estimated engineering progress remains **~93%**.
+- **Concrete privacy defect:** The public opt-in shared-traffic script disabled sharing on Stop, journey-stop and pagehide, but did not abort an already pending GPS-observation POST to original shared Mterms. Such a request could continue after consent revocation. Client cancellation is inherently best-effort; previously server-accepted observations cannot be recalled.
+- **Fix merged after review:** [public PR #16](https://github.com/Zux12/jalan-navigation/pull/16), isolated branch **dev/jalan-observation-inflight-consent-revoke-20261115**, exactly three changed frontend/test paths; per-upload AbortController aborts on all three stop triggers. An identity guard prevents a stale cancelled request's cleanup from unlocking the newly opted-in session. Visible stop wording distinguishes attempted cancellation from server data deletion. Original default-off consent, the nearby-coordinate GET hold, TomTom primary, manual OSRM and backend were preserved.
+- **Targeted evidence:** [PR privacy CI 43618912671](https://github.com/Zux12/jalan-navigation/actions/runs/43618912671) **SUCCESS** including Stop/journey-stop/pagehide and restart race, and [real offline 390px Chromium PR CI 43618912803](https://github.com/Zux12/jalan-navigation/actions/runs/43618912803) **SUCCESS** with a browser-intercepted, never-sent observation request. Reviewed three-file diff and GitHub compare (3 ahead, 0 behind). Squash-merged to public main at [320dbfc93d6b051aa1c3920a1b7b721fcd65a0b8](https://github.com/Zux12/jalan-navigation/commit/320dbfc93d6b051aa1c3920a1b7b721fcd65a0b8) ~01:03 MYT.
+- **Not claimed:** No independently verified postmerge Pages build/deploy or external live browser load yet; PR-only success is not deployment evidence. No proof that the original server aborts a received request or deletes accepted records. The original Mterms router query-redaction flag was previously verified **disabled** and its direct callers/log retention remain unresolved. Backend [draft PR #50](https://github.com/Zux12/Mterms2026/pull/50) stays unmerged. No private Heroku deploy/restore, original Mterms modification, Atlas write, secret/key use, routing promotion or phone interaction.
+- **Status and exact next:** N11 still **PARTIAL/BLOCKED** despite this frontend privacy hardening; N13 remains manual release pending; N15 **NOT READY**. Independently establish postmerge exact-SHA Pages evidence, then address server log/retention and remaining non-phone release checks before controlled manual authenticated private pilot deployment and one consolidated stationary phone handoff.
+
 
 
 ### 2026-11-15 ~00:14 MYT — Additional public coordinate GET exposures found; reviewed privacy HOLD merged (N11 partial)
