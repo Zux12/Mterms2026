@@ -19,6 +19,7 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: node --check server/jalan/run-kl-local-readonly.js
+      - run: node --test server/jalan/run-kl-local-readonly-headers.test.js
       - run: node --check server/jalan/smoke-kl-evidence-http-v4102.js
       - run: node server/jalan/check-kl-preview-browser-script.js
       - run: node --test server/jalan/kl-private-deployment-preflight.test.js
