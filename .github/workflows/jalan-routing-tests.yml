@@ -19,6 +19,7 @@ jobs:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: node --check server/jalan/run-kl-local-readonly.js
+      - run: node --check server/jalan/smoke-kl-evidence-http-v4102.js
       - run: node server/jalan/check-kl-preview-browser-script.js
       - run: node --test server/jalan/kl-private-deployment-preflight.test.js
       - run: node --test server/jalan/kl-railway-auth.test.js
@@ -106,6 +107,8 @@ jobs:
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
         run: node server/jalan/smoke-kl-preview-local.js
+      - name: Verify experimental 200 and 422 HTTP evidence and probe real 404 on imported KL graph
+        run: node server/jalan/smoke-kl-evidence-http-v4102.js
       - name: Remove private local inputs and sanitized evidence
         if: always()
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
