@@ -199,8 +199,18 @@ button.addEventListener('click',async()=>{
    accessReviewText.textContent=rows.join('\\n');
   }
 
+  // Already computed by backend road snap, not inferred from route geometry.
+  // This is a proximity advisory, never a legal/physical walking approval.
+  const safeSnap=value=>Number.isFinite(value)&&value>=0&&value<=200?
+   Math.round(value)+' m':'unavailable';
+  const endSnapReview=Number.isFinite(data.endSnapMeters)&&data.endSnapMeters>=25;
+  const anyAmbiguous=data.startSnapAmbiguous===true||data.endSnapAmbiguous===true;
   status.textContent='Distance: '+(data.distanceMeters/1000).toFixed(2)+' km\n'+
    'Illustrative ETA (not traffic-aware): '+data.illustrativeEtaMinutes+' min\n'+
+   'Start-to-road snap: '+safeSnap(data.startSnapMeters)+'\n'+
+   'Destination-to-road snap: '+safeSnap(data.endSnapMeters)+'\n'+
+   (endSnapReview?'Arrival caution: destination is away from the selected imported road; verify permitted access and final walking route.\n':'')+
+   (anyAmbiguous?'Snap caution: multiple nearby graph edges may fit the requested point.\n':'')+
    'Possible turn-restriction warnings: '+(data.potentialTurnRestrictionReviewCount??'unavailable')+'\n'+
    'Access caution edges: '+data.potentialAccessReviewEdges+'\n'+
    'Legal driving route verified: NO';
