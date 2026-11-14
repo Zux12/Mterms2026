@@ -51,3 +51,10 @@ This compares current **repository source**, not a live authenticated browser se
 - Experimental KL turn/access enforcement readiness. Keep `legalDrivingRouteVerified:false`.
 
 **No deployment, MongoDB write, repository frontend edit or production navigation change was performed by this source audit.**
+
+
+## Actual 390px public Chromium integration gate — 14 November 2026
+- [Frontend PR #3](https://github.com/Zux12/jalan-navigation/pull/3) **merged** test-only change on public `main`, commit [`4e332bd8febf547fe4e6852fd6f79372576faf69`](https://github.com/Zux12/jalan-navigation/commit/4e332bd8febf547fe4e6852fd6f79372576faf69). Exactly two new test/CI files; no application JavaScript, CSS, backend, TomTom or secrets changed.
+- [PR CI 43593370453](https://github.com/Zux12/jalan-navigation/actions/runs/43593370453) `chromium-public-390` job **passed**; log confirms actual headless Chromium on 390x844 public V4.7.4 HTML/JS/CSS. Browser serves locally; version-matched Leaflet CSS/JS are substituted from pinned npm 1.9.4 package while **every other external request is blocked**.
+- Confirmed no JS page exceptions on startup, search/map/panel bounded to 390px viewport, mock geolocation denied status, fake TomTom traffic-aware route render, explicit switch to separately mocked OSRM, TomTom HTTP 401 controlled error (no automatic OSRM call), key removal clears session/local browser storage. Assertions use only **public demonstration coordinates** and fake API key.
+- **Remaining N11 scope:** actual CDN subresource integrity/CSP, browser-key lifecycle risk reduction, third-party script supply-chain audit, public legacy Mterms endpoint access-log privacy, complete accessibility and keyboard checks, real network failure/retry and live traffic accuracy. Neither local mocks nor Chromium proves physical Safari, live Heroku uptime, driving route legality or acceptance of any of the 20 independent KL road cases. Keep phone gate closed pending all implementable checks and N13 manual release.
