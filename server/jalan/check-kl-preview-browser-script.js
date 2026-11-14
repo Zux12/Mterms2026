@@ -14,4 +14,9 @@ for(const id of ['map','start','end','token','check','route','swap','status']){
 }
 if(!html.includes('EXPERIMENTAL ONLY')||!html.includes('legalDrivingRouteVerified'))
  throw Error('Pilot safety warning or route safety gate missing');
+for(const diagnostic of ['Start-to-road snap:', 'Destination-to-road snap:',
+ 'endSnapMeters', 'startSnapAmbiguous', 'endSnapAmbiguous', 'Arrival caution:',
+ 'Legal driving route verified: NO']){
+ if(!html.includes(diagnostic))throw Error('Missing private route snap/access safety diagnostic: '+diagnostic);
+}
 process.stdout.write('KL pilot browser script parses and required controls exist.\n');
