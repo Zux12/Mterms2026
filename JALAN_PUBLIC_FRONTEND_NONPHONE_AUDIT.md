@@ -25,6 +25,18 @@ This compares current **repository source**, not a live authenticated browser se
 6. **Staged release and rollback:** maintain original Mterms app unmodified, deployment manual-only, and separate private Heroku health/auth/snap-warning verification. Protect current main-side Oil & Gas files from the broad draft PR #2.
 7. **No-phone readiness gate:** update `JALAN_PRE_PHONE_RELEASE_GATE.md` N05/N11/N12/N13 only when each actual review/test is done. Do not invite owner to phone testing before completing feasible non-phone work and documenting external limitations.
 
+## Implemented public KL3C privacy guard — 14 November 2026
+
+**Real code change, not merely a recommendation:** In the separate public GitHub Pages repository [PR #1](https://github.com/Zux12/jalan-navigation/pull/1), committed and **merged to `main`** at `e14feec09b9ff1f0777441b6e872bbbbecba79e0`, the legacy public `jalan-kl-3c.js` panel now:
+- Shows explicit **default-off per-page consent** identifying the original Mterms Heroku experimental endpoint and warning that route coordinates are transmitted in the request URL, with possible server-side access logs. No claim of server-side deletion is made.
+- Blocks ordinary route requests and the one-time GPS permission request until opted in. Refuses out-of-KL coordinates. Does not persist this consent in browser storage.
+- Revocation and “Clear preview and consent” abort pending requests, clear preview geometry and prevent a delayed GPS callback from making an outbound request; request uses `cache:'no-store'` and `referrerPolicy:'no-referrer'`.
+- Preserves `NOT FOR DRIVING` warnings and the original TomTom/OSRM provider selection; **does not** change the original Mterms app, destination-only road restrictions, private Heroku pilot or any database.
+
+**Reproducible evidence:** [PR-only CI 43591440058](https://github.com/Zux12/jalan-navigation/actions/runs/43591440058) passed seven mocked, no-network JavaScript tests of default-deny, explicit consent, abort/revocation, stale GPS response, clear, bounded coordinates and no persistent consent. [Postmerge main test 43591526277](https://github.com/Zux12/jalan-navigation/actions/runs/43591526277) also passed. GitHub Pages [build 43591526076](https://github.com/Zux12/jalan-navigation/actions/runs/43591526076) was still pending when this was first recorded; obtain completed result before asserting public deployment. These are **source/mocked checks**, NOT physical mobile use or a live endpoint privacy audit.
+
+**Remaining:** Legacy public KL3C still calls the original Mterms experimental backend *only when explicitly authorized*. Server-side original endpoint behavior/access logs remain unverified; a stronger production boundary could instead remove that public feature or place it behind a purpose-built authenticated JALAN endpoint, after proper compatibility and privacy review. No claim that the original endpoint is safe for general users. TomTom browser-key persistence, external Leaflet supply-chain and OSRM fallback end-to-end tests remain open.
+
 ## Explicitly unverified
 - Current public site live functional behavior, current original-Mterms public KL endpoint response, and physical Safari UX.
 - Current TomTom key, live traffic or reproducible route/ETA output. No key accessed.
