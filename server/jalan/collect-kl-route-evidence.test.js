@@ -8,26 +8,32 @@ const good={
  ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,routingActivated:false,
  databaseWrites:0,trafficAware:false,legalDrivingRouteVerified:false,
  accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
- distanceMeters:1571,startSnapMeters:0,endSnapMeters:0,
+ distanceMeters:1571,edgeCount:1,startSnapMeters:0,endSnapMeters:0,
  geometry:{type:'LineString',coordinates:[[101.69,3.14],[101.70,3.15]]},
  geometryGapReviewAvailable:true,geometryGapCountOverThreshold:0,geometryGapThresholdMeters:2,
+ geometryGapTransitionsInspected:0,geometryMaxGapMeters:0,geometryGapAdvisoryOnly:true,
  potentialAccessReviewEdges:1,potentialTurnRestrictionReviewCount:0,
  startSnapAmbiguous:false,endSnapAmbiguous:true
 };
 const noPath={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',graphVersion:'road_graph_edges_v495',graphEdges:168221,
  error:'No directed path found',routingActivated:false,databaseWrites:0,
- trafficAware:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
-const reply=(status,body)=>async()=>({status,json:async()=>body});
+ trafficAware:false,legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,
+  turnRestrictionsEnforced:false,timingMs:{graphLoad:12.25,snapping:3.45,pathSearch:78.65,total:94.35}};
+const reply=(status,body,headers={'cache-control':'no-store'})=>async()=>({
+ status,headers:new Headers(headers),json:async()=>body
+});
 test('collects actual experimental response metadata but never writes coordinates or secrets to evidence',async()=>{
  let request;
  const out=await collectEvidence([base],url,{fetchImpl:async(u,o)=>{
-  request={u,o};return {status:200,json:async()=>good};
+  request={u,o};return {status:200,headers:new Headers({'cache-control':'no-store'}),json:async()=>good};
  },authHeader:'Authorization',authValue:'Bearer secret-local-only'});
  assert.equal(out.length,1);assert.equal(out[0].responseStatus,200);assert.equal(out[0].ok,true);
  assert.equal(out[0].geometryContinuous,true);
  assert.equal(out[0].endSnapAmbiguous,true);
  assert.equal(request.o.headers.Authorization,'Bearer secret-local-only');
- assert.equal(request.o.redirect,'error');assert.ok(request.u.includes('startLat=3.14'));
+ assert.equal(request.o.redirect,'error');assert.equal(request.o.cache,'no-store');
+ assert.equal(request.o.headers['cache-control'],'no-store');
+ assert.ok(request.u.includes('startLat=3.14'));
  const serialized=JSON.stringify(out);
  assert.ok(!serialized.includes('101.69'));assert.ok(!serialized.includes('secret-local-only'));
  assert.ok(!serialized.includes('coordinates'));
@@ -42,6 +48,39 @@ test('recognized no-path 404 is accepted only with pre-existing independent revi
  assert.equal(out[0].noPathModeVerified,true);
  assert.equal(out[0].pathSearchMs,78.7);
  assert.equal(out[0].serverTotalMs,94.4);
+});
+test('KL no-path evidence refuses claimed legal or access/turn enforcement',async()=>{
+ const c={...base,caseId:'kl-nopath-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,[key]:true})});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].failureClass,'unverified-experimental-response',key);
+  assert.equal(out[0].noPathModeVerified,undefined,key);
+  assert.equal(out[0].graphEvidenceVerified,undefined,key);
+ }
+});
+test('KL no-path evidence requires all three explicit advisory-only flags',async()=>{
+ const c={...base,caseId:'kl-nopath-missing-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const altered={...noPath};delete altered[key];
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,altered)});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].failureClass,'unverified-experimental-response',key);
+  assert.equal(out[0].noPathModeVerified,undefined,key);
+ }
+});
+test('KL no-path rejects non-boolean enforcement metadata without retaining it',async()=>{
+ const c={...base,caseId:'kl-nopath-malformed-flags',journeyType:'disconnected',
+  expectedReachable:false,disconnectionReviewed:true};
+ const payload={secret:'DO_NOT_ARCHIVE_NO_PATH_METADATA'};
+ for(const key of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced']){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,{...noPath,[key]:payload})});
+  assert.equal(out[0].responseStatus,0,key);
+  assert.equal(out[0].graphEvidenceVerified,undefined,key);
+  assert.ok(!JSON.stringify(out).includes(payload.secret),key);
+ }
 });
 test('generic HTTP 404 cannot be mistaken for a disconnected road',async()=>{
  const c={...base,expectedReachable:false,disconnectionReviewed:true};
@@ -249,11 +288,16 @@ test('verified 422 snap miss is distinct from no-path and preserves bounded timi
  const body={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
   error:'No nearby directed graph segment within 200 m',
   routingActivated:false,databaseWrites:0,trafficAware:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,graphCacheHit:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,
+  turnRestrictionsEnforced:false,
   startSnapMeters:240,endSnapMeters:null,
   timingMs:{graphLoad:12,snapping:4,pathSearch:0,total:16}};
  const out=await collectEvidence([base],url,{fetchImpl:reply(422,body)});
  assert.equal(out[0].responseStatus,422);
  assert.equal(out[0].failureClass,'snap-out-of-range');
+ assert.equal(out[0].graphEvidenceVerified,true);
+ assert.equal(out[0].graphCacheHit,false);
  assert.equal(out[0].ok,false);
  assert.equal(out[0].noPathModeVerified,undefined);
  assert.equal(out[0].startSnapMeters,240);
@@ -358,4 +402,202 @@ test('reviewed no-path replies preserve only boolean cache-state diagnostics',as
   ...noPath,mode:'NOT_JALAN',graphCacheHit:true
  })});
  assert.equal(unrelated[0].graphCacheHit,undefined);
+});
+
+// A syntactically valid route with matching endpoints is not complete pilot
+// evidence if its server-side geometry gap audit is missing or inconsistent.
+test('KL collector rejects missing geometry gap audit fields as continuity evidence',async()=>{
+ for(const changed of [
+  {geometryGapAdvisoryOnly:undefined},{geometryGapTransitionsInspected:undefined},
+  {geometryMaxGapMeters:undefined},{geometryGapThresholdMeters:undefined},
+  {geometryGapReviewAvailable:false}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].responseStatus,200);
+  assert.equal(out[0].geometryMetricsVerified,true,'endpoint/distance cross-check remains independent');
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector rejects contradictory geometry-gap audits even with clean geometry',async()=>{
+ for(const changed of [
+  {geometryGapAdvisoryOnly:false},{geometryGapTransitionsInspected:-1},
+  {geometryGapTransitionsInspected:0.5},{geometryGapThresholdMeters:-1},
+  {geometryGapThresholdMeters:3},{geometryMaxGapMeters:-0.1},
+  {geometryMaxGapMeters:3},{geometryGapCountOverThreshold:1}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector does not persist arbitrary malformed geometry audit metadata',async()=>{
+ const secret='PRIVATE_KL_GAP_REVIEW_TOKEN';
+ const body={...good,geometryGapTransitionsInspected:{secret},
+  geometryMaxGapMeters:[secret],geometryGapAdvisoryOnly:secret};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,body)});
+ assert.equal(out[0].geometryContinuous,false);
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.ok(!JSON.stringify(out).includes(secret));
+});
+
+test('cacheable or server-identifying successful replies cannot supply private KL route evidence',async()=>{
+ for(const headers of [{},{'cache-control':'public, max-age=300'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,good,headers)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].geometryMetricsVerified,undefined);
+  assert.equal(out[0].distanceMeters,undefined);
+  assert.ok(!JSON.stringify(out).includes('101.69'));
+ }
+});
+
+test('cacheable disconnected-road HTTP 404 cannot count as independently reviewed no-path',async()=>{
+ const c={...base,journeyType:'disconnected',expectedReachable:false,disconnectionReviewed:true};
+ for(const headers of [{},{'cache-control':'max-age=60'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([c],url,{fetchImpl:reply(404,noPath,headers)});
+  assert.equal(out[0].responseStatus,0);
+  assert.equal(out[0].noPathModeVerified,undefined);
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+ }
+});
+
+test('cacheable GPS-snap HTTP 422 cannot supply trusted failure diagnostics',async()=>{
+ const miss={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  startSnapMeters:240};
+ for(const headers of [{},{'cache-control':'public, max-age=60'},
+   {'cache-control':'no-store','x-powered-by':'Express'}]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,miss,headers)});
+  assert.equal(out[0].ok,false);
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].startSnapMeters,undefined);
+ }
+});
+
+test('KL collector rejects incomplete geometry transition coverage and invalid edge counts',async()=>{
+ for(const changed of [
+  {edgeCount:undefined},{edgeCount:0},{edgeCount:2},{edgeCount:'1'},
+  {edgeCount:1.5},{edgeCount:168224},{geometryGapTransitionsInspected:1}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(200,{...good,...changed})});
+  assert.equal(out[0].responseStatus,200);
+  assert.equal(out[0].geometryMetricsVerified,true,'geographic cross-check is independent');
+  assert.equal(out[0].geometryContinuous,false,JSON.stringify(changed));
+ }
+});
+test('KL collector accepts complete transition coverage for multi-edge routes',async()=>{
+ const out=await collectEvidence([base],url,{fetchImpl:reply(200,{
+  ...good,edgeCount:3,geometryGapTransitionsInspected:2
+ })});
+ assert.equal(out[0].geometryMetricsVerified,true);
+ assert.equal(out[0].geometryContinuous,true);
+});
+
+test('KL 422 snap diagnostic refuses incomplete or stale graph provenance',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,
+  startSnapMeters:241,endSnapMeters:null};
+ for(const change of [
+  {graphEdges:1000},{graphEdges:null},{graphEdges:'168221'},
+  {graphVersion:'road_graph_edges_v493'},{graphVersion:undefined}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...change})});
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].startSnapMeters,undefined);
+ }
+});
+test('KL 422 snap diagnostic refuses unsupported or missing road safety flags',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
+ for(const flag of ['legalDrivingRouteVerified','accessRestrictionsEnforced','turnRestrictionsEnforced'])
+  for(const value of [true,undefined]){
+   const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,[flag]:value})});
+   assert.equal(out[0].failureClass,'unverified-experimental-response');
+   assert.equal(out[0].startSnapMeters,undefined);
+  }
+});
+test('KL 422 evidence retains only sanitized boolean graph cache state',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,startSnapMeters:241,endSnapMeters:null};
+ const out=await collectEvidence([base],url,{fetchImpl:reply(422,{
+  ...snap,graphCacheHit:{secret:'PRIVATE_SNAP_CACHE_TOKEN'}
+ })});
+ assert.equal(out[0].failureClass,'snap-out-of-range');
+ assert.equal(out[0].graphEvidenceVerified,true);
+ assert.equal(out[0].graphCacheHit,null);
+ assert.ok(!JSON.stringify(out).includes('PRIVATE_SNAP_CACHE_TOKEN'));
+});
+
+test('KL 422 snap evidence rejects responses with both reported snaps inside the 200 m boundary',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,
+  startSnapMeters:0,endSnapMeters:199};
+ for(const metrics of [
+  {},{startSnapMeters:199,endSnapMeters:199},
+  {startSnapMeters:null,endSnapMeters:null},
+  {startSnapMeters:undefined,endSnapMeters:100}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.equal(out[0].startSnapMeters,undefined);
+ }
+});
+
+test('KL 422 snap evidence allows rounded 200 m miss and either endpoint beyond threshold',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221};
+ for(const metrics of [
+  {startSnapMeters:200,endSnapMeters:0},
+  {startSnapMeters:0,endSnapMeters:201},
+  {startSnapMeters:280,endSnapMeters:null}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'snap-out-of-range');
+  assert.equal(out[0].responseStatus,422);
+  assert.equal(out[0].graphEvidenceVerified,true);
+  assert.equal(out[0].noPathModeVerified,undefined);
+  assert.equal(out[0].ok,false);
+ }
+});
+
+test('KL 422 snap evidence rejects malformed or implausible distance metrics without leaking metadata',async()=>{
+ const snap={ok:false,mode:'EXPERIMENTAL_SEGMENT_ROUTE',
+  error:'No nearby directed graph segment within 200 m',
+  routingActivated:false,databaseWrites:0,trafficAware:false,
+  legalDrivingRouteVerified:false,accessRestrictionsEnforced:false,turnRestrictionsEnforced:false,
+  graphVersion:'road_graph_edges_v495',graphEdges:168221,
+  startSnapMeters:250,endSnapMeters:0};
+ for(const metrics of [
+  {startSnapMeters:'250'},
+  {startSnapMeters:Infinity},
+  {startSnapMeters:-1,endSnapMeters:230},
+  {startSnapMeters:{secret:'DO_NOT_COPY_422'},endSnapMeters:250},
+  {startSnapMeters:400001},
+  {endSnapMeters:undefined}
+ ]){
+  const out=await collectEvidence([base],url,{fetchImpl:reply(422,{...snap,...metrics})});
+  assert.equal(out[0].failureClass,'unverified-experimental-response');
+  assert.equal(out[0].graphEvidenceVerified,undefined);
+  assert.ok(!JSON.stringify(out).includes('DO_NOT_COPY_422'));
+ }
 });

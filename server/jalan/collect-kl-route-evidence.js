@@ -35,10 +35,24 @@ function validateCases(cases){
 }
 function verifiedGeometry(body){
  const g=body?.geometry?.coordinates;
+ // The gap report is advisory, not proof of legal road connectivity. Even
+ // so, incomplete or internally contradictory audits must not be accepted
+ // as positive geometry-continuity evidence for the 20-journey pilot gate.
  return body?.geometry?.type==='LineString'&&Array.isArray(g)&&g.length>=2&&
-  g.every(p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1]))&&
-  body.geometryGapReviewAvailable===true&&body.geometryGapCountOverThreshold===0&&
-  Number.isFinite(body.geometryGapThresholdMeters)&&body.geometryGapThresholdMeters<=2;
+  g.every(p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&
+    Math.abs(p[0])<=180&&Math.abs(p[1])<=90)&&
+  body.geometryGapReviewAvailable===true&&body.geometryGapAdvisoryOnly===true&&
+  body.geometryGapCountOverThreshold===0&&
+  // The router audits every consecutive path edge, including zero-length
+  // virtual node connectors. A claimed clean gap report with fewer inspected
+  // transitions than edgeCount-1 is not complete route evidence.
+  Number.isSafeInteger(body.edgeCount)&&body.edgeCount>=1&&body.edgeCount<=168223&&
+  Number.isSafeInteger(body.geometryGapTransitionsInspected)&&
+  body.geometryGapTransitionsInspected===body.edgeCount-1&&
+  Number.isFinite(body.geometryGapThresholdMeters)&&
+  body.geometryGapThresholdMeters>=0&&body.geometryGapThresholdMeters<=2&&
+  Number.isFinite(body.geometryMaxGapMeters)&&body.geometryMaxGapMeters>=0&&
+  body.geometryMaxGapMeters<=body.geometryGapThresholdMeters;
 }
 // Independently cross-check experimental GeoJSON against the private input
 // coordinates while they are in memory. Never serialize those coordinates.
@@ -82,6 +96,14 @@ function routeReply(body){
 function fullGraphReply(body){
  return body?.graphVersion==='road_graph_edges_v495'&&body?.graphEdges===168221;
 }
+// Private journey requests include coordinates in the query string. The
+// preview promises uncacheable, fingerprint-minimized responses. Do not accept
+// cached or server-identifying replies as durable pilot evidence, including
+// a supposed reviewed disconnection or GPS-snap failure.
+function privateResponseHeadersVerified(response){
+ return response?.headers?.get?.('cache-control')==='no-store'&&
+  response.headers.get('x-powered-by')===null;
+}
 // The response body is untrusted diagnostic input. Keep only scalar fields
 // of the expected type in the durable evidence file, never opaque strings,
 // objects or arrays that may accidentally contain URL/GPS/token material.
@@ -89,6 +111,16 @@ function fullGraphReply(body){
 function evidenceNonnegativeNumber(v){return Number.isFinite(v)&&v>=0?v:null;}
 function evidenceCount(v){return Number.isSafeInteger(v)&&v>=0?v:null;}
 function evidenceBoolean(v){return typeof v==='boolean'?v:null;}
+// A claimed HTTP 422 must be supported by the router's rounded snap
+// measurements. The server rounds to integer metres, so a true distance
+// just above 200 m may be reported as exactly 200 m. Both distances inside
+// that rounded boundary (or unavailable) cannot establish a snap miss.
+// Fail closed on nonnumeric/unsafe values; never serialize response metadata.
+function snapMissMetricsVerified(body){
+ const a=body?.startSnapMeters,b=body?.endSnapMeters;
+ return [a,b].every(v=>v===null||(Number.isFinite(v)&&v>=0&&v<=400000))&&
+  [a,b].some(v=>Number.isFinite(v)&&v>=200);
+}
 // Stage timings are advisory only: preserve measured processing costs even for
 // a legitimate directed no-path outcome, without copying URL, GPS or secrets.
 function appendServerTiming(row,body){
@@ -116,15 +148,15 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
  for(const c of cases){ // Sequential to avoid load spikes against experimental graph.
   const u=new URL(endpoint);
   for(const k of ['startLat','startLng','endLat','endLng'])u.searchParams.set(k,String(c[k]));
-  const headers={accept:'application/json'};
+  const headers={accept:'application/json','cache-control':'no-store'};
   if(authHeader)headers[authHeader]=authValue;
   const row={caseId:c.caseId,journeyType:c.journeyType,expectedReachable:c.expectedReachable};
   const start=performance.now();
   try{
-   const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',signal:AbortSignal.timeout(timeoutMs)});
+   const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});
    let body=null;try{body=await res.json();}catch(_){} // Do not log response bodies.
    row.elapsedMs=Math.round((performance.now()-start)*10)/10;
-   if(res.status===200&&routeReply(body)&&fullGraphReply(body)){
+   if(res.status===200&&privateResponseHeadersVerified(res)&&routeReply(body)&&fullGraphReply(body)){
     row.responseStatus=200;row.ok=true;row.graphEvidenceVerified=true;
     row.distanceMeters=evidenceNonnegativeNumber(body.distanceMeters);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
@@ -139,7 +171,9 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.potentialTurnRestrictionReviewCount=evidenceCount(body.potentialTurnRestrictionReviewCount);
     row.startSnapAmbiguous=evidenceBoolean(body.startSnapAmbiguous);
     row.endSnapAmbiguous=evidenceBoolean(body.endSnapAmbiguous);
-   }else if(res.status===404&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&body.error==='No directed path found'&&fullGraphReply(body)){
+   }else if(res.status===404&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
+    body.turnRestrictionsEnforced===false&&body.error==='No directed path found'&&fullGraphReply(body)){
     row.responseStatus=404;row.ok=false;row.graphEvidenceVerified=true;
     row.disconnectionReviewed=c.disconnectionReviewed===true;
     // Confirm a recognized experimental no-path response, not just HTTP 404.
@@ -151,12 +185,19 @@ async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,aut
     row.searchVisitedNodes=Number.isSafeInteger(body.searchVisitedNodes)&&
       body.searchVisitedNodes>=0&&body.searchVisitedNodes<=400000?body.searchVisitedNodes:null;
     appendServerTiming(row,body);
-   }else if(res.status===422&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
+   }else if(res.status===422&&privateResponseHeadersVerified(res)&&body?.ok===false&&body.mode==='EXPERIMENTAL_SEGMENT_ROUTE'&&
     body.routingActivated===false&&body.databaseWrites===0&&body.trafficAware===false&&
+    body.legalDrivingRouteVerified===false&&body.accessRestrictionsEnforced===false&&
+    body.turnRestrictionsEnforced===false&&fullGraphReply(body)&&
+    snapMissMetricsVerified(body)&&
     body.error==='No nearby directed graph segment within 200 m'){
     // A snap failure is NOT a directed no-path finding. Preserve only sanitized
     // measurements; the existing acceptance validator must reject this case.
     row.responseStatus=422;row.ok=false;row.failureClass='snap-out-of-range';
+    // A 422 is a diagnostic failure, never accepted journey evidence.
+    // Attribute it to KL only after the full v495 graph and advisory flags match.
+    row.graphEvidenceVerified=true;
+    row.graphCacheHit=evidenceBoolean(body.graphCacheHit);
     row.startSnapMeters=evidenceNonnegativeNumber(body.startSnapMeters);
     row.endSnapMeters=evidenceNonnegativeNumber(body.endSnapMeters);
     appendServerTiming(row,body);
@@ -197,4 +238,4 @@ if(require.main===module)main().catch(e=>{
   /^(Usage:|Expected |Invalid |Coordinate |Both |Input and output|Do not |Endpoint |Use HTTPS|JALAN_EXPERIMENTAL_ROUTE_URL|Authentication)/.test(e.message)?e.message:'check local configuration and file permissions')+'\n');
  process.exitCode=1;
 });
-module.exports={endpointUrl,validateCases,verifiedGeometry,routeReply,collectEvidence};
+module.exports={endpointUrl,validateCases,verifiedGeometry,geometryMatchesJourney,routeReply,collectEvidence};
