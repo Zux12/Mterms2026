@@ -199,4 +199,8 @@ jobs:
           npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.58.2
           npx playwright install --with-deps chromium
       - name: Verify authenticated 390px private mobile pilot after deployed revision
+        env:
+          # New code deployments MUST show PR #43 snap offsets; legacy
+          # validation-only checks of the old code do not assert this.
+          JALAN_REQUIRE_SNAP_UI: ${{ !inputs.validation_only }}
         run: node server/jalan/smoke-heroku-private-mobile.js
