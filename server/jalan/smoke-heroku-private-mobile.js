@@ -57,6 +57,17 @@ async function main(){
   await page.getByText('KL graph available:',{exact:false}).waitFor({timeout:30000});
   await page.locator('#route').click();
   await page.getByText('Legal driving route verified: NO',{exact:false}).waitFor({timeout:30000});
+  // A brand-new manually approved private-pilot release must contain the
+  // source-level snap-distance UI shipped in PR #43. The validation_only
+  // path may inspect the OLDER deployed code before promotion, so it must
+  // not claim this new feature is deployed or require it prematurely.
+  if(process.env.JALAN_REQUIRE_SNAP_UI==='true'){
+   const status=await page.locator('#status').innerText();
+   if(!status.includes('Start-to-road snap:')||
+      !status.includes('Destination-to-road snap:')||
+      !status.includes('Legal driving route verified: NO'))
+    throw Error('new-release-snap-distance-ui-contract-missing');
+  }
   if((await page.locator('#trip-distance').innerText())!=='0.02 km')
    throw Error('mobile-distance-contract-invalid');
   if((await page.locator('.leaflet-overlay-pane path').count())<1)
