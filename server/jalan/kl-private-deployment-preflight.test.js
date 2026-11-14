@@ -191,3 +191,18 @@ test('new manual private Heroku code release verifies road-snap UI, old validati
  }
  assert.ok(!yaml.includes('  push:\n'),'release workflow must remain strictly manual');
 });
+
+test('private Heroku health sampling is bounded, authenticated and never a driving capacity claim',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const src=fs.readFileSync(path.join(__dirname,'smoke-heroku-private-pilot.js'),'utf8');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-routing-tests.yml'),'utf8');
+ assert.ok(yaml.includes('run: node server/jalan/smoke-heroku-private-pilot.js'));
+ assert.ok(yaml.includes("github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
+ assert.match(src,/for\(let wave=0;wave<2;wave\+\+\)/);
+ assert.match(src,/Array\.from\(\{length:4\}/);
+ assert.ok(src.includes("request('/api/jalan/kl/health',20000)"));
+ assert.ok(src.includes("r.headers.get('cache-control')!=='no-store'"));
+ assert.ok(src.includes('Diagnostic sample only; no route throughput or service SLA established'));
+ assert.ok(!src.includes('console.log(auth)')&&!src.includes('console.log(token)'));
+});

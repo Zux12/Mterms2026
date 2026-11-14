@@ -59,6 +59,30 @@ async function main(){
   response.routingActivated!==false)
   throw Error('Private JALAN route failed strict diagnostic-only contract');
  console.log('Private Heroku read-only KL route verified. No driving legitimacy claimed.');
+ // Small, bounded service-responsiveness observation for N12. Four concurrent
+ // authenticated, read-only health requests in each of two waves. NOT a route
+ // stress test, multi-driver benchmark or production capacity acceptance.
+ const durations=[];
+ for(let wave=0;wave<2;wave++){
+  const observations=await Promise.all(Array.from({length:4},async()=>{
+   const started=process.hrtime.bigint();
+   const r=await request('/api/jalan/kl/health',20000);
+   const h=await r.json();
+   const elapsedMs=Number(process.hrtime.bigint()-started)/1e6;
+   if(h.ok!==true||h.readOnly!==true||h.liveRouting!==false||
+      h.graphEdges!==168221||h.graphCached!==true||
+      r.headers.get('cache-control')!=='no-store')
+    throw Error('Private pilot bounded health stability/provenance failed');
+   if(!Number.isFinite(elapsedMs)||elapsedMs<0)
+    throw Error('Invalid health latency observation');
+   return elapsedMs;
+  }));
+  durations.push(...observations);
+ }
+ durations.sort((a,b)=>a-b);
+ const percentile=p=>Math.round(durations[Math.ceil(p*durations.length)-1]*10)/10;
+ console.log('Dedicated private pilot bounded health sample: 8 authenticated read-only requests, max 4 concurrent, 0 failures; response p50='+
+  percentile(0.5)+' ms, p95='+percentile(0.95)+' ms, maximum='+percentile(1)+' ms. Diagnostic sample only; no route throughput or service SLA established.');
 }
 if(require.main===module)main().catch(e=>{
  console.error('Private authenticated smoke failed: '+String(e.message).slice(0,160));
