@@ -41,8 +41,16 @@ async function main(){
   JALAN_TURN_ENFORCEMENT_ENABLED:'false',
   NODE_ENV:'production'
  };
- await request('/apps/'+NAME+'/config-vars','PATCH',updates);
- console.log('Dedicated Heroku pilot config set; read-only Atlas credential validated.');
+ // Heroku PATCH creates a config release. Do not create one when the
+ // dedicated pilot already has exactly these required values.
+ const changed=Object.fromEntries(Object.entries(updates).filter(([k,v])=>previous[k]!==v));
+ if(Object.keys(changed).length){
+  await request('/apps/'+NAME+'/config-vars','PATCH',changed);
+  console.log('Dedicated pilot configuration reconciled (changed fields only).');
+ }else{
+  console.log('Dedicated pilot configuration already matches; no config release requested.');
+ }
+ console.log('Read-only Atlas credential validated.');
  console.log('Private access credentials configured and preserved; no secret values printed.');
  console.log('Original mterm2026 app and its configuration untouched.');
  console.log('Access password and API preview token can be revealed only in the private pilot Heroku Settings > Config Vars.');
