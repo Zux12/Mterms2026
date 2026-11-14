@@ -18,6 +18,14 @@ async function main(){
  failureStage='input-validation';
  const cases=validateCases(JSON.parse(fs.readFileSync(input,'utf8')));
  const app=express();
+ // Keep the operator-only loopback evidence endpoint aligned with the
+ // dedicated private Heroku pilot's non-cacheable, non-identifying contract.
+ // The strict evidence collector must NEVER relax its response-header gate.
+ app.disable('x-powered-by');
+ app.use((_req,res,next)=>{
+  res.set('Cache-Control','no-store');
+  next();
+ });
  // Ephemeral per-run token prevents other local processes from casually
  // querying private journey coordinates through the loopback preview.
  const sessionToken=randomBytes(32).toString('hex');
