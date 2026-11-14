@@ -24,10 +24,10 @@ test('JSON-body KL preview validates exactly four finite numeric coordinates',()
  assert.equal(parsePostedCoordinates(request(good,{},'text/plain')),null);
 });
 
-// Reproduces real original-Mterms middleware order: its 5 MB JSON parser
-// consumes the request BEFORE the JALAN router. This test proves the new
-// post-parse Content-Length decision, NOT a 1 KB pre-parser memory limit.
-test('experimental POST enforces post-parse transport policy with upstream 5 MB parser',async()=>{
+// Reproduces original-Mterms middleware order: its 5 MB JSON parser consumes
+// each request before the JALAN router. Covers legal chunked framing, but
+// does NOT establish a 1 KB pre-parser ingress cap or live Heroku behavior.
+test('experimental POST supports framed JSON and validates after the upstream 5 MB parser',async()=>{
  const app=express();
  app.use(express.json({limit:'5mb'}));
  app.use('/api/jalan/kl-segment-v4102',router);
@@ -68,18 +68,29 @@ test('experimental POST enforces post-parse transport policy with upstream 5 MB 
      headers:{'Content-Encoding':'gzip'}
    });
    assert.equal(zipped.status,415);
-   // A chunked request has no trustworthy Content-Length; fail closed.
-   const chunked=await new Promise((resolve,reject)=>{
-     const req=http.request(base,{method:'POST',headers:{
-       'Content-Type':'application/json','Transfer-Encoding':'chunked'
-     }},res=>{
-       let data='';res.setEncoding('utf8');res.on('data',v=>data+=v);
-       res.on('end',()=>resolve({status:res.statusCode,data:JSON.parse(data)}));
+   // A chunked body is valid HTTP framing. A browser cannot explicitly
+   // set Content-Length, so do not reject solely for its absence. Use a
+   // public non-routable-in-pilot fixture to avoid Atlas graph operations.
+   async function chunked(body){
+     return await new Promise((resolve,reject)=>{
+       const req=http.request(base,{method:'POST',headers:{
+         'Content-Type':'application/json','Transfer-Encoding':'chunked'
+       }},res=>{
+         let data='';res.setEncoding('utf8');res.on('data',v=>data+=v);
+         res.on('end',()=>resolve({status:res.statusCode,data:JSON.parse(data)}));
+       });
+       req.on('error',reject);req.write(body);req.end();
      });
-     req.on('error',reject);req.write(JSON.stringify(outside));req.end();
-   });
-   assert.equal(chunked.status,411);
-   assert.match(chunked.data.error,/Content-Length required/);
+   }
+   const framed=await chunked(JSON.stringify(outside));
+   assert.equal(framed.status,400);
+   assert.match(framed.data.error,/KL pilot region/);
+   // Unknown wire size remains bounded only by upstream 5 MB parser.
+   // Even for chunked bodies, an oversized parsed coordinate object fails
+   // schema validation before any graph read.
+   const badSchema=await chunked(JSON.stringify({...outside,debug:'x'.repeat(1600)}));
+   assert.equal(badSchema.status,400);
+   assert.match(badSchema.data.error,/Four numeric JSON coordinates required/);
  } finally{
    await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
  }
