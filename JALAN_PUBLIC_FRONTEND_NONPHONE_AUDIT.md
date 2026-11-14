@@ -1,0 +1,34 @@
+# JALAN — Public frontend / private pilot non-phone integration audit
+**Date:** 14 November 2026. **Status: SOURCE AUDIT COMPLETE; INTEGRATION / SECURITY REVIEW STILL OPEN.**
+
+This compares current **repository source**, not a live authenticated browser session. Inputs: `Zux12/jalan-navigation/main` (`42724ae699fa730f5db86e6f0b5effbe84f23c7f`) and `Zux12/Mterms2026/jalan-v4102-routing-regression-tests` (trusted `a2267ac636cb73805eb3b1cd51cb0f735a8ddfa3`). No user location, TomTom key or other secret was read, and no live data was modified.
+
+## Actual integration inventory
+| Component | Source finding | Release implication |
+|---|---|---|
+| Public GitHub Pages | `index.html` identifies **Jalan Navigation Prototype V4.7.4 Shared Traffic Pilot** and loads many experimental modules. It is **not** the private authenticated Heroku pilot. | Do not confuse public UI version with private KL pilot commit or claim they are a single deployed app. |
+| Traffic-aware primary routing | `tomtom-live.js` calls TomTom Routing API with `traffic=true`, `departAt=now` and `routeType=fastest`; also loads TomTom flow/incident tiles directly. | TomTom remains preferred for current traffic-aware routing; an experimental graph route never supersedes it. An active browser-held API key and verified response are required for *real* comparisons. |
+| TomTom secret lifecycle | API key input is a password field; code retains key in **sessionStorage** and, only when “remember” checked, **localStorage**. It is placed in TomTom API query parameters and tile URLs. “Remove key” clears both browser storage slots. | Browser-held key is visible to the browser/target TomTom requests, and localStorage persistence can be exposed to same-origin scripts/XSS. For production, prefer restricted-key policy, no URL logging, CSP review, and reconsider browser storage. This is a security concern to review, not proof of leakage. Never copy key into Git or chat. |
+| Static third-party assets | Public `index.html` loads Leaflet v1.9.4 CSS/JS from `unpkg.com` without an observed fixed Subresource Integrity hash on the inspected tags. | Audit supply-chain controls and content-security policy before public release. |
+| Public KL segment preview | `jalan-kl-3c.js` hardcodes `https://mterm2026-559f9bf571b5.herokuapp.com/api/jalan/kl-segment-v4102` and sends start/destination coordinates directly to the **older original Mterms Heroku origin**. No client token is passed by this module. | **Important isolation inconsistency.** This is a public prototype test module; it must not be described as the dedicated, private, authenticated JALAN pilot. Check original API current status and privacy policy before retaining opt-in GPS route send; do not redirect it to private pilot without an approved auth design, CORS, and explicit user consent. |
+| Public KL preview safety | `jalan-kl-3c.js` labels its panel `TEST ONLY`, fixed-speed ETA and `NOT FOR DRIVING`; GPS only on explicit user click, with accuracy threshold. | Keep conservative disclaimer. Public exposure of experimental route coordinates must be reviewed even though it is opt-in. |
+| Private pilot | Trusted branch has `kl-pilot-preview.html` with authenticated isolated route and read-only full graph. New arrival-snap offsets merged in PR #43. | The public GitHub Pages prototype **does not automatically inherit** private Heroku UI changes. Manual-only separate Heroku release is required, and is *not* currently authorized as a phone test. |
+| Fallback | Public `tomtom-live.js` error message tells user to uncheck TomTom primary to use OSRM. | This is a manual fallback prompt, not proof a current OSRM fallback preserves live traffic/turn legality. Review exact traffic-incident/reroute fallback contracts before consumer release. |
+| Frontend validation | Existing protected [7-job CI](https://github.com/Zux12/Mterms2026/actions/runs/43564400866) passed private KL browser/fullgraph checks; it is **not** a complete end-to-end test of the public V4.7.4 Pages frontend. | Prepare consolidated non-phone public frontend checks for errors, key storage, routing provider switch, desktop/mobile emulation, accessibility and safe failure. No need to rerun already passing KL private tests. |
+
+## Integration decisions and next non-phone deliverables
+1. **Keep frontends separate for now:** public GitHub Pages is a prototype; dedicated Heroku KL pilot is owner-authenticated. Do **not** silently merge these or use the original Mterms application to host experimental private navigation.
+2. **Highest-impact unresolved issue:** decide whether the legacy public KL3C panel should be removed from the *public* prototype, replaced with a link to an authenticated pilot, or retained with a more explicit privacy boundary. Choose only after checking currently deployed original Mterms API and user-facing privacy behaviour. No unapproved route/data change now.
+3. **Credential/privacy hardening:** independently review server-side ability to supply restricted TomTom keys vs browser-only key, CSP/SRI asset trust, logging of URL query parameters, storage lifespan, route request throttling and failure handling.
+4. **Routing robustness:** audit manual OSRM fallback and traffic-aware TomTom error handling, update sources/test harness only when concrete failing conditions are demonstrated. Do not assert driving legality based on an OSRM response.
+5. **Desktop browser verification:** exercise public V4.7.4 route-provider switching and state transitions in Chromium, including missing TomTom key, invalid key, API errors, no location permission, keyboard navigation and 390px layout. Use mock network responses for deterministic logic checks and clearly distinguish from live TomTom tests.
+6. **Staged release and rollback:** maintain original Mterms app unmodified, deployment manual-only, and separate private Heroku health/auth/snap-warning verification. Protect current main-side Oil & Gas files from the broad draft PR #2.
+7. **No-phone readiness gate:** update `JALAN_PRE_PHONE_RELEASE_GATE.md` N05/N11/N12/N13 only when each actual review/test is done. Do not invite owner to phone testing before completing feasible non-phone work and documenting external limitations.
+
+## Explicitly unverified
+- Current public site live functional behavior, current original-Mterms public KL endpoint response, and physical Safari UX.
+- Current TomTom key, live traffic or reproducible route/ETA output. No key accessed.
+- Current road signs, pedestrian bollards, permitted legal drop-off and any accepted 20-case driving evidence.
+- Experimental KL turn/access enforcement readiness. Keep `legalDrivingRouteVerified:false`.
+
+**No deployment, MongoDB write, repository frontend edit or production navigation change was performed by this source audit.**
