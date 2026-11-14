@@ -26,8 +26,9 @@ return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,
 router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
 // JSON-body coordinates avoid route coordinates in default router URL logs.
 // Original Mterms still parses JSON globally (5 MB) before mounting /api/jalan:
-// this endpoint's 1 KB Content-Length policy is checked AFTER that parser,
-// so it does NOT cap upstream parse memory or replace server log redaction.
+// a declared-size check runs AFTER that parser; requests without Content-Length
+// are accepted when well-formed, but all parsing retains the upstream 5 MB
+// limit. This is NOT a 1 KB raw cap or a server log-redaction guarantee.
 // Legacy GET remains accessible to direct clients and needs separate mitigation.
 function parsePostedCoordinates(req){
  const b=req.body,keys=b&&typeof b==='object'&&!Array.isArray(b)?Object.keys(b).sort():[];
@@ -37,17 +38,23 @@ function parsePostedCoordinates(req){
     keys.some(k=>typeof b[k]!=='number'||!Number.isFinite(b[k])))return null;
  return {start:[b.startLat,b.startLng],end:[b.endLat,b.endLng]};
 }
-// Fail closed for missing transfer length, chunked bodies, or compression.
-// This bounds the declared HTTP request body for route processing only; the
-// shared application's global 5 MB JSON parser has already consumed the body.
+// Browsers cannot set Content-Length, and proxies may legally forward framed
+// request bodies without it (e.g. chunked transfer or HTTP/2 translation).
+// Only reject an explicitly declared body size above 1024 bytes; absent length
+// is NOT a raw-size guarantee. The original shared app's upstream 5 MB parser
+// still handles all bodies BEFORE this policy. A strict 1 KB ingress limit
+// would require a separately reviewed pre-parser change in original Mterms.
+// Parsed payload shape/finite-number/canonical-size validation remains mandatory.
 function postTransportPolicy(req,res,next){
  const type=String(req.headers['content-type']||'').split(';')[0].trim().toLowerCase();
  if(type!=='application/json')return res.status(415).json({ok:false,error:'JSON content type required'});
  const encoding=String(req.headers['content-encoding']||'identity').trim().toLowerCase();
  if(encoding!=='identity')return res.status(415).json({ok:false,error:'Compressed JSON is not supported'});
- const declared=String(req.headers['content-length']||'');
- if(!/^[1-9][0-9]*$/.test(declared))return res.status(411).json({ok:false,error:'Content-Length required for JSON route'});
- if(Number(declared)>1024)return res.status(413).json({ok:false,error:'JSON route request exceeds 1024 bytes'});
+ const declared=req.headers['content-length'];
+ if(declared!==undefined){
+   if(!/^[1-9][0-9]*$/.test(String(declared)))return res.status(400).json({ok:false,error:'Invalid Content-Length'});
+   if(Number(declared)>1024)return res.status(413).json({ok:false,error:'Declared JSON route request exceeds 1024 bytes'});
+ }
  next();
 }
 async function handleRoute(req,res){try{
