@@ -198,6 +198,9 @@ jobs:
         run: |
           echo "Validation-only: checking existing deployed JALAN pilot; no Heroku writes or Git push."
       - name: Verify authenticated private pilot after deployed revision
+        env:
+          # Validate old v15 without write; NEW code must support POST and retire GET.
+          JALAN_REQUIRE_POST_ROUTE: ${{ !inputs.validation_only }}
         run: node server/jalan/smoke-heroku-private-pilot.js
       - name: Install browser dependencies for private mobile acceptance
         run: |
