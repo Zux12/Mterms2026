@@ -1,0 +1,29 @@
+name: Check Oil and Gas membership welcome
+
+on:
+  pull_request:
+    paths:
+      - "server/oilandgas/membership-admin.js"
+      - "server/oilandgas/editor.js"
+      - "server/oilandgas/desk/membership-admin.js"
+      - "server/oilandgas/desk/membership-admin.css"
+      - "server/oilandgas/desk/desk.html"
+      - "scripts/check-oilandgas-membership-welcome.js"
+      - ".github/workflows/oilandgas-membership-welcome-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check syntax
+        run: |
+          node --check server/oilandgas/membership-admin.js
+          node --check server/oilandgas/editor.js
+          node --check server/oilandgas/desk/membership-admin.js
+      - name: Check authenticated approval and notification invariants
+        run: node scripts/check-oilandgas-membership-welcome.js
