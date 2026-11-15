@@ -26,6 +26,7 @@ jobs:
       - run: node --test server/jalan/audit-heroku-pilot-rollback-readonly.test.js
       - run: node --test server/jalan/configure-heroku-private-pilot.test.js
       - run: node --test server/jalan/audit-original-mterms-router-privacy-readonly.test.js
+      - run: node --test server/jalan/audit-private-heroku-router-privacy-readonly.test.js
       - run: node --test server/jalan/audit-heroku-pilot-config-readonly.test.js
       - run: node --test server/jalan/audit-jalan-traffic-retention-readonly.test.js
       - run: node --test server/jalan/audit-dbkl-temporary-road-graph-readonly.test.js
@@ -209,6 +210,10 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         run: node server/jalan/audit-heroku-pilot-config-readonly.js
+      - name: Inspect dedicated private pilot query redaction and log-drain count read-only
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/audit-private-heroku-router-privacy-readonly.js
 
   heroku-authenticated-pilot:
     if: github.event_name == 'push' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
