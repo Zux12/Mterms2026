@@ -67,6 +67,11 @@ app.use('/api/oilandgas/publications', require('./oilandgas/publications'));
 app.use('/api/oilandgas/editor', require('./oilandgas/public-reader'));
 app.use('/api/oilandgas/editor', require('./oilandgas/editor'));
 
+/* JALAN experimental POST ingress: exact path, before original 5 MB parser.
+ * All other Mterms routes retain existing parser and session behavior.
+ * Draft only; deployment needs separate shared-host router-log approval. */
+app.use('/api/jalan/kl-segment-v4102/route', require('./jalan/kl-shared-ingress-v4102'));
+
 /* Parsers */
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));

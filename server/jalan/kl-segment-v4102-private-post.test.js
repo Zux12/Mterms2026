@@ -5,6 +5,13 @@ const express=require('express');
 const http=require('node:http');
 const {gzipSync}=require('node:zlib');
 const {parsePostedCoordinates,router}=require('./kl-segment-v4102');
+const preParserIngress=require('./kl-shared-ingress-v4102');
+const fs=require('node:fs'),path=require('node:path');
+// Independent source assertion: the exact draft ingress mounts before the
+// original 5 MB parser, without moving parsers for unrelated Mterms routes.
+const originalAppSource=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
+assert.ok(originalAppSource.indexOf("app.use('/api/jalan/kl-segment-v4102/route'")>=0);
+assert.ok(originalAppSource.indexOf("app.use('/api/jalan/kl-segment-v4102/route'")<originalAppSource.indexOf("app.use(express.json({ limit: '5mb' })"));
 
 function request(body,query={},type='application/json'){
  return {body,query,is:(mime)=>mime===type};
@@ -24,13 +31,15 @@ test('JSON-body KL preview validates exactly four finite numeric coordinates',()
  assert.equal(parsePostedCoordinates(request(good,{},'text/plain')),null);
 });
 
-// Reproduces original-Mterms middleware order: its 5 MB JSON parser consumes
-// each request before the JALAN router. Covers legal chunked framing, but
-// does NOT establish a 1 KB pre-parser ingress cap or live Heroku behavior.
+// Reproduces the proposed original-Mterms middleware order, now with a
+// path-specific authenticated 1 KB parser preceding the original 5 MB parser.
+// This is draft loopback evidence, NOT a live Heroku verification.
 test('shared original-app experimental route defaults OFF for GET and POST',async()=>{
  const old=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
  delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
- const app=express();app.use(express.json({limit:'5mb'}));
+ const app=express();
+ app.use('/api/jalan/kl-segment-v4102/route',preParserIngress);
+ app.use(express.json({limit:'5mb'}));
  app.use('/api/jalan/kl-segment-v4102',router);
  const server=app.listen(0,'127.0.0.1');
  try{
@@ -58,6 +67,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
  process.env.JALAN_SHARED_KL_PREVIEW_ENABLED='true';
  process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=fixtureToken;
  const app=express();
+ app.use('/api/jalan/kl-segment-v4102/route',preParserIngress);
  app.use(express.json({limit:'5mb'}));
  app.use('/api/jalan/kl-segment-v4102',router);
  const server=app.listen(0,'127.0.0.1');
@@ -85,6 +95,12 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    assert.equal(noCredential.status,401);
    assert.equal(noCredential.headers.get('cache-control'),'no-store');
    assert.equal(noCredential.headers.get('referrer-policy'),'no-referrer');
+   // Reject an unauthenticated large body BEFORE parsing it as shared JSON.
+   const refusedLarge=await fetch(base,{method:'POST',headers:{
+     'Content-Type':'application/json','X-JALAN-Preview-Token':'bad'
+   },body:JSON.stringify(outside)+' '.repeat(16000)});
+   assert.equal(refusedLarge.status,401);
+   assert.equal(refusedLarge.headers.get('cache-control'),'no-store');
    const incorrectCredential=await fetch(base,{method:'POST',headers:{
      'Content-Type':'application/json','X-JALAN-Preview-Token':'invalid'
    },body:JSON.stringify(outside)});
@@ -139,6 +155,9 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    assert.equal(text.headers.get('referrer-policy'),'no-referrer');
    // Compression could conceal a large inflated body. Reject before route work,
    // even though the upstream parser has already processed the compressed JSON.
+   const malformed=await send('{"startLat":');
+   assert.equal(malformed.status,400,'malformed JSON never reaches global handlers');
+   assert.equal(malformed.headers.get('cache-control'),'no-store');
    const zipped=await send(gzipSync(JSON.stringify(outside)),{
      headers:{'Content-Encoding':'gzip'}
    });
@@ -161,12 +180,11 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    const framed=await chunked(JSON.stringify(outside));
    assert.equal(framed.status,400);
    assert.match(framed.data.error,/KL pilot region/);
-   // Unknown wire size remains bounded only by upstream 5 MB parser.
-   // Even for chunked bodies, an oversized parsed coordinate object fails
-   // schema validation before any graph read.
+   // An unknown declared size no longer slips through a 5 MB upstream
+   // parser: pre-parser ingress rejects chunked bodies above 1 KB.
    const badSchema=await chunked(JSON.stringify({...outside,debug:'x'.repeat(1600)}));
-   assert.equal(badSchema.status,400);
-   assert.match(badSchema.data.error,/Four numeric JSON coordinates required/);
+   assert.equal(badSchema.status,413);
+   assert.match(badSchema.data.error,/exceeds 1024 bytes/);
  } finally{
    await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
    if(previousGate===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;

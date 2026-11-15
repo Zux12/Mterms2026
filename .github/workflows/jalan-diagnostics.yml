@@ -40,6 +40,7 @@ jobs:
         run: |
           if [ -f server/jalan/kl-segment-v4102-private-post.test.js ]; then
             node --check server/jalan/kl-segment-v4102.js
+            node --check server/jalan/kl-shared-ingress-v4102.js
             node --check server/jalan/kl-segment-v4102-private-post.test.js
             node --test server/jalan/kl-segment-v4102-private-post.test.js
           else

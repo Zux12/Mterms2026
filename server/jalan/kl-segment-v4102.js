@@ -104,4 +104,4 @@ function requireSharedPreviewToken(req,res,next){
  next();
 }
 router.post('/route',requireSharedPreviewToken,postTransportPolicy,handleRoute); // no GET fallback
-module.exports={router,project,calculate,distance,parsePostedCoordinates};
+module.exports={router,project,calculate,distance,parsePostedCoordinates,requireSharedPreviewToken};
