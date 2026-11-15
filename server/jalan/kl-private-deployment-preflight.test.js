@@ -186,7 +186,7 @@ test('new manual private Heroku code release verifies road-snap UI, old validati
  assert.ok(mobile.includes("process.env.JALAN_REQUIRE_SNAP_UI==='true'"));
  for(const key of ['Start-to-road snap:','Destination-to-road snap:',
   'Legal driving route verified: NO']){
-  assert.ok(html.includes(key),'candidate source missing '+key);
+  assert.ok(browserJs.includes(key),'candidate source missing '+key);
   assert.ok(mobile.includes(key),'postdeploy browser must prove '+key);
  }
  assert.ok(!yaml.includes('  push:\n'),'release workflow must remain strictly manual');
