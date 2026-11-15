@@ -64,6 +64,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
+const {deliverReceipts} = require('./membership-receipts');
 const origins = new Set(['https://oilandgas.eu.com', 'https://www.oilandgas.eu.com']);
 const limits = { name: 120, email: 180, role: 150, country: 100, interest: 100, organisation: 180, introduction: 1500 };
 const required = ['name', 'email', 'role', 'country', 'interest'];
@@ -110,7 +111,9 @@ router.post('/', async (req, res, next) => {
   }
   try {
     // The built-in unique _id prevents concurrent applications for the same address.
-    await members().insertOne({ ...member, _id: member.email, status: 'pending', consent: true, appliedAt: new Date() });
+    await members().insertOne({ ...member, _id: member.email, status: 'pending', consent: true, appliedAt: new Date(),
+      receiptMail:{state:'queued',attempts:0,queuedAt:new Date(),nextAttemptAt:new Date()} });
+    setImmediate(()=>deliverReceipts().catch(()=>{}));
   } catch (error) {
     if (error.code !== 11000) return next(error);
   }
