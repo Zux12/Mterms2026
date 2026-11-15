@@ -62,6 +62,14 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    await new Promise(resolve=>server.once('listening',resolve));
    const base='http://127.0.0.1:'+server.address().port+
       '/api/jalan/kl-segment-v4102/route';
+   // Activating JSON POST must NOT reactivate the legacy coordinate-in-URL
+   // GET route. The 410 only blocks application processing, not upstream
+   // router URL logging; redaction remains an operator-owned release gate.
+   const legacy=await fetch(base+'?startLat=3.139&startLng=101.6869&endLat=3.1478&endLng=101.6953');
+   assert.equal(legacy.status,410);
+   assert.equal(legacy.headers.get('cache-control'),'no-store');
+   assert.equal(legacy.headers.get('referrer-policy'),'no-referrer');
+   assert.match((await legacy.json()).error,/GET preview retired/);
    async function send(body,opts={}){
      const res=await fetch(opts.url||base,{method:'POST',
        headers:{'Content-Type':'application/json',...(opts.headers||{})},body});
