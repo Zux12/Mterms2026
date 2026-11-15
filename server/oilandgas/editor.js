@@ -48,7 +48,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
-for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css','authors.js','authors.css']) {
+for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css','authors.js','authors.css','membership-admin.js','membership-admin.css']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
 
@@ -176,6 +176,8 @@ router.use(wrap(async(req,res,next)=>{
 }));
 // Keep author email and affiliation records behind the Editor's Desk login.
 router.use('/authors', require('./authors-admin')(database));
+// Approval and SMTP welcome notices are restricted to authenticated editors.
+router.use('/members', require('./membership-admin'));
 
 router.post('/weekly-pick/automatic',wrap(async(req,res)=>{
   const {slot}=req.body || {};
