@@ -41,9 +41,15 @@ function assertPrivateRouteRequests(state,minimum){
 async function main(){
  if(process.env.JALAN_BROWSER_REAL_GRAPH==='1')return realGraphBrowser();
  const app=express();
+ // Exercise the same strict script CSP as the private runtime, not a permissive test fixture.
+ app.use((_req,res,next)=>{
+  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' https://unpkg.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self';");
+  next();
+ });
  app.use(express.json({limit:'1kb'}));
  let delayNextRoute=false;
  app.get('/',(_,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
+ app.get('/kl-pilot-preview.js',(_,res)=>res.type('application/javascript').sendFile(path.join(__dirname,'kl-pilot-preview.js')));
  app.get('/api/jalan/kl/health',(req,res)=>{
   if(req.get('x-jalan-preview-token')!=='browser-fixture-token')return res.sendStatus(401);
   res.json({ok:true,readOnly:true,liveRouting:false,graphEdges:168221,graphCached:true});
@@ -67,7 +73,10 @@ async function main(){
   const desktopRouteRequests=observePrivateRouteRequests(page);
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
+  const documentResponse=await page.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
+  const pagePolicy=await documentResponse.headerValue('content-security-policy');
+  if(!pagePolicy?.includes("script-src 'self' https://unpkg.com;")||pagePolicy.includes("script-src 'self' 'unsafe-inline'"))
+   throw Error('Private preview script CSP is unexpectedly permissive');
   await page.locator('#token').fill('browser-fixture-token');
   await page.locator('.leaflet-container').waitFor({timeout:15000});
   await page.locator('#check').click();

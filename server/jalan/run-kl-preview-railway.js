@@ -47,7 +47,7 @@ async function main(){
   res.set('X-Content-Type-Options','nosniff');
   res.set('Referrer-Policy','no-referrer');
   res.set('X-Frame-Options','DENY');
-  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none';");
+  res.set('Content-Security-Policy',"default-src 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' https://unpkg.com; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none';");
   next();
  });
  // Railway health probe reveals no route, DB fields, or authentication state.
@@ -58,6 +58,8 @@ async function main(){
   return res.status(401).type('text').send('Private JALAN pilot: authentication required');
  });
  app.get('/',(_req,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
+ // Served only after Basic authentication: never load the private preview code from a CDN.
+ app.get('/kl-pilot-preview.js',(_req,res)=>res.type('application/javascript').sendFile(path.join(__dirname,'kl-pilot-preview.js')));
  const history=new Map();let active=0;
  app.use('/api/jalan/kl',(req,res,next)=>{
   if(!eq(req.get('x-jalan-preview-token'),token))

@@ -7,8 +7,11 @@ const vm=require('node:vm');
 const html=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.html'),'utf8');
 const matches=[...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
 const inline=matches.filter(m=>!/(?:^|\s)src\s*=/.test(m[1]));
-if(inline.length!==1)throw Error('Expected one inline pilot browser script');
-new vm.Script(inline[0][2],{filename:'kl-pilot-preview-inline.js'});
+if(inline.length!==0)throw Error('Private pilot must not have inline JavaScript');
+if(!html.includes('<script src="/kl-pilot-preview.js"></script>'))
+ throw Error('Expected one same-origin private preview module');
+const browserScript=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.js'),'utf8');
+new vm.Script(browserScript,{filename:'kl-pilot-preview.js'});
 
 /*
  * The browser holds the private preview token and optional one-shot GPS point.
@@ -32,11 +35,18 @@ for(const [tags,url,sri] of expected){
 for(const id of ['map','start','end','token','check','route','swap','status']){
  if(!new RegExp('id="'+id+'"').test(html))throw Error('Missing preview control '+id);
 }
-if(!html.includes('EXPERIMENTAL ONLY')||!html.includes('legalDrivingRouteVerified'))
+if(!html.includes('EXPERIMENTAL ONLY')||!browserScript.includes('legalDrivingRouteVerified'))
  throw Error('Pilot safety warning or route safety gate missing');
 for(const diagnostic of ['Start-to-road snap:', 'Destination-to-road snap:',
  'endSnapMeters', 'startSnapAmbiguous', 'endSnapAmbiguous', 'Arrival caution:',
  'Legal driving route verified: NO']){
- if(!html.includes(diagnostic))throw Error('Missing private route snap/access safety diagnostic: '+diagnostic);
+ if(!browserScript.includes(diagnostic))throw Error('Missing private route snap/access safety diagnostic: '+diagnostic);
 }
-process.stdout.write('KL pilot browser script parses and required controls exist.\n');
+for(const runtime of ['run-kl-preview-local.js','run-kl-preview-railway.js']){
+ const source=fs.readFileSync(path.join(__dirname,runtime),'utf8');
+ if(!source.includes("script-src 'self' https://unpkg.com;")||
+    source.includes("script-src 'self' 'unsafe-inline'")||
+    !source.includes("app.get('/kl-pilot-preview.js'"))
+  throw Error('Private pilot runtime must serve script under a strict script-src CSP: '+runtime);
+}
+process.stdout.write('KL pilot external script parses, strict script CSP and controls exist.\\n');
