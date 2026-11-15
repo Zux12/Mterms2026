@@ -1,0 +1,31 @@
+name: Check Oil and Gas membership history
+
+on:
+  pull_request:
+    paths:
+      - "server/oilandgas/membership-admin.js"
+      - "server/oilandgas/editor.js"
+      - "server/oilandgas/desk/membership-admin.js"
+      - "server/oilandgas/desk/membership-history.js"
+      - "server/oilandgas/desk/membership-history.css"
+      - "server/oilandgas/desk/desk.html"
+      - "scripts/check-oilandgas-membership-history.js"
+      - ".github/workflows/oilandgas-membership-history-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check server and client JavaScript syntax
+        run: |
+          node --check server/oilandgas/membership-admin.js
+          node --check server/oilandgas/editor.js
+          node --check server/oilandgas/desk/membership-admin.js
+          node --check server/oilandgas/desk/membership-history.js
+      - name: Check private history and approval invariants
+        run: node scripts/check-oilandgas-membership-history.js

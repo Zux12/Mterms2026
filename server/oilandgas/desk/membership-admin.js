@@ -56,6 +56,7 @@
             };
             card.append(check);
             status.textContent='Member approved. Welcome email queued.';
+            document.dispatchEvent(new Event('oilgas-membership-approved'));
           }catch(err){feedback.textContent=err.message;button.disabled=false;}
         };
         card.append(button,feedback);wrapper.append(card);
