@@ -57,17 +57,18 @@ function postTransportPolicy(req,res,next){
  }
  next();
 }
-async function handleRoute(req,res){
- // Sensitive request-derived route geometry and errors must not be cached.
- // This is response privacy only: it does NOT suppress Heroku router GET logs.
- res.set('Cache-Control','no-store');
- res.set('Referrer-Policy','no-referrer');
- res.set('X-Content-Type-Options','nosniff');
- try{
+async function handleRoute(req,res){try{
  const posted=req.method==='POST'?parsePostedCoordinates(req):null;
  if(req.method==='POST'&&!posted)return res.status(400).json({ok:false,error:'Four numeric JSON coordinates required; URL query not accepted'});
  const s=posted?posted.start:[Number(req.query.startLat),Number(req.query.startLng)],
        t=posted?posted.end:[Number(req.query.endLat),Number(req.query.endLng)];if(!pilot(s)||!pilot(t))return res.status(400).json({ok:false,error:'Both coordinates must be in the KL pilot region'});const g=await load(),a=nearest(g.edges,s),b=nearest(g.edges,t);if(!a||!b||a.meters>200||b.meters>200)return res.status(422).json({ok:false,error:'No nearby directed graph segment within 200 m',startSnapMeters:a?Math.round(a.meters):null,endSnapMeters:b?Math.round(b.meters):null});const r=calculate(g,a,b);if(!r)return res.status(404).json({ok:false,error:'No directed path found'});res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',geometry:{type:'LineString',coordinates:r.geometry},...r,startSnapMeters:Math.round(a.meters),endSnapMeters:Math.round(b.meters),illustrativeEtaMinutes:Math.round(r.distanceMeters/1000/30*60*10)/10,etaAssumedSpeedKmh:30,trafficAware:false,turnRestrictionsEnforced:false,legalDrivingRouteVerified:false,routingActivated:false,databaseWrites:0});}catch(e){console.error('KL 3C:',e.message);res.status(503).json({ok:false,error:'KL preview temporarily unavailable'});}}
+// Apply to *all* GET/POST responses including transport-policy 400/413/415.
+router.use('/route',(req,res,next)=>{
+ res.set('Cache-Control','no-store');
+ res.set('Referrer-Policy','no-referrer');
+ res.set('X-Content-Type-Options','nosniff');
+ next();
+});
 router.get('/route',handleRoute); // legacy compatibility; URL coords can be logged
 router.post('/route',postTransportPolicy,handleRoute); // upstream global JSON parser required; no GET fallback
 module.exports={router,project,calculate,distance,parsePostedCoordinates};
