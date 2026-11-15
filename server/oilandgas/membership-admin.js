@@ -144,7 +144,7 @@ router.get('/history',async(req,res,next)=>{
       {$or:[{'welcomeMail.state':{$exists:true}},{'receiptMail.state':{$exists:true}}]};
     const match=kind==='all'?tracked:{...tracked};
     if(q){
-      const literal=q.replace(/[.*+?^${}()|[\]\\]/g,'\\router.get('/delivery/:email',async(req,res,next)=>{');
+      const literal=q.replace(/[^\w\s]/g, char=>'\\'+char);
       const search={$or:[{name:{$regex:literal,$options:'i'}},
         {email:{$regex:literal,$options:'i'}},
         {organisation:{$regex:literal,$options:'i'}}]};
