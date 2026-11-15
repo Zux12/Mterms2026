@@ -14,6 +14,7 @@ function endpointUrl(raw){
  if(u.protocol!=='https:'&&!(u.protocol==='http:'&&local))throw Error('Use HTTPS (or loopback HTTP)');
  if(!u.pathname.endsWith('/route'))throw Error('Endpoint must end in /route');
  if(u.username||u.password)throw Error('Do not put credentials in the URL');
+ if(u.search||u.hash)throw Error('Do not put coordinates, keys or fragments in the URL');
  return u;
 }
 function validCoord(lat,lng){return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=2.5&&lat<=3.8&&lng>=100.8&&lng<=102.3;}
@@ -96,8 +97,8 @@ function routeReply(body){
 function fullGraphReply(body){
  return body?.graphVersion==='road_graph_edges_v495'&&body?.graphEdges===168221;
 }
-// Private journey requests include coordinates in the query string. The
-// preview promises uncacheable, fingerprint-minimized responses. Do not accept
+// JSON POST keeps route coordinates out of URLs and Heroku router query logs.
+// The preview promises uncacheable, fingerprint-minimized responses. Do not accept
 // cached or server-identifying replies as durable pilot evidence, including
 // a supposed reviewed disconnection or GPS-snap failure.
 function privateResponseHeadersVerified(response){
@@ -140,20 +141,40 @@ function appendServerTiming(row,body){
   row.serverTotalMs=Math.round(timing.total*10)/10;
  }
 }
-async function collectEvidence(cases,rawEndpoint,{fetchImpl=globalThis.fetch,authHeader,authValue,timeoutMs=20000}={}){
+async function collectEvidence(cases,rawEndpoint,{
+ fetchImpl=globalThis.fetch,authHeader,authValue,pilotPassword,pilotPreviewToken,timeoutMs=20000
+}={}){
  validateCases(cases);const endpoint=endpointUrl(rawEndpoint),out=[];
  if((authHeader&&!authValue)||(!authHeader&&authValue))throw Error('Both authentication header name and value must be supplied');
  if(authHeader&&!/^[a-zA-Z0-9-]+$/.test(authHeader))throw Error('Invalid header name');
+ if(authHeader&&new Set(['host','cookie','accept','cache-control','content-type','origin','referer']).has(authHeader.toLowerCase()))
+  throw Error('Invalid authentication header name');
+ const dedicated=/^jalan-kl-private-pilot(?:-[a-z0-9]+)?\.herokuapp\.com$/i.test(endpoint.hostname);
+ const usePilot=pilotPassword!==undefined||pilotPreviewToken!==undefined;
+ if(dedicated&&!usePilot)throw Error('Dedicated private pilot requires Basic password and preview token');
+ if(usePilot){
+  if(!dedicated)throw Error('Private pilot credentials require the dedicated Heroku hostname');
+  if(authHeader||authValue)throw Error('Do not mix dedicated pilot and generic authentication');
+  if(typeof pilotPassword!=='string'||pilotPassword.length<32||
+    typeof pilotPreviewToken!=='string'||pilotPreviewToken.length<32||
+    pilotPassword===pilotPreviewToken)
+   throw Error('Invalid dedicated pilot credentials');
+ }
  if(!Number.isFinite(timeoutMs)||timeoutMs<1000||timeoutMs>60000)throw Error('Invalid request timeout');
  for(const c of cases){ // Sequential to avoid load spikes against experimental graph.
-  const u=new URL(endpoint);
-  for(const k of ['startLat','startLng','endLat','endLng'])u.searchParams.set(k,String(c[k]));
-  const headers={accept:'application/json','cache-control':'no-store'};
-  if(authHeader)headers[authHeader]=authValue;
+  const headers={accept:'application/json','content-type':'application/json','cache-control':'no-store'};
+  if(usePilot){
+   headers.Authorization='Basic '+Buffer.from('jalan-pilot:'+pilotPassword).toString('base64');
+   headers['x-jalan-preview-token']=pilotPreviewToken;
+  }else if(authHeader)headers[authHeader]=authValue;
   const row={caseId:c.caseId,journeyType:c.journeyType,expectedReachable:c.expectedReachable};
   const start=performance.now();
   try{
-   const res=await fetchImpl(u.toString(),{method:'GET',headers,redirect:'error',cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});
+   const payload={startLat:c.startLat,startLng:c.startLng,endLat:c.endLat,endLng:c.endLng};
+   const res=await fetchImpl(endpoint.toString(),{
+    method:'POST',headers,body:JSON.stringify(payload),redirect:'error',
+    cache:'no-store',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(timeoutMs)
+   });
    let body=null;try{body=await res.json();}catch(_){} // Do not log response bodies.
    row.elapsedMs=Math.round((performance.now()-start)*10)/10;
    if(res.status===200&&privateResponseHeadersVerified(res)&&routeReply(body)&&fullGraphReply(body)){
@@ -222,7 +243,9 @@ async function main(){
  if(path.resolve(input)===path.resolve(output))throw Error('Input and output paths must differ');
  const cases=JSON.parse(fs.readFileSync(input,'utf8'));
  const rows=await collectEvidence(cases,process.env.JALAN_EXPERIMENTAL_ROUTE_URL,{
-  authHeader:process.env.JALAN_AUTH_HEADER,authValue:process.env.JALAN_AUTH_VALUE
+  authHeader:process.env.JALAN_AUTH_HEADER,authValue:process.env.JALAN_AUTH_VALUE,
+  pilotPassword:process.env.JALAN_PILOT_ACCESS_PASSWORD,
+  pilotPreviewToken:process.env.JALAN_PREVIEW_TOKEN
  });
  // Exclusive creation protects previous evidence; 0600 avoids permissive reads.
  fs.writeFileSync(output,JSON.stringify(rows,null,2)+'\n',{flag:'wx',mode:0o600});
