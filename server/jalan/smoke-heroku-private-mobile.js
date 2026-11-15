@@ -4,6 +4,7 @@
 // Executes only after the trusted workflow verifies a new Heroku code release.
 const {chromium}=require('playwright');
 const APP='jalan-kl-private-pilot';
+const {audit,mayRunLegacyCoordinateGet}=require('./audit-private-heroku-router-privacy-readonly');
 async function main(){
  const key=process.env.HEROKU_API_KEY;
  if(!key||key.length<16)throw Error('missing-service-credential');
@@ -50,6 +51,13 @@ async function main(){
    throw Error('mobile-layout-invalid');
   if(!(await page.locator('#gps-note').innerText()).includes('GPS is off.'))
    throw Error('mobile-gps-consent-invalid');
+  // Existing v15 browser route action uses coordinate-bearing GET. Do not
+  // issue it from CI unless dedicated Heroku URL query redaction is enabled.
+  // New manually released source uses POST and does not expose coordinates in URL.
+  const isNewPostRelease=process.env.JALAN_REQUIRE_SNAP_UI==='true';
+  const legacyAllowed=isNewPostRelease?false:mayRunLegacyCoordinateGet(
+   await audit({log:()=>{}}));
+  if(isNewPostRelease||legacyAllowed){
   await page.locator('#token').fill(token);
   await page.locator('#start').fill('3.1315707, 101.7038508');
   await page.locator('#end').fill('3.1314573, 101.7038951');
@@ -75,6 +83,9 @@ async function main(){
   const safety=await page.locator('#trip-safety').innerText();
   if(!safety.includes('driving legality unverified'))
    throw Error('mobile-driving-warning-missing');
+  }else{
+   console.log('Legacy private mobile route smoke intentionally SKIPPED: router URL redaction not enabled; page/layout/consent checks passed.');
+  }
   // Deliberately do NOT request actual GPS on the hosted pilot. Simulated
   // geolocation behavior is already covered by isolated Chromium fixtures.
   if(scriptError)throw Error('mobile-script-error');

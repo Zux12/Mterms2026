@@ -2,6 +2,7 @@
 // Read-only authenticated smoke of SEPARATE private Heroku pilot; no coords logged.
 // The dedicated Heroku config and Basic auth secrets are never printed.
 const APP='jalan-kl-private-pilot';
+const {audit,mayRunLegacyCoordinateGet}=require('./audit-private-heroku-router-privacy-readonly');
 async function main(){
  const key=process.env.HEROKU_API_KEY;
  if(!key||key.length<16)throw Error('Heroku workflow credential is unavailable');
@@ -54,6 +55,11 @@ async function main(){
  const usePost=process.env.JALAN_REQUIRE_POST_ROUTE==='true';
  // During validation_only, keep testing deployed v15's legacy GET protocol.
  // A NEW code release MUST use JSON POST and reject legacy GET with 410.
+ // v15 still uses coordinate-bearing GET. CI must NOT generate those
+ // requests while Heroku router query redaction is disabled/unknown.
+ const legacyAllowed=usePost?false:mayRunLegacyCoordinateGet(
+  await audit({log:()=>{}}));
+ if(usePost||legacyAllowed){
  const route=usePost?'/api/jalan/kl/route':
   '/api/jalan/kl/route?startLat=3.1315707&startLng=101.7038508&endLat=3.1314573&endLng=101.7038951';
  const opts=usePost?{method:'POST',headers:{'Content-Type':'application/json'},
@@ -74,6 +80,9 @@ async function main(){
   response.routingActivated!==false)
   throw Error('Private JALAN route failed strict diagnostic-only contract');
  console.log('Private Heroku read-only KL route verified. No driving legitimacy claimed.');
+ }else{
+  console.log('Legacy private GET route smoke intentionally SKIPPED: router URL redaction not enabled; health-only verification continues.');
+ }
  // Small, bounded service-responsiveness observation for N12. Four concurrent
  // authenticated, read-only health requests in each of two waves. NOT a route
  // stress test, multi-driver benchmark or production capacity acceptance.

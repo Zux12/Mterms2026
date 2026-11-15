@@ -28,6 +28,11 @@ async function audit({fetcher=fetch,key=process.env.HEROKU_API_KEY,log=console.l
 }
 // An authorized manual CODE deployment must fail *before* pilot config writes
 // while the dedicated Heroku router may log exact route coordinates.
+// Older v15 smoke sends coordinates in the URL. NEVER run that GET while
+// Heroku router query logging is disabled, unsupported or unknown.
+function mayRunLegacyCoordinateGet(result){
+ return result?.state==='enabled';
+}
 function requireEnabledForCodePromotion(result){
  if(result?.state!=='enabled')throw Error('dedicated-private-pilot-router-redaction-not-enabled');
  return true;
@@ -39,4 +44,4 @@ if(require.main===module)audit().then(info=>{
  console.error('Private JALAN pilot router metadata audit unavailable; release privacy gate unresolved.');
  process.exitCode=1;
 });
-module.exports={audit,requireEnabledForCodePromotion};
+module.exports={audit,requireEnabledForCodePromotion,mayRunLegacyCoordinateGet};
