@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const members=fs.readFileSync('server/oilandgas/membership.js','utf8');
+const receipts=fs.readFileSync('server/oilandgas/membership-receipts.js','utf8');
+const approval=fs.readFileSync('server/oilandgas/membership-admin.js','utf8');
+assert(members.includes("receiptMail:{state:'queued'"),'New applications must queue an acknowledgement.');
+assert(members.includes("setImmediate(()=>deliverReceipts()"),'Queue should run after insert.');
+assert(members.includes("if (error.code !== 11000) return next(error);"),'Duplicates must not create receipt.');
+assert(receipts.includes("status:'pending'"),'Only pending applications receive receipts.');
+assert(receipts.includes("Resend-Idempotency-Key"),'Receipt should use an idempotency key.');
+assert(receipts.includes("'receiptMail.state':'sent'"),'Track accepted receipt.');
+assert(receipts.includes("OIL_ARTICLE_RESEND_KEY"),'Reuse Resend SMTP key.');
+assert(approval.includes("welcomeMail:"),"Approval welcome emails must remain enabled.");
+console.log('Oil & Gas membership receipt checks passed.');
