@@ -1,0 +1,8 @@
+.membership-panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:26px;margin:26px 0}
+.membership-panel>p{color:var(--muted);font-size:13px}
+#membership-pending{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:15px}
+.membership-card{background:var(--wash);border:1px solid var(--line);border-radius:10px;padding:20px}
+.membership-card h3{margin:0 0 10px;font:normal 19px/1.3 Georgia,serif}
+.membership-card p{font-size:13px;overflow-wrap:anywhere}
+.membership-card button{margin-top:8px}
+@media(max-width:680px){.membership-panel{padding:16px}}
