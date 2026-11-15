@@ -68,10 +68,13 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    // parser, but MUST NOT reach the route handler.
    const oversized=await send(JSON.stringify(outside)+' '.repeat(1300));
    assert.equal(oversized.status,413);
+   assert.equal(oversized.headers.get('cache-control'),'no-store');
    assert.match(oversized.data.error,/exceeds 1024 bytes/);
    const text=await fetch(base,{method:'POST',
      headers:{'Content-Type':'text/plain'},body:'startLat=3.139'});
    assert.equal(text.status,415);
+   assert.equal(text.headers.get('cache-control'),'no-store');
+   assert.equal(text.headers.get('referrer-policy'),'no-referrer');
    // Compression could conceal a large inflated body. Reject before route work,
    // even though the upstream parser has already processed the compressed JSON.
    const zipped=await send(gzipSync(JSON.stringify(outside)),{
