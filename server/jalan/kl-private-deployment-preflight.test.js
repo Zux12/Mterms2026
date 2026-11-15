@@ -168,7 +168,8 @@ test('private pilot iPhone safe area keeps route status below top browser chrome
  assert.match(html,/position:fixed;top:0;left:0;right:0/);
  assert.match(html,/pointer-events:none/);
  assert.match(html,/#trip-safety\{line-height:1\.4;overflow-wrap:anywhere\}/);
- assert.match(html,/Legal driving route verified: NO/);
+ const browserJs=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.js'),'utf8');
+ assert.match(browserJs,/Legal driving route verified: NO/);
 });
 
 test('new manual private Heroku code release verifies road-snap UI, old validation-only path stays compatible',()=>{
@@ -176,7 +177,7 @@ test('new manual private Heroku code release verifies road-snap UI, old validati
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
   'jalan-heroku-private-pilot-deploy.yml'),'utf8');
  const mobile=fs.readFileSync(path.join(__dirname,'smoke-heroku-private-mobile.js'),'utf8');
- const html=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.html'),'utf8');
+ const browserJs=fs.readFileSync(path.join(__dirname,'kl-pilot-preview.js'),'utf8');
  const step=yaml.indexOf('Verify authenticated 390px private mobile pilot after deployed revision');
  const runner=yaml.indexOf('run: node server/jalan/smoke-heroku-private-mobile.js',step);
  assert.ok(step>0&&runner>step);
