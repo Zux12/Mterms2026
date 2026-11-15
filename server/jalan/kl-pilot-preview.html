@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>JALAN — Private KL route explorer</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <style>
 :root{font-family:system-ui,sans-serif;color:#162333;background:#f4f7fa}
 *{box-sizing:border-box}body{margin:0}header{background:#fff;padding:15px 20px;border-bottom:1px solid #dae2e8}
@@ -44,7 +44,7 @@ small{color:#556677}.trip-metrics{display:grid;grid-template-columns:repeat(2,mi
 <details id="access-review" hidden><summary>Inspect access-caution edges (advisory only)</summary><pre id="access-review-text" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px"></pre><small>Public OSM way and directed-edge IDs with imported access tags. This is not a road-permission decision.</small></details>
 <p><small>Private experimental diagnostic preview only. Never use for live driving. Requires the isolated KL preview API on the same origin. The map uses OpenStreetMap tiles; only request routes with coordinates you are comfortable sharing with that service.</small></p>
 </aside><div id="map" aria-label="Experimental route map"></div></main>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script>
 'use strict';
 const map=L.map('map').setView([3.14,101.69],12);
