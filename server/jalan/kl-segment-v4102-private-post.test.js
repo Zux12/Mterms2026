@@ -39,7 +39,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    async function send(body,opts={}){
      const res=await fetch(opts.url||base,{method:'POST',
        headers:{'Content-Type':'application/json',...(opts.headers||{})},body});
-     return {status:res.status,data:await res.json()};
+     return {status:res.status,headers:res.headers,data:await res.json()};
    }
    for(const body of [
      {...good,endLat:'3.1478'}, {...good,debug:'extra'}
@@ -48,12 +48,22 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
      assert.equal(res.status,400);
      assert.match(res.data.error,/JSON coordinates required|numeric JSON coordinates required/);
    }
+   // Even malformed/rejected requests containing potential location data
+   // must not be cached, and must discourage referrer forwarding.
+   const bad=await send(JSON.stringify({...good,endLat:'3.1478'}));
+   assert.equal(bad.status,400);
+   assert.equal(bad.headers.get('cache-control'),'no-store');
+   assert.equal(bad.headers.get('referrer-policy'),'no-referrer');
+   assert.equal(bad.headers.get('x-content-type-options'),'nosniff');
    const query=await send(JSON.stringify(good),{url:base+'?startLat=3.139'});
    assert.equal(query.status,400);
    // A valid short JSON body reaches coordinate checks (not the graph).
    const normal=await send(JSON.stringify(outside));
    assert.equal(normal.status,400);
    assert.match(normal.data.error,/KL pilot region/);
+   assert.equal(normal.headers.get('cache-control'),'no-store');
+   assert.equal(normal.headers.get('referrer-policy'),'no-referrer');
+   assert.equal(normal.headers.get('x-content-type-options'),'nosniff');
    // Valid JSON with substantial trailing whitespace passes the shared 5 MB
    // parser, but MUST NOT reach the route handler.
    const oversized=await send(JSON.stringify(outside)+' '.repeat(1300));
