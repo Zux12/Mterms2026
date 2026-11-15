@@ -74,6 +74,13 @@ router.use('/route',(req,res,next)=>{
   return res.status(503).json({ok:false,error:'Experimental KL preview is not enabled'});
  next();
 });
-router.get('/route',handleRoute); // legacy compatibility; URL coords can be logged
-router.post('/route',postTransportPolicy,handleRoute); // upstream global JSON parser required; no GET fallback
+// Retire legacy URL-coordinate GET when this preview is deliberately activated.
+// The old original-Mterms/main deployment still accepts GET until a separately
+// approved release; even a 410 response cannot prevent Heroku's router from
+// logging URL query parameters already received. Operator log redaction remains
+// a separate hard release gate.
+router.get('/route',(_req,res)=>res.status(410).json({
+ ok:false,error:'Coordinate GET preview retired; use reviewed JSON POST transport'
+}));
+router.post('/route',postTransportPolicy,handleRoute); // no GET fallback
 module.exports={router,project,calculate,distance,parsePostedCoordinates};
