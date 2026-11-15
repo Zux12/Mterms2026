@@ -6,6 +6,38 @@ const {spawn}=require('node:child_process');
 const {randomBytes}=require('node:crypto');
 const express=require('express');
 const path=require('node:path');
+// Observe the ACTUAL Chromium network request, never only source strings.
+// Synthetic OSM fixture coordinates and tokens must remain in POST body/header,
+// not in the URL captured by the upstream Heroku Router.
+function observePrivateRouteRequests(page){
+ const state={requests:0,violations:[]};
+ page.on('request',request=>{
+  const url=new URL(request.url());
+  if(url.pathname!=='/api/jalan/kl/route')return;
+  state.requests++;
+  if(url.search||request.method()!=='POST'){
+   state.violations.push('url-or-method');
+   return;
+  }
+  if(request.headers()['content-type']?.split(';')[0]!=='application/json'){
+   state.violations.push('not-json');
+   return;
+  }
+  try{
+   const body=request.postDataJSON();
+   const keys=body&&typeof body==='object'&&!Array.isArray(body)?
+    Object.keys(body).sort().join('|'):'';
+   if(keys!=='endLat|endLng|startLat|startLng'||
+    Object.values(body).some(value=>typeof value!=='number'||!Number.isFinite(value)))
+    state.violations.push('invalid-coordinate-body');
+  }catch{state.violations.push('invalid-json');}
+ });
+ return state;
+}
+function assertPrivateRouteRequests(state,minimum){
+ if(state.requests<minimum||state.violations.length)
+  throw Error('Private coordinate request transport violated POST-only no-query contract');
+}
 async function main(){
  if(process.env.JALAN_BROWSER_REAL_GRAPH==='1')return realGraphBrowser();
  const app=express();
@@ -32,6 +64,7 @@ async function main(){
  try{
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const page=await browser.newPage();
+  const desktopRouteRequests=observePrivateRouteRequests(page);
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
@@ -88,6 +121,7 @@ async function main(){
   // Chromium context. These are fixture checks, not live-device acceptance.
   const mobile=await browser.newPage({viewport:{width:390,height:844},
    deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const mobileRouteRequests=observePrivateRouteRequests(mobile);
   const mobileErrors=[];
   mobile.on('pageerror',e=>mobileErrors.push(e.message));
   await mobile.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
@@ -118,6 +152,8 @@ async function main(){
   await mobile.getByText('GPS position captured once',{exact:false}).waitFor({timeout:15000});
   if((await mobile.locator('#trip-distance').innerText())!=='—')
    throw Error('Mobile explicit GPS action did not invalidate stale route');
+  assertPrivateRouteRequests(desktopRouteRequests,3);
+  assertPrivateRouteRequests(mobileRouteRequests,1);
   if(mobileErrors.length)throw Error('Mobile browser script error');
   process.stdout.write('Chromium desktop and touch-mobile pilot interactions passed against local fixture API.\n');
  }finally{
@@ -141,6 +177,7 @@ async function realGraphBrowser(){
   if(!ready)throw Error('Local graph preview startup timeout');
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const page=await browser.newPage();
+  const realRouteRequests=observePrivateRouteRequests(page);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+port+'/',{waitUntil:'domcontentloaded'});
   await page.locator('#token').fill(token);
@@ -161,6 +198,7 @@ async function realGraphBrowser(){
   const match=/Distance: ([0-9.]+) km/.exec(corridor);
   if(!match||Number(match[1])<1||!corridor.includes('Legal driving route verified: NO'))
    throw Error('Real graph corridor route browser contract mismatch');
+  assertPrivateRouteRequests(realRouteRequests,2);
   if(errors.length)throw Error('Browser script error after corridor route');
   process.stdout.write('Chromium and real read-only KL graph browser-to-backend short and corridor routes passed.\\n');
  }finally{
