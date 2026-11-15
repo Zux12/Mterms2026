@@ -3,7 +3,7 @@
   const byId=id=>document.getElementById(id);
   const body=byId('history-rows'),summary=byId('history-summary');
   if(!body || !summary) return;
-  let page=0,more=false,loading=false,requestNumber=0;
+  let page=0,more=false,requestNumber=0;
   let searchTimer;
   const dateLabel=value=>{
     if(!value)return '—';
@@ -48,8 +48,6 @@
   }
   async function load(){
     const serial=++requestNumber;
-    if(loading)return;
-    loading=true;
     summary.textContent='Loading membership email records…';
     try{
       const params=new URLSearchParams({page:String(page),kind:byId('history-kind').value,q:byId('history-search').value.trim()});
@@ -83,7 +81,7 @@
       byId('history-next').disabled=!more;
     }catch(error){
       if(serial===requestNumber){body.replaceChildren();summary.textContent=error.message;byId('history-next').disabled=true;}
-    }finally{loading=false;}
+    }
   }
   byId('history-prev').onclick=()=>{if(page>0){page--;load();}};
   byId('history-next').onclick=()=>{if(more){page++;load();}};
