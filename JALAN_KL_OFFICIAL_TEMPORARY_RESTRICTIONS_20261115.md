@@ -59,6 +59,23 @@ These are source-backed questions to be converted into complete independent orig
 
 Additional historical-status research candidate: **LLM–JB-WB-01** Jalan Johar–Jalan Beringin westbound was announced reopened 15 September 2025; verify 2026 authority state, exact geometry and travel eligibility before use as an actual case.
 
+
+## Independent expired-event counterexamples — 15 November 2026 ~17:0x MYT
+
+**Additional primary-authority N09 evidence, not a permanent restriction or a real driving test.** Official DBKL/KLCCC has repeatedly published **different date-bounded full closures of Jalan Raja** for different events. A source search that finds a matching street name or a headline saying “full closure” without checking the *effective window* would yield an unsafe stale ban.
+
+| Authority, publication and road | Stated event closure window (Malaysia local time) | Status relative to 15 Nov 2026 | Evidence rule |
+|---|---|---|---|
+| [DBKL's 14 July 2026 Citrawarna notice](https://www.dbkl.gov.my/en/announcements/hebahan-penutupan-jalan-kuala-lumpur), Jalan Raja | **13 July 2026, noon → 27 July 2026, 05:00**; event and a separate downtown road/parade closure 24–25 July have different hours | **Published window ended** | **Never encode as a permanent Jalan Raja closure**; the dated authority notice is a retrospective control for an expiry-negative test, not evidence it is open now |
+| [KLCCC's official Kuala Lumpur Standard Chartered Marathon 2026 notice](https://klccc.dbkl.gov.my/makluman-acara-larian-kuala-lumpur-standard-chartered-2026/), Jalan Raja | **2 October 2026, 20:00 → 4 October 2026, 15:00**, plus differing 3–4 October race windows and affected streets | **Published window ended**; official search index returned explicit schedule but a fresh direct page-open timed out on this run | Treat as **secondary fetch pending** if executable notice import needs live direct source; no current November ban inferred |
+| [DBKL announcement listing, posted 18 September 2026](https://www.dbkl.gov.my/pengumuman/pemakluman-penutupan-penuh-jalan-raja), “Pemakluman Penutupan Penuh Jalan Raja” | **No effective dates or road extents exposed in the page's retrieved HTML** | **Unknown from that page alone** | **Fail closed on activation**: do not use only the headline/publication date as start/end or assume continuing closure |
+
+**Two source-backed N09 expiry/negative-control candidates (NOT accepted driving journeys):**
+- `KL-TEMP-EXP-JR01`: A 15 Nov 2026 test must **not** apply the July Citrawarna Jalan Raja closure as if still in its July effective interval. Independently resolve the exact segment and current source status before a live route comparison.
+- `KL-TEMP-EXP-JR02`: A 15 Nov 2026 test must **not** apply the early-October Marathon Jalan Raja closure as if still in its event window. The date-less September announcement cannot be used to revive an arbitrary closure; obtain its actual published attachment/duration first.
+
+**Current schedule contrast:** The separate [DBKL U Thant notice](https://www.dbkl.gov.my/berita-acara/penutupan-sementara-laluan-jalan-di-jalan-u-thant-bagi-kerja-kerja-pembinaan-pipe-jacking) still has a published end date of 31 Jan 2027 and KLCCC's KL–Seremban staged lane work ends 2 Feb 2027, so *publication date*, *effective start/end*, *hour-of-day*, *type* (lane vs whole road), and possible rescission must be stored distinctly. The published schedule is **not** proof of actual November signs, open/closed status, lane limits, traffic-aware ETA or legal passage. No new OSM node geometry, authenticated route result, live TomTom comparison, DB writes or private Heroku release obtained. **N09 remains PARTIAL; N06 NOT APPROVED; N08 BLOCKED EXTERNAL; N10 remains 0/20; N15 phone gate OPEN.**
+
 ## Engineering implications and honest boundaries
 
 - **N09 evidence advanced:** an official **direction-specific and date-bounded** one-way/closure source now exists, in addition to the already recorded staged KL–Seremban nighttime lane works. A time-independent imported OSM graph with no verified temporary restriction feed must **not** be treated as authoritative for these controls; keep TomTom production routing authority and the experimental legal-driving-verified flag false, turn enforcement OFF. Do **not** install static permanent bans based on 2026–27 notices.
