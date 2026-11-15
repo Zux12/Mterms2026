@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {audit,requireEnabledForCodePromotion}=require('./audit-private-heroku-router-privacy-readonly');
+const {audit,requireEnabledForCodePromotion,mayRunLegacyCoordinateGet}=require('./audit-private-heroku-router-privacy-readonly');
 const key='K'.repeat(32);
 function fixture({enabled=true,featureStatus=200,drains=1,appName='jalan-kl-private-pilot'}={}){
  const calls=[],output=[];
@@ -49,4 +49,11 @@ test('pilot app identity mismatch stops before feature or drains can be read',as
  const f=fixture({appName:'mterm2026'});
  await assert.rejects(audit({fetcher:f.fetcher,key,log:()=>{}}),/identity/);
  assert.equal(f.calls.length,1);
+});
+
+test('legacy URL-coordinate smoke is blocked unless private router redaction is explicitly enabled',()=>{
+ for(const state of ['disabled','unavailable','unknown',undefined])
+  assert.equal(mayRunLegacyCoordinateGet({state}),false);
+ assert.equal(mayRunLegacyCoordinateGet(null),false);
+ assert.equal(mayRunLegacyCoordinateGet({state:'enabled'}),true);
 });
