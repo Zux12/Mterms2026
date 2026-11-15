@@ -13,6 +13,8 @@
 
 ## Non-phone engineering and validation checklist
 
+**15 November 2026, ~19:10 MYT — N11 scoped progress (DRAFT ONLY, NOT PASS):** [PR #54](https://github.com/Zux12/Mterms2026/pull/54) stages exact-path `/api/jalan/kl-segment-v4102/route` POST authentication and an actual **1 KB pre-parser JSON cap** before the original Mterms 5 MB parser; all non-JALAN routes retain the original parser. [Exact-head CI 43707506447](https://github.com/Zux12/Mterms2026/actions/runs/43707506447) **SUCCESS**, 3/3 focused loopback POST cases and diagnostic/syntax checks, draft [d9884fb1](https://github.com/Zux12/Mterms2026/commit/d9884fb105eb9007d83a84b7f99a4913cbe55d2a). **UNMERGED/UNDEPLOYED**, private pilot v15 unchanged; original shared Heroku router query-redaction previously **DISABLED**, log retention/owner key not verified, activated legacy GET would only get 410 after upstream router logging. This **does not close N11 or N13**, and **does not count as any independent KL journey** (N10 0/20); N15 phone gate stays CLOSED. Next: operator-owned shared-host log/retention evidence and manual private release/rollback, then independently verified KL O/D routes. No phone test requested.
+
 | ID | Gate / evidence required | Status as of 14 Nov | Evidence or next substantive work |
 |---|---|---|---|
 | N01 | Private CLI/backend isolated from original Mterms entrypoint, no unrelated file changes | **PASS — source scoped** | Manual pilot Heroku workflow; trusted JALAN source `jalan-v4102-routing-regression-tests`, original `Procfile` and `server/app.js` intact |
