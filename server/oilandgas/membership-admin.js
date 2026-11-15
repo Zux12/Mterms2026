@@ -128,6 +128,51 @@ router.post('/approve', async (req,res,next) => {
   } catch(err) {next(err);}
 });
 
+// Read-only private history of membership mail state recorded by the application.
+// "sent" means SMTP accepted; inbox delivery requires the provider's delivery event.
+router.get('/history',async(req,res,next)=>{
+  try{
+    const page=Number(req.query.page||0);
+    const kind=req.query.kind||'all';
+    const q=typeof req.query.q==='string'?req.query.q.trim():'';
+    if(!Number.isSafeInteger(page)||page<0||page>100000 ||
+       !['all','welcome','receipt'].includes(kind)||q.length>120){
+      return res.status(400).json({error:'Invalid history filters.'});
+    }
+    const tracked=kind==='welcome'?{'welcomeMail.state':{$exists:true}}:
+      kind==='receipt'?{'receiptMail.state':{$exists:true}}:
+      {$or:[{'welcomeMail.state':{$exists:true}},{'receiptMail.state':{$exists:true}}]};
+    const match=kind==='all'?tracked:{...tracked};
+    if(q){
+      const literal=q.replace(/[.*+?^${}()|[\]\\]/g,'\\router.get('/delivery/:email',async(req,res,next)=>{');
+      const search={$or:[{name:{$regex:literal,$options:'i'}},
+        {email:{$regex:literal,$options:'i'}},
+        {organisation:{$regex:literal,$options:'i'}}]};
+      if(match.$or) match.$and=[search];
+      else Object.assign(match,search);
+    }
+    const projection={_id:0,name:1,email:1,organisation:1,status:1,
+      approvedAt:1,appliedAt:1,
+      'welcomeMail.state':1,'welcomeMail.queuedAt':1,
+      'welcomeMail.acceptedAt':1,'welcomeMail.startedAt':1,
+      'welcomeMail.attempts':1,'welcomeMail.lastError':1,
+      'welcomeMail.nextAttemptAt':1,'welcomeMail.messageId':1,
+      'receiptMail.state':1,'receiptMail.queuedAt':1,
+      'receiptMail.acceptedAt':1,'receiptMail.attempts':1,
+      'receiptMail.lastError':1,'receiptMail.nextAttemptAt':1,
+      'receiptMail.messageId':1};
+    const limit=20;
+    const collection=members();
+    const [rows,total]=await Promise.all([
+      collection.find(match,{projection}).sort({approvedAt:-1,appliedAt:-1,_id:1})
+        .skip(page*limit).limit(limit).toArray(),
+      collection.countDocuments(match)
+    ]);
+    res.json({items:rows,page,limit,total,more:(page+1)*limit<total,
+      meaning:'Sent = Resend SMTP accepted the email. Inbox delivery is not independently verified by this record.'});
+  }catch(err){next(err);}
+});
+
 router.get('/delivery/:email',async(req,res,next)=>{
   try {
     const email=req.params.email;
