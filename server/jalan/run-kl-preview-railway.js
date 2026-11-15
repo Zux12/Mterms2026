@@ -24,6 +24,14 @@ function basic(req){
  const split=decoded.indexOf(':');
  return split>0&&eq(decoded.slice(0,split),'jalan-pilot')&&eq(decoded.slice(split+1),password);
 }
+// Pilot-only: retire direct coordinate-bearing GET on every newly deployed
+// code revision. This cannot prevent upstream Heroku Router query logging;
+// deployment remains blocked unless the private router redaction flag is ON.
+function rejectPrivateLegacyGet(req,res,next){
+ if(req.method==='GET'&&req.path==='/route')
+  return res.status(410).json({ok:false,error:'Private coordinate URL route retired; use authenticated JSON POST'});
+ next();
+}
 async function main(){
  if(!uri||!token||token.length<32||!password||password.length<32||
   token===password||!Number.isSafeInteger(port)||port<1024||port>65535)
@@ -54,6 +62,10 @@ async function main(){
  app.use('/api/jalan/kl',(req,res,next)=>{
   if(!eq(req.get('x-jalan-preview-token'),token))
    return res.status(401).json({ok:false,error:'Pilot token required'});
+  // Reject legacy GET before graph-heavy route work or rate-limit state.
+  // Only the dedicated Heroku pilot entrypoint installs this check.
+  if(req.path==='/route'&&req.method==='GET')
+   return rejectPrivateLegacyGet(req,res,next);
   if(req.path==='/route'){
    const now=Date.now();
    for(const [ip,times] of history)if(!times.length||now-times[times.length-1]>=60000)history.delete(ip);
@@ -80,4 +92,4 @@ if(require.main===module)main().catch(()=>{
  process.stderr.write('Private JALAN pilot initialization failed; details suppressed.\n');
  process.exitCode=1;
 });
-module.exports={basic};
+module.exports={basic,rejectPrivateLegacyGet};
