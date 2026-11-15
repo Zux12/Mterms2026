@@ -53,7 +53,10 @@ test('shared original-app experimental route defaults OFF for GET and POST',asyn
 });
 test('experimental POST supports framed JSON and validates after the upstream 5 MB parser',async()=>{
  const previousGate=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+ const previousToken=process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+ const fixtureToken='offline-only-not-a-live-key-0123456789abcdef';
  process.env.JALAN_SHARED_KL_PREVIEW_ENABLED='true';
+ process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=fixtureToken;
  const app=express();
  app.use(express.json({limit:'5mb'}));
  app.use('/api/jalan/kl-segment-v4102',router);
@@ -62,6 +65,31 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    await new Promise(resolve=>server.once('listening',resolve));
    const base='http://127.0.0.1:'+server.address().port+
       '/api/jalan/kl-segment-v4102/route';
+   // Shared deployment is NOT the private Basic-auth pilot: an operator
+   // enable flag without a separate strong server token must fail closed.
+   delete process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+   const missingSecret=await fetch(base,{method:'POST',headers:{
+     'Content-Type':'application/json','X-JALAN-Preview-Token':fixtureToken
+   },body:JSON.stringify(outside)});
+   assert.equal(missingSecret.status,503);
+   assert.equal(missingSecret.headers.get('cache-control'),'no-store');
+   process.env.JALAN_SHARED_KL_PREVIEW_TOKEN='weak';
+   const weakSecret=await fetch(base,{method:'POST',headers:{
+     'Content-Type':'application/json','X-JALAN-Preview-Token':fixtureToken
+   },body:JSON.stringify(outside)});
+   assert.equal(weakSecret.status,503);
+   process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=fixtureToken;
+   const noCredential=await fetch(base,{method:'POST',headers:{
+     'Content-Type':'application/json'
+   },body:JSON.stringify(outside)});
+   assert.equal(noCredential.status,401);
+   assert.equal(noCredential.headers.get('cache-control'),'no-store');
+   assert.equal(noCredential.headers.get('referrer-policy'),'no-referrer');
+   const incorrectCredential=await fetch(base,{method:'POST',headers:{
+     'Content-Type':'application/json','X-JALAN-Preview-Token':'invalid'
+   },body:JSON.stringify(outside)});
+   assert.equal(incorrectCredential.status,401);
+   assert.ok(!(await incorrectCredential.text()).includes(fixtureToken));
    // Activating JSON POST must NOT reactivate the legacy coordinate-in-URL
    // GET route. The 410 only blocks application processing, not upstream
    // router URL logging; redaction remains an operator-owned release gate.
@@ -72,7 +100,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    assert.match((await legacy.json()).error,/GET preview retired/);
    async function send(body,opts={}){
      const res=await fetch(opts.url||base,{method:'POST',
-       headers:{'Content-Type':'application/json',...(opts.headers||{})},body});
+       headers:{'Content-Type':'application/json','X-JALAN-Preview-Token':fixtureToken,...(opts.headers||{})},body});
      return {status:res.status,headers:res.headers,data:await res.json()};
    }
    for(const body of [
@@ -142,5 +170,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
    if(previousGate===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
    else process.env.JALAN_SHARED_KL_PREVIEW_ENABLED=previousGate;
+   if(previousToken===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+   else process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=previousToken;
  }
 });
