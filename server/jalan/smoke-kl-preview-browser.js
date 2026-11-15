@@ -9,13 +9,16 @@ const path=require('node:path');
 async function main(){
  if(process.env.JALAN_BROWSER_REAL_GRAPH==='1')return realGraphBrowser();
  const app=express();
+ app.use(express.json({limit:'1kb'}));
  let delayNextRoute=false;
  app.get('/',(_,res)=>res.sendFile(path.join(__dirname,'kl-pilot-preview.html')));
  app.get('/api/jalan/kl/health',(req,res)=>{
   if(req.get('x-jalan-preview-token')!=='browser-fixture-token')return res.sendStatus(401);
   res.json({ok:true,readOnly:true,liveRouting:false,graphEdges:168221,graphCached:true});
  });
- app.get('/api/jalan/kl/route',async(req,res)=>{
+ app.post('/api/jalan/kl/route',async(req,res)=>{
+  if(Object.keys(req.query).length||!['startLat','startLng','endLat','endLng'].every(k=>Number.isFinite(req.body?.[k])))
+   return res.status(400).json({ok:false,error:'Invalid private JSON route request'});
   if(delayNextRoute){delayNextRoute=false;await new Promise(resolve=>setTimeout(resolve,600));}
   if(req.get('x-jalan-preview-token')!=='browser-fixture-token')return res.sendStatus(401);
   res.json({ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
@@ -70,7 +73,7 @@ async function main(){
    throw Error('Stale route response repainted after endpoint swap');
   // The browser must not render a route if the API claims turn enforcement
   // or legal driving verification; the preview contract requires both false.
-  await page.route('**/api/jalan/kl/route?*',async route=>{
+  await page.route('**/api/jalan/kl/route',async route=>{
    const unsafe={ok:true,mode:'EXPERIMENTAL_SEGMENT_ROUTE',routingActivated:false,
     legalDrivingRouteVerified:true,turnRestrictionsEnforced:false,
     geometry:{type:'LineString',coordinates:[[101.7038508,3.1315707],[101.7038951,3.1314573]]}};

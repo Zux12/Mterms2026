@@ -118,3 +118,14 @@ test('missing per-edge tag metadata does not present a false all-clear',()=>{
  assert.equal(result.potentialAccessReviewEdges,1);
  assert.equal(result.accessCautionDetails,null);
 });
+
+test('private POST coordinates require exactly four finite numbers and no URL query',()=>{
+ const {parsePrivatePost}=require('./kl-segment-v4102');
+ const valid={startLat:3.139,startLng:101.6869,endLat:3.1478,endLng:101.6953};
+ const mock=(body,query={},type=true)=>({body,query,is:()=>type});
+ assert.deepEqual(parsePrivatePost(mock(valid)),[[3.139,101.6869],[3.1478,101.6953]]);
+ for(const body of [null,[],{...valid,startLat:'3.139'},{...valid,endLng:Infinity},
+  {...valid,debug:'extra'}])assert.equal(parsePrivatePost(mock(body)),null);
+ assert.equal(parsePrivatePost(mock(valid,{startLat:'3.139'})),null);
+ assert.equal(parsePrivatePost(mock(valid,{},false)),null);
+});

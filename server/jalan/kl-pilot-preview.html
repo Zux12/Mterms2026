@@ -154,10 +154,15 @@ button.addEventListener('click',async()=>{
  button.disabled=true;status.textContent='Requesting experimental route…';
  try{
   const [startLat,startLng]=coordinate('start'),[endLat,endLng]=coordinate('end');
-  const query=new URLSearchParams({startLat,startLng,endLat,endLng});
   const token=document.getElementById('token').value;
   if(!token)throw Error('Enter the local preview token.');
-  const response=await fetch('/api/jalan/kl/route?'+query,{headers:{Accept:'application/json','x-jalan-preview-token':token},signal:controller.signal});
+  // Never send a coordinate-bearing GET URL from the new private UI.
+  // On POST failure, do not retry the legacy GET transport.
+  const response=await fetch('/api/jalan/kl/route',{
+   method:'POST',headers:{Accept:'application/json','Content-Type':'application/json','x-jalan-preview-token':token},
+   body:JSON.stringify({startLat,startLng,endLat,endLng}),
+   cache:'no-store',referrerPolicy:'no-referrer',signal:controller.signal
+  });
   const data=await response.json();
   if(version!==requestVersion)return;
   if(!response.ok||data.ok!==true)throw Error(data.error||'Route unavailable');

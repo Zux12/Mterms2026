@@ -34,9 +34,12 @@ async function main(){
   const h=await health.json();
   if(health.status!==200||h.ok!==true||h.readOnly!==true||
     h.liveRouting!==false||h.graphEdges!==168221)throw Error('Preview graph health contract failed');
-  const q=new URLSearchParams({startLat:'3.1315707',startLng:'101.7038508',
-   endLat:'3.1314573',endLng:'101.7038951'});
-  const response=await get('/api/jalan/kl/route?'+q,{headers});
+  // Current private pilot source must accept JSON-body POST, without URL query.
+  // Loopback smoke never sends GPS coordinates in request URL.
+  const response=await get('/api/jalan/kl/route',{
+   method:'POST',headers:{...headers,'Content-Type':'application/json'},
+   body:JSON.stringify({startLat:3.1315707,startLng:101.7038508,
+    endLat:3.1314573,endLng:101.7038951})});
   const route=await response.json();
   if(response.status!==200||route.ok!==true||
     route.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||
