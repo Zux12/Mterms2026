@@ -1,0 +1,23 @@
+name: Check Oil and Gas membership receipts
+on:
+  pull_request:
+    paths:
+      - "server/oilandgas/membership.js"
+      - "server/oilandgas/membership-receipts.js"
+      - "scripts/check-oilandgas-membership-receipts.js"
+      - ".github/workflows/oilandgas-membership-receipts-check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax checks
+        run: |
+          node --check server/oilandgas/membership.js
+          node --check server/oilandgas/membership-receipts.js
+          node --check server/oilandgas/membership-admin.js
+      - name: Email queue regression checks
+        run: node scripts/check-oilandgas-membership-receipts.js
