@@ -1,7 +1,7 @@
 # PROJECT JALAN — MASTER HANDOVER & ENGINEERING LOG
 
 **READ THIS FILE FIRST IN EVERY NEW CHAT OR AUTOMATED DEVELOPMENT RUN.**
-**Updated:** 2026-11-15 (Malaysia time, UTC+08)
+**Updated:** 2026-11-16 (Malaysia time, UTC+08)
 **Owner's priority:** Get an operational, reliable JALAN web navigation app into the owner's hands for testing, then prepare distribution and later Apple App Store work. Avoid repeating completed work.
 
 ## 1. Current position (do not accidentally reset progress)
@@ -83,6 +83,14 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 6. Keep short but information-rich, append new log entries newest first, preserve prior important milestones. Keep all credentials out of GitHub.
 
 ## 8. Latest activity / chronological log (newest first)
+
+### 2026-11-16 ~04:05 MYT — KLCCC November road-closure expiry evidence added; no routing/Heroku release changes
+
+- **Read master handover FIRST** and both required [pre-phone gate](JALAN_PRE_PHONE_RELEASE_GATE.md) and [public audit](JALAN_PUBLIC_FRONTEND_NONPHONE_AUDIT.md) at shared `main`. Inspected current GitHub commits and open PRs of BOTH repositories, protected [backend Actions run 43744255977](https://github.com/Zux12/Mterms2026/actions/runs/43744255977) (all **7/7 completed success**, including read-only full-KL and Heroku jobs at prior trusted `30fe4a6f`) and [frontend Pages 43735051159](https://github.com/Zux12/jalan-navigation/actions/runs/43735051159) (all **3/3 success** at `9fbcbedf`). No duplicate CI dispatched. Open shared [draft PR #54](https://github.com/Zux12/Mterms2026/pull/54) remains intentionally unreleased. Direct web loads of public Pages and private Heroku returned tool-inaccessible responses; these neither prove outage nor live browser success. No fresh authenticated operator Heroku/Atlas state beyond previously recorded 02:02 MYT probe.
+- **Meaningful new independent N09 source review:** KLCCC [official traffic-event archive page](https://klccc.dbkl.gov.my/info-traffic/2/) lists two *different* 2026 Deepavali restrictions that have **expired by 16 Nov**: (a) a **specified part** of Jalan Tun Sambanthan 1 near the church/Jalan Tamby Abdullah 1, full closure ending **10 Nov 05:00 MYT**; (b) **one lane** by Semua House on ambiguously spelled Jalan Bunus/Bonus 6, ending **9 Nov 22:00 MYT**. These must not become perpetual bans, and partial-lane occupation must not be modeled as whole-road closure. The KLCCC page later timed out on direct reload; dates/types were independently present in its indexed official content, not inferred from search headlines. Added `KL-TEMP-EXP-BF01` and `KL-TEMP-EXP-MI01` as **temporal regression questions only**, not geocoded full journeys, in [KL source matrix commit ed2f3563](https://github.com/Zux12/Mterms2026/commit/ed2f356382d51d155356222c28e9d067c73399b8); [pre-phone release gate commit 33238cc7](https://github.com/Zux12/Mterms2026/commit/33238cc7fe096d6231a8d1cb6bf929be3e64f003) now states the exact limitations.
+- **Readiness still unchanged:** historic engineering **~93%** (estimate), independently reviewed KL complete driving O/D **0/20**, N06 legal turns **NOT APPROVED**, N09 **PARTIAL**, N11 original/private Heroku router-query privacy **BLOCKED**, N12 actual prior-code restoration **UNTESTED**, N13 manually controlled private POST/snap-code release **HOLD**, N15 **PHONE NOT READY**. No source/test/production routing modification, no Heroku/config/secret/Atlas write, no draft merge or phone request. **Next executable engineering step:** operator-authenticated log-redaction/retention approval on both Heroku services and then one separately reviewed private POST release/actual restore; in parallel source exact public road OSM endpoints and newer authority/sign evidence, run genuine authenticated O/D plus live TomTom comparisons before any of 20 cases receives PASS. Keep temporary event evidence separate from on-road/legal acceptance.
+
+
 
 ### 2026-11-16 ~03:05 MYT — Protected latest 7/7 terminal CI established; separate private vs public integration and safety gates reverified, no new code
 
