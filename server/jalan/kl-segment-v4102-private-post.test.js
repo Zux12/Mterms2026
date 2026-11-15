@@ -34,6 +34,41 @@ test('JSON-body KL preview validates exactly four finite numeric coordinates',()
 // Reproduces the proposed original-Mterms middleware order, now with a
 // path-specific authenticated 1 KB parser preceding the original 5 MB parser.
 // This is draft loopback evidence, NOT a live Heroku verification.
+test('shared preview health fails closed before database access without flag or token',async()=>{
+ const oldFlag=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+ const oldToken=process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+ const fixtureToken='offline-only-health-token-0123456789abcdef';
+ const app=express();app.use('/api/jalan/kl-segment-v4102',router);
+ const server=app.listen(0,'127.0.0.1');
+ const restore=()=>{
+  if(oldFlag===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+  else process.env.JALAN_SHARED_KL_PREVIEW_ENABLED=oldFlag;
+  if(oldToken===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+  else process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=oldToken;
+ };
+ try{
+  await new Promise(resolve=>server.once('listening',resolve));
+  const url='http://127.0.0.1:'+server.address().port+'/api/jalan/kl-segment-v4102/health';
+  delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+  process.env.JALAN_SHARED_KL_PREVIEW_TOKEN=fixtureToken;
+  let response=await fetch(url);
+  assert.equal(response.status,503);
+  assert.equal(response.headers.get('cache-control'),'no-store');
+  assert.match((await response.json()).error,/not enabled/);
+  process.env.JALAN_SHARED_KL_PREVIEW_ENABLED='true';
+  response=await fetch(url);
+  assert.equal(response.status,401);
+  assert.equal(response.headers.get('referrer-policy'),'no-referrer');
+  process.env.JALAN_SHARED_KL_PREVIEW_TOKEN='short';
+  response=await fetch(url,{headers:{'X-JALAN-Preview-Token':fixtureToken}});
+  assert.equal(response.status,503);
+  // No graph connection is configured; all three requests must have been
+  // blocked before the original mongoose health countDocuments call.
+ } finally{
+  await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+  restore();
+ }
+});
 test('shared original-app experimental route defaults OFF for GET and POST',async()=>{
  const old=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
  delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
