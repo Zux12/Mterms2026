@@ -33,12 +33,76 @@ test('collects actual experimental response metadata but never writes coordinate
  assert.equal(request.o.headers.Authorization,'Bearer secret-local-only');
  assert.equal(request.o.redirect,'error');assert.equal(request.o.cache,'no-store');
  assert.equal(request.o.headers['cache-control'],'no-store');
- assert.ok(request.u.includes('startLat=3.14'));
+ assert.equal(request.o.method,'POST');
+ assert.equal(request.o.headers['content-type'],'application/json');
+ assert.equal(request.o.referrerPolicy,'no-referrer');
+ assert.equal(new URL(request.u).search,'');
+ assert.equal(JSON.parse(request.o.body).startLat,base.startLat);
+ assert.equal(JSON.parse(request.o.body).endLng,base.endLng);
+ assert.ok(!request.u.includes('startLat'));
  const serialized=JSON.stringify(out);
  assert.ok(!serialized.includes('101.69'));assert.ok(!serialized.includes('secret-local-only'));
  assert.ok(!serialized.includes('coordinates'));
  assert.ok(!serialized.includes('experimental.example'));
 });
+
+test('dedicated Heroku collector uses both credentials and POST body, never URL coordinates',async()=>{
+ const origin='https://jalan-kl-private-pilot-5ac59f8ae0bd.herokuapp.com/api/jalan/kl/route';
+ const pilotPassword='p'.repeat(32),pilotPreviewToken='t'.repeat(32);
+ let captured;
+ const out=await collectEvidence([base],origin,{
+  pilotPassword,pilotPreviewToken,fetchImpl:async(u,o)=>{
+   captured={u,o};return reply(200,good)();
+  }
+ });
+ assert.equal(out[0].ok,true);
+ assert.equal(captured.u,origin);
+ assert.equal(captured.o.method,'POST');
+ assert.equal(JSON.parse(captured.o.body).startLat,base.startLat);
+ assert.equal(captured.o.headers['x-jalan-preview-token'],pilotPreviewToken);
+ assert.equal(Buffer.from(captured.o.headers.Authorization.slice(6),'base64').toString(),
+  'jalan-pilot:'+pilotPassword);
+ const evidence=JSON.stringify(out);
+ assert.ok(!evidence.includes(pilotPassword)&&!evidence.includes(pilotPreviewToken));
+ assert.ok(!evidence.includes('101.69'));
+});
+test('collector rejects URL coordinates and incorrect or incomplete private credentials before network',async()=>{
+ const origin='https://jalan-kl-private-pilot-5ac59f8ae0bd.herokuapp.com/api/jalan/kl/route';
+ assert.throws(()=>endpointUrl(url+'?startLat=3.14'),/Do not put/);
+ assert.throws(()=>endpointUrl(url+'#secret'),/Do not put/);
+ let called=0;
+ const spy=async()=>{called++;return reply(200,good)();};
+ for(const config of [
+  {},
+  {pilotPassword:'p'.repeat(32)},
+  {pilotPreviewToken:'t'.repeat(32)},
+  {pilotPassword:'short',pilotPreviewToken:'t'.repeat(32)},
+  {pilotPassword:'p'.repeat(32),pilotPreviewToken:'p'.repeat(32)},
+  {pilotPassword:'p'.repeat(32),pilotPreviewToken:'t'.repeat(32),
+   authHeader:'Authorization',authValue:'Bearer wrong-mode'}
+ ]){
+  await assert.rejects(()=>collectEvidence([base],origin,{...config,fetchImpl:spy}),/pilot|credential|mix/i);
+ }
+ await assert.rejects(()=>collectEvidence([base],url,{
+  pilotPassword:'p'.repeat(32),pilotPreviewToken:'t'.repeat(32),fetchImpl:spy
+ }),/dedicated Heroku/);
+ await assert.rejects(()=>collectEvidence([base],url,{
+  authHeader:'Content-Type',authValue:'text/plain',fetchImpl:spy
+ }),/Invalid authentication header/);
+ assert.equal(called,0,'credential validation precedes all network requests');
+});
+test('retired GET protocol never triggers a fallback or qualifies as accepted evidence',async()=>{
+ let calls=0;
+ const out=await collectEvidence([base],url,{fetchImpl:async(u,o)=>{
+  calls++;assert.equal(o.method,'POST');assert.equal(new URL(u).search,'');
+  return reply(410,{ok:false,error:'Legacy GET retired'})();
+ }});
+ assert.equal(calls,1);
+ assert.equal(out[0].responseStatus,410);
+ assert.equal(out[0].ok,false);
+ assert.equal(out[0].failureClass,'unverified-experimental-response');
+});
+
 test('recognized no-path 404 is accepted only with pre-existing independent review',async()=>{
  const c={...base,caseId:'kl-unreachable',journeyType:'disconnected',
   expectedReachable:false,disconnectionReviewed:true};
