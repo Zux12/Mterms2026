@@ -23,9 +23,9 @@ async function main(){
  if(!pw||pw.length<32||!token||token.length<32||pw===token)
   throw Error('Private Heroku pilot credentials not provisioned');
  const auth='Basic '+Buffer.from('jalan-pilot:'+pw).toString('base64');
- const request=async(path,timeout=20000)=>{
+ const request=async(path,timeout=20000,options={})=>{
   const result=await fetch(url.origin+path,{
-   headers:{Authorization:auth,'x-jalan-preview-token':token},
+   ...options,headers:{Authorization:auth,'x-jalan-preview-token':token,...options.headers},
    redirect:'manual',signal:AbortSignal.timeout(timeout)});
   if(!result.ok)throw Error('Authenticated pilot HTTP '+result.status);
   return result;
@@ -51,8 +51,23 @@ async function main(){
  }
  if(!ready)throw Error('Private KL graph preloading did not complete');
  console.log('Heroku KL road graph cache is warm and ready for bounded route requests.');
- const route='/api/jalan/kl/route?startLat=3.1315707&startLng=101.7038508&endLat=3.1314573&endLng=101.7038951';
- const response=await (await request(route,120000)).json();
+ const usePost=process.env.JALAN_REQUIRE_POST_ROUTE==='true';
+ // During validation_only, keep testing deployed v15's legacy GET protocol.
+ // A NEW code release MUST use JSON POST and reject legacy GET with 410.
+ const route=usePost?'/api/jalan/kl/route':
+  '/api/jalan/kl/route?startLat=3.1315707&startLng=101.7038508&endLat=3.1314573&endLng=101.7038951';
+ const opts=usePost?{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({startLat:3.1315707,startLng:101.7038508,
+   endLat:3.1314573,endLng:101.7038951})}:{};
+ const response=await (await request(route,120000,opts)).json();
+ if(usePost){
+  // No route coordinates in this GET URL. Require explicit retirement response.
+  const legacy=await fetch(url.origin+'/api/jalan/kl/route',{
+   headers:{Authorization:auth,'x-jalan-preview-token':token},
+   redirect:'manual',signal:AbortSignal.timeout(20000)});
+  if(legacy.status!==410||legacy.headers.get('cache-control')!=='no-store')
+   throw Error('New private pilot still permits legacy coordinate-URL GET');
+ }
  if(response.ok!==true||response.mode!=='EXPERIMENTAL_SEGMENT_ROUTE'||
   response.graphEdges!==168221||response.legalDrivingRouteVerified!==false||
   response.turnRestrictionsEnforced!==false||response.databaseWrites!==0||
