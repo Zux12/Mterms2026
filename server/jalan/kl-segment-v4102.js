@@ -1,6 +1,6 @@
 'use strict';
 // Jalan Batch 3C: isolated, read-only segment-snap preview with direction-aware partial edges.
-const express=require('express'),mongoose=require('mongoose');
+const express=require('express'),mongoose=require('mongoose'),crypto=require('node:crypto');
 const router=express.Router(),DB='jalan_navigation',COL='road_graph_edges_v495',COUNT=168221,R=6371000;
 let graph=null,loading=null;
 const rad=Math.PI/180;
@@ -82,5 +82,26 @@ router.use('/route',(req,res,next)=>{
 router.get('/route',(_req,res)=>res.status(410).json({
  ok:false,error:'Coordinate GET preview retired; use reviewed JSON POST transport'
 }));
-router.post('/route',postTransportPolicy,handleRoute); // no GET fallback
+// This route is on the shared Mterms host, not behind private Heroku Basic auth.
+// Flag activation alone must never expose CPU/Atlas-heavy preview requests to
+// arbitrary clients. Require a DIFFERENT server-held secret from the private
+// JALAN pilot, via a header (never URL or browser code). CORS is not auth.
+// Public Pages clients stay paused pending a separately reviewed private proxy,
+// account policy, and original-host/router log-retention verification.
+function requireSharedPreviewToken(req,res,next){
+ const secret=process.env.JALAN_SHARED_KL_PREVIEW_TOKEN;
+ if(typeof secret!=='string'||Buffer.byteLength(secret,'utf8')<32)
+  return res.status(503).json({ok:false,error:'Experimental KL preview authorization not configured'});
+ const token=req.get('X-JALAN-Preview-Token');
+ if(typeof token!=='string'||Buffer.byteLength(token,'utf8')>512)
+  return res.status(401).json({ok:false,error:'Experimental KL preview authorization required'});
+ // Digest lengths are fixed; constant-time comparison avoids prefix matches,
+ // and no supplied credential is logged, echoed or stored.
+ const expected=crypto.createHash('sha256').update(secret,'utf8').digest();
+ const supplied=crypto.createHash('sha256').update(token,'utf8').digest();
+ if(!crypto.timingSafeEqual(expected,supplied))
+  return res.status(401).json({ok:false,error:'Experimental KL preview authorization required'});
+ next();
+}
+router.post('/route',requireSharedPreviewToken,postTransportPolicy,handleRoute); // no GET fallback
 module.exports={router,project,calculate,distance,parsePostedCoordinates};
