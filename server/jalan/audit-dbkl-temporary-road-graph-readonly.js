@@ -34,15 +34,51 @@ function summarise(roads,edgeIds,asOf){
   }
   const ids=new Map();
   for(const g of roadGroups.values())for(const id of g.wayIds)ids.set(id,g);
-  for(const id of edgeIds){
+  // Only imported directed edges from the SAME named OSM way may provide
+  // incoming/outgoing node evidence. These are not signed/legal turns.
+  const incident=new Map();
+  function countAt(roadName,node,direction){
+    return incident.get(roadName+'|'+node)?.[direction]||0;
+  }
+  for(const edge of edgeIds){
+    const id=typeof edge==='string'?edge:edge?.edgeId;
     if(typeof id!=='string')continue;
     const m=id.match(/^osm-way-([0-9]+):[0-9]+:[FR]$/);
-    if(m&&ids.has(m[1]))ids.get(m[1]).directedEdges++;
+    if(!m||!ids.has(m[1]))continue;
+    const group=ids.get(m[1]);
+    group.directedEdges++;
+    if(!edge||typeof edge!=='object')continue;
+    const from=String(edge.fromNode??''),to=String(edge.toNode??'');
+    if(!/^[0-9]+$/.test(from)||!/^[0-9]+$/.test(to)||
+       !group.nodes.has(from)||!group.nodes.has(to))continue;
+    for(const [node,direction] of [[from,'outgoing'],[to,'incoming']]){
+      const key=group.name+'|'+node;
+      if(!incident.has(key))incident.set(key,{incoming:0,outgoing:0});
+      incident.get(key)[direction]++;
+    }
   }
-  function shared(a,b){
+  function sharedIds(a,b){
     const x=roadGroups.get(a).nodes,y=roadGroups.get(b).nodes;
-    let n=0;for(const node of x)if(y.has(node))n++;
-    return n; // possible graph junction only; not a legal turn
+    return [...x].filter(node=>y.has(node)).sort((x,y)=>
+      x.length-y.length||x.localeCompare(y));
+  }
+  function directedTransferCandidates(fromRoad,toRoad){
+    const common=sharedIds(fromRoad,toRoad);
+    const inbound=common.reduce((n,node)=>n+countAt(fromRoad,node,'incoming'),0);
+    const outbound=common.reduce((n,node)=>n+countAt(toRoad,node,'outgoing'),0);
+    const possible=common.filter(node=>
+      countAt(fromRoad,node,'incoming')>0&&countAt(toRoad,node,'outgoing')>0);
+    return {
+      sharedNodeCount:common.length,
+      // Public OSM IDs, not personal GPS or user travel locations. Truncated
+      // intentionally; node IDs need independent current OSM validation.
+      sharedImportedNodeIds:common.slice(0,10),
+      importedIncomingEdgesAtSharedNodes:inbound,
+      importedOutgoingEdgesAtSharedNodes:outbound,
+      nodesWithPotentialDirectedTransfer:possible.length,
+      potentialDirectedTransferNodeIds:possible.slice(0,10),
+      independentlyVerifiedLegalTurn:false
+    };
   }
   const grouped=NAMES.map(name=>{
     const g=roadGroups.get(name);
@@ -56,10 +92,17 @@ function summarise(roads,edgeIds,asOf){
     notice:NOTICE,withinPublishedControlWindow:asOf>=NOTICE.from&&asOf<=NOTICE.through,
     namedRoads:grouped,
     importedSharedNodeCandidates:{
-      uThantTunRazak:shared(NAMES[0],NAMES[2]),
-      langgakGolfTunRazak:shared(NAMES[1],NAMES[2])
+      uThantTunRazak:sharedIds(NAMES[0],NAMES[2]).length,
+      langgakGolfTunRazak:sharedIds(NAMES[1],NAMES[2]).length
     },
     namedRoadsWithoutExactImportedMatch:grouped.filter(x=>!x.importedWays).map(x=>x.name),
+    // Matches the two DBKL-restricted directions plus permitted outbound
+    // direction. A positive count is an AUDIT PRIORITY, never permission.
+    importedDirectionCandidates:{
+      uThantToTunRazak:directedTransferCandidates(NAMES[0],NAMES[2]),
+      tunRazakToLanggakGolf:directedTransferCandidates(NAMES[2],NAMES[1]),
+      langgakGolfToTunRazak:directedTransferCandidates(NAMES[1],NAMES[2])
+    },
     interpretation:'Public OSM junction/oneway metadata only; DBKL describes specific temporary closed movements, not all junctions.',
     surveyedJunctionMatched:false,currentSignsVerified:false,
     independentCurrentOsmExtractVerified:false,actualTomTomComparisonVerified:false,
@@ -91,9 +134,9 @@ async function audit(){
     const matched=[];
     const ids=new Set(roads.map(x=>String(x.roadId||'').replace(/^osm-way-/,'')).filter(x=>/^\d+$/.test(x)));
     // One bounded 168,221-edge index/identity scan, no user data or coordinates.
-    for await(const e of edges.find({},{projection:{_id:0,edgeId:1},maxTimeMS:60000}).batchSize(2500)){
+    for await(const e of edges.find({},{projection:{_id:0,edgeId:1,fromNode:1,toNode:1},maxTimeMS:60000}).batchSize(2500)){
       const m=String(e.edgeId||'').match(/^osm-way-([0-9]+):[0-9]+:[FR]$/);
-      if(m&&ids.has(m[1]))matched.push(e.edgeId);
+      if(m&&ids.has(m[1]))matched.push({edgeId:e.edgeId,fromNode:e.fromNode,toNode:e.toNode});
     }
     const result=summarise(roads,matched,asOf);
     console.log(JSON.stringify({...result,fullImportedDirectedEdges:edgeCount}));
