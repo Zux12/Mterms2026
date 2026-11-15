@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {audit}=require('./audit-private-heroku-router-privacy-readonly');
+const {audit,requireEnabledForCodePromotion}=require('./audit-private-heroku-router-privacy-readonly');
 const key='K'.repeat(32);
 function fixture({enabled=true,featureStatus=200,drains=1,appName='jalan-kl-private-pilot'}={}){
  const calls=[],output=[];
@@ -38,6 +38,12 @@ test('unsupported private feature is not claimed enabled',async()=>{
  const f=fixture({featureStatus:404,drains:0});
  const r=await audit({fetcher:f.fetcher,key,log:x=>f.output.push(x)});
  assert.equal(r.state,'unavailable');
+});
+test('manual code release gate refuses disabled, unsupported or unknown router redaction',()=>{
+ for(const state of ['disabled','unavailable',undefined]){
+  assert.throws(()=>requireEnabledForCodePromotion({state}),/redaction-not-enabled/);
+ }
+ assert.equal(requireEnabledForCodePromotion({state:'enabled'}),true);
 });
 test('pilot app identity mismatch stops before feature or drains can be read',async()=>{
  const f=fixture({appName:'mterm2026'});

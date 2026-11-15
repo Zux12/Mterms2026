@@ -43,6 +43,11 @@ jobs:
           node --check server/jalan/configure-heroku-private-pilot.js
           test -n "$HEROKU_API_KEY"
           test -n "$JALAN_READONLY_MONGODB_URI"
+      - name: BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled (GET only)
+        if: ${{ !inputs.validation_only }}
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: node server/jalan/audit-private-heroku-router-privacy-readonly.js --require-enabled
       - name: Configure JALAN pilot credentials only (never mterm2026)
         if: ${{ !inputs.validation_only }}
         run: node server/jalan/configure-heroku-private-pilot.js

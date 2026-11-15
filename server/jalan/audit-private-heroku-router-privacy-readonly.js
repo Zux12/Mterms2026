@@ -26,8 +26,17 @@ async function audit({fetcher=fetch,key=process.env.HEROKU_API_KEY,log=console.l
  log('No route/GPS request, log content or retention inspected. Feature state is not historical log evidence.');
  return {state,drainCount:drains.length};
 }
-if(require.main===module)audit().catch(()=>{
+// An authorized manual CODE deployment must fail *before* pilot config writes
+// while the dedicated Heroku router may log exact route coordinates.
+function requireEnabledForCodePromotion(result){
+ if(result?.state!=='enabled')throw Error('dedicated-private-pilot-router-redaction-not-enabled');
+ return true;
+}
+if(require.main===module)audit().then(info=>{
+ if(process.argv.includes('--require-enabled'))
+  requireEnabledForCodePromotion(info);
+}).catch(()=>{
  console.error('Private JALAN pilot router metadata audit unavailable; release privacy gate unresolved.');
  process.exitCode=1;
 });
-module.exports={audit};
+module.exports={audit,requireEnabledForCodePromotion};
