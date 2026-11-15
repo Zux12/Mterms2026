@@ -133,7 +133,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    assert.equal(oversized.headers.get('cache-control'),'no-store');
    assert.match(oversized.data.error,/exceeds 1024 bytes/);
    const text=await fetch(base,{method:'POST',
-     headers:{'Content-Type':'text/plain'},body:'startLat=3.139'});
+     headers:{'Content-Type':'text/plain','X-JALAN-Preview-Token':fixtureToken},body:'startLat=3.139'});
    assert.equal(text.status,415);
    assert.equal(text.headers.get('cache-control'),'no-store');
    assert.equal(text.headers.get('referrer-policy'),'no-referrer');
@@ -149,7 +149,8 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    async function chunked(body){
      return await new Promise((resolve,reject)=>{
        const req=http.request(base,{method:'POST',headers:{
-         'Content-Type':'application/json','Transfer-Encoding':'chunked'
+         'Content-Type':'application/json','Transfer-Encoding':'chunked',
+         'X-JALAN-Preview-Token':fixtureToken
        }},res=>{
          let data='';res.setEncoding('utf8');res.on('data',v=>data+=v);
          res.on('end',()=>resolve({status:res.statusCode,data:JSON.parse(data)}));
