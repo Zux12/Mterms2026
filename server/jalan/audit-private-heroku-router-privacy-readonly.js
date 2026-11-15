@@ -28,7 +28,12 @@ async function audit({fetcher=fetch,key=process.env.HEROKU_API_KEY,log=console.l
 }
 // An authorized manual CODE deployment must fail *before* pilot config writes
 // while the dedicated Heroku router may log exact route coordinates.
-// Older v15 smoke sends coordinates in the URL. NEVER run that GET while\n// Heroku router query logging is disabled, unsupported or unknown.\nfunction mayRunLegacyCoordinateGet(result){\n return result?.state==='enabled';\n}\nfunction requireEnabledForCodePromotion(result){
+// Older v15 smoke sends coordinates in the URL. NEVER run that GET while
+// Heroku router query logging is disabled, unsupported or unknown.
+function mayRunLegacyCoordinateGet(result){
+ return result?.state==='enabled';
+}
+function requireEnabledForCodePromotion(result){
  if(result?.state!=='enabled')throw Error('dedicated-private-pilot-router-redaction-not-enabled');
  return true;
 }
