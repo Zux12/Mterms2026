@@ -30,6 +30,18 @@ One imported OSM node identifier is shared between U Thant and Tun Razak; one is
 
 **Decision:** N06 still NOT APPROVED; N09 temporal control source + imported topological screening PARTIAL; N10 remains **0/20 independent complete KL driving journeys accepted**. No temporary rule imported into production, no TomTom substitution, no road restrictions enforced. Next: obtain current independent OSM/authority surveyed junction geometry and source-dated on-site controls, compare exact turn/grade-separated nodes with authorized real routes, and keep uncertainty explicitly visible.
 
+## New authenticated directed-transfer screening — 15 November 2026 ~11:13 MYT (imported graph only)
+
+The read-only trusted diagnostic from [reviewed PR #53](https://github.com/Zux12/Mterms2026/pull/53) was merged **only** into the isolated trusted JALAN pilot-development branch as [`f52c204e`](https://github.com/Zux12/Mterms2026/commit/f52c204e5670979508f9d430457402f0aff60582). Targeted draft CI [43670943807](https://github.com/Zux12/Mterms2026/actions/runs/43670943807) **SUCCESS** (four focused audit TAP cases passed, including two new endpoint-direction/provenance cases), and **actual protected read-only [CI 43671048946](https://github.com/Zux12/Mterms2026/actions/runs/43671048946) finished 7/7 SUCCESS** against the existing **168,221-edge** KL import. The output exposes only public OSM IDs and aggregate directed edge incidence; no trip coordinates, observations or MongoDB writes.
+
+| DBKL maneuver in notice | Imported shared node ID | Imported edges entering source road at node | Imported edges leaving destination road at node | Candidate same-node directed transfer | Interpretation only |
+|---|---|---:|---:|---|---|
+| U Thant → Tun Razak (notice: direct exit closed) | `1722609977` | 0 | 0 | **No**, 0 nodes | No directed pair observed at *this* imported candidate; cannot prove actual 2026 closure or precise Regal House slip |
+| Tun Razak → Langgak Golf (notice: direct entry closed) | `478756831` | 1 | 0 | **No**, 0 nodes | Existing imported endpoint metadata cannot show this directed movement |
+| Langgak Golf → Tun Razak (notice: designated outbound) | `478756831` | 1 | 1 | **Yes**, 1 candidate node | Imported directed endpoint pair exists; not proof of a legally permitted physical turn |
+
+The one imported shared-node candidate each for U Thant↔Tun Razak and Langgak Golf↔Tun Razak remains as in PR #52. This directional pattern **resembles the published DBKL [green-inbound/red-outbound schematic](https://www.dbkl.gov.my/images/berita-dan-acara/2026/julai/260706/1.-740286112_1012626288348981_3428728264665288080_n.jpg)**, but a directionally plausible imported node is **neither an independent November 2026 OSM snapshot nor a verified physical/legal intersection**. Specifically, zero outgoing edges may arise from segmentation or import limits, and a shared node can exist without legal turn permission. The diagnostic does not test reverse Tun Razak→U Thant entry, full origin/destination trips, actual barrier locations, current TomTom route choice, grade separation or signage. This is prioritization evidence, **not three accepted journey results**. N06 stays NOT APPROVED; N09 stays PARTIAL; N10 stays **0/20**.
+
 ## Eight candidate maneuver checks from actual notices — NOT eight accepted driving journeys
 
 These are source-backed questions to be converted into complete independent origin/destination cases **only after** locating exact junction geometry and current on-site/updated authority evidence. They are not GPS fixes, route results or proof of legally navigable paths.
