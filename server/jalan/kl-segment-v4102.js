@@ -57,7 +57,13 @@ function postTransportPolicy(req,res,next){
  }
  next();
 }
-async function handleRoute(req,res){try{
+async function handleRoute(req,res){
+ // Sensitive request-derived route geometry and errors must not be cached.
+ // This is response privacy only: it does NOT suppress Heroku router GET logs.
+ res.set('Cache-Control','no-store');
+ res.set('Referrer-Policy','no-referrer');
+ res.set('X-Content-Type-Options','nosniff');
+ try{
  const posted=req.method==='POST'?parsePostedCoordinates(req):null;
  if(req.method==='POST'&&!posted)return res.status(400).json({ok:false,error:'Four numeric JSON coordinates required; URL query not accepted'});
  const s=posted?posted.start:[Number(req.query.startLat),Number(req.query.startLng)],
