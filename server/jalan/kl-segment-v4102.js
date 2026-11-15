@@ -67,6 +67,11 @@ router.use('/route',(req,res,next)=>{
  res.set('Cache-Control','no-store');
  res.set('Referrer-Policy','no-referrer');
  res.set('X-Content-Type-Options','nosniff');
+ // Sharing this Heroku app must not implicitly activate a location-processing
+ // endpoint. An operator must deliberately enable it after privacy/access review.
+ // A disabled endpoint still cannot erase router logs from direct URL requests.
+ if(process.env.JALAN_SHARED_KL_PREVIEW_ENABLED!=='true')
+  return res.status(503).json({ok:false,error:'Experimental KL preview is not enabled'});
  next();
 });
 router.get('/route',handleRoute); // legacy compatibility; URL coords can be logged
