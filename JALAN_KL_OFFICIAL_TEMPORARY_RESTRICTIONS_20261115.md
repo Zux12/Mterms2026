@@ -8,6 +8,20 @@
 2. **DBKL/KLCCC official site:** [KL-Seremban resurfacing traffic announcement](https://klccc.dbkl.gov.my/page/2/), alongside DBKL's [18 September 2026 lane-closure announcement](https://www.dbkl.gov.my/pengumuman/makluman-penutupan-lorong-lbr-kl-seremban-penutupan-lorong-secara-berperingkat). KLCCC reports works **8 September 2026–2 February 2027**, approximately **22:00–05:00**, both directions, from the SPE ramp toward the gateway near Plaza Dunia Perabot. This is **staged lane works**, **NOT** authority confirmation that the entire KL–Seremban corridor is closed. The DBKL announcement body has limited machine-readable detail; keep KLCCC as the source for operating window.
 3. **LLM, published 15 September 2025:** [Jalan Johar–Jalan Beringin westbound reopening](https://www.llm.gov.my/announcement/announcement_detail/27337), said to open at 00:01 on 15 September 2025. This demonstrates that a historic closure must not be hardcoded indefinitely; **does not certify current November 2026 availability or access**.
 
+## Cross-check against actual imported full-KL directed OSM graph — 15 November 2026 ~10:20 MYT
+
+**New read-only technical evidence, NOT independent current road-ground-truth:** [JALAN backend PR #52](https://github.com/Zux12/Mterms2026/pull/52) merged three JALAN diagnostic/test/guarded-CI paths to isolated trusted source [`12bc05d8`](https://github.com/Zux12/Mterms2026/commit/12bc05d884b8f3432b4f883a90732d8d19aa13f2). Mock audit cases 2/2 PASS. [Protected realgraph CI 43666984616](https://github.com/Zux12/Mterms2026/actions/runs/43666984616) 7/7 SUCCESS with actual `jalan_readonly` Atlas metadata-only/read-only query, **168,221 directed KL edges** and no observed JALAN database writes or GPS reads.
+
+| Imported public street name (exact case-insensitive match) | Imported OSM ways | Directed edge records | `oneway=true` ways | `oneway=false` ways | Public OSM node identifiers |
+|---|---:|---:|---:|---:|---:|
+| Jalan U Thant | 9 | 168 | 2 | 7 | 91 |
+| Jalan Langgak Golf | 5 | 45 | 3 | 2 | 41 |
+| Jalan Tun Razak | 211 | 573 | 211 | 0 | 582 |
+
+One imported OSM node identifier is shared between U Thant and Tun Razak; one is shared between Langgak Golf and Tun Razak. These indicate **possible imported junctions only**. The audit did not independently retrieve current OSM tags, map the shared nodes to the specific DBKL-published Regal House/Iraqi Embassy restricted turn approaches, confirm sign or barrier positions, run an actual DBKL-temporal legal route, or compare live TomTom results. The 2026 temporary one-way plan **cannot be inferred from historic OSM one-way totals**, and no named-road subsegment can be declared open/closed on this evidence alone.
+
+**Decision:** N06 still NOT APPROVED; N09 temporal control source + imported topological screening PARTIAL; N10 remains **0/20 independent complete KL driving journeys accepted**. No temporary rule imported into production, no TomTom substitution, no road restrictions enforced. Next: obtain current independent OSM/authority surveyed junction geometry and source-dated on-site controls, compare exact turn/grade-separated nodes with authorized real routes, and keep uncertainty explicitly visible.
+
 ## Eight candidate maneuver checks from actual notices — NOT eight accepted driving journeys
 
 These are source-backed questions to be converted into complete independent origin/destination cases **only after** locating exact junction geometry and current on-site/updated authority evidence. They are not GPS fixes, route results or proof of legally navigable paths.
