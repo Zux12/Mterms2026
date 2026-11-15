@@ -27,7 +27,33 @@ test('JSON-body KL preview validates exactly four finite numeric coordinates',()
 // Reproduces original-Mterms middleware order: its 5 MB JSON parser consumes
 // each request before the JALAN router. Covers legal chunked framing, but
 // does NOT establish a 1 KB pre-parser ingress cap or live Heroku behavior.
+test('shared original-app experimental route defaults OFF for GET and POST',async()=>{
+ const old=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+ delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+ const app=express();app.use(express.json({limit:'5mb'}));
+ app.use('/api/jalan/kl-segment-v4102',router);
+ const server=app.listen(0,'127.0.0.1');
+ try{
+  await new Promise(resolve=>server.once('listening',resolve));
+  const url='http://127.0.0.1:'+server.address().port+
+   '/api/jalan/kl-segment-v4102/route';
+  const get=await fetch(url);
+  const post=await fetch(url,{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(good)});
+  for(const response of [get,post]){
+   assert.equal(response.status,503);
+   assert.equal(response.headers.get('cache-control'),'no-store');
+   assert.match((await response.json()).error,/not enabled/);
+  }
+ }finally{
+  await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+  if(old===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+  else process.env.JALAN_SHARED_KL_PREVIEW_ENABLED=old;
+ }
+});
 test('experimental POST supports framed JSON and validates after the upstream 5 MB parser',async()=>{
+ const previousGate=process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+ process.env.JALAN_SHARED_KL_PREVIEW_ENABLED='true';
  const app=express();
  app.use(express.json({limit:'5mb'}));
  app.use('/api/jalan/kl-segment-v4102',router);
@@ -106,5 +132,7 @@ test('experimental POST supports framed JSON and validates after the upstream 5 
    assert.match(badSchema.data.error,/Four numeric JSON coordinates required/);
  } finally{
    await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));
+   if(previousGate===undefined)delete process.env.JALAN_SHARED_KL_PREVIEW_ENABLED;
+   else process.env.JALAN_SHARED_KL_PREVIEW_ENABLED=previousGate;
  }
 });
