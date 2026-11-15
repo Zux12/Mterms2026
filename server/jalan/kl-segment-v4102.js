@@ -23,7 +23,16 @@ for(const e of next){const nd=cur.d+e.len;if(nd<(dist.get(e.to)??Infinity)){dist
 }
 if(!dist.has(END))return null;const path=[];let n=END;while(n!==START){const p=prev.get(n);if(!p||path.length>COUNT)throw Error('Path reconstruction');path.push(p.e);n=p.from;}path.reverse();const geometry=[];for(const e of path){for(const p of e.coords){const q=[p[1],p[0]],last=geometry[geometry.length-1];if(!last||last[0]!==q[0]||last[1]!==q[1])geometry.push(q);}}
 return {geometry,distanceMeters:Math.round(dist.get(END)),edgeCount:path.length,visited};}
-router.get('/health',async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
+// Shared-host health must not be an unauthenticated database-count endpoint.
+// Preserve no-store and fail closed before even consulting the imported graph.
+router.get('/health',(req,res,next)=>{
+ res.set('Cache-Control','no-store');
+ res.set('Referrer-Policy','no-referrer');
+ res.set('X-Content-Type-Options','nosniff');
+ if(process.env.JALAN_SHARED_KL_PREVIEW_ENABLED!=='true')
+  return res.status(503).json({ok:false,error:'Experimental KL preview is not enabled'});
+ return requireSharedPreviewToken(req,res,next);
+},async(req,res)=>{try{const n=await mongoose.connection.useDb(DB,{useCache:true}).db.collection(COL).countDocuments();res.json({ok:n===COUNT,mode:'kl-segment-preview-v4.10.2',graphEdges:n,readOnly:true,graphCached:!!graph,liveRouting:false});}catch(e){res.status(503).json({ok:false,error:'Graph unavailable'});}});
 // JSON-body coordinates avoid route coordinates in default router URL logs.
 // Original Mterms still parses JSON globally (5 MB) before mounting /api/jalan:
 // a declared-size check runs AFTER that parser; requests without Content-Length
