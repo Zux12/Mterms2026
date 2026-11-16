@@ -91,3 +91,26 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - Attempted public page/API fetches from the available web access; inaccessible, so live deployment remains unverified. GitHub Actions full run status is not confirmed.
 - No API key, Heroku config, scheduling, production recognition, certificate issuance, or email setting was changed.
 - Next: run Node CI end-to-end, confirm Heroku deployment and admin login, verify actual DOI metadata on a small sample, add an independent retraction/integrity clearance workflow, then implement evidence-reviewed automatic shortlist. Keep activation and emails OFF throughout.
+
+## Continued engineering — 16 November 2026 (reviewed-only weekly selection)
+- Public Heroku and website HTTP checks were attempted using both web retrieval and the local execution environment. The endpoints could not be reached from those tools, so the production deployment remains unverified; do not treat GitHub commits as live deployment proof.
+- Introduced `server/oilandgas/recognition-selector.js` as a pure verified-review selector with distinct publications per weekly category, 365-day publication cooldown, 84-day author cooldown preference, discouragement of repeat co-authors in a single week, category-weighted scores, and a narrow verified-Malaysian-affiliation preference when score separation is at most 5.
+- `recognition.js` now has `GET /api/oilandgas/editor/recognition/preview-reviewed`: separate from the original *provisional keyword* preview, this selection gate requires approved evidence reviews, matching publication revision, bibliography verification, documented integrity clearance, and recognition readiness. Automatic and manual activation now read this reviewed-only shortlist, never the provisional ranking, and still require `OIL_RECOGNITION_ACTIVATION_ENABLED=true`.
+- Introduced authenticated `POST /api/oilandgas/editor/recognition/review-approve`. This requires an existing pending AI review, matching revision and Crossref record, an editor-provided public HTTPS integrity-evidence URL, 30–1200 character editorial rationale, and explicit confirmation. Approval makes a review eligible for future shortlisting but **does not activate any recognition, issue a certificate, or send email**. This is documented human integrity clearance; independent automated retraction feed integration remains outstanding.
+- Editor's Desk now displays reviewed-only shortlist separately from provisional ranking, and includes a documented integrity-approval form.
+- Added `tests/oilandgas-recognition-selector.test.js` and updated the existing GitHub CI workflow to run it.
+- Executed 8 isolated pure-JavaScript selection and safety checks via the GitHub-fetched current code; **8/8 passed**. These checks do not replace Node CI or browser/Heroku smoke tests.
+- JavaScript syntax of updated recognition.js and recognition.html validated; GitHub combined commit status returned no checks and the workflow-run lookup returned no visible runs for the selected commit. Therefore CI completion remains **UNCONFIRMED**.
+
+### Strict operational constraints
+- Congratulatory recognition email remains a *non-sending placeholder*; do not connect transports or enable outreach without separate user approval.
+- Auto schedule and recognition activation are OFF/LOCKED unless explicitly configured. **Do not set activation flag yet.**
+- No recognition selections or certificate issuance were performed this turn. Existing homepage highlights, member email workflows and JALAN files were not changed.
+- The reviewed-only shortlist may legitimately show **zero candidates** until evidence-based reviews are completed, properly documented and cleared. Do not fall back to provisional ranking for activation.
+
+### Next engineering work
+1. Independently run full Node test suite in CI with confirmed results.
+2. Verify current Heroku deploy and frontend GitHub Pages production routing.
+3. Implement scheduled batch evidence reviews and automated publication integrity checks (Crossmark/Crossref/other authoritative sources), keeping unverified cases pending.
+4. Test editor approval transactionality and admin identity/audit trace.
+5. Test weekly recognition simulation without writes to production or email. 
