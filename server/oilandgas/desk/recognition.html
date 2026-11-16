@@ -29,6 +29,7 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <button>Stage override</button></form><div id="overrides"></div></section>
 <section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
 <button id="activate" class="secondary" disabled>Activation locked pending tests</button></section>
+<section class="panel"><h2>Withdraw invalid recognition</h2><p class="muted">A withdrawn selection is removed from active and archive feeds. Previously issued certificates are invalidated, but verification remains available and shows the withdrawn status. No emails are sent.</p><form id="withdraw"><label>Recognition to withdraw<select name="selectionId" id="withdraw-selection" required><option value="">Select recognition</option></select></label><label>Reason<textarea name="reason" minlength="10" maxlength="500" required placeholder="Explain the editorial or integrity concern"></textarea></label><button type="submit" class="secondary">Withdraw selected recognition</button></form><p id="withdraw-message" role="status"></p></section>
 <section class="panel"><h2>Co-author certificates</h2>
 <p class="muted">Issue certificates only after confirming a co-author's exact published byline name. Certificates are verifiable online and can be printed or saved as PDF. No email will be sent.</p>
 <form id="certificate-issue"><label>Recognition selection<select name="selectionId" id="certificate-selection" required><option value="">Select an activated recognition</option></select></label>
@@ -74,13 +75,21 @@ async function preview(){
 async function certificates(){
  try{const [history,issued]=await Promise.all([api('history'),api('certificates')]);
  const select=$('certificate-selection');select.replaceChildren(new Option('Select an activated recognition',''));
- for(const item of history.items){if(!['active','archived'].includes(item.status))continue;select.add(new Option(item.label+' · '+item.title,item.id))}
+ const withdrawal=$('withdraw-selection');withdrawal.replaceChildren(new Option('Select recognition',''));
+ for(const item of history.items){if(!['active','archived'].includes(item.status))continue;select.add(new Option(item.label+' · '+item.title,item.id));withdrawal.add(new Option(item.label+' · '+item.title,item.id))}
  const target=$('certificate-list');target.replaceChildren();
  if(!issued.items.length)target.append(node('p','No certificates issued yet.','muted'));
  for(const c of issued.items){const p=node('p',c.authorName+' · '+c.title+' · ');
  const a=node('a','Verify / print ↗');a.href='https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
  }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
 }
+$('withdraw').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());
+ if(!confirm('Withdraw this editorial recognition and invalidate every associated certificate?'))return;
+ const result=await api('withdraw',data);
+ $('withdraw-message').textContent=result.alreadyWithdrawn?'This recognition was already withdrawn.':'Recognition withdrawn and certificates invalidated.';
+ await refresh();
+ }catch(err){$('withdraw-message').textContent=err.message}};
 $('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());
  if(!confirm('Confirm that this name appears as an author on the selected published research paper?'))return;
