@@ -248,6 +248,33 @@ async function scheduledTick(){
 setInterval(scheduledTick,15*60000).unref();
 
 
+adminRouter.post('/withdraw',async(req,res,next)=>{try{
+ const selectionId=String(req.body?.selectionId||'').trim();
+ const reason=String(req.body?.reason||'').trim();
+ if(!/^\d{4}-\d\d-\d\d:(editors-pick|industry-impact|emerging-research)$/.test(selectionId)||
+  reason.length<10||reason.length>500)
+  return res.status(400).json({error:'Select a recognition and provide a withdrawal reason (10–500 characters).'});
+ const session=await mongoose.connection.startSession();
+ try{
+  let result={ok:false};
+  await session.withTransaction(async()=>{
+   const selections=db().collection('recognition_selections');
+   const row=await selections.findOne({_id:selectionId},{session});
+   if(!row)throw Object.assign(new Error('Recognition record not found.'),{status:404});
+   if(row.status==='withdrawn'){result={ok:true,alreadyWithdrawn:true};return;}
+   const now=new Date();
+   await selections.updateOne({_id:selectionId,status:{$in:['active','archived']}},
+    {$set:{status:'withdrawn',withdrawnAt:now,withdrawalReason:reason}},{session});
+   await db().collection('recognition_certificates').updateMany({selectionId},
+    {$set:{status:'withdrawn',withdrawnAt:now}},{session});
+   await db().collection('recognition_audit').insertOne({
+    action:'recognition-withdrawn',selectionId,reason,createdAt:now,
+    previousStatus:row.status},{session});
+   result={ok:true,withdrawn:true,certificatesRevoked:true,emailEnabled:false};
+  });
+  res.json(result);
+ }finally{await session.endSession();}
+}catch(e){next(e);}});
 adminRouter.get('/certificates',async(req,res,next)=>{try{
  const rows=await db().collection('recognition_certificates').find({})
  .sort({issuedAt:-1}).limit(100).toArray();
