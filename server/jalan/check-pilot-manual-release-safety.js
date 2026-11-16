@@ -19,9 +19,10 @@ async function preflight({fetcher=fetch,key=process.env.HEROKU_API_KEY,
  const app=await response.json();
  if(app?.id!==PRIVATE.id||app?.name!==PRIVATE.name)
   throw Error('private-app-identity-mismatch');
- const code=await auditCode(fetcher,key);
+ // Each subordinate read uses the immutable app UUID, never the mutable app name.
+ const code=await auditCode(fetcher,key,{appId:PRIVATE.id});
  // All versioned config variables stay in memory, never in log or output.
- const cfg=await auditConfig({fetcher,key,expectedUri,log:()=>{}});
+ const cfg=await auditConfig({fetcher,key,expectedUri,log:()=>{},appId:PRIVATE.id});
  if(code.state!=='previous-code-slug-metadata-verified'||
     cfg.eligible!=='confirmed'||cfg.compatible!==true||
     code.currentVersion!==cfg.currentVersion||

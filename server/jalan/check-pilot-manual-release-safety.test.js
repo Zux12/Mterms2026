@@ -21,8 +21,7 @@ function fixture({eligible=true,priorConfig=validConfig(),wrongIdentity=false,ve
   calls.push({path,method:options.method||'GET',body:options.body});
   let data;
   if(path==='/apps/'+privateId)data={id:wrongIdentity?'wrong':privateId,name:'jalan-kl-private-pilot'};
-  else if(path==='/apps/jalan-kl-private-pilot')data={id:privateId,name:'jalan-kl-private-pilot'};
-  else if(path==='/apps/jalan-kl-private-pilot/releases'){
+    else if(path==='/apps/'+privateId+'/releases'){
    releaseReads++;
    data=versionDrift&&releaseReads>1?[
     {id:'next',version:16,status:'succeeded',slug:{id:'nextslug'}},...releases
@@ -46,6 +45,8 @@ test('eligible identical-config code snapshot passes without touching Heroku',as
  assert.equal(out.restoreTested,false);
  assert.ok(f.calls.length>=7);
  assert.ok(f.calls.every(x=>x.method==='GET'&&x.body===undefined));
+ assert.ok(f.calls.every(x=>x.path.startsWith('/apps/'+privateId)),
+  'all subordinate release/config/slug reads must use the pinned UUID, not a reusable app name');
  assert.doesNotMatch(logs.join(' '),/dummy@example|PPPP|TTTT|newslug|oldslug|Bearer/);
 });
 test('unknown or denied rollback eligibility cannot authorize deployment',async()=>{

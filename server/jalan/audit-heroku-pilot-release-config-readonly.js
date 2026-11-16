@@ -2,6 +2,7 @@
 // Dedicated JALAN private Heroku pilot only. GET-only v14-v15 recovery
 // configuration compatibility inspection. NEVER outputs config vars or URLs.
 const APP='jalan-kl-private-pilot';
+const UUID=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 const HEADERS={Accept:'application/vnd.heroku+json; version=3'};
 const REQUIRED={
  JALAN_PILOT_MODE:'EXPERIMENTAL_SEGMENT_ROUTE',
@@ -30,9 +31,10 @@ function compatibility(current,previous,expectedUri){
  return {compatible:reasons.length===0,reasons};
 }
 async function audit({fetcher=fetch,key=process.env.HEROKU_API_KEY,
- expectedUri=process.env.JALAN_READONLY_MONGODB_URI,log=console.log}={}){
+ expectedUri=process.env.JALAN_READONLY_MONGODB_URI,log=console.log,appId=APP}={}){
  if(typeof key!=='string'||key.length<16||typeof expectedUri!=='string'||!expectedUri)
   throw Error('protected-heroku-credentials-not-available');
+ if(appId!==APP&&!UUID.test(appId))throw Error('invalid-private-app-identity');
  const headers={...HEADERS,Authorization:'Bearer '+key};
  const get=async path=>{
   const r=await fetcher('https://api.heroku.com'+path,{
@@ -40,9 +42,10 @@ async function audit({fetcher=fetch,key=process.env.HEROKU_API_KEY,
   if(!r.ok)throw Error('heroku-release-config-audit-http-'+r.status);
   return r.json();
  };
- const base='/apps/'+APP;
+ const base='/apps/'+encodeURIComponent(appId);
  const app=await get(base);
- if(app?.name!==APP||!app.id)throw Error('unexpected-pilot-application');
+ if(app?.name!==APP||!app.id||(appId!==APP&&app.id!==appId))
+  throw Error('unexpected-pilot-application');
  const releases=await get(base+'/releases');
  if(!Array.isArray(releases)||releases.length<2)throw Error('release-list-unavailable');
  const sorted=releases.filter(x=>Number.isInteger(x.version)).sort((a,b)=>b.version-a.version);
