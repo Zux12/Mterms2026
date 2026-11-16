@@ -1,0 +1,41 @@
+name: JALAN Heroku router query privacy (operator manual only)
+
+# Registration-only definition. Actual audited operation exists only on the
+# trusted JALAN development ref. Main has no credential or platform access.
+on:
+  workflow_dispatch:
+    inputs:
+      app_target:
+        description: 'Exact role (private pilot or original Mterms). One app per run.'
+        required: true
+        type: choice
+        options:
+          - private
+          - original
+      apply:
+        description: 'False audits only. True needs exact typed confirmation below.'
+        required: true
+        type: boolean
+        default: false
+      expected_app_id:
+        description: 'Heroku app UUID independently checked in your account; required for apply.'
+        required: false
+        type: string
+      confirmation:
+        description: 'For apply: ENABLE_QUERY_REDACTION_PRIVATE or ENABLE_QUERY_REDACTION_ORIGINAL'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  registration-only:
+    if: github.ref != 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Explain manual privacy operation
+        run: |
+          echo "Registration only: no Heroku credentials or platform changes."
+          echo "Read JALAN_HEROKU_ROUTER_PRIVACY_RUNBOOK.md before continuing."
+          echo "Select the reviewed trusted JALAN branch and start with apply=false."
