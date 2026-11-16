@@ -3,6 +3,7 @@
 const express=require('express');
 const mongoose=require('mongoose');
 const crypto=require('crypto');
+const policy=require('./recognition-policy');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -26,6 +27,7 @@ function entry(row,kind){
  byline:String(p.byline||row.byline||(row.authors||[]).map(x=>x.name).join(', ')),
  topic:String(p.topic||row.topic||''),
  source:kind==='publications'&&/^https:\/\//.test(row.source||'')?row.source:'',
+ integrityStatus:String(row.integrityStatus||row.retractionStatus||'').toLowerCase(),
  publishedAt:row.publishedAt||null};
 }
 function scorePaper(p){
@@ -56,10 +58,10 @@ function normalizeName(name){return String(name||'').normalize('NFKC').trim().to
 function isMY(p){return p.malaysianAffiliationVerified===true;}
 async function candidates(){
  const out=[];
- for(const kind of ['publications','articles']){
+ for(const kind of ['publications']){
   const rows=await db().collection(kind).find({status:'published',publication:{$exists:true}},
-   {projection:{reference:1,publicationId:1,publication:1,source:1,publishedAt:1,authors:1,byline:1}}).limit(1500).toArray();
-  out.push(...rows.map(r=>entry(r,kind)).filter(p=>p.title&&p.byline&&p.reference));
+   {projection:{reference:1,publicationId:1,publication:1,source:1,publishedAt:1,authors:1,byline:1,integrityStatus:1,retractionStatus:1}}).limit(1500).toArray();
+  out.push(...rows.map(r=>entry(r,kind)).filter(p=>policy.publicationEligibility(p).eligible));
  }
  return out;
 }
@@ -129,22 +131,26 @@ adminRouter.get('/status',async(req,res,next)=>{try{
  const now=new Date();const active=await db().collection('recognition_selections')
  .find({status:'active',end:{$gt:now}}).sort({category:1}).toArray();
  res.json({programme:'WRRP-001',schedulerEnabled:process.env.OIL_RECOGNITION_AUTO==='true',
-  emailEnabled:false,certificateIssuanceEnabled:false,
+  emailEnabled:false,certificateIssuanceEnabled:true,activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
  res.json({scheduledStart:weekStart().toISOString(),emailEnabled:false,
-  scoring:'rule-based-provisional',items:await shortlist()});
+  scoring:'rule-based-provisional',activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
+  items:(await shortlist()).map(x=>({...x,minimumScore:policy.thresholdFor(x.category),
+   passesThreshold:!!x.candidate&&x.candidate.assessment.total>=policy.thresholdFor(x.category)}))});
 }catch(e){next(e);}});
 adminRouter.post('/override',async(req,res,next)=>{try{
  const {category,kind,reference,reason}=req.body||{};
- if(!categories.some(c=>c.key===category)||!['articles','publications'].includes(kind)||
+ if(!categories.some(c=>c.key===category)||kind!=='publications'||
  typeof reference!=='string'||!/^OG-[AP]-[A-F0-9]{16}$/.test(reference)||
  typeof reason!=='string'||reason.trim().length<5||reason.length>500)
  return res.status(400).json({error:'Category, published reference and reason are required.'});
  const record=await db().collection(kind).findOne({reference,status:'published',publication:{$exists:true}});
  if(!record)return res.status(404).json({error:'Published paper not found.'});
  const p=entry(record,kind);
+ const eligibility=policy.publicationEligibility(p);
+ if(!eligibility.eligible)return res.status(422).json({error:'Publication is not eligible: '+eligibility.reasons.join(', ')});
  await db().collection('recognition_overrides').updateOne({_id:category},
  {$set:{category,kind,reference,reason:reason.trim(),updatedAt:new Date(),state:'pending'}},{upsert:true});
  await db().collection('recognition_audit').insertOne({action:'override-staged',category,kind,reference,
@@ -176,9 +182,12 @@ async function activateCycle(){
   const override=overrides.find(o=>o.category===item.category);
   if(!override)continue;
   const record=await db().collection(override.kind).findOne({reference:override.reference,status:'published',publication:{$exists:true}});
-  if(record)item.candidate={...entry(record,override.kind),assessment:{...scorePaper(entry(record,override.kind)),
+  if(record&&policy.publicationEligibility(entry(record,override.kind)).eligible)item.candidate={...entry(record,override.kind),assessment:{...scorePaper(entry(record,override.kind)),
    overrideReason:override.reason,mode:'admin-override'}};
  }
+ const invalid=proposed.filter(row=>!row.candidate||!policy.publicationEligibility(row.candidate).eligible||
+  (row.candidate.assessment.total<policy.thresholdFor(row.category)&&row.candidate.assessment.mode!=='admin-override'));
+ if(invalid.length)throw Object.assign(new Error('Insufficient eligible, qualified publications: '+invalid.map(x=>x.category).join(', ')),{status:409});
  const keys=proposed.map(x=>x.candidate&&x.candidate.kind+':'+x.candidate.reference);
  if(keys.some(x=>!x)||new Set(keys).size!==3)
   throw Object.assign(new Error('Cannot activate until three distinct, published eligible papers are available.'),{status:409});
@@ -205,6 +214,8 @@ async function activateCycle(){
  return {ok:true,cycleId,activated:3,emailEnabled:false};
 }
 adminRouter.post('/activate',async(req,res,next)=>{try{
+ if(process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true')
+  return res.status(423).json({error:'Activation locked while research evaluation and deployment tests are incomplete.'});
  if(req.body?.confirm!=='ACTIVATE_NO_EMAIL')return res.status(400).json({error:'Explicit activation confirmation required.'});
  res.json(await activateCycle());
 }catch(e){next(e);}});
@@ -217,7 +228,7 @@ adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode
  warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
 let schedulerBusy=false;
 async function scheduledTick(){
- if(process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
+ if(process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
  try{const now=new Date(),start=weekStart(now);
   if(now>=start&&!await db().collection('recognition_cycles').findOne({_id:start.toISOString().slice(0,10)}))
@@ -244,9 +255,8 @@ adminRouter.post('/certificate/issue',async(req,res,next)=>{try{
  const selection=await db().collection('recognition_selections').findOne({_id:selectionId,
   status:{$in:['active','archived']}});
  if(!selection)return res.status(404).json({error:'Recognition selection not found.'});
- const names=selection.byline.split(/[,;]+/).map(normalizeName);
  const authorKey=normalizeName(authorName);
- if(!names.includes(authorKey))return res.status(400).json({error:'Author must exactly match a published byline entry.'});
+ if(!policy.verifiedBylineAuthor(selection,authorName))return res.status(400).json({error:'Author must exactly match a published byline entry.'});
  const collection=db().collection('recognition_certificates');
  await collection.createIndex({selectionId:1,authorKey:1},{unique:true});
  const existing=await collection.findOne({selectionId,authorKey});
