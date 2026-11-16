@@ -49,11 +49,29 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
 <button id="activate" class="secondary" disabled>Activation locked pending tests</button></section>
 <section class="panel"><h2>Withdraw invalid recognition</h2><p class="muted">A withdrawn selection is removed from active and archive feeds. Previously issued certificates are invalidated, but verification remains available and shows the withdrawn status. No emails are sent.</p><form id="withdraw"><label>Recognition to withdraw<select name="selectionId" id="withdraw-selection" required><option value="">Select recognition</option></select></label><label>Reason<textarea name="reason" minlength="10" maxlength="500" required placeholder="Explain the editorial or integrity concern"></textarea></label><button type="submit" class="secondary">Withdraw selected recognition</button></form><p id="withdraw-message" role="status"></p></section>
-<section class="panel"><h2>Co-author certificates</h2>
-<p class="muted">Issue certificates only after confirming a co-author's exact published byline name. Certificates are verifiable online and can be printed or saved as PDF. No email will be sent.</p>
+<section class="panel"><h2>Co-author recognition letters</h2>
+<p class="muted">Issue a formal A4 Letter of Recognition only after confirming a co-author's exact published byline name. Letters are verifiable and can be printed or saved as PDF. No email will be sent.</p>
 <form id="certificate-issue"><label>Recognition selection<select name="selectionId" id="certificate-selection" required><option value="">Select an activated recognition</option></select></label>
-<label>Co-author name exactly as published<input name="authorName" maxlength="160" required placeholder="Use name exactly as shown in the publication byline"></label><button type="submit">Issue verified recognition certificate</button></form>
-<p id="certificate-result" role="status"></p><h3>Recently issued certificates</h3><div id="certificate-list"></div></section>
+<label>Co-author name exactly as published<input name="authorName" maxlength="160" required placeholder="Use name exactly as shown in the publication byline"></label><button type="submit">Issue official recognition letter</button></form>
+<p id="certificate-result" role="status"></p><h3>Recently issued letters</h3><div id="certificate-list"></div></section>
+<section class="panel"><h2>Recognition letter engagement</h2>
+<p class="muted">The approved document format is now a one-page, justified A4 <strong>Letter of Recognition</strong> with the Oil &amp; Gas branding. For a letter linked from an email, tracking separates link requests from successfully loaded letter pages. Automated email scanners can request links; neither event proves the author read the message.</p>
+<div class="grid">
+<div class="card"><small>Total tracked link requests</small><h3 id="tracking-requests">0</h3></div>
+<div class="card"><small>Confirmed letter page loads</small><h3 id="tracking-views">0</h3></div>
+<div class="card"><small>Emails sent by WRRP</small><h3>0 — disabled</h3></div>
+</div>
+<p><button type="button" class="secondary" id="tracking-refresh">Refresh letter activity</button></p>
+<p id="tracking-message" role="status">No email outreach is active. Test-only links can be generated for existing valid letters.</p>
+<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;text-align:left;font:13px Arial,sans-serif"><thead>
+<tr><th style="padding:10px;border-bottom:1px solid #ddd">Author / Letter</th><th style="padding:10px;border-bottom:1px solid #ddd">Email status</th><th style="padding:10px;border-bottom:1px solid #ddd">Link requested</th><th style="padding:10px;border-bottom:1px solid #ddd">Letter loaded</th><th style="padding:10px;border-bottom:1px solid #ddd">Last activity</th></tr>
+</thead><tbody id="tracking-rows"></tbody></table></div>
+<form id="tracking-create" style="margin-top:22px">
+<label>Existing issued letter ID<input name="letterId" required pattern="OG-WRS-[A-Z0-9-]{8,64}" maxlength="75" placeholder="OG-WRS-..."></label>
+<button type="submit" class="secondary">Generate private test tracking link — no email</button>
+</form>
+<p id="tracking-link-result" role="status"></p>
+</section>
 <section class="panel"><h2>Recognition email design</h2><p class="muted">A short, premium HTML email layout using Oil &amp; Gas charcoal, orange and gold. Design preview only — author notification sending is still completely disabled.</p><p><a href="recognition-email-preview.html" target="_blank" rel="noopener noreferrer">Open branded email preview ↗</a></p></section><section class="panel"><h2>Email placeholder</h2><p id="notifications">Not connected.</p></section>
 </main><script>
 'use strict';
@@ -76,7 +94,7 @@ async function refresh(){
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. No emails are enabled.');await certificates();
+ message('Editor controls available. No emails are enabled.');await certificates();await loadLetterTracking();
  }catch(e){message(e.message)}
 }
 async function preview(){
@@ -99,7 +117,7 @@ async function certificates(){
  const target=$('certificate-list');target.replaceChildren();
  if(!issued.items.length)target.append(node('p','No certificates issued yet.','muted'));
  for(const c of issued.items){const p=node('p',c.authorName+' · '+c.title+' · ');
- const a=node('a','Verify / print ↗');a.href='https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
+ const a=node('a','Open A4 letter ↗');a.href='https://oilandgas.eu.com/letter.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
  }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
 }
 $('integrity-approval').onsubmit=async e=>{e.preventDefault();const state=$('integrity-approval-state');
@@ -134,7 +152,7 @@ $('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());
  if(!confirm('Confirm that this name appears as an author on the selected published research paper?'))return;
  const result=await api('certificate/issue',data);
- $('certificate-result').textContent=result.alreadyIssued?'Certificate already exists: '+result.id:'Certificate issued: '+result.id+' (no email sent).';
+ $('certificate-result').textContent=result.alreadyIssued?'Letter already exists: '+result.id:'Letter issued: '+result.id+' (no email sent).';
  await certificates();
  }catch(err){$('certificate-result').textContent=err.message}};
 
@@ -154,6 +172,44 @@ $('preview-reviewed').onclick=async()=>{
     ' of 3 cleared selections. Activation remains locked during testing.';
  }catch(err){$('reviewed-note').textContent='Reviewed shortlist unavailable: '+err.message}
 };
+
+function formatTrackingDate(value){return value?new Date(value).toLocaleString('en-MY',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'}):'—'}
+async function loadLetterTracking(){
+ const body=$('tracking-rows');body.replaceChildren();
+ try{
+  const result=await api('letter-tracking');
+  let requested=0,loaded=0;
+  for(const item of result.items){
+   requested+=item.linkRequests||0;loaded+=item.letterLoads||0;
+   const row=document.createElement('tr');
+   const vals=[(item.authorName||'Author')+' · '+item.letterId,
+    item.emailStatus||'disabled',
+    String(item.linkRequests||0),
+    String(item.letterLoads||0),
+    formatTrackingDate(item.lastLetterLoadAt||item.lastLinkRequestAt)];
+   vals.forEach(v=>{const td=document.createElement('td');td.style.padding='10px';td.style.borderBottom='1px solid #eee';td.textContent=v;row.append(td)});
+   body.append(row);
+  }
+  $('tracking-requests').textContent=requested;
+  $('tracking-views').textContent=loaded;
+  $('tracking-message').textContent=result.items.length?
+   'Tracked records: '+result.items.length+'. Link requests may include automated security scans; page loads are not proof of human reading.':
+   'No tracked letters yet. Recognition emails remain disabled.';
+ }catch(err){$('tracking-message').textContent=err.message}
+}
+$('tracking-refresh').onclick=loadLetterTracking;
+$('tracking-create').onsubmit=async e=>{e.preventDefault();
+ const result=$('tracking-link-result');
+ try{
+  const data=Object.fromEntries(new FormData(e.target).entries());
+  const created=await api('letter-link/create',data);
+  result.replaceChildren(document.createTextNode('Private preview link created (not emailed): '));
+  const link=document.createElement('a');link.href=created.url;link.textContent='Open tracked A4 letter';
+  link.target='_blank';link.rel='noopener noreferrer';result.append(link);
+  await loadLetterTracking();
+ }catch(err){result.textContent=err.message}
+};
+
 $('refresh').onclick=refresh;$('preview').onclick=preview;
 $('override').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
