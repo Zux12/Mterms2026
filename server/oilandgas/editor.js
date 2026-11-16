@@ -178,6 +178,8 @@ router.use(wrap(async(req,res,next)=>{
 router.use('/authors', require('./authors-admin')(database));
 // Approval and SMTP welcome notices are restricted to authenticated editors.
 router.use('/members', require('./membership-admin'));
+// Recognition controls inherit the existing authenticated Editor's Desk session.
+router.use('/recognition', require('./recognition').adminRouter);
 
 router.post('/weekly-pick/automatic',wrap(async(req,res)=>{
   const {slot}=req.body || {};
