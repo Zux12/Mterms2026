@@ -1,0 +1,66 @@
+name: JALAN Heroku router query privacy (operator manual only)
+
+# Stage on a private code-review branch. Once independently reviewed and
+# registered, only an explicit human workflow_dispatch may change a flag.
+# No deploy, no dyno restart, no config-var write, no MongoDB or route calls.
+on:
+  workflow_dispatch:
+    inputs:
+      app_target:
+        description: 'Exact role (private pilot or original Mterms). One app per run.'
+        required: true
+        type: choice
+        options:
+          - private
+          - original
+      apply:
+        description: 'False audits only. True needs exact typed confirmation below.'
+        required: true
+        type: boolean
+        default: false
+      expected_app_id:
+        description: 'Heroku app UUID independently checked in your account; required for apply.'
+        required: false
+        type: string
+      confirmation:
+        description: 'For apply: ENABLE_QUERY_REDACTION_PRIVATE or ENABLE_QUERY_REDACTION_ORIGINAL'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jalan-router-privacy-operator
+  cancel-in-progress: false
+
+jobs:
+  check-or-enable:
+    # Never run on PRs or untrusted refs; even manual inspection needs the
+    # established reviewed JALAN trusted ref and repository HEROKU_API_KEY.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Explicit app-scoped query redaction / audit (no other Heroku changes)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          JALAN_APP_TARGET: ${{ inputs.app_target }}
+          JALAN_APPLY: ${{ inputs.apply }}
+          JALAN_EXPECTED_APP_ID: ${{ inputs.expected_app_id }}
+          JALAN_ROUTER_PRIVACY_CONFIRMATION: ${{ inputs.confirmation }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check server/jalan/enable-heroku-router-redaction-operator.js
+          if [ "$JALAN_APPLY" = "true" ]; then
+            node server/jalan/enable-heroku-router-redaction-operator.js --target="$JALAN_APP_TARGET" --apply
+          else
+            node server/jalan/enable-heroku-router-redaction-operator.js --target="$JALAN_APP_TARGET"
+          fi

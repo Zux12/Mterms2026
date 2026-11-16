@@ -1,0 +1,155 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {enableQueryRedaction}=require('./enable-heroku-router-redaction-operator');
+const KEY='test-only-redacted-key-not-a-heroku-secret';
+const PILOT_ID='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const ORIGINAL_ID='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const OTHER_ID='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+function response(status,data,etag='"W/123"'){
+ return {status,ok:status>=200&&status<300,headers:{get:x=>x.toLowerCase()==='etag'?etag:null},json:async()=>data};
+}
+function setup({original=false,enabled=false,featureEtag='"W/123"',afterEnabled=true,
+ patchStatus=200,ambiguous=false,malformedId=false}={}){
+ const calls=[],messages=[];
+ const originalName='mterm2026';
+ let patchCount=0;
+ const fetcher=async(url,opts)=>{
+  const u=new URL(url),method=opts.method;
+  calls.push({path:u.pathname,method,body:opts.body,headers:opts.headers,redirect:opts.redirect});
+  assert.equal(u.origin,'https://api.heroku.com');
+  assert.equal(opts.redirect,'error');
+  if(u.pathname==='/apps/jalan-kl-private-pilot')
+   return original?response(404,{}):response(200,{id:malformedId?'unsafe/name':PILOT_ID,name:'jalan-kl-private-pilot'});
+  if(u.pathname==='/apps/mterm2026')
+   return original?response(200,{id:ORIGINAL_ID,name:originalName}):response(404,{});
+  if(u.pathname==='/apps/mterms2026')
+   return ambiguous?response(200,{id:OTHER_ID,name:'mterms2026'}):response(404,{});
+  if([PILOT_ID,ORIGINAL_ID,OTHER_ID].some(id=>u.pathname==='/apps/'+id+'/features/http-router-no-log-query')){
+   if(method==='GET')return response(200,{name:'http-router-no-log-query',
+    enabled:patchCount>0?afterEnabled:enabled},featureEtag);
+   if(method==='PATCH'){
+    patchCount++;
+    assert.equal(opts.headers['If-Match'],featureEtag);
+    assert.equal(opts.headers['Content-Type'],'application/json');
+    assert.deepEqual(JSON.parse(opts.body),{enabled:true});
+    return response(patchStatus,{name:'http-router-no-log-query',enabled:true});
+   }
+  }
+  throw Error('Unexpected request '+method+' '+u.pathname);
+ };
+ return {fetcher,calls,messages,log:m=>messages.push(m),get patches(){return patchCount}};
+}
+test('dry-run private only does not mutate or request route, location, config or log records',async()=>{
+ const h=setup();
+ const r=await enableQueryRedaction({target:'private',key:KEY,fetcher:h.fetcher,log:h.log});
+ assert.equal(r.state,'disabled');
+ assert.equal(r.changed,false);
+ assert.equal(h.patches,0);
+ assert.equal(h.calls.length,3);
+ assert(h.calls.every(c=>c.method==='GET'&&(c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query')));
+ assert(h.messages.every(m=>!m.includes(KEY)));
+});
+test('explicit private approval updates only the identified private app and verifies GET',async()=>{
+ const h=setup();
+ const r=await enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log});
+ assert.deepEqual(r,{target:'private',state:'enabled',changed:true});
+ assert.equal(h.patches,1);
+ assert.equal(h.calls.filter(c=>c.method==='GET').length,3);
+ assert(h.calls.every(c=>c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query'));
+ assert(h.calls.some(c=>c.method==='PATCH'&&c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query'));
+});
+test('already enabled is idempotent and still verified',async()=>{
+ const h=setup({enabled:true});
+ const r=await enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log});
+ assert.equal(r.changed,false);
+ assert.equal(r.state,'enabled');
+ assert.equal(h.patches,0);
+});
+test('confirmation mismatch fails before any authenticated call',async()=>{
+ const h=setup();
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:ORIGINAL_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log}),/confirmation/);
+ assert.equal(h.calls.length,0);
+});
+test('original alias discovered uniquely; no pilot request or code mutation',async()=>{
+ const h=setup({original:true});
+ const r=await enableQueryRedaction({target:'original',apply:true,expectedAppId:ORIGINAL_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log});
+ assert.equal(r.changed,true);
+ assert.equal(h.patches,1);
+ assert(h.calls.every(c=>!c.path.includes('jalan-kl-private-pilot')&&!c.path.includes(PILOT_ID)));
+ assert(h.calls.some(c=>c.method==='PATCH'&&c.path==='/apps/'+ORIGINAL_ID+'/features/http-router-no-log-query'));
+});
+test('ambiguous original identity refuses PATCH',async()=>{
+ const h=setup({original:true,ambiguous:true});
+ await assert.rejects(enableQueryRedaction({target:'original',apply:true,expectedAppId:ORIGINAL_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log}),/ambiguous/);
+ assert.equal(h.patches,0);
+});
+test('a concurrent ETag conflict or failed GET verification never reports success',async()=>{
+ const h=setup({patchStatus:412});
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/not confirmed/);
+ const h2=setup({afterEnabled:false});
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h2.fetcher,log:h2.log}),/verification failed/);
+ assert.equal(h2.patches,1);
+});
+test('malformed discovered app ID prevents feature requests and mutation',async()=>{
+ const h=setup({malformedId:true});
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/identity/);
+ assert.equal(h.patches,0);
+ assert.deepEqual(h.calls.map(c=>c.path),['/apps/jalan-kl-private-pilot']);
+});
+test('apply requires a valid independently checked app ID before authenticated lookup',async()=>{
+ for(const expectedAppId of ['', 'unsafe/id', null]){
+  const h=setup();
+  await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId,
+   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/expected app ID/);
+  assert.equal(h.calls.length,0);
+ }
+});
+test('different valid app ID fails before feature reads or writes, including already-enabled state',async()=>{
+ for(const enabled of [false,true]){
+  const h=setup({enabled});
+  await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:OTHER_ID,
+   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/does not match/);
+  assert.deepEqual(h.calls.map(c=>c.path),['/apps/jalan-kl-private-pilot']);
+  assert.equal(h.patches,0);
+ }
+});
+test('pinned dry-run rejects a mismatch and accepts UUID case differences without logging identity',async()=>{
+ const h=setup();
+ await assert.rejects(enableQueryRedaction({target:'private',expectedAppId:OTHER_ID,
+  key:KEY,fetcher:h.fetcher,log:h.log}),/does not match/);
+ assert.equal(h.calls.length,1);
+ const h2=setup();
+ await enableQueryRedaction({target:'private',expectedAppId:PILOT_ID.toUpperCase(),
+  key:KEY,fetcher:h2.fetcher,log:h2.log});
+ assert.equal(h2.patches,0);
+ assert(h2.messages.some(m=>m.includes('identityPinned=true')));
+ assert(h2.messages.every(m=>!m.includes(PILOT_ID)&&!m.includes(KEY)));
+});
+test('unsupported target and absent auth fail closed',async()=>{
+ const h=setup();
+ await assert.rejects(enableQueryRedaction({target:'all',key:KEY,fetcher:h.fetcher,log:h.log}),/Unsupported/);
+ await assert.rejects(enableQueryRedaction({target:'private',key:'',fetcher:h.fetcher,log:h.log}),/authentication/);
+ assert.equal(h.calls.length,0);
+});
+
+test('operator workflow is manual-only with explicit trusted-ref and no background trigger',()=>{
+ const fs=require('node:fs');
+ const yaml=fs.readFileSync(require('node:path').join(__dirname,'../../.github/workflows/jalan-heroku-router-privacy-operator.yml'),'utf8');
+ assert.match(yaml,/on:\n  workflow_dispatch:/);
+ assert.doesNotMatch(yaml,/\n  (push|pull_request|schedule):/);
+ assert.match(yaml,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
+ assert.match(yaml,/contents: read/);
+ assert.match(yaml,/JALAN_EXPECTED_APP_ID: \$\{\{ inputs\.expected_app_id \}\}/);
+ assert.match(yaml,/cancel-in-progress: false/);
+ assert.match(yaml,/node server\/jalan\/enable-heroku-router-redaction-operator\.js/);
+ assert.doesNotMatch(yaml,/git push|heroku git:|config:set|mongodb:|railway/i);
+});
