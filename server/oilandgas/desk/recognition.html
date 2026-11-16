@@ -29,6 +29,11 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <button>Stage override</button></form><div id="overrides"></div></section>
 <section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
 <button id="activate" class="secondary">Activate this week's recognition — no emails</button></section>
+<section class="panel"><h2>Co-author certificates</h2>
+<p class="muted">Issue certificates only after confirming a co-author's exact published byline name. Certificates are verifiable online and can be printed or saved as PDF. No email will be sent.</p>
+<form id="certificate-issue"><label>Recognition selection<select name="selectionId" id="certificate-selection" required><option value="">Select an activated recognition</option></select></label>
+<label>Co-author name exactly as published<input name="authorName" maxlength="160" required placeholder="Use name exactly as shown in the publication byline"></label><button type="submit">Issue verified recognition certificate</button></form>
+<p id="certificate-result" role="status"></p><h3>Recently issued certificates</h3><div id="certificate-list"></div></section>
 <section class="panel"><h2>Email placeholder</h2><p id="notifications">Not connected.</p></section>
 </main><script>
 'use strict';
@@ -49,7 +54,7 @@ async function refresh(){
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. No emails are enabled.');
+ message('Editor controls available. No emails are enabled.');await certificates();
  }catch(e){message(e.message)}
 }
 async function preview(){
@@ -62,6 +67,25 @@ async function preview(){
  message('Preview completed. Nothing was published or emailed.');
  }catch(e){message(e.message)}
 }
+
+async function certificates(){
+ try{const [history,issued]=await Promise.all([api('history'),api('certificates')]);
+ const select=$('certificate-selection');select.replaceChildren(new Option('Select an activated recognition',''));
+ for(const item of history.items){if(!['active','archived'].includes(item.status))continue;select.add(new Option(item.label+' · '+item.title,item.id))}
+ const target=$('certificate-list');target.replaceChildren();
+ if(!issued.items.length)target.append(node('p','No certificates issued yet.','muted'));
+ for(const c of issued.items){const p=node('p',c.authorName+' · '+c.title+' · ');
+ const a=node('a','Verify / print ↗');a.href='https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
+ }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
+}
+$('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());
+ if(!confirm('Confirm that this name appears as an author on the selected published research paper?'))return;
+ const result=await api('certificate/issue',data);
+ $('certificate-result').textContent=result.alreadyIssued?'Certificate already exists: '+result.id:'Certificate issued: '+result.id+' (no email sent).';
+ await certificates();
+ }catch(err){$('certificate-result').textContent=err.message}};
+
 $('refresh').onclick=refresh;$('preview').onclick=preview;
 $('override').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
