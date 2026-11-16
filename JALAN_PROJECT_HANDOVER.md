@@ -96,6 +96,13 @@ G. When stable, prepare Apple developer/App Store packaging considerations, test
 
 ## 8. Latest activity / chronological log (newest first)
 
+### 2026-11-16 22:23 MYT owner screenshot — zero eligible traffic reports and stale GPS; diagnosis only
+
+- Owner supplied an iPhone screenshot after PR44 showing a 35.1km route, 30min ETA, “Route reports: 0 · 10:23 PM”, “GPS signal stale · position unverified”, and a displayed “49 m: Turn right onto Jalan Temoleh P8/6”. No raw provider response or full origin/destination coordinates accompanied the image.
+- Re-read current public main `tomtom-live.js` (blob `083205c9213b2e2c400edc1fc64096d4ff3982d3`), confirmed it exactly matches PR44. The ready/zero state follows a successfully accepted reconstruction and zero currently eligible route sections; a rejected geometry match produces an unavailable/error state. Missing/empty TRAFFIC sections also produce zero, so the image does not establish whether traffic is absent in reality. The count was stamped at fetch time; it is not a capture of the raw provider payload.
+- Stale/unmatched GPS does not prevent the initial selected-route traffic request and does not itself filter every report away. The image's current position and 49m instruction distance are unverified; do not classify the screenshot as successful real-road direction/traffic acceptance. Exact phone location, stale-signal cause, and actual TomTom response were not accessed or inferred.
+- No code/release/automation changes for this screenshot alone. Next useful traffic investigation is the provider's section count and route summary for this exact journey, distinguishing a valid empty response from missing traffic detail; preserve the directional association rule. Existing formal N15 holds remain.
+
 ### 2026-11-16 ~22:18 MYT — Published provider-associated traffic for the selected route and destination direction (public PR #44)
 
 - **Owner request and starting evidence:** Following the owner's report that PR42's spatial filtering remained inaccurate, implement their instruction to use TomTom's road-side/direction information and exclude traffic that does not belong to the journey toward destination. Read current master handover and public main `1555c478`, including completed PR40 auto-Go traffic, PR41 report focus, PR42 proximity filter and the latest scheduled-run PR43 blocked-storage correction. Privately checked hourly automation `Automation_58b16b1f255481919896294bf0c8d181`: latest recorded completed run produced PR43; schedule/prompt/enabled state were not modified. Avoided redoing these completed features or changing original Mterms/private app work.
