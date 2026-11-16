@@ -53,3 +53,29 @@ Frontend repository: Zux12/oilandgas-website
 
 ## IMPORTANT
 Do not misstate completion: current work is a committed foundation undergoing tests, not a completed, production-validated programme.
+
+## Continued engineering — 16 November 2026 (subsequent go)
+- Audited live MongoDB oilandgas.publications: 124 published publication records; all 124 have HTTPS source URLs and publication IDs (this does NOT prove links resolve or that manuscripts are non-retracted).
+- Verified there are no recognition collections in the live database at the time of audit. No programme recognitions activated and no certificates sent.
+- Added server/oilandgas/recognition-policy.js: strict publication-only selection, source URL requirement, integrity-status hold, byline token matching, and category threshold rules.
+- Updated recognition.js to shortlist source-backed published research publications only, reject ineligible manual overrides, and enforce score thresholds (85 Editor's Pick, 75 other categories) unless explicitly overridden by an editor. Metadata text scoring remains provisional and not a validated scientific-quality review.
+- Added a second independent activation guard: OIL_RECOGNITION_ACTIVATION_ENABLED must be exactly 'true' to activate selections, whether manually or by scheduler. Leave this OFF during testing. OIL_RECOGNITION_AUTO remains OFF.
+- Staged editor overrides now appear in the preview (same code path as activation).
+- Added admin-only /recognition/withdraw for an invalid recognition; auditable transactional withdrawal revokes linked certificates. Added withdrawal controls in Editor's Desk recognition page.
+- Added tests/oilandgas-recognition-policy.test.js and extended .github/workflows/recognition-tests.yml to check eligibility, integrity holds, co-author matching, thresholds, activation guard, and absence of mail transport.
+- Checked JavaScript syntax of prior committed source using V8 JS parsing; after changes, fresh runtime checks and GitHub Actions result still require confirmation.
+- Live web and Heroku smoke checks are NOT confirmed: public HTTP retrieval via available web/container connection failed. GitHub commit success does not prove Heroku deployment.
+
+### Important current safety status
+Recognition author emails: OFF, placeholder only. Existing membership/submission receipt flows remain unchanged.
+Recognition activation: **LOCKED** unless an operator explicitly configures OIL_RECOGNITION_ACTIVATION_ENABLED=true. Do not set this flag until end-to-end tests pass.
+Automatic weekly scheduler: OFF by default.
+Cert issuance: available as an authenticated manual workflow only for a selected verified byline name; no emails generated.
+
+### Remaining gaps
+1. Independent evidence-backed, credible AI evaluation (not just keyword scoring) and publication retraction/withdrawal verification against authoritative sources.
+2. Verify GitHub Actions executed successfully, then live Heroku deployment and public-site functionality.
+3. End-to-end integration tests, including admin session, DB transactions, duplicate requests and override exclusion.
+4. Validate names for all co-authors and generate PDF/signed recognition packages beyond browser print view.
+5. Build notification preference and suppression workflows as placeholders only. Do not connect email provider until explicit user approval.
+6. Review scoring fairness and 12-week author cooldown, plus topic/institution diversity.
