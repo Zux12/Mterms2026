@@ -122,7 +122,7 @@ publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  if(!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(req.params.id))return res.sendStatus(404);
  const row=await db().collection('recognition_certificates').findOne({_id:req.params.id});
  if(!row)return res.sendStatus(404);
- res.json({id:row._id,status:row.status,author:row.authorName,title:row.title,category:row.category,issuedAt:row.issuedAt||null});
+ res.json({id:row._id,status:row.status,author:row.authorName,title:row.title,category:row.category,label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,note:row.note});
 }catch(e){next(e);}});
 adminRouter.use(express.json({limit:'20kb'}));
 adminRouter.get('/status',async(req,res,next)=>{try{
@@ -228,6 +228,41 @@ async function scheduledTick(){
 // Feature flag defaults OFF. This scheduler never sends email.
 setInterval(scheduledTick,15*60000).unref();
 
+
+adminRouter.get('/certificates',async(req,res,next)=>{try{
+ const rows=await db().collection('recognition_certificates').find({})
+ .sort({issuedAt:-1}).limit(100).toArray();
+ res.json({items:rows.map(x=>({id:x._id,selectionId:x.selectionId,authorName:x.authorName,
+ title:x.title,category:x.category,status:x.status,issuedAt:x.issuedAt}))});
+}catch(e){next(e);}});
+adminRouter.post('/certificate/issue',async(req,res,next)=>{try{
+ const selectionId=String(req.body?.selectionId||'').trim();
+ const authorName=String(req.body?.authorName||'').trim();
+ if(!/^\d{4}-\d\d-\d\d:(editors-pick|industry-impact|emerging-research)$/.test(selectionId)||
+  authorName.length<2||authorName.length>160)
+  return res.status(400).json({error:'Choose a valid selection and published co-author name.'});
+ const selection=await db().collection('recognition_selections').findOne({_id:selectionId,
+  status:{$in:['active','archived']}});
+ if(!selection)return res.status(404).json({error:'Recognition selection not found.'});
+ const names=selection.byline.split(/[,;]+/).map(normalizeName);
+ const authorKey=normalizeName(authorName);
+ if(!names.includes(authorKey))return res.status(400).json({error:'Author must exactly match a published byline entry.'});
+ const collection=db().collection('recognition_certificates');
+ await collection.createIndex({selectionId:1,authorKey:1},{unique:true});
+ const existing=await collection.findOne({selectionId,authorKey});
+ if(existing)return res.json({ok:true,alreadyIssued:true,id:existing._id});
+ const now=new Date(),id='OG-WRS-'+crypto.randomBytes(12).toString('hex').toUpperCase();
+ try{await collection.insertOne({_id:id,selectionId,authorKey,authorName,
+  title:selection.title,category:selection.category,label:selection.label,
+  start:selection.start,end:selection.end,issuedAt:now,status:'valid',
+  note:'Editorial recognition, not an accredited academic award.'});}
+ catch(e){if(e.code===11000){const prior=await collection.findOne({selectionId,authorKey});
+  return res.json({ok:true,alreadyIssued:true,id:prior._id});}throw e;}
+ await db().collection('recognition_audit').insertOne({action:'certificate-issued',
+  selectionId,authorName,certificateId:id,createdAt:now});
+ res.json({ok:true,id,verificationUrl:'https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(id),
+  emailEnabled:false});
+}catch(e){next(e);}});
 adminRouter.get('/notifications',async(req,res)=>res.json({emailEnabled:false,mode:'placeholder',
  message:'No emails will be queued or sent. Notification system awaits acceptance testing and explicit approval.',
  queued:0,sent:0}));
