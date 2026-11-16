@@ -4,6 +4,8 @@ on:
     paths:
       - 'server/oilandgas/recognition.js'
       - 'tests/oilandgas-recognition.test.js'
+      - 'tests/oilandgas-recognition-policy.test.js'
+      - 'server/oilandgas/recognition-policy.js'
       - '.github/workflows/recognition-tests.yml'
   workflow_dispatch:
 jobs:
@@ -19,6 +21,8 @@ jobs:
       - name: Install application dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Check recognition module syntax
-        run: node --check server/oilandgas/recognition.js
+        run: |
+          node --check server/oilandgas/recognition.js
+          node --check server/oilandgas/recognition-policy.js
       - name: Run recognition safety and scoring tests
-        run: node --test tests/oilandgas-recognition.test.js
+        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js
