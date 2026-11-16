@@ -18,6 +18,10 @@ on:
         required: true
         type: boolean
         default: false
+      expected_app_id:
+        description: 'Heroku app UUID independently checked in your account; required for apply.'
+        required: false
+        type: string
       confirmation:
         description: 'For apply: ENABLE_QUERY_REDACTION_PRIVATE or ENABLE_QUERY_REDACTION_ORIGINAL'
         required: false
@@ -49,6 +53,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           JALAN_APP_TARGET: ${{ inputs.app_target }}
           JALAN_APPLY: ${{ inputs.apply }}
+          JALAN_EXPECTED_APP_ID: ${{ inputs.expected_app_id }}
           JALAN_ROUTER_PRIVACY_CONFIRMATION: ${{ inputs.confirmation }}
         shell: bash
         run: |

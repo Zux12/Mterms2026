@@ -52,7 +52,7 @@ test('dry-run private only does not mutate or request route, location, config or
 });
 test('explicit private approval updates only the identified private app and verifies GET',async()=>{
  const h=setup();
- const r=await enableQueryRedaction({target:'private',apply:true,
+ const r=await enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log});
  assert.deepEqual(r,{target:'private',state:'enabled',changed:true});
  assert.equal(h.patches,1);
@@ -62,7 +62,7 @@ test('explicit private approval updates only the identified private app and veri
 });
 test('already enabled is idempotent and still verified',async()=>{
  const h=setup({enabled:true});
- const r=await enableQueryRedaction({target:'private',apply:true,
+ const r=await enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log});
  assert.equal(r.changed,false);
  assert.equal(r.state,'enabled');
@@ -70,13 +70,13 @@ test('already enabled is idempotent and still verified',async()=>{
 });
 test('confirmation mismatch fails before any authenticated call',async()=>{
  const h=setup();
- await assert.rejects(enableQueryRedaction({target:'private',apply:true,
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:ORIGINAL_ID,
   confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log}),/confirmation/);
  assert.equal(h.calls.length,0);
 });
 test('original alias discovered uniquely; no pilot request or code mutation',async()=>{
  const h=setup({original:true});
- const r=await enableQueryRedaction({target:'original',apply:true,
+ const r=await enableQueryRedaction({target:'original',apply:true,expectedAppId:ORIGINAL_ID,
   confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log});
  assert.equal(r.changed,true);
  assert.equal(h.patches,1);
@@ -85,25 +85,54 @@ test('original alias discovered uniquely; no pilot request or code mutation',asy
 });
 test('ambiguous original identity refuses PATCH',async()=>{
  const h=setup({original:true,ambiguous:true});
- await assert.rejects(enableQueryRedaction({target:'original',apply:true,
+ await assert.rejects(enableQueryRedaction({target:'original',apply:true,expectedAppId:ORIGINAL_ID,
   confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log}),/ambiguous/);
  assert.equal(h.patches,0);
 });
 test('a concurrent ETag conflict or failed GET verification never reports success',async()=>{
  const h=setup({patchStatus:412});
- await assert.rejects(enableQueryRedaction({target:'private',apply:true,
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/not confirmed/);
  const h2=setup({afterEnabled:false});
- await assert.rejects(enableQueryRedaction({target:'private',apply:true,
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h2.fetcher,log:h2.log}),/verification failed/);
  assert.equal(h2.patches,1);
 });
 test('malformed discovered app ID prevents feature requests and mutation',async()=>{
  const h=setup({malformedId:true});
- await assert.rejects(enableQueryRedaction({target:'private',apply:true,
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:PILOT_ID,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/identity/);
  assert.equal(h.patches,0);
  assert.deepEqual(h.calls.map(c=>c.path),['/apps/jalan-kl-private-pilot']);
+});
+test('apply requires a valid independently checked app ID before authenticated lookup',async()=>{
+ for(const expectedAppId of ['', 'unsafe/id', null]){
+  const h=setup();
+  await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId,
+   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/expected app ID/);
+  assert.equal(h.calls.length,0);
+ }
+});
+test('different valid app ID fails before feature reads or writes, including already-enabled state',async()=>{
+ for(const enabled of [false,true]){
+  const h=setup({enabled});
+  await assert.rejects(enableQueryRedaction({target:'private',apply:true,expectedAppId:OTHER_ID,
+   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/does not match/);
+  assert.deepEqual(h.calls.map(c=>c.path),['/apps/jalan-kl-private-pilot']);
+  assert.equal(h.patches,0);
+ }
+});
+test('pinned dry-run rejects a mismatch and accepts UUID case differences without logging identity',async()=>{
+ const h=setup();
+ await assert.rejects(enableQueryRedaction({target:'private',expectedAppId:OTHER_ID,
+  key:KEY,fetcher:h.fetcher,log:h.log}),/does not match/);
+ assert.equal(h.calls.length,1);
+ const h2=setup();
+ await enableQueryRedaction({target:'private',expectedAppId:PILOT_ID.toUpperCase(),
+  key:KEY,fetcher:h2.fetcher,log:h2.log});
+ assert.equal(h2.patches,0);
+ assert(h2.messages.some(m=>m.includes('identityPinned=true')));
+ assert(h2.messages.every(m=>!m.includes(PILOT_ID)&&!m.includes(KEY)));
 });
 test('unsupported target and absent auth fail closed',async()=>{
  const h=setup();
@@ -119,6 +148,7 @@ test('operator workflow is manual-only with explicit trusted-ref and no backgrou
  assert.doesNotMatch(yaml,/\n  (push|pull_request|schedule):/);
  assert.match(yaml,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
  assert.match(yaml,/contents: read/);
+ assert.match(yaml,/JALAN_EXPECTED_APP_ID: \$\{\{ inputs\.expected_app_id \}\}/);
  assert.match(yaml,/cancel-in-progress: false/);
  assert.match(yaml,/node server\/jalan\/enable-heroku-router-redaction-operator\.js/);
  assert.doesNotMatch(yaml,/git push|heroku git:|config:set|mongodb:|railway/i);

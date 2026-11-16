@@ -7,11 +7,14 @@ const ACK={private:'ENABLE_QUERY_REDACTION_PRIVATE',original:'ENABLE_QUERY_REDAC
 const ACCEPT='application/vnd.heroku+json; version=3';
 // Heroku's platform API supports immutable app IDs; fail closed on malformed IDs.
 const APP_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-async function enableQueryRedaction({target,apply=false,confirmation='',key=process.env.HEROKU_API_KEY,
+async function enableQueryRedaction({target,apply=false,confirmation='',expectedAppId='',key=process.env.HEROKU_API_KEY,
  fetcher=fetch,log=console.log}={}){
  if(!Object.hasOwn(NAMES,target))throw Error('Unsupported target; private or original only');
  if(typeof key!=='string'||key.length<16)throw Error('Heroku operator authentication unavailable');
  if(apply && confirmation!==ACK[target])throw Error('Operator confirmation required; no mutation performed');
+ if(typeof expectedAppId!=='string'||(expectedAppId!==''&&!APP_UUID.test(expectedAppId))||
+    (apply&&!APP_UUID.test(expectedAppId)))
+  throw Error('A valid independently checked expected app ID is required for apply');
  const headers={Accept:ACCEPT,Authorization:'Bearer '+key};
  async function request(method,path,options={}){
   const r=await fetcher('https://api.heroku.com'+path,{
@@ -35,6 +38,10 @@ async function enableQueryRedaction({target,apply=false,confirmation='',key=proc
  // Resolve by name only for initial discovery; bind every feature read/write to
  // the immutable verified app ID to avoid a rename/reuse race.
  const appId=apps[0].id;
+ // A valid UUID discovered from a familiar name is not proof that the operator
+ // approved that app. Bind the run to the identity checked before dispatch.
+ if(expectedAppId&&appId.toLowerCase()!==expectedAppId.toLowerCase())
+  throw Error('Heroku target does not match the independently checked app ID');
  const path='/apps/'+appId+'/features/'+FEATURE;
  async function readFeature(){
   const r=await request('GET',path);
@@ -59,6 +66,7 @@ async function enableQueryRedaction({target,apply=false,confirmation='',key=proc
  if(apply&&!after.enabled)throw Error('Heroku redaction verification failed');
  log('JALAN Heroku query-string router redaction: '+target+
   ' before='+String(before.enabled)+' after='+String(after.enabled)+
+  ' identityPinned='+String(Boolean(expectedAppId))+
   ' changed='+String(Boolean(apply&&!before.enabled&&after.enabled)));
  log('No code release, route/location request, historical-log purge or retention audit performed.');
  return {target,state:after.enabled?'enabled':'disabled',changed:Boolean(apply&&!before.enabled&&after.enabled)};
@@ -68,7 +76,8 @@ if(require.main===module){
  const target=args.find(x=>x.startsWith('--target='))?.slice('--target='.length);
  const apply=args.includes('--apply');
  const confirmation=process.env.JALAN_ROUTER_PRIVACY_CONFIRMATION||'';
- enableQueryRedaction({target,apply,confirmation}).catch(()=>{
+ const expectedAppId=process.env.JALAN_EXPECTED_APP_ID||'';
+ enableQueryRedaction({target,apply,confirmation,expectedAppId}).catch(()=>{
   console.error('Heroku operator redaction was not verified; no release gate clearance.');
   process.exitCode=1;
  });
