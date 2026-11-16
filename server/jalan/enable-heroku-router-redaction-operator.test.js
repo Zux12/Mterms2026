@@ -3,11 +3,14 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {enableQueryRedaction}=require('./enable-heroku-router-redaction-operator');
 const KEY='test-only-redacted-key-not-a-heroku-secret';
+const PILOT_ID='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const ORIGINAL_ID='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const OTHER_ID='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 function response(status,data,etag='"W/123"'){
  return {status,ok:status>=200&&status<300,headers:{get:x=>x.toLowerCase()==='etag'?etag:null},json:async()=>data};
 }
 function setup({original=false,enabled=false,featureEtag='"W/123"',afterEnabled=true,
- patchStatus=200,ambiguous=false}={}){
+ patchStatus=200,ambiguous=false,malformedId=false}={}){
  const calls=[],messages=[];
  const originalName='mterm2026';
  let patchCount=0;
@@ -17,12 +20,12 @@ function setup({original=false,enabled=false,featureEtag='"W/123"',afterEnabled=
   assert.equal(u.origin,'https://api.heroku.com');
   assert.equal(opts.redirect,'error');
   if(u.pathname==='/apps/jalan-kl-private-pilot')
-   return original?response(404,{}):response(200,{id:'pilot-uuid',name:'jalan-kl-private-pilot'});
+   return original?response(404,{}):response(200,{id:malformedId?'unsafe/name':PILOT_ID,name:'jalan-kl-private-pilot'});
   if(u.pathname==='/apps/mterm2026')
-   return original?response(200,{id:'original-uuid',name:originalName}):response(404,{});
+   return original?response(200,{id:ORIGINAL_ID,name:originalName}):response(404,{});
   if(u.pathname==='/apps/mterms2026')
-   return ambiguous?response(200,{id:'other-uuid',name:'mterms2026'}):response(404,{});
-  if(u.pathname.endsWith('/features/http-router-no-log-query')){
+   return ambiguous?response(200,{id:OTHER_ID,name:'mterms2026'}):response(404,{});
+  if([PILOT_ID,ORIGINAL_ID,OTHER_ID].some(id=>u.pathname==='/apps/'+id+'/features/http-router-no-log-query')){
    if(method==='GET')return response(200,{name:'http-router-no-log-query',
     enabled:patchCount>0?afterEnabled:enabled},featureEtag);
    if(method==='PATCH'){
@@ -44,7 +47,7 @@ test('dry-run private only does not mutate or request route, location, config or
  assert.equal(r.changed,false);
  assert.equal(h.patches,0);
  assert.equal(h.calls.length,3);
- assert(h.calls.every(c=>c.method==='GET'&&(c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/jalan-kl-private-pilot/features/http-router-no-log-query')));
+ assert(h.calls.every(c=>c.method==='GET'&&(c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query')));
  assert(h.messages.every(m=>!m.includes(KEY)));
 });
 test('explicit private approval updates only the identified private app and verifies GET',async()=>{
@@ -54,7 +57,8 @@ test('explicit private approval updates only the identified private app and veri
  assert.deepEqual(r,{target:'private',state:'enabled',changed:true});
  assert.equal(h.patches,1);
  assert.equal(h.calls.filter(c=>c.method==='GET').length,3);
- assert(h.calls.every(c=>c.path.startsWith('/apps/jalan-kl-private-pilot')));
+ assert(h.calls.every(c=>c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query'));
+ assert(h.calls.some(c=>c.method==='PATCH'&&c.path==='/apps/'+PILOT_ID+'/features/http-router-no-log-query'));
 });
 test('already enabled is idempotent and still verified',async()=>{
  const h=setup({enabled:true});
@@ -76,7 +80,8 @@ test('original alias discovered uniquely; no pilot request or code mutation',asy
   confirmation:'ENABLE_QUERY_REDACTION_ORIGINAL',key:KEY,fetcher:h.fetcher,log:h.log});
  assert.equal(r.changed,true);
  assert.equal(h.patches,1);
- assert(h.calls.every(c=>!c.path.includes('jalan-kl-private-pilot')));
+ assert(h.calls.every(c=>!c.path.includes('jalan-kl-private-pilot')&&!c.path.includes(PILOT_ID)));
+ assert(h.calls.some(c=>c.method==='PATCH'&&c.path==='/apps/'+ORIGINAL_ID+'/features/http-router-no-log-query'));
 });
 test('ambiguous original identity refuses PATCH',async()=>{
  const h=setup({original:true,ambiguous:true});
@@ -92,6 +97,13 @@ test('a concurrent ETag conflict or failed GET verification never reports succes
  await assert.rejects(enableQueryRedaction({target:'private',apply:true,
   confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h2.fetcher,log:h2.log}),/verification failed/);
  assert.equal(h2.patches,1);
+});
+test('malformed discovered app ID prevents feature requests and mutation',async()=>{
+ const h=setup({malformedId:true});
+ await assert.rejects(enableQueryRedaction({target:'private',apply:true,
+  confirmation:'ENABLE_QUERY_REDACTION_PRIVATE',key:KEY,fetcher:h.fetcher,log:h.log}),/identity/);
+ assert.equal(h.patches,0);
+ assert.deepEqual(h.calls.map(c=>c.path),['/apps/jalan-kl-private-pilot']);
 });
 test('unsupported target and absent auth fail closed',async()=>{
  const h=setup();

@@ -5,6 +5,8 @@ const FEATURE='http-router-no-log-query';
 const NAMES={private:['jalan-kl-private-pilot'],original:['mterm2026','mterms2026']};
 const ACK={private:'ENABLE_QUERY_REDACTION_PRIVATE',original:'ENABLE_QUERY_REDACTION_ORIGINAL'};
 const ACCEPT='application/vnd.heroku+json; version=3';
+// Heroku's platform API supports immutable app IDs; fail closed on malformed IDs.
+const APP_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function enableQueryRedaction({target,apply=false,confirmation='',key=process.env.HEROKU_API_KEY,
  fetcher=fetch,log=console.log}={}){
  if(!Object.hasOwn(NAMES,target))throw Error('Unsupported target; private or original only');
@@ -25,13 +27,15 @@ async function enableQueryRedaction({target,apply=false,confirmation='',key=proc
   if(r.status===404)continue;
   if(!r.ok)throw Error('Heroku app identity lookup failed: HTTP '+r.status);
   const data=await r.json();
-  if(data?.name!==candidate||typeof data.id!=='string'||!data.id)
+  if(data?.name!==candidate||typeof data.id!=='string'||!APP_UUID.test(data.id))
    throw Error('Unexpected Heroku app identity');
   apps.push(data);
  }
  if(apps.length!==1)throw Error('Heroku target identity missing or ambiguous');
- const name=apps[0].name;
- const path='/apps/'+name+'/features/'+FEATURE;
+ // Resolve by name only for initial discovery; bind every feature read/write to
+ // the immutable verified app ID to avoid a rename/reuse race.
+ const appId=apps[0].id;
+ const path='/apps/'+appId+'/features/'+FEATURE;
  async function readFeature(){
   const r=await request('GET',path);
   if(!r.ok)throw Error('Heroku query redaction unavailable: HTTP '+r.status);
