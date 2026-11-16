@@ -2,7 +2,7 @@
 // Read-only inventory of potential JALAN pilot rollback code slugs. No restore,
 // no credential/config mutations, no route/GPS, and no original Mterms access.
 const APP='jalan-kl-private-pilot';
-const ROOT='https://api.heroku.com/apps/'+APP;
+const UUID=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 function choosePreviousCodeRelease(releases){
  if(!Array.isArray(releases))throw Error('release-history-malformed');
  const sorted=releases.filter(r=>Number.isInteger(r?.version)&&r.version>0)
@@ -17,18 +17,21 @@ function choosePreviousCodeRelease(releases){
   previousVersion:previous.version,currentSlug:current.slug.id,
   candidateSlug:previous.slug.id};
 }
-async function audit(fetchImpl,token){
+async function audit(fetchImpl,token,{appId=APP}={}){
  if(!token||token.length<16)throw Error('missing-readonly-heroku-access');
+ if(appId!==APP&&!UUID.test(appId))throw Error('invalid-private-app-identity');
+ const root='https://api.heroku.com/apps/'+encodeURIComponent(appId);
  const headers={Authorization:'Bearer '+token,
   Accept:'application/vnd.heroku+json; version=3'};
  const get=async path=>{
-  const r=await fetchImpl(ROOT+path,{headers,redirect:'error',
+  const r=await fetchImpl(root+path,{headers,redirect:'error',
    signal:AbortSignal.timeout(15000)});
   if(!r.ok)throw Error('heroku-readonly-api-http-'+r.status);
   return r.json();
  };
  const app=await get('');
- if(app.name!==APP)throw Error('unexpected-heroku-application');
+ if(app?.name!==APP||(appId!==APP&&app.id!==appId))
+  throw Error('unexpected-heroku-application');
  const list=await get('/releases');
  const result=choosePreviousCodeRelease(list);
  if(result.state!=='candidate-found')return result;

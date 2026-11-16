@@ -23,6 +23,7 @@ jobs:
       - run: node --check server/jalan/smoke-kl-evidence-http-v4102.js
       - run: node server/jalan/check-kl-preview-browser-script.js
       - run: node --test server/jalan/kl-private-deployment-preflight.test.js
+      - run: node --test server/jalan/check-pilot-manual-release-safety.test.js
       - run: node --test server/jalan/audit-heroku-pilot-rollback-readonly.test.js
       - run: node --test server/jalan/configure-heroku-private-pilot.test.js
       - run: node --test server/jalan/audit-original-mterms-router-privacy-readonly.test.js
