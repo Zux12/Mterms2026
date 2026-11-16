@@ -2,10 +2,14 @@
 
 This procedure enables only `http-router-no-log-query`, on one existing Heroku app per run. It does not deploy code, change config vars, fetch location/log records, or write database data. Registration and source integration do not mean the feature is enabled. Default `apply=false` performs GET requests only.
 
+## Recorded execution — 17 November 2026
+
+Both app flags are **enabled**, with verified read-after-write at trusted `424de3ca`. Private activation [43909529090](https://github.com/Zux12/Mterms2026/actions/runs/43909529090) and original activation [43909961007](https://github.com/Zux12/Mterms2026/actions/runs/43909961007) both completed SUCCESS with `identityPinned=true after=true`. Each had its own successful pinned dry-run. See the [master handover](JALAN_PROJECT_HANDOVER.md) for exact identity, timing and evidence. Do not repeat activation merely because older logs say disabled. Retention, controlled code release and actual rollback are still separate open work.
+
 ## Before a live run
 
 1. Verify the current trusted `jalan-v4102-routing-regression-tests` head and its completed CI, including the 13 mocked operator cases. Review [PR #69](https://github.com/Zux12/Mterms2026/pull/69). Do not select a draft or arbitrary branch.
-2. In the authorized Heroku account, independently identify the intended app and its UUID using authenticated app metadata (`GET /apps/{app-name}`). Keep credentials locally; do not put them into GitHub inputs, comments or chat. `expected_app_id` is the app UUID, never an API token. The established `HEROKU_API_KEY` repository secret is used by the trusted workflow only.
+2. In the authorized Heroku account, independently identify the intended app and its UUID using authenticated app metadata (`GET /apps/{app-name}`). The existing [read-only access workflow](https://github.com/Zux12/Mterms2026/actions/workflows/jalan-heroku-access-check.yml), on the reviewed trusted branch, can independently perform these exact metadata GETs using the repository-held credential. [Identity run 43908658507](https://github.com/Zux12/Mterms2026/actions/runs/43908658507) records the verified name/UUID pair and rejects missing/ambiguous/malformed identities. This provides an authenticated lookup without copying a credential into the browser or chat. Keep credentials out of GitHub inputs, comments and chat. `expected_app_id` is the app UUID, never an API token. The established `HEROKU_API_KEY` repository secret is used by the trusted workflow only.
 3. Select exactly one role: `private` means `jalan-kl-private-pilot`; `original` means the uniquely existing `mterm2026` or `mterms2026`. If both original aliases exist, the helper refuses the operation. A matching name with a different UUID is also refused.
 
 ## Inspect, then enable
