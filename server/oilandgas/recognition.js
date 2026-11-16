@@ -95,7 +95,13 @@ publicRouter.get('/current',async(req,res,next)=>{try{
 publicRouter.get('/archive',async(req,res,next)=>{try{
  const page=Number(req.query.page||0);
  if(!Number.isSafeInteger(page)||page<0||page>1000)return res.status(400).json({error:'Invalid page'});
+ const category=typeof req.query.category==='string'?req.query.category:'';
+ const q=typeof req.query.q==='string'?req.query.q.trim():'';
+ if(q.length>100||(category&&!categories.some(c=>c.key===category)))return res.status(400).json({error:'Invalid archive filter'});
  const match={status:{$in:['active','archived']}};
+ if(category)match.category=category;
+ if(q){const literal=q.replace(/[.*+?^$()|[\]{}\\]/g,'\\ const match={status:{$in:['active','archived']}};
+ const [count,items]=await Promise.all([db().collection('recognition_selections').countDocuments(match),');match.$or=['title','byline','topic','label'].map(k=>({[k]:{$regex:literal,$options:'i'}}));}
  const [count,items]=await Promise.all([db().collection('recognition_selections').countDocuments(match),
  db().collection('recognition_selections').find(match).sort({start:-1,_id:1}).skip(page*12).limit(12).toArray()]);
  res.json({total:count,page,items:items.map(publicRecord)});
