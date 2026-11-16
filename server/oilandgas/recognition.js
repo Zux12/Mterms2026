@@ -100,10 +100,12 @@ publicRouter.get('/archive',async(req,res,next)=>{try{
  if(q.length>100||(category&&!categories.some(c=>c.key===category)))return res.status(400).json({error:'Invalid archive filter'});
  const match={status:{$in:['active','archived']}};
  if(category)match.category=category;
- if(q){const literal=q.replace(/[^a-zA-Z0-9À-ž\s-]/g,'');if(literal)match.$or=['title','byline','topic','label'].map(k=>({[k]:{$regex:literal,$options:'i'}}));}
- const [count,items]=await Promise.all([db().collection('recognition_selections').countDocuments(match),');match.$or=['title','byline','topic','label'].map(k=>({[k]:{$regex:literal,$options:'i'}}));}
- const [count,items]=await Promise.all([db().collection('recognition_selections').countDocuments(match),
- db().collection('recognition_selections').find(match).sort({start:-1,_id:1}).skip(page*12).limit(12).toArray()]);
+ if(q){const literal=q.replace(/[^a-zA-Z0-9À-ž\s-]/g,'');
+  if(literal)match.$or=['title','byline','topic','label'].map(k=>({[k]:{$regex:literal,$options:'i'}}));}
+ const [count,items]=await Promise.all([
+  db().collection('recognition_selections').countDocuments(match),
+  db().collection('recognition_selections').find(match).sort({start:-1,_id:1}).skip(page*12).limit(12).toArray()
+ ]);
  res.json({total:count,page,items:items.map(publicRecord)});
 }catch(e){next(e);}});
 publicRouter.get('/verify/:id',async(req,res,next)=>{try{
