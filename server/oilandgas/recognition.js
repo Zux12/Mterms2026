@@ -33,11 +33,11 @@ function scorePaper(p){
  // This is a transparent provisional ranking; it is NOT a scientific-quality judgement.
  const found={
   relevance:words.relevance.test(txt)?25:0,
-  technical:words.method.test(txt)?12:0,
-  practical:words.application.test(txt)?14:0,
-  evidence:p.source?12:6,
-  originality:words.novelty.test(txt)?6:0,
-  timeliness:words.impact.test(txt)?7:0
+  technical:words.method.test(txt)?20:0,
+  practical:words.application.test(txt)?20:0,
+  evidence:p.source?15:8,
+  originality:words.novelty.test(txt)?10:0,
+  timeliness:words.impact.test(txt)?10:0
  };
  const total=Object.values(found).reduce((a,b)=>a+b,0);
  return {total,breakdown:found,mode:'rule-based-provisional',
@@ -145,6 +145,71 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
  await db().collection('recognition_audit').insertOne({action:'override-cleared',category,reason:reason.trim(),createdAt:new Date()});
  res.json({ok:true});
 }catch(e){next(e);}});
+
+async function activateCycle(){
+ const start=weekStart(),end=new Date(start.getTime()+7*86400000);
+ const cycleId=start.toISOString().slice(0,10);
+ const selections=db().collection('recognition_selections');
+ const previous=await db().collection('recognition_cycles').findOne({_id:cycleId,status:'active'});
+ if(previous)return {ok:true,alreadyActive:true,cycleId};
+ const proposed=await shortlist();
+ const overrides=await db().collection('recognition_overrides').find({}).toArray();
+ for(const item of proposed){
+  const override=overrides.find(o=>o.category===item.category);
+  if(!override)continue;
+  const record=await db().collection(override.kind).findOne({reference:override.reference,status:'published',publication:{$exists:true}});
+  if(record)item.candidate={...entry(record,override.kind),assessment:{...scorePaper(entry(record,override.kind)),
+   overrideReason:override.reason,mode:'admin-override'}};
+ }
+ const keys=proposed.map(x=>x.candidate&&x.candidate.kind+':'+x.candidate.reference);
+ if(keys.some(x=>!x)||new Set(keys).size!==3)
+  throw Object.assign(new Error('Cannot activate until three distinct, published eligible papers are available.'),{status:409});
+ const session=await mongoose.connection.startSession();
+ try{
+  await session.withTransaction(async()=>{
+   if(await db().collection('recognition_cycles').findOne({_id:cycleId},{session}))
+    throw Object.assign(new Error('Weekly cycle already exists; review before retrying.'),{status:409});
+   const now=new Date();
+   await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
+    selectionMode:'provisional-text-ranking',emailsEnabled:false,createdAt:now},{session});
+   await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
+   await selections.insertMany(proposed.map(row=>{
+    const p=row.candidate;
+    return {_id:cycleId+':'+row.category,cycleId,category:row.category,label:row.label,
+     kind:p.kind,reference:p.reference,publicationId:p.publicationId,
+     title:p.title,summary:p.summary,byline:p.byline,topic:p.topic,source:p.source,
+     start,end,status:'active',score:p.assessment,createdAt:now,emailStatus:'disabled'};
+   }),{session});
+   await db().collection('recognition_audit').insertOne({action:'weekly-activation',cycleId,
+    createdAt:now,emailEnabled:false},{session});
+  });
+ }finally{await session.endSession();}
+ return {ok:true,cycleId,activated:3,emailEnabled:false};
+}
+adminRouter.post('/activate',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='ACTIVATE_NO_EMAIL')return res.status(400).json({error:'Explicit activation confirmation required.'});
+ res.json(await activateCycle());
+}catch(e){next(e);}});
+adminRouter.get('/history',async(req,res,next)=>{try{
+ const items=await db().collection('recognition_selections').find({}).sort({start:-1}).limit(60).toArray();
+ res.json({items:items.map(publicRecord)});
+}catch(e){next(e);}});
+adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode:'rule-based-provisional',
+ maxScore:MAX_SCORE,weights:{relevance:25,technical:20,practical:20,evidence:15,originality:10,timeliness:10},
+ warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
+let schedulerBusy=false;
+async function scheduledTick(){
+ if(process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
+ schedulerBusy=true;
+ try{const now=new Date(),start=weekStart(now);
+  if(now>=start&&!await db().collection('recognition_cycles').findOne({_id:start.toISOString().slice(0,10)}))
+   await activateCycle();
+ }catch(err){console.error('Recognition schedule:',err.message);}
+ finally{schedulerBusy=false;}
+}
+// Feature flag defaults OFF. This scheduler never sends email.
+setInterval(scheduledTick,15*60000).unref();
+
 adminRouter.get('/notifications',async(req,res)=>res.json({emailEnabled:false,mode:'placeholder',
  message:'No emails will be queued or sent. Notification system awaits acceptance testing and explicit approval.',
  queued:0,sent:0}));
