@@ -11,7 +11,8 @@ const schema = new mongoose.Schema({
 schema.index({ at: 1 }, { expireAfterSeconds: 900 });
 schema.index({ cell: 1, direction: 1, at: -1 });
 const Observation = db.models.TrafficObservation || db.model('TrafficObservation', schema);
-const ipBuckets = new Map();
+const {createEphemeralIpLimiter}=require('./traffic-ephemeral-ip-limiter');
+const observationIpLimiter=createEphemeralIpLimiter();
 router.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 router.get('/health', (_req, res) => res.json({ ok: true, service: 'jalan', database: db.name, mode: 'pilot-v4.8' }));
 function cell(lat, lon) { return `${Math.floor(lat * 500)}:${Math.floor(lon * 500)}`; }
@@ -25,11 +26,8 @@ function median(values) {
 }
 router.post('/observations', express.json({ limit: '2kb' }), async (req, res) => {
   try {
-    const now = Date.now(), ip = req.ip || 'unknown';
-    const bucket = ipBuckets.get(ip) || { n: 0, until: now + 60000 };
-    if (now > bucket.until) { bucket.n = 0; bucket.until = now + 60000; }
-    if (++bucket.n > 20) { ipBuckets.set(ip, bucket); return res.status(429).json({ error: 'Too many requests' }); }
-    ipBuckets.set(ip, bucket);
+    if (!observationIpLimiter.allow(req.ip || 'unknown'))
+      return res.status(429).json({ error: 'Too many requests' });
     const { lat, lon, speedKmh, heading, accuracy, sessionId } = req.body || {};
     if (!validCoord(lat, -90, 90) || !validCoord(lon, -180, 180) ||
         !validCoord(speedKmh, 0, 180) || !validCoord(heading, 0, 360) ||
