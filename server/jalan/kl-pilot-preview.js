@@ -7,7 +7,10 @@ let routeLayer=null,markers=[],nextPoint='start',routeController=null,requestVer
 let gpsRequestVersion=0;
 function cancelPendingGps(){
  gpsRequestVersion++;
- document.getElementById('gps').disabled=false;
+ const button=document.getElementById('gps');
+ if(button.disabled)
+  document.getElementById('gps-note').textContent='Pending GPS selection cancelled after manual coordinate change.';
+ button.disabled=false;
 }
 function invalidateRoute(){
  document.getElementById('access-review').hidden=true;
