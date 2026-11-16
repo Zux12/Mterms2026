@@ -4,6 +4,7 @@ const express=require('express');
 const mongoose=require('mongoose');
 const crypto=require('crypto');
 const policy=require('./recognition-policy');
+const selector=require('./recognition-selector');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -93,6 +94,27 @@ async function shortlist(){
   return {category:c.key,label:c.label,candidate:chosen};
  });
 }
+function reviewRevision(p){
+ return crypto.createHash('sha256').update(JSON.stringify({
+  reference:p.reference,publicationId:p.publicationId,
+  title:p.title,summary:p.summary,source:p.source
+ })).digest('hex');
+}
+async function reviewedShortlist(){
+ const all=await candidates();
+ const history=await db().collection('recognition_selections')
+  .find({status:{$in:['active','archived']}},{projection:{reference:1,kind:1,start:1,byline:1}})
+  .sort({start:-1}).limit(2000).toArray();
+ const refs=all.map(p=>p.reference);
+ const reviews=await db().collection('recognition_reviews').find({reference:{$in:refs}}).toArray();
+ const byRef=new Map(reviews.map(r=>[r.reference,r]));
+ const eligible=all.map(p=>{
+  const r=byRef.get(p.reference);
+  return {...p,assessment:r?.assessment,reviewStatus:r?.status,
+   reviewRevisionMatches:!!r&&r.revision===reviewRevision(p)};
+ });
+ return selector.choose(eligible,history,new Date(),{verifiedOnly:true});
+}
 async function applyOverrides(proposed) {
  const overrides=await db().collection('recognition_overrides').find({}).toArray();
  for(const item of proposed){
@@ -173,6 +195,14 @@ adminRouter.post('/override',async(req,res,next)=>{try{
  reason:reason.trim(),createdAt:new Date()});
  res.json({ok:true,staged:true,paper:p.title,emailEnabled:false});
 }catch(e){next(e);}});
+adminRouter.get('/preview-reviewed',async(req,res,next)=>{try{
+ const items=await reviewedShortlist();
+ res.set('Cache-Control','no-store').json({
+  programme:'WRRP-001',mode:'evidence-approved-only',emailEnabled:false,
+  activationEnabled:false,items,
+  warning:'A bibliographic AI draft is never sufficient by itself. Approved records require independent integrity clearance.'
+ });
+}catch(e){next(e);}});
 adminRouter.get('/overrides',async(req,res,next)=>{try{
  const items=await db().collection('recognition_overrides').find({}).limit(20).toArray();
  res.json({items});
@@ -192,9 +222,11 @@ async function activateCycle(){
  const selections=db().collection('recognition_selections');
  const previous=await db().collection('recognition_cycles').findOne({_id:cycleId,status:'active'});
  if(previous)return {ok:true,alreadyActive:true,cycleId};
- const proposed=await applyOverrides(await shortlist());
+ const proposed=await reviewedShortlist();
+ // Activation uses exclusively verified, approved assessments. Provisional rankings
+ // and manual featured-story overrides cannot bypass integrity clearance.
  const invalid=proposed.filter(row=>!row.candidate||!policy.publicationEligibility(row.candidate).eligible||
-  (row.candidate.assessment.total<policy.thresholdFor(row.category)&&row.candidate.assessment.mode!=='admin-override'));
+  (row.candidate.assessment.total<policy.thresholdFor(row.category)));
  if(invalid.length)throw Object.assign(new Error('Insufficient eligible, qualified publications: '+invalid.map(x=>x.category).join(', ')),{status:409});
  const keys=proposed.map(x=>x.candidate&&x.candidate.kind+':'+x.candidate.reference);
  if(keys.some(x=>!x)||new Set(keys).size!==3)
@@ -206,7 +238,7 @@ async function activateCycle(){
     throw Object.assign(new Error('Weekly cycle already exists; review before retrying.'),{status:409});
    const now=new Date();
    await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
-    selectionMode:'provisional-text-ranking',emailsEnabled:false,createdAt:now},{session});
+    selectionMode:'evidence-approved-ranking',emailsEnabled:false,createdAt:now},{session});
    await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
    await selections.insertMany(proposed.map(row=>{
     const p=row.candidate;
