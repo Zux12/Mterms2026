@@ -48,6 +48,9 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: node server/jalan/audit-private-heroku-router-privacy-readonly.js --require-enabled
+      - name: BLOCK private deploy unless prior code release is eligible to restore (GET only)
+        if: ${{ !inputs.validation_only }}
+        run: node server/jalan/check-pilot-manual-release-safety.js
       - name: Configure JALAN pilot credentials only (never mterm2026)
         if: ${{ !inputs.validation_only }}
         run: node server/jalan/configure-heroku-private-pilot.js
