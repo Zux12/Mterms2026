@@ -52,7 +52,7 @@ function weekStart(date=new Date()){
  if(shifted.getTime()-8*3600000>date.getTime())shifted.setUTCDate(shifted.getUTCDate()-7);
  return new Date(shifted.getTime()-8*3600000);
 }
-function normalizeName(name){return String(name||'').normalize('NFKC').trim().toLowerCase().replace(/\\s+/g,' ');}
+function normalizeName(name){return String(name||'').normalize('NFKC').trim().toLowerCase().replace(/\s+/g,' ');}
 function isMY(p){return p.malaysianAffiliationVerified===true;}
 async function candidates(){
  const out=[];
@@ -74,8 +74,7 @@ async function shortlist(){
  const affiliationMap=new Map(linked.map(x=>[x._id,x.affiliation||'']));
  for(const p of all){
   p.malaysianAffiliationVerified=p.byline.split(/[,;]+/).map(normalizeName)
-   .some(key=>/\bmalaysia\b|\buniversiti\b|\buniversity\b|\butm\b|\butp\b|\bukm\b|\bupm\b/i.test(affiliationMap.get(key)||'') &&
-    /\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b/i.test(affiliationMap.get(key)||''));
+   .some(key=>/\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b|\bcyberjaya\b|\bgeomatika\b/i.test(affiliationMap.get(key)||''));
  }
  const ranked=all.filter(p=>!existing.some(e=>e.reference===p.reference&&e.kind===p.kind&&
   new Date(e.start).getTime()>now.getTime()-365*86400000))
