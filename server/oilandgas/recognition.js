@@ -93,6 +93,22 @@ async function shortlist(){
   return {category:c.key,label:c.label,candidate:chosen};
  });
 }
+async function applyOverrides(proposed) {
+ const overrides=await db().collection('recognition_overrides').find({}).toArray();
+ for(const item of proposed){
+  const override=overrides.find(o=>o.category===item.category);
+  if(!override)continue;
+  const record=await db().collection(override.kind).findOne({
+   reference:override.reference,status:'published',publication:{$exists:true}});
+  if(!record)continue;
+  const p=entry(record,override.kind);
+  if(!policy.publicationEligibility(p).eligible)continue;
+  item.candidate={...p,assessment:{...scorePaper(p),
+   overrideReason:override.reason,mode:'admin-override'}};
+  item.override={reference:override.reference,reason:override.reason};
+ }
+ return proposed;
+}
 function publicRecord(s){return {id:s._id,category:s.category,label:s.label,kind:s.kind,reference:s.reference,
  title:s.title,summary:s.summary,byline:s.byline,topic:s.topic,source:s.source||'',start:s.start,end:s.end,
  status:s.status,certificateStatus:'not-issued',emailStatus:'disabled'};}
@@ -137,7 +153,7 @@ adminRouter.get('/status',async(req,res,next)=>{try{
 adminRouter.get('/preview',async(req,res,next)=>{try{
  res.json({scheduledStart:weekStart().toISOString(),emailEnabled:false,
   scoring:'rule-based-provisional',activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
-  items:(await shortlist()).map(x=>({...x,minimumScore:policy.thresholdFor(x.category),
+  items:(await applyOverrides(await shortlist())).map(x=>({...x,minimumScore:policy.thresholdFor(x.category),
    passesThreshold:!!x.candidate&&x.candidate.assessment.total>=policy.thresholdFor(x.category)}))});
 }catch(e){next(e);}});
 adminRouter.post('/override',async(req,res,next)=>{try{
@@ -176,15 +192,7 @@ async function activateCycle(){
  const selections=db().collection('recognition_selections');
  const previous=await db().collection('recognition_cycles').findOne({_id:cycleId,status:'active'});
  if(previous)return {ok:true,alreadyActive:true,cycleId};
- const proposed=await shortlist();
- const overrides=await db().collection('recognition_overrides').find({}).toArray();
- for(const item of proposed){
-  const override=overrides.find(o=>o.category===item.category);
-  if(!override)continue;
-  const record=await db().collection(override.kind).findOne({reference:override.reference,status:'published',publication:{$exists:true}});
-  if(record&&policy.publicationEligibility(entry(record,override.kind)).eligible)item.candidate={...entry(record,override.kind),assessment:{...scorePaper(entry(record,override.kind)),
-   overrideReason:override.reason,mode:'admin-override'}};
- }
+ const proposed=await applyOverrides(await shortlist());
  const invalid=proposed.filter(row=>!row.candidate||!policy.publicationEligibility(row.candidate).eligible||
   (row.candidate.assessment.total<policy.thresholdFor(row.category)&&row.candidate.assessment.mode!=='admin-override'));
  if(invalid.length)throw Object.assign(new Error('Insufficient eligible, qualified publications: '+invalid.map(x=>x.category).join(', ')),{status:409});
