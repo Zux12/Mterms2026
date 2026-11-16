@@ -65,6 +65,7 @@ app.use('/api/oilandgas/contact', require('./oilandgas/contact'));
 app.use('/api/oilandgas/articles', require('./oilandgas/articles'));
 app.use('/api/oilandgas/publications', require('./oilandgas/publications'));
 app.use('/api/oilandgas/editor', require('./oilandgas/public-reader'));
+app.use('/api/oilandgas/recognition', require('./oilandgas/recognition').publicRouter);
 app.use('/api/oilandgas/editor', require('./oilandgas/editor'));
 
 /* Parsers */
