@@ -1,0 +1,24 @@
+name: Oil and Gas recognition checks
+on:
+  push:
+    paths:
+      - 'server/oilandgas/recognition.js'
+      - 'tests/oilandgas-recognition.test.js'
+      - '.github/workflows/recognition-tests.yml'
+  workflow_dispatch:
+jobs:
+  recognition-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install application dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check recognition module syntax
+        run: node --check server/oilandgas/recognition.js
+      - name: Run recognition safety and scoring tests
+        run: node --test tests/oilandgas-recognition.test.js
