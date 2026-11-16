@@ -2,6 +2,16 @@
 const map=L.map('map').setView([3.14,101.69],12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
 let routeLayer=null,markers=[],nextPoint='start',routeController=null,requestVersion=0,gpsMarker=null;
+// Browser geolocation cannot be aborted. Discard late callbacks after a manual
+// coordinate/map/swap decision or a newer location request.
+let gpsRequestVersion=0;
+function cancelPendingGps(){
+ gpsRequestVersion++;
+ const button=document.getElementById('gps');
+ if(button.disabled)
+  document.getElementById('gps-note').textContent='Pending GPS selection cancelled after manual coordinate change.';
+ button.disabled=false;
+}
 function invalidateRoute(){
  document.getElementById('access-review').hidden=true;
  document.getElementById('access-review-text').textContent='';
@@ -17,12 +27,14 @@ function invalidateRoute(){
 const selectionMarkers={start:null,end:null};
 for(const id of ['start','end']){
  document.getElementById(id).addEventListener('input',()=>{
+  cancelPendingGps();
   invalidateRoute();
   status.textContent='Coordinates changed. Preview route to recalculate.';
  });
 }
 map.on('click',event=>{
  const id=nextPoint;
+ cancelPendingGps();
  invalidateRoute();
  const {lat,lng}=event.latlng;
  document.getElementById(id).value=lat.toFixed(6)+', '+lng.toFixed(6);
@@ -36,13 +48,21 @@ const gpsNote=document.getElementById('gps-note');
 document.getElementById('gps').addEventListener('click',()=>{
  const action=document.getElementById('gps');
  if(!navigator.geolocation){gpsNote.textContent='This browser does not support GPS location.';return;}
+ const gpsVersion=++gpsRequestVersion;
  action.disabled=true;
  gpsNote.textContent='Requesting one-time location permission…';
  navigator.geolocation.getCurrentPosition(position=>{
+  if(gpsVersion!==gpsRequestVersion)return;
   action.disabled=false;
   const {latitude:lat,longitude:lng,accuracy}=position.coords;
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<2.5||lat>3.8||lng<100.8||lng>102.3){
    gpsNote.textContent='Location is outside the current KL experimental coverage. No route requested.';
+   return;
+  }
+  // Do not silently treat missing or implausible GPS accuracy as zero metres.
+  // 100 m is a conservative stationary preview threshold, not road-legality proof.
+  if(!Number.isFinite(accuracy)||accuracy<0||accuracy>100){
+   gpsNote.textContent='GPS accuracy unavailable or exceeds 100 m. Location not used; enter coordinates manually or retry.';
    return;
   }
   invalidateRoute();
@@ -53,6 +73,7 @@ document.getElementById('gps').addEventListener('click',()=>{
   gpsNote.textContent='GPS position captured once (accuracy ±'+Math.round(accuracy)+' m). No automatic tracking or rerouting.';
   status.textContent='GPS start selected. Preview a route for stationary testing.';
  },error=>{
+  if(gpsVersion!==gpsRequestVersion)return;
   action.disabled=false;
   gpsNote.textContent=error.code===1?'Location permission denied. You can still enter coordinates.':'Could not determine your location. Try again or enter coordinates.';
  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
@@ -87,6 +108,7 @@ document.getElementById('check').addEventListener('click',async()=>{
  finally{check.disabled=false;}
 });
 document.getElementById('swap').addEventListener('click',()=>{
+ cancelPendingGps();
  invalidateRoute();
  const a=document.getElementById('start'),b=document.getElementById('end');
  const value=a.value;a.value=b.value;b.value=value;
