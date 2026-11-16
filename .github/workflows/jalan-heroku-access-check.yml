@@ -12,11 +12,18 @@ permissions:
 
 jobs:
   check:
+    # Never provide a secret-bearing checkout on an arbitrary dispatch ref.
+    if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Inventory both app generations, drains and add-on counts without log reads
+        run: node server/jalan/audit-heroku-retention-metadata-readonly.js
       - name: Verify Heroku API authentication without modifying Heroku
         shell: bash
         run: |
