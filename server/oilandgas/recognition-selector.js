@@ -14,10 +14,12 @@ function authorCooldown(candidate,history,now,days=84){
    names(h.byline).some(n=>a.has(n));
  });
 }
-function paperCooldown(candidate,history,now,days=365){
- return history.some(h=>h.reference===candidate.reference &&
-  h.kind===candidate.kind && Number.isFinite(new Date(h.start).getTime())&&
-  new Date(h.start).getTime()>now-days*MS_DAY);
+// Lifetime exclusion: once recognized in ANY category, a paper never qualifies again.
+// Stable publicationId takes priority; reference remains a fallback for older records.
+function paperCooldown(candidate,history){
+ return history.some(h=>h.kind===candidate.kind &&
+  (h.reference===candidate.reference ||
+   (candidate.publicationId && h.publicationId && candidate.publicationId===h.publicationId)));
 }
 function categoryScore(p,category){
  const b=p.assessment?.breakdown||{};
