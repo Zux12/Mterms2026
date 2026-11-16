@@ -31,6 +31,7 @@ jobs:
       - run: node --test server/jalan/audit-heroku-pilot-release-config-readonly.test.js
       - run: node --test server/jalan/audit-heroku-pilot-config-readonly.test.js
       - run: node --test server/jalan/audit-jalan-traffic-retention-readonly.test.js
+      - run: node --test server/jalan/audit-heroku-retention-metadata-readonly.test.js
       - run: node --test server/jalan/audit-dbkl-temporary-road-graph-readonly.test.js
       - run: node --test server/jalan/kl-railway-auth.test.js
       - run: node --test server/jalan/kl-private-legacy-get-retirement.test.js
