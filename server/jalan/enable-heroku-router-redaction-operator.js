@@ -1,0 +1,72 @@
+'use strict';
+// Operator-only, manually invoked platform security action. No release, routes,
+// GPS, logs, config vars, Atlas, or original Mterms application code touched.
+const FEATURE='http-router-no-log-query';
+const NAMES={private:['jalan-kl-private-pilot'],original:['mterm2026','mterms2026']};
+const ACK={private:'ENABLE_QUERY_REDACTION_PRIVATE',original:'ENABLE_QUERY_REDACTION_ORIGINAL'};
+const ACCEPT='application/vnd.heroku+json; version=3';
+async function enableQueryRedaction({target,apply=false,confirmation='',key=process.env.HEROKU_API_KEY,
+ fetcher=fetch,log=console.log}={}){
+ if(!Object.hasOwn(NAMES,target))throw Error('Unsupported target; private or original only');
+ if(typeof key!=='string'||key.length<16)throw Error('Heroku operator authentication unavailable');
+ if(apply && confirmation!==ACK[target])throw Error('Operator confirmation required; no mutation performed');
+ const headers={Accept:ACCEPT,Authorization:'Bearer '+key};
+ async function request(method,path,options={}){
+  const r=await fetcher('https://api.heroku.com'+path,{
+   method,headers:{...headers,...(options.headers||{})},
+   ...(options.body?{body:options.body}:{}),redirect:'error',
+   signal:AbortSignal.timeout(15000)
+  });
+  return r;
+ }
+ const apps=[];
+ for(const candidate of NAMES[target]){
+  const r=await request('GET','/apps/'+candidate);
+  if(r.status===404)continue;
+  if(!r.ok)throw Error('Heroku app identity lookup failed: HTTP '+r.status);
+  const data=await r.json();
+  if(data?.name!==candidate||typeof data.id!=='string'||!data.id)
+   throw Error('Unexpected Heroku app identity');
+  apps.push(data);
+ }
+ if(apps.length!==1)throw Error('Heroku target identity missing or ambiguous');
+ const name=apps[0].name;
+ const path='/apps/'+name+'/features/'+FEATURE;
+ async function readFeature(){
+  const r=await request('GET',path);
+  if(!r.ok)throw Error('Heroku query redaction unavailable: HTTP '+r.status);
+  const data=await r.json();
+  if(data?.name!==FEATURE||typeof data.enabled!=='boolean')
+   throw Error('Unexpected Heroku redaction feature response');
+  return {enabled:data.enabled,etag:r.headers?.get?.('etag')||null};
+ }
+ const before=await readFeature();
+ if(apply&&!before.enabled){
+  if(!before.etag)throw Error('Missing feature ETag; refusing concurrent update risk');
+  const r=await request('PATCH',path,{headers:{'Content-Type':'application/json','If-Match':before.etag},
+   body:JSON.stringify({enabled:true})});
+  if(!r.ok)throw Error('Heroku feature update not confirmed: HTTP '+r.status);
+  const body=await r.json();
+  if(body?.name!==FEATURE||body.enabled!==true)
+   throw Error('Heroku feature update acknowledgement invalid');
+ }
+ // Never consider PATCH success sufficient without another read-only verify.
+ const after=await readFeature();
+ if(apply&&!after.enabled)throw Error('Heroku redaction verification failed');
+ log('JALAN Heroku query-string router redaction: '+target+
+  ' before='+String(before.enabled)+' after='+String(after.enabled)+
+  ' changed='+String(Boolean(apply&&!before.enabled&&after.enabled)));
+ log('No code release, route/location request, historical-log purge or retention audit performed.');
+ return {target,state:after.enabled?'enabled':'disabled',changed:Boolean(apply&&!before.enabled&&after.enabled)};
+}
+if(require.main===module){
+ const args=process.argv.slice(2);
+ const target=args.find(x=>x.startsWith('--target='))?.slice('--target='.length);
+ const apply=args.includes('--apply');
+ const confirmation=process.env.JALAN_ROUTER_PRIVACY_CONFIRMATION||'';
+ enableQueryRedaction({target,apply,confirmation}).catch(()=>{
+  console.error('Heroku operator redaction was not verified; no release gate clearance.');
+  process.exitCode=1;
+ });
+}
+module.exports={enableQueryRedaction};
