@@ -20,6 +20,11 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p id="notice" role="status" class="status">Checking editor session…</p>
 <section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button></section>
 <section class="panel"><h2>Weekly preview</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
+<section class="panel"><h2>Evidence-aware AI paper review</h2>
+<p class="muted">Check one published paper against Crossref (where a DOI exists), then request a bounded AI assessment using only verified bibliographic data and the stored paper summary. The result is advisory only; it cannot activate recognition, issue a certificate or send an email. AI configuration is required on the backend.</p>
+<form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
+<button type="submit">Review research evidence</button></form>
+<p id="paper-review-state" role="status"></p><pre id="paper-review-result" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f4f3ee;padding:14px" hidden></pre></section>
 <section class="panel"><h2>Administrator override</h2><p class="muted">Stage a replacement paper for one recognition category. Changes are audited and applied at activation; staging itself does not change the website.</p>
 <form id="override">
 <label>Category<select name="category"><option value="editors-pick">Editor's Pick</option><option value="industry-impact">Industry Impact</option><option value="emerging-research">Emerging Research</option></select></label>
@@ -83,6 +88,20 @@ async function certificates(){
  const a=node('a','Verify / print ↗');a.href='https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
  }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
 }
+$('paper-review').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');
+ button.disabled=true;$('paper-review-state').textContent='Checking publication evidence…';
+ $('paper-review-result').hidden=true;
+ try{const data=Object.fromEntries(new FormData(e.target).entries());
+ const result=await api('review-paper',data);
+ $('paper-review-state').textContent='Review status: '+result.state+'. No recognition or email has been issued.';
+ const body=result.assessment?{score:result.assessment.total,confidence:result.assessment.confidence,
+   reasoning:result.assessment.reasoning,limitations:result.assessment.limitations,
+   evidence:result.assessment.evidence,decision:result.assessment.decision}:
+   {reason:result.reason,evidence:result.evidence,metadata:result.metadata&&{doi:result.metadata.doi,title:result.metadata.title}};
+ $('paper-review-result').textContent=JSON.stringify(body,null,2);
+ $('paper-review-result').hidden=false;
+ }catch(err){$('paper-review-state').textContent=err.message}
+ finally{button.disabled=false}};
 $('withdraw').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());
  if(!confirm('Withdraw this editorial recognition and invalidate every associated certificate?'))return;
