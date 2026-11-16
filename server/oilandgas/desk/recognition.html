@@ -28,7 +28,7 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <label>Reason<textarea name="reason" required minlength="5" maxlength="500"></textarea></label>
 <button>Stage override</button></form><div id="overrides"></div></section>
 <section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
-<button id="activate" class="secondary">Activate this week's recognition — no emails</button></section>
+<button id="activate" class="secondary" disabled>Activation locked pending tests</button></section>
 <section class="panel"><h2>Co-author certificates</h2>
 <p class="muted">Issue certificates only after confirming a co-author's exact published byline name. Certificates are verifiable online and can be printed or saved as PDF. No email will be sent.</p>
 <form id="certificate-issue"><label>Recognition selection<select name="selectionId" id="certificate-selection" required><option value="">Select an activated recognition</option></select></label>
@@ -49,7 +49,9 @@ function message(s){$('notice').textContent=s}
 function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
 async function refresh(){
  try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
- $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Emails: OFF · Certificates: not issuing'),
+ $('activate').disabled=!status.activationEnabled;
+ $('activate').textContent=status.activationEnabled?'Activate reviewed recognition — no emails':'Activation locked pending tests';
+ $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Activation: '+(status.activationEnabled?'ENABLED':'LOCKED')+' · Emails: OFF'),
  node('p','Active recognitions: '+status.active.length));
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
@@ -62,7 +64,8 @@ async function preview(){
  for(const item of data.items){const card=node('article','','card');
  card.append(node('small',item.label),node('h3',item.candidate?.title||'No eligible candidate'),
  node('p',item.candidate?.byline||'', 'muted'),
- node('p',item.candidate?'Provisional score: '+item.candidate.assessment.total+'/100 · '+item.candidate.assessment.mode:'Unfilled category','muted'));
+ node('p',item.candidate?'Provisional score: '+item.candidate.assessment.total+'/100 · minimum '+item.minimumScore+' · '+(item.passesThreshold?'threshold reached':'below threshold'):'Unfilled category','muted'));
+ card.append(node('p','Eligibility is based on available metadata, not independent research integrity verification.','muted'));
  $('candidates').append(card)}
  message('Preview completed. Nothing was published or emailed.');
  }catch(e){message(e.message)}
