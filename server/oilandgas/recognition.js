@@ -243,10 +243,31 @@ adminRouter.post('/review-paper',async(req,res,next)=>{try{
  const paper=entry(record,'publications'),eligibility=policy.publicationEligibility(paper);
  if(!eligibility.eligible)return res.status(422).json({error:'Paper ineligible',reasons:eligibility.reasons});
  const result=await require('./recognition-review').review(paper);
+ if(result.state==='reviewed'){
+  const revision=crypto.createHash('sha256').update(JSON.stringify({
+   reference:paper.reference,publicationId:paper.publicationId,
+   title:paper.title,summary:paper.summary,source:paper.source
+  })).digest('hex');
+  await db().collection('recognition_reviews').updateOne({_id:paper.reference},{
+   $set:{reference:paper.reference,publicationId:paper.publicationId,
+    revision,assessment:result.assessment,
+    metadata:{state:result.metadata?.state,doi:result.metadata?.doi,
+     title:result.metadata?.title,metadataUrl:result.metadata?.metadataUrl},
+    model:result.model,status:'pending-editorial-and-integrity-review',reviewedAt:new Date(),
+    emailEnabled:false}
+  },{upsert:true});
+  result.savedAsDraftReview=true;
+ }
  res.set('Cache-Control','no-store').json(result);
 }catch(e){console.error('WRRP editorial evidence review',e.code||e.name);
  res.status(503).json({error:'Independent evidence review unavailable. No score was awarded or recognition activated.',emailEnabled:false});
 }});
+adminRouter.get('/reviews',async(req,res,next)=>{try{
+ const items=await db().collection('recognition_reviews').find({},
+  {projection:{reference:1,assessment:1,metadata:1,status:1,reviewedAt:1,model:1}})
+  .sort({reviewedAt:-1}).limit(30).toArray();
+ res.set('Cache-Control','no-store').json({emailEnabled:false,items});
+}catch(e){next(e);}});
 adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode:'rule-based-provisional',
  maxScore:MAX_SCORE,weights:{relevance:25,technical:20,practical:20,evidence:15,originality:10,timeliness:10},
  warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
