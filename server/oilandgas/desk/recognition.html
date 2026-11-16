@@ -20,6 +20,11 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p id="notice" role="status" class="status">Checking editor session…</p>
 <section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button></section>
 <section class="panel"><h2>Weekly preview</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
+<section class="panel"><h2>Evidence-cleared automatic shortlist</h2>
+<p class="muted">This is the production-eligibility view. Only papers with a matching saved review, independently cleared integrity, and an approved AI assessment may be considered. It is intentionally separate from provisional keyword rankings.</p>
+<button id="preview-reviewed" class="secondary" type="button">Check evidence-cleared shortlist</button>
+<p id="reviewed-note" role="status">No approved shortlist has been checked yet.</p>
+<div id="reviewed-candidates" class="grid"></div></section>
 <section class="panel"><h2>Evidence-aware AI paper review</h2>
 <p class="muted">Check one published paper against Crossref (where a DOI exists), then request a bounded AI assessment using only verified bibliographic data and the stored paper summary. The result is advisory only; it cannot activate recognition, issue a certificate or send an email. AI configuration is required on the backend.</p>
 <form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
@@ -117,6 +122,22 @@ $('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
  await certificates();
  }catch(err){$('certificate-result').textContent=err.message}};
 
+
+$('preview-reviewed').onclick=async()=>{
+ const target=$('reviewed-candidates');target.replaceChildren();
+ $('reviewed-note').textContent='Checking reviewed candidates…';
+ try{
+  const result=await api('preview-reviewed');
+  for(const item of result.items){
+   const article=node('article','','card');
+   article.append(node('small',item.category),node('h3',item.candidate?.title||'No cleared candidate'),
+    node('p',item.candidate?('Reviewed score '+item.candidate.assessment.total+' / 100'):'Awaiting independent publication-integrity clearance','muted'));
+   target.append(article);
+  }
+  $('reviewed-note').textContent=result.items.filter(x=>x.candidate).length+
+    ' of 3 cleared selections. Activation remains locked during testing.';
+ }catch(err){$('reviewed-note').textContent='Reviewed shortlist unavailable: '+err.message}
+};
 $('refresh').onclick=refresh;$('preview').onclick=preview;
 $('override').onsubmit=async e=>{e.preventDefault();try{
  const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
