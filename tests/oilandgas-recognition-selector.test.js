@@ -20,7 +20,7 @@ test('three distinct papers for three categories with unique authors',()=>{
  assert.equal(results.filter(x=>x.candidate).length,3);
  assert.equal(new Set(results.map(x=>x.candidate.reference)).size,3);
 });
-test('12-month paper repeat excluded and 12-week author repeat avoided',()=>{
+test('Lifetime paper repeat excluded and 12-week author repeat avoided',()=>{
  const now=new Date('2026-11-16T01:00:00Z');
  const history=[{kind:'publications',reference:'old',byline:'A. Researcher',start:new Date('2026-10-10')}];
  assert.equal(paperCooldown(p('old','A. Researcher'),history,now.getTime()),true);
@@ -40,4 +40,20 @@ test('score below threshold cannot receive an automatic recognition',()=>{
  const low=p('low','A. Researcher',{assessment:{...base.assessment,total:70}});
  const r=choose([low],[],new Date('2026-11-16'));
  assert.ok(r.every(x=>x.candidate===null));
+});
+
+test('a paper remains permanently excluded after multiple years and across categories',()=>{
+ const now=new Date('2035-11-16T01:00:00Z');
+ const old={kind:'publications',reference:'OG-P-OLD',publicationId:'paper-123',byline:'A. Researcher',
+   category:'editors-pick',start:new Date('2026-11-16'),status:'archived'};
+ assert.equal(paperCooldown(p('OG-P-OLD','A. Researcher'),[old],now.getTime()),true);
+ assert.equal(paperCooldown(p('OG-P-RENAMED','A. Researcher',{publicationId:'paper-123'}),[old],now.getTime()),true);
+ const results=choose([p('OG-P-OLD','A. Researcher'),p('new','B. Researcher')],[old],now);
+ assert.equal(results[0].candidate.reference,'new');
+ assert.equal(results.some(x=>x.candidate?.reference==='OG-P-OLD'),false);
+});
+test('all exhausted categories remain empty instead of recycling old papers',()=>{
+ const old={kind:'publications',reference:'exhausted',byline:'A. Researcher',start:new Date('2020-01-01'),status:'archived'};
+ const results=choose([p('exhausted','A. Researcher')],[old],new Date('2036-01-01'));
+ assert.ok(results.every(x=>x.candidate===null));
 });
