@@ -192,6 +192,16 @@ publicRouter.get('/letter-link/:token',letterNoStore,async(req,res,next)=>{try{
  target.searchParams.set('visit',token);
  return res.redirect(302,target.href);
 }catch(e){next(e);}});
+publicRouter.options('/letter-view',(req,res)=>{
+ const origin=req.get('Origin');
+ if(!['https://oilandgas.eu.com','https://www.oilandgas.eu.com'].includes(origin))
+  return res.sendStatus(403);
+ res.set({'Access-Control-Allow-Origin':origin,
+  'Access-Control-Allow-Methods':'POST, OPTIONS',
+  'Access-Control-Allow-Headers':'Content-Type',
+  'Access-Control-Max-Age':'300','Vary':'Origin'});
+ return res.sendStatus(204);
+});
 publicRouter.post('/letter-view',letterNoStore,express.json({limit:'2kb'}),async(req,res,next)=>{try{
  const token=typeof req.body?.token==='string'?req.body.token:'';
  const letterId=typeof req.body?.letterId==='string'?req.body.letterId:'';
