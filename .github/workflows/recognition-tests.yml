@@ -8,6 +8,8 @@ on:
       - 'server/oilandgas/recognition-policy.js'
       - 'server/oilandgas/recognition-review.js'
       - 'tests/oilandgas-recognition-review.test.js'
+      - 'tests/oilandgas-recognition-selector.test.js'
+      - 'server/oilandgas/recognition-selector.js'
       - '.github/workflows/recognition-tests.yml'
   workflow_dispatch:
 jobs:
@@ -27,5 +29,6 @@ jobs:
           node --check server/oilandgas/recognition.js
           node --check server/oilandgas/recognition-policy.js
           node --check server/oilandgas/recognition-review.js
+          node --check server/oilandgas/recognition-selector.js
       - name: Run recognition safety and scoring tests
         run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js
