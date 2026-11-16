@@ -30,6 +30,15 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
 <button type="submit">Review research evidence</button></form>
 <p id="paper-review-state" role="status"></p><pre id="paper-review-result" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f4f3ee;padding:14px" hidden></pre></section>
+<section class="panel"><h2>Documented integrity approval (testing)</h2>
+<p class="muted">Only an already reviewed publication with matching Crossref metadata can be approved for the future automatic shortlist. Check the original publisher's status and reliable correction/retraction notices first; record the public evidence and editorial rationale. This does not feature the paper, issue a certificate, or send an email.</p>
+<form id="integrity-approval">
+<label>Published paper reference<input name="reference" required maxlength="21" pattern="OG-P-[A-F0-9]{16}" placeholder="OG-P-0123456789ABCDEF"></label>
+<label>Independent publication-status evidence URL<input name="evidenceUrl" type="url" required placeholder="https://publisher-or-index.org/..."></label>
+<label>Editorial verification rationale<textarea name="rationale" minlength="30" maxlength="1200" required placeholder="Describe the checks performed and what the linked publisher/index record establishes."></textarea></label>
+<label><input type="checkbox" id="integrity-confirm" required style="width:auto;margin-right:6px"> I have checked the original publication record and available integrity notices.</label>
+<button type="submit">Approve review for future selection (no publication)</button>
+</form><p id="integrity-approval-state" role="status"></p></section>
 <section class="panel"><h2>Administrator override</h2><p class="muted">Stage a replacement paper for one recognition category. Changes are audited and applied at activation; staging itself does not change the website.</p>
 <form id="override">
 <label>Category<select name="category"><option value="editors-pick">Editor's Pick</option><option value="industry-impact">Industry Impact</option><option value="emerging-research">Emerging Research</option></select></label>
@@ -93,6 +102,13 @@ async function certificates(){
  const a=node('a','Verify / print ↗');a.href='https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
  }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
 }
+$('integrity-approval').onsubmit=async e=>{e.preventDefault();const state=$('integrity-approval-state');
+ if(!$('integrity-confirm').checked)return;
+ if(!confirm('Confirm independent research-integrity checks were performed. Approve this paper for the future shortlist? This sends no email and issues no certificate.'))return;
+ try{const data=Object.fromEntries(new FormData(e.target).entries());data.confirmation='INTEGRITY_CHECKED';
+ const result=await api('review-approve',data);state.textContent='Assessment approved for automatic shortlisting. No recognition activated or email sent.';
+ await $('preview-reviewed').onclick();
+ }catch(err){state.textContent=err.message}};
 $('paper-review').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');
  button.disabled=true;$('paper-review-state').textContent='Checking publication evidence…';
  $('paper-review-result').hidden=true;
