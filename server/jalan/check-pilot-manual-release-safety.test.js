@@ -49,7 +49,7 @@ test('eligible identical-config code snapshot passes without touching Heroku',as
  assert.doesNotMatch(logs.join(' '),/dummy@example|PPPP|TTTT|newslug|oldslug|Bearer/);
 });
 test('unknown or denied rollback eligibility cannot authorize deployment',async()=>{
- for(const eligible of [false,undefined]){
+ for(const eligible of [false,null]){
   const f=fixture({eligible});
   await assert.rejects(preflight({fetcher:f.fetcher,key:'K'.repeat(40),expectedUri:uri,log:()=>{}}),
    /restore-not-verified/);
