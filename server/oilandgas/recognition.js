@@ -164,6 +164,49 @@ publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  if(!row)return res.sendStatus(404);
  res.json({id:row._id,status:row.status,author:row.authorName,title:row.title,category:row.category,label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,note:row.note});
 }catch(e){next(e);}});
+// A unique opaque link identifies a recognition letter recipient without exposing email.
+// GET events mean a link was requested (including possible automated link scanners).
+// POST events are recorded only after the verified letter has rendered in a browser.
+const TRACKING_TOKEN_RE=/^[a-f0-9]{64}$/i;
+const tokenDigest=token=>crypto.createHash('sha256').update(token).digest('hex');
+function letterNoStore(req,res,next){
+ res.set({'Cache-Control':'no-store, private','Referrer-Policy':'no-referrer',
+  'X-Robots-Tag':'noindex, nofollow','X-Content-Type-Options':'nosniff'});
+ next();
+}
+publicRouter.get('/letter-link/:token',letterNoStore,async(req,res,next)=>{try{
+ const token=req.params.token||'';
+ if(!TRACKING_TOKEN_RE.test(token))return res.sendStatus(404);
+ const key=tokenDigest(token);
+ const links=db().collection('recognition_letter_links');
+ const found=await links.findOne({_id:key,status:'enabled'});
+ if(!found)return res.sendStatus(404);
+ const cert=await db().collection('recognition_certificates').findOne({_id:found.letterId,status:'valid'});
+ if(!cert)return res.sendStatus(404);
+ // Do not infer a human email open from a GET. Email security tools may prefetch links.
+ const now=new Date();
+ await links.updateOne({_id:key,status:'enabled'},{$inc:{linkRequests:1},
+  $set:{lastLinkRequestAt:now},$min:{firstLinkRequestAt:now}});
+ const target=new URL('https://oilandgas.eu.com/letter.html');
+ target.searchParams.set('id',cert._id);
+ target.searchParams.set('visit',token);
+ return res.redirect(302,target.href);
+}catch(e){next(e);}});
+publicRouter.post('/letter-view',letterNoStore,express.json({limit:'2kb'}),async(req,res,next)=>{try{
+ const token=typeof req.body?.token==='string'?req.body.token:'';
+ const letterId=typeof req.body?.letterId==='string'?req.body.letterId:'';
+ if(!TRACKING_TOKEN_RE.test(token)||!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(letterId))
+  return res.status(400).json({recorded:false});
+ const key=tokenDigest(token);
+ const link=await db().collection('recognition_letter_links').findOne({_id:key,letterId,status:'enabled'});
+ if(!link)return res.status(404).json({recorded:false});
+ const valid=await db().collection('recognition_certificates').findOne({_id:letterId,status:'valid'});
+ if(!valid)return res.status(404).json({recorded:false});
+ const now=new Date();
+ await db().collection('recognition_letter_links').updateOne({_id:key,status:'enabled'},
+  {$inc:{letterLoads:1},$set:{lastLetterLoadAt:now},$min:{firstLetterLoadAt:now}});
+ res.json({recorded:true,meaning:'Letter page loaded; this does not prove the recipient personally viewed it.'});
+}catch(e){next(e);}});
 adminRouter.use(express.json({limit:'20kb'}));
 adminRouter.get('/status',async(req,res,next)=>{try{
  const now=new Date();const active=await db().collection('recognition_selections')
@@ -412,6 +455,33 @@ adminRouter.post('/certificate/issue',async(req,res,next)=>{try{
   selectionId,authorName,certificateId:id,createdAt:now});
  res.json({ok:true,id,verificationUrl:'https://oilandgas.eu.com/certificate.html?id='+encodeURIComponent(id),
   emailEnabled:false});
+}catch(e){next(e);}});
+// This creates a tracking link for a VALID recognition letter only.
+// It does not enqueue or send an email. The token is returned once, never stored in plaintext.
+adminRouter.post('/letter-link/create',async(req,res,next)=>{try{
+ const letterId=String(req.body?.letterId||'').trim();
+ if(!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(letterId))
+  return res.status(400).json({error:'Valid recognition letter ID required'});
+ const cert=await db().collection('recognition_certificates').findOne({_id:letterId,status:'valid'});
+ if(!cert)return res.status(404).json({error:'No valid recognition letter was issued'});
+ const token=crypto.randomBytes(32).toString('hex');
+ const id=tokenDigest(token),now=new Date();
+ await db().collection('recognition_letter_links').insertOne({_id:id,letterId,
+  authorName:cert.authorName,selectionId:cert.selectionId,status:'enabled',
+  createdAt:now,mode:'unsent-preview',emailStatus:'disabled',
+  linkRequests:0,letterLoads:0});
+ res.set('Cache-Control','no-store').json({ok:true,
+  url:'https://mterm2026-559f9bf571b5.herokuapp.com/api/oilandgas/recognition/letter-link/'+token,
+  warning:'Private preview link only. No email has been sent. Share only with the intended recipient.'});
+}catch(e){next(e);}});
+adminRouter.get('/letter-tracking',async(req,res,next)=>{try{
+ const rows=await db().collection('recognition_letter_links').find({},
+  {projection:{_id:0,letterId:1,authorName:1,selectionId:1,status:1,
+   createdAt:1,mode:1,emailStatus:1,linkRequests:1,letterLoads:1,
+   firstLinkRequestAt:1,lastLinkRequestAt:1,firstLetterLoadAt:1,lastLetterLoadAt:1}})
+  .sort({createdAt:-1}).limit(100).toArray();
+ res.set('Cache-Control','private, no-store').json({emailEnabled:false,items:rows,
+  interpretation:'Link requested may be an email security scanner. Letter page loaded is not proof of human reading; neither establishes email open or download.'});
 }catch(e){next(e);}});
 adminRouter.get('/notifications',async(req,res)=>res.json({emailEnabled:false,mode:'placeholder',
  message:'No emails will be queued or sent. Notification system awaits acceptance testing and explicit approval.',
