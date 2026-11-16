@@ -164,7 +164,57 @@ async function main(){
   assertPrivateRouteRequests(desktopRouteRequests,3);
   assertPrivateRouteRequests(mobileRouteRequests,1);
   if(mobileErrors.length)throw Error('Mobile browser script error');
-  process.stdout.write('Chromium desktop and touch-mobile pilot interactions passed against local fixture API.\n');
+  // Real 390px Chromium callback sequencing: simulate native geolocation
+  // responses arriving after the owner edits or swaps endpoints. No GPS,
+  // remote location service or real coordinates are used for this test.
+  const gpsRace=await browser.newPage({viewport:{width:390,height:844},
+   deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const gpsRaceErrors=[];
+  gpsRace.on('pageerror',e=>gpsRaceErrors.push(e.message));
+  await gpsRace.addInitScript(()=>{
+   Object.defineProperty(navigator,'geolocation',{configurable:true,value:{
+    getCurrentPosition(success,error){
+     window.__testGpsSuccess=success;
+     window.__testGpsError=error;
+    }
+   }});
+  });
+  await gpsRace.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded'});
+  await gpsRace.locator('.leaflet-container').waitFor({timeout:15000});
+  await gpsRace.locator('#gps').click();
+  await gpsRace.locator('#start').fill('3.130000, 101.700000');
+  await gpsRace.getByText('Pending GPS selection cancelled',{exact:false}).waitFor();
+  await gpsRace.evaluate(()=>window.__testGpsSuccess({coords:{
+   latitude:3.138888,longitude:101.688888,accuracy:12}}));
+  if((await gpsRace.locator('#start').inputValue())!=='3.130000, 101.700000')
+   throw Error('Late GPS fix overwrote manual start coordinate');
+  await gpsRace.locator('#gps').click();
+  await gpsRace.evaluate(()=>window.__testGpsSuccess({coords:{
+   latitude:3.138888,longitude:101.688888}}));
+  await gpsRace.getByText('GPS accuracy unavailable or exceeds 100 m',{exact:false}).waitFor();
+  if((await gpsRace.locator('#start').inputValue())!=='3.130000, 101.700000')
+   throw Error('Unknown GPS accuracy was silently accepted');
+  await gpsRace.locator('#gps').click();
+  await gpsRace.evaluate(()=>window.__testGpsSuccess({coords:{
+   latitude:3.138888,longitude:101.688888,accuracy:250}}));
+  await gpsRace.getByText('GPS accuracy unavailable or exceeds 100 m',{exact:false}).waitFor();
+  if((await gpsRace.locator('#start').inputValue())!=='3.130000, 101.700000')
+   throw Error('Low-confidence GPS fix was silently accepted');
+  await gpsRace.locator('#gps').click();
+  await gpsRace.locator('#swap').click();
+  const swapped=await gpsRace.locator('#start').inputValue();
+  await gpsRace.evaluate(()=>window.__testGpsSuccess({coords:{
+   latitude:3.138888,longitude:101.688888,accuracy:12}}));
+  if((await gpsRace.locator('#start').inputValue())!==swapped)
+   throw Error('Late GPS fix overwrote manually swapped endpoints');
+  await gpsRace.locator('#gps').click();
+  await gpsRace.evaluate(()=>window.__testGpsSuccess({coords:{
+   latitude:3.138888,longitude:101.688888,accuracy:12}}));
+  await gpsRace.getByText('GPS position captured once',{exact:false}).waitFor();
+  if((await gpsRace.locator('#start').inputValue())!=='3.138888, 101.688888')
+   throw Error('New valid opt-in GPS fix was not accepted after stale cancellation');
+  if(gpsRaceErrors.length)throw Error('GPS callback regression browser script error');
+  process.stdout.write('Chromium desktop, touch-mobile and GPS callback trust/race interactions passed against local fixture API.\\n');
  }finally{
   if(browser)await browser.close();
   await new Promise(resolve=>server.close(resolve));
