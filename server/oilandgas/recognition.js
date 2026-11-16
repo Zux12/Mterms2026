@@ -67,8 +67,8 @@ async function candidates(){
  return out;
 }
 async function shortlist(){
- const existing=await db().collection('recognition_selections').find({status:{$in:['active','archived']}},
-  {projection:{reference:1,kind:1,start:1}}).sort({start:-1}).limit(1000).toArray();
+ const existing=await db().collection('recognition_selections').find({status:{$in:['active','archived','withdrawn']}},
+  {projection:{reference:1,kind:1,publicationId:1}}).toArray();
  const now=weekStart();
  const all=await candidates();
  const authorKeys=[...new Set(all.flatMap(p=>p.byline.split(/[,;]+/).map(normalizeName).filter(Boolean)))];
@@ -79,8 +79,8 @@ async function shortlist(){
   p.malaysianAffiliationVerified=p.byline.split(/[,;]+/).map(normalizeName)
    .some(key=>/\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b|\bcyberjaya\b|\bgeomatika\b/i.test(affiliationMap.get(key)||''));
  }
- const ranked=all.filter(p=>!existing.some(e=>e.reference===p.reference&&e.kind===p.kind&&
-  new Date(e.start).getTime()>now.getTime()-365*86400000))
+ const ranked=all.filter(p=>!existing.some(e=>e.kind===p.kind &&
+  (e.reference===p.reference || (e.publicationId&&p.publicationId&&e.publicationId===p.publicationId))))
  .map(p=>({...p,assessment:scorePaper(p)}))
  .sort((a,b)=>b.assessment.total-a.assessment.total ||
   Number(isMY(b))-Number(isMY(a)) ||
@@ -103,8 +103,8 @@ function reviewRevision(p){
 async function reviewedShortlist(){
  const all=await candidates();
  const history=await db().collection('recognition_selections')
-  .find({status:{$in:['active','archived']}},{projection:{reference:1,kind:1,start:1,byline:1}})
-  .sort({start:-1}).limit(2000).toArray();
+  .find({status:{$in:['active','archived','withdrawn']}},{projection:{reference:1,kind:1,publicationId:1,start:1,byline:1}})
+  .toArray();
  const refs=all.map(p=>p.reference);
  const reviews=await db().collection('recognition_reviews').find({reference:{$in:refs}}).toArray();
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
