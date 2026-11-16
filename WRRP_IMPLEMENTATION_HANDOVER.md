@@ -129,3 +129,12 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - No recognition email sent, no tracking token generated in production, no recognition issued. Activation and schedule remain LOCKED/OFF.
 - **Not yet tested on live website:** GitHub commits and JS syntax checks alone do not establish deployed Heroku or GitHub Pages behavior, actual PDF layout/print quality, live CORS, or analytics accuracy. Do not claim those passed.
 - Need to check true author-facing A4 print on Safari and Chrome (one page) and consider a signed/working verification QR code later.
+
+## Permanent once-only recognition rule — 16 November 2026
+- User explicitly rejected returning recognition: **once a publication is selected in any recognition category, that publication must never be selected again**, regardless of time elapsed. No 12-month expiry, no anniversary/repeat award.
+- Updated recognition-selector.js `paperCooldown` to lifetime exclusion by stored publication reference or matching stable publicationId, independent of recognition category/date.
+- Updated recognition.js: provisional candidate pool and reviewed-only selection history both include all past active/archived/withdrawn selections without 1,000/2,000 record limits or 12-month lookback. These provide lifelong exclusion for previously recognized papers.
+- When no eligible new research exists, leave that category unfilled for the week. Preserve prior winners only in the archive; do not call them new winners.
+- The **12-week author cooldown remains a preference** between distinct eligible papers, not a ban on an author ever receiving recognition for a different paper.
+- Added lifetime exclusion regression tests for years-later selection, renamed reference with same publication ID, and exhausted pool. Four isolated checks passed using fetched JavaScript; full Node CI and deployment remain unverified.
+- No emails, awards, tracking links, production recognition records or scheduler settings were changed.
