@@ -103,8 +103,8 @@ test('unsupported target and absent auth fail closed',async()=>{
 test('operator workflow is manual-only with explicit trusted-ref and no background trigger',()=>{
  const fs=require('node:fs');
  const yaml=fs.readFileSync(require('node:path').join(__dirname,'../../.github/workflows/jalan-heroku-router-privacy-operator.yml'),'utf8');
- assert.match(yaml,/on:\\n  workflow_dispatch:/);
- assert.doesNotMatch(yaml,/\\n  (push|pull_request|schedule):/);
+ assert.match(yaml,/on:\n  workflow_dispatch:/);
+ assert.doesNotMatch(yaml,/\n  (push|pull_request|schedule):/);
  assert.match(yaml,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
  assert.match(yaml,/contents: read/);
  assert.match(yaml,/cancel-in-progress: false/);
