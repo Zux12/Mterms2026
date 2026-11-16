@@ -207,3 +207,21 @@ test('private Heroku health sampling is bounded, authenticated and never a drivi
  assert.ok(src.includes('Diagnostic sample only; no route throughput or service SLA established'));
  assert.ok(!src.includes('console.log(auth)')&&!src.includes('console.log(token)'));
 });
+
+test('manual private code deployment cannot begin before qualified rollback preflight',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
+ const safeguard=yaml.indexOf('BLOCK private deploy unless prior code release is eligible to restore');
+ const credential=yaml.indexOf('Configure JALAN pilot credentials only');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ assert.ok(privacy>0&&safeguard>privacy&&credential>safeguard&&push>credential,
+  'qualified rollback preflight must run before configuration writes or code push');
+ assert.ok(yaml.slice(safeguard,credential).includes('if: ${{ !inputs.validation_only }}'),
+  'existing read-only validation-only flow must skip the release gate');
+ assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'));
+ assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
+ assert.doesNotMatch(yaml.split('permissions:')[0],/\n\s*push:/,
+  'no automatic deployment trigger');
+});
