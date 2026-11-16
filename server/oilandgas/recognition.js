@@ -294,6 +294,42 @@ adminRouter.post('/review-paper',async(req,res,next)=>{try{
 }catch(e){console.error('WRRP editorial evidence review',e.code||e.name);
  res.status(503).json({error:'Independent evidence review unavailable. No score was awarded or recognition activated.',emailEnabled:false});
 }});
+// Editorial approval records an explicit external integrity review.
+// Approval NEVER activates a week or sends email.
+adminRouter.post('/review-approve',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ const evidenceUrl=String(req.body?.evidenceUrl||'').trim();
+ const rationale=String(req.body?.rationale||'').trim();
+ const confirmation=req.body?.confirmation;
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+  rationale.length<30||rationale.length>1200||confirmation!=='INTEGRITY_CHECKED')
+  return res.status(400).json({error:'Provide a valid reference, public HTTPS evidence URL, detailed rationale (30–1200 characters), and explicit integrity-check confirmation.'});
+ const record=await db().collection('publications').findOne({reference,status:'published',publication:{$exists:true}},
+  {projection:{reference:1,publicationId:1,publication:1,source:1,publishedAt:1,integrityStatus:1,retractionStatus:1}});
+ if(!record)return res.status(404).json({error:'Published research record unavailable'});
+ const paper=entry(record,'publications');
+ if(!policy.publicationEligibility(paper).eligible)return res.status(422).json({error:'Publication does not satisfy research eligibility checks.'});
+ const review=await db().collection('recognition_reviews').findOne({_id:reference});
+ if(!review||review.status==='approved')return res.status(409).json({error:'A pending, unapproved AI evidence review is required.'});
+ if(review.revision!==reviewRevision(paper)||review.metadata?.state!=='found'||
+  !review.assessment?.evidence?.bibliographyVerified)
+  return res.status(409).json({error:'Bibliographic verification missing or publication has changed; repeat the evidence review.'});
+ if(review.assessment.total<75)return res.status(409).json({error:'Assessment below minimum recognition threshold.'});
+ const now=new Date();
+ const approved={...review.assessment,evidence:{...review.assessment.evidence,
+  integrityCleared:true,integrityEvidenceUrl:evidenceUrl,
+  integrityCheckedAt:now,integrityCheckMethod:'documented-editorial-review'},
+  readyForRecognition:true,decision:'approved-for-automatic-shortlist'};
+ const changed=await db().collection('recognition_reviews').updateOne({
+  _id:reference,revision:review.revision,status:'pending-editorial-and-integrity-review'
+ },{$set:{assessment:approved,status:'approved',approvedAt:now,
+  approvalEvidenceUrl:evidenceUrl,approvalRationale:rationale}});
+ if(!changed.modifiedCount)return res.status(409).json({error:'Review changed during approval. Refresh.'});
+ await db().collection('recognition_audit').insertOne({
+  action:'research-review-approved',reference,evidenceUrl,rationale,createdAt:now,
+  result:'shortlist-eligible-only',emailEnabled:false});
+ res.json({ok:true,status:'approved',recognitionActivated:false,emailEnabled:false});
+}catch(e){next(e);}});
 adminRouter.get('/reviews',async(req,res,next)=>{try{
  const items=await db().collection('recognition_reviews').find({},
   {projection:{reference:1,assessment:1,metadata:1,status:1,reviewedAt:1,model:1}})
