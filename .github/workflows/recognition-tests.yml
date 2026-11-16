@@ -31,4 +31,4 @@ jobs:
           node --check server/oilandgas/recognition-review.js
           node --check server/oilandgas/recognition-selector.js
       - name: Run recognition safety and scoring tests
-        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js
+        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js tests/oilandgas-recognition-selector.test.js
