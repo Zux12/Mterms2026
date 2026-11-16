@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Weekly Recognition | Editor's Desk</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#252725;background:#f9f8f5}*{box-sizing:border-box}body{margin:0}
+header{padding:22px max(20px,calc((100vw - 1100px)/2));background:#1d2524;color:white;display:flex;justify-content:space-between;align-items:center}
+header a{color:white}main{max-width:1100px;padding:35px 20px;margin:auto}h1{font:normal 38px Georgia,serif}h2{font:normal 26px Georgia,serif}
+small{letter-spacing:.1em;color:#b45a2b;text-transform:uppercase;font-weight:bold}.panel{border:1px solid #dcd9d2;background:white;padding:25px;margin:22px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{border:1px solid #ddd;padding:18px;min-width:0}
+button{background:#222;color:#fff;padding:10px 15px;border:0;cursor:pointer}button.secondary{background:white;color:#222;border:1px solid #aaa}
+input,select,textarea{width:100%;padding:10px;margin:7px 0 15px;border:1px solid #bbb;font:inherit}
+label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-height:1.6}.warning{padding:14px;background:#fff0d8;color:#6a4b0e}
+.status{padding:12px 0;min-height:40px}a{color:#a54518}pre{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:750px){.grid{grid-template-columns:1fr}h1{font-size:30px}}
+</style></head><body>
+<header><strong>oil &amp; gas<span style="color:#ff842d">.</span> / Editor's Desk</strong><a href="desk.html">Back to dashboard</a></header>
+<main><small>WRRP-001 / Test workspace</small><h1>Weekly Research Recognition</h1>
+<p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
+<div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or certificates are generated in this version. The weekly scheduler is disabled by default.</div>
+<p id="notice" role="status" class="status">Checking editor session…</p>
+<section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button></section>
+<section class="panel"><h2>Weekly preview</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
+<section class="panel"><h2>Administrator override</h2><p class="muted">Stage a replacement paper for one recognition category. Changes are audited and applied at activation; staging itself does not change the website.</p>
+<form id="override">
+<label>Category<select name="category"><option value="editors-pick">Editor's Pick</option><option value="industry-impact">Industry Impact</option><option value="emerging-research">Emerging Research</option></select></label>
+<label>Content type<select name="kind"><option value="publications">Publication</option><option value="articles">Article</option></select></label>
+<label>Published reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-[AP]-[A-F0-9]{16}"></label>
+<label>Reason<textarea name="reason" required minlength="5" maxlength="500"></textarea></label>
+<button>Stage override</button></form><div id="overrides"></div></section>
+<section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
+<button id="activate" class="secondary">Activate this week's recognition — no emails</button></section>
+<section class="panel"><h2>Email placeholder</h2><p id="notifications">Not connected.</p></section>
+</main><script>
+'use strict';
+const apiBase='recognition/';
+const $=id=>document.getElementById(id);
+async function api(path,body){
+ const response=await fetch(apiBase+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.error||(response.status===401?'Sign in via Editor’s Desk first.':'Request failed.'));
+ return data;
+}
+function message(s){$('notice').textContent=s}
+function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
+async function refresh(){
+ try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
+ $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Emails: OFF · Certificates: not issuing'),
+ node('p','Active recognitions: '+status.active.length));
+ $('overrides').replaceChildren(node('h3','Staged overrides'));
+ for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
+ $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
+ message('Editor controls available. No emails are enabled.');
+ }catch(e){message(e.message)}
+}
+async function preview(){
+ try{message('Checking published candidates…');const data=await api('preview');$('candidates').replaceChildren();
+ for(const item of data.items){const card=node('article','','card');
+ card.append(node('small',item.label),node('h3',item.candidate?.title||'No eligible candidate'),
+ node('p',item.candidate?.byline||'', 'muted'),
+ node('p',item.candidate?'Provisional score: '+item.candidate.assessment.total+'/100 · '+item.candidate.assessment.mode:'Unfilled category','muted'));
+ $('candidates').append(card)}
+ message('Preview completed. Nothing was published or emailed.');
+ }catch(e){message(e.message)}
+}
+$('refresh').onclick=refresh;$('preview').onclick=preview;
+$('override').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
+ message('Override staged successfully.');await refresh();
+}catch(err){message(err.message)}};
+$('activate').onclick=async()=>{if(!confirm('Publish three recognition records for this week? No emails or certificates will be issued.'))return;
+ try{const data=await api('activate',{confirm:'ACTIVATE_NO_EMAIL'});message('Weekly activation result: '+JSON.stringify(data));await refresh()}
+ catch(e){message(e.message)}};
+refresh();
+</script></body></html>
