@@ -231,6 +231,22 @@ adminRouter.get('/history',async(req,res,next)=>{try{
  const items=await db().collection('recognition_selections').find({}).sort({start:-1}).limit(60).toArray();
  res.json({items:items.map(publicRecord)});
 }catch(e){next(e);}});
+// AI metadata assessment is read-only and invoked by an authenticated editor.
+// It cannot activate selections, issue certificates, modify database records or email authors.
+adminRouter.post('/review-paper',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Invalid paper reference'});
+ const record=await db().collection('publications').findOne({
+  reference,status:'published',publication:{$exists:true}
+ },{projection:{reference:1,publication:1,source:1,publishedAt:1,publicationId:1,integrityStatus:1,retractionStatus:1}});
+ if(!record)return res.status(404).json({error:'Published paper not found'});
+ const paper=entry(record,'publications'),eligibility=policy.publicationEligibility(paper);
+ if(!eligibility.eligible)return res.status(422).json({error:'Paper ineligible',reasons:eligibility.reasons});
+ const result=await require('./recognition-review').review(paper);
+ res.set('Cache-Control','no-store').json(result);
+}catch(e){console.error('WRRP editorial evidence review',e.code||e.name);
+ res.status(503).json({error:'Independent evidence review unavailable. No score was awarded or recognition activated.',emailEnabled:false});
+}});
 adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode:'rule-based-provisional',
  maxScore:MAX_SCORE,weights:{relevance:25,technical:20,practical:20,evidence:15,originality:10,timeliness:10},
  warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
