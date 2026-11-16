@@ -99,3 +99,15 @@ test('unsupported target and absent auth fail closed',async()=>{
  await assert.rejects(enableQueryRedaction({target:'private',key:'',fetcher:h.fetcher,log:h.log}),/authentication/);
  assert.equal(h.calls.length,0);
 });
+
+test('operator workflow is manual-only with explicit trusted-ref and no background trigger',()=>{
+ const fs=require('node:fs');
+ const yaml=fs.readFileSync(require('node:path').join(__dirname,'../../.github/workflows/jalan-heroku-router-privacy-operator.yml'),'utf8');
+ assert.match(yaml,/on:\\n  workflow_dispatch:/);
+ assert.doesNotMatch(yaml,/\\n  (push|pull_request|schedule):/);
+ assert.match(yaml,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
+ assert.match(yaml,/contents: read/);
+ assert.match(yaml,/cancel-in-progress: false/);
+ assert.match(yaml,/node server\/jalan\/enable-heroku-router-redaction-operator\.js/);
+ assert.doesNotMatch(yaml,/git push|heroku git:|config:set|mongodb:|railway/i);
+});
