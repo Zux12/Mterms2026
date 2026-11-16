@@ -52,7 +52,8 @@ function weekStart(date=new Date()){
  if(shifted.getTime()-8*3600000>date.getTime())shifted.setUTCDate(shifted.getUTCDate()-7);
  return new Date(shifted.getTime()-8*3600000);
 }
-function isMY(p){return /\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b/i.test(p.byline+' '+p.summary);}
+function normalizeName(name){return String(name||'').normalize('NFKC').trim().toLowerCase().replace(/\\s+/g,' ');}
+function isMY(p){return p.malaysianAffiliationVerified===true;}
 async function candidates(){
  const out=[];
  for(const kind of ['publications','articles']){
@@ -66,7 +67,17 @@ async function shortlist(){
  const existing=await db().collection('recognition_selections').find({status:{$in:['active','archived']}},
   {projection:{reference:1,kind:1,start:1}}).sort({start:-1}).limit(1000).toArray();
  const now=weekStart();
- const ranked=(await candidates()).filter(p=>!existing.some(e=>e.reference===p.reference&&e.kind===p.kind&&
+ const all=await candidates();
+ const authorKeys=[...new Set(all.flatMap(p=>p.byline.split(/[,;]+/).map(normalizeName).filter(Boolean)))];
+ const linked=await db().collection('author_admin_details').find({_id:{$in:authorKeys}},
+  {projection:{_id:1,affiliation:1}}).toArray();
+ const affiliationMap=new Map(linked.map(x=>[x._id,x.affiliation||'']));
+ for(const p of all){
+  p.malaysianAffiliationVerified=p.byline.split(/[,;]+/).map(normalizeName)
+   .some(key=>/\bmalaysia\b|\buniversiti\b|\buniversity\b|\butm\b|\butp\b|\bukm\b|\bupm\b/i.test(affiliationMap.get(key)||'') &&
+    /\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b/i.test(affiliationMap.get(key)||''));
+ }
+ const ranked=all.filter(p=>!existing.some(e=>e.reference===p.reference&&e.kind===p.kind&&
   new Date(e.start).getTime()>now.getTime()-365*86400000))
  .map(p=>({...p,assessment:scorePaper(p)}))
  .sort((a,b)=>b.assessment.total-a.assessment.total ||
