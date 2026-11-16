@@ -79,3 +79,15 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 4. Validate names for all co-authors and generate PDF/signed recognition packages beyond browser print view.
 5. Build notification preference and suppression workflows as placeholders only. Do not connect email provider until explicit user approval.
 6. Review scoring fairness and 12-week author cooldown, plus topic/institution diversity.
+
+## Continued engineering — 16 November 2026 (evidence review phase)
+- Added `server/oilandgas/recognition-review.js`: source URL/DOI extraction, Crossref metadata lookup (only DOI resolver hosts), conservative publication title matching, 100-point bounded AI assessment using the existing OpenAI JS dependency, and explicit limitations.
+- The AI is **not** represented as having read the entire paper. Crossref agreement does NOT clear a paper of retraction risk. Output always includes `integrityCleared:false` and `readyForRecognition:false`.
+- Added authenticated `POST /api/oilandgas/editor/recognition/review-paper`: reviews one existing published research reference, checks bibliographic mismatch, requires `OIL_RECOGNITION_OPENAI_API_KEY` (not configured by these commits), and never sends email or activates selections.
+- Successful assessments are saved as draft-only `recognition_reviews` records with `pending-editorial-and-integrity-review` status; read-only `GET /api/oilandgas/editor/recognition/reviews` returns the latest drafts.
+- Added manual evidence review UI within Editor's Desk recognition page.
+- Added `tests/oilandgas-recognition-review.test.js` and GitHub Actions workflow test coverage for source matching, AI score limits, no-key fail-closed and no-email behavior.
+- Ran **8 isolated in-memory runtime checks** of the fetched policy and review modules using mock URL/Crossref/OpenAI components: 8 passed. This is not a substitute for full Node CI, integration, or live Heroku tests.
+- Attempted public page/API fetches from the available web access; inaccessible, so live deployment remains unverified. GitHub Actions full run status is not confirmed.
+- No API key, Heroku config, scheduling, production recognition, certificate issuance, or email setting was changed.
+- Next: run Node CI end-to-end, confirm Heroku deployment and admin login, verify actual DOI metadata on a small sample, add an independent retraction/integrity clearance workflow, then implement evidence-reviewed automatic shortlist. Keep activation and emails OFF throughout.
