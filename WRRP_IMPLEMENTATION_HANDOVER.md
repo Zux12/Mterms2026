@@ -114,3 +114,18 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 3. Implement scheduled batch evidence reviews and automated publication integrity checks (Crossmark/Crossref/other authoritative sources), keeping unverified cases pending.
 4. Test editor approval transactionality and admin identity/audit trace.
 5. Test weekly recognition simulation without writes to production or email. 
+
+## Continued engineering — 16 November 2026 (A4 letter design locked & engagement tracking)
+- User explicitly approved the earlier A4 recognition LETTER mockup, requesting an admin indication when a recipient clicks the email link and loads the letter.
+- Added `WRRP_LETTER_DESIGN_LOCK.md` documenting official A4 portrait, justified, charcoal/orange/gold recognition LETTER (replaces certificate as author-facing terminology). No unauthorized signature or nonworking QR code fabricated.
+- Added `Zux12/oilandgas-website/letter.html`: printable A4 portrait page with justified body paragraphs, wordmark, gold border lines, decorative seal and verification; accepts an optional private visit token and removes it from the visible address bar immediately.
+- Previous `certificate.html?id=...` links now redirect to `letter.html?id=...` for backwards compatibility.
+- Email HTML mockup now states Official A4 Letter of Recognition and uses `{{TRACKED_LETTER_URL}}` placeholder. No email sender/queue has been introduced.
+- New `recognition_letter_links` documents use a randomly generated 32-byte opaque token, only its SHA-256 digest stored in the database. Admin-only creation requires an already-issued valid recognition ID and returns a private unsent testing URL.
+- `GET /api/oilandgas/recognition/letter-link/:token` counts LINK REQUESTS and redirects to the letter. Security scanners may generate these requests; this is NOT proof the author clicked or read an email.
+- `POST /api/oilandgas/recognition/letter-view` counts PAGE LOADS only after valid recognition data is rendered in a browser. Corrected cross-origin OPTIONS preflight for the public site. Page-load signal is NOT proof the intended author personally read the letter.
+- `GET /api/oilandgas/editor/recognition/letter-tracking` is private behind Editor's Desk authentication; admin UI now shows per-letter link requests, letter loads, last activity and recognition email status (disabled).
+- Added `tests/oilandgas-recognition-letter-tracking.test.js` to Node CI, plus syntax checks for new backend and HTML embedded JS.
+- No recognition email sent, no tracking token generated in production, no recognition issued. Activation and schedule remain LOCKED/OFF.
+- **Not yet tested on live website:** GitHub commits and JS syntax checks alone do not establish deployed Heroku or GitHub Pages behavior, actual PDF layout/print quality, live CORS, or analytics accuracy. Do not claim those passed.
+- Need to check true author-facing A4 print on Safari and Chrome (one page) and consider a signed/working verification QR code later.
