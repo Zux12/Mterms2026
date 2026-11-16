@@ -44,7 +44,7 @@ test('dry-run private only does not mutate or request route, location, config or
  assert.equal(r.changed,false);
  assert.equal(h.patches,0);
  assert.equal(h.calls.length,3);
- assert(h.calls.every(c=>c.method==='GET'&&!/route|log-drain|config|\?/.test(c.path)));
+ assert(h.calls.every(c=>c.method==='GET'&&(c.path==='/apps/jalan-kl-private-pilot'||c.path==='/apps/jalan-kl-private-pilot/features/http-router-no-log-query')));
  assert(h.messages.every(m=>!m.includes(KEY)));
 });
 test('explicit private approval updates only the identified private app and verifies GET',async()=>{
