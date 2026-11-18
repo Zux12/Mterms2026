@@ -231,3 +231,10 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - Updated Editor's Desk `server/oilandgas/editor.js` static asset allowlist to serve those exact external files. Kept strict CSP, no inline JS, no unsafe-inline policy relaxation.
 - Validated editor HTML has no inline script/style attributes, external resources are referenced, CSP permits self-hosted files, SMTP test button and click handler are present, and JavaScript syntax check passed (13 assertions). The live URL could not be retrieved from available web tool, so **actual Heroku deploy and Safari functional retest remain unverified**.
 - Admin test-email sending remains manual and requires an explicit click in the authenticated Editor's Desk. No email sent; author emails and recognition activation remain disabled.
+
+### Hostinger administrator SMTP acceptance test — user verified 18 November 2026
+- User provided a screenshot of the **received** inbox message at approximately 16:27 Malaysia time, sent as **Oil & Gas Research Recognition** to **m.zurix@oilandgas.eu.com**, with subject beginning `[SMTP TEST — NO AWARDS]`.
+- Screenshot confirms the HTML email displayed successfully: charcoal branded header, gold test banner, title, dates, and vacancy warning.
+- The message contained a synthetic test preview with all three categories unfilled; **this is not evidence the actual research selection evaluated the papers or found no winners**.
+- Mark one-off Hostinger SMTP administrator email test as PASSED at recipient/inbox level. No author congratulatory email was sent. Friday live alerts and automated weekly recognition remain OFF pending rule-only assessment migration and deployment authorization.
+- User has not approved Decision 6/8 yet.
