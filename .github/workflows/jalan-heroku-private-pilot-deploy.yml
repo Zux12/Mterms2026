@@ -40,7 +40,6 @@ jobs:
           # The GitHub branch must retain the production-safe entrypoint.
           test "$(cat Procfile)" = "web: node server/app.js"
           node --check server/jalan/run-kl-preview-railway.js
-          node --check server/jalan/configure-heroku-private-pilot.js
           test -n "$HEROKU_API_KEY"
           test -n "$JALAN_READONLY_MONGODB_URI"
       - name: BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled (GET only)
@@ -51,9 +50,9 @@ jobs:
       - name: BLOCK private deploy unless prior code release is eligible to restore (GET only)
         if: ${{ !inputs.validation_only }}
         run: node server/jalan/check-pilot-manual-release-safety.js
-      - name: Configure JALAN pilot credentials only (never mterm2026)
-        if: ${{ !inputs.validation_only }}
-        run: node server/jalan/configure-heroku-private-pilot.js
+      # Release is strictly code-only. Required variables and previous release
+      # compatibility are already independently checked by the GET-only gate.
+      # Never rotate/create pilot credentials as a side effect of code deployment.
       - name: Record pre-push Heroku release baseline (non-secret)
         if: ${{ !inputs.validation_only }}
         shell: bash
