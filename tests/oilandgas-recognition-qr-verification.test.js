@@ -12,17 +12,15 @@ test('QR contains official site and individual letter ID, never tracking secrets
  assert.equal(link.searchParams.get('id'),id);
  assert.equal(link.searchParams.has('visit'),false);
 });
-test('unknown, invalid and withdrawn letters never show a valid QR scan result',()=>{
+test('a dated recognition remains discoverable after its featured week',()=>{
  assert.equal(currentLetterStatus(null,null),'not-found');
  assert.equal(currentLetterStatus({status:'valid'},null),'invalid');
- assert.equal(currentLetterStatus({status:'valid'},{status:'withdrawn'}),'withdrawn');
- assert.equal(currentLetterStatus({status:'withdrawn'},{status:'active'}),'withdrawn');
+ assert.equal(currentLetterStatus({status:'valid'},{status:'active'}),'recognized');
+ assert.equal(currentLetterStatus({status:'valid'},{status:'archived'}),'recognized');
+ assert.equal(currentLetterStatus({status:'valid'},{status:'withdrawn'}),'recognized-with-notice');
+ assert.equal(currentLetterStatus({status:'withdrawn'},{status:'archived'}),'recognized-with-notice');
  assert.equal(currentLetterStatus({status:'valid'},{status:'deleted'}),'invalid');
  assert.equal(currentLetterStatus({status:'pending'},{status:'active'}),'invalid');
-});
-test('valid letters remain verifiable while parent recognition is active or archived',()=>{
- assert.equal(currentLetterStatus({status:'valid'},{status:'active'}),'valid');
- assert.equal(currentLetterStatus({status:'valid'},{status:'archived'}),'valid');
 });
 test('reject malformed or unsafe verification references',()=>{
  for(const ref of ['','OG-WRS-','OG-WRS-ABC?x=1','../etc','OG-WRS-<script>']){
