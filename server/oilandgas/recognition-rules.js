@@ -52,7 +52,18 @@ function abstractAssessment(p){
   }).filter(Boolean);
   matches[key]=found;
   // Granular points based on independent groups, not on repeated keyword frequency.
-  breakdown[key]=Math.min(config.max,Math.round(config.max*found.length/config.groups.length));
+  // First topical match earns most industry relevance points: expertise in a
+  // single field is not weaker than a paper spanning multiple business segments.
+  // Additional independent evidence groups earn graduated, bounded points.
+  const scoreSteps={
+   relevance:[0,18,22,25,25,25],
+   technical:[0,8,14,18,20],
+   practical:[0,8,13,17,20],
+   evidence:[0,6,11,15],
+   originality:[0,5,10],
+   timeliness:[0,5,8,10]
+  };
+  breakdown[key]=scoreSteps[key][Math.min(found.length,scoreSteps[key].length-1)];
   reasons[key]=found.length?found.map(x=>x.signal+': '+x.term).join('; '):'No explicit supporting phrase detected';
  }
  // Textual signals do not independently verify originality or source integrity.
