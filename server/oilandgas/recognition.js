@@ -134,7 +134,7 @@ async function reviewedShortlist(){
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
  const approved=all.map(p=>{
   const r=byRef.get(p.reference),assessment=deterministic.directoryAssessment(p);
-  const recent=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
+  const recent=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000&&r.assessmentVersion===deterministic.VERSION;
   return {...p,assessment,reviewStatus:r?.status,
    bibliographyVerified:recent&&r?.bibliographyVerified===true,
    integrityCleared:recent&&r?.integrityCleared===true,
@@ -400,42 +400,45 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
 // Automatic editorial screening is deliberately narrower than scientific
 // integrity certification: requires matching Crossref title/abstract, a recent
 // known-retraction lookup, and no explicit Crossref retraction notice.
+// Equal-input directory scoring. Independent DOI metadata checks remain
+// a separate publication-integrity gate; abstracts are NOT required or read.
 async function autoScreenSourceVerifiedCandidates({max=5}={}){
  const papers=await candidates();
  const eligible=papers.map(p=>({...p,assessment:deterministic.directoryAssessment(p)}))
   .filter(p=>p.assessment.eligibleForEditorialReview&&p.assessment.total>=75);
  const reviewed=await db().collection('recognition_rule_reviews')
   .find({reference:{$in:eligible.map(p=>p.reference)}}).toArray();
- const byRef=new Map(reviewed.map(x=>[x.reference,x])),now=new Date();
- const stale=new Date(now.getTime()-7*86400000);
+ const byRef=new Map(reviewed.map(x=>[x.reference,x]));
+ const stale=new Date(Date.now()-7*86400000);
  const todo=eligible.filter(p=>{
   const r=byRef.get(p.reference);
   return !(r?.status==='approved'&&r.revision===reviewRevision(p)&&
-   r.checkedAt&&new Date(r.checkedAt)>stale)&&
+   r.assessmentVersion===deterministic.VERSION&&r.checkedAt&&new Date(r.checkedAt)>stale)&&
    (!r?.autoAttemptedAt||new Date(r.autoAttemptedAt)<stale);
  }).slice(0,Math.min(10,Math.max(1,max)));
  let approved=0;
  for(const paper of todo){
-  const source=await sourceVerifier.crossrefAbstract(paper);
+  const metadata=await sourceVerifier.crossrefAbstract(paper);
+  // crossrefAbstract checks DOI and title first; "abstract-insufficient"
+  // is ACCEPTABLE here because assessment never relies on any abstract.
+  const sourceMatched=['verified','abstract-insufficient'].includes(metadata.status);
   const notice=await integrityMonitor.inspect(paper);
-  const norm=s=>deterministic.normalize(s).toLowerCase();
-  const same=source.status==='verified'&&norm(source.abstract)===norm(paper.abstract);
-  const valid=same&&notice.state==='no-explicit-notice-found';
+  const valid=sourceMatched&&notice.state==='no-explicit-notice-found';
   const status=valid?'approved':'pending-source-or-integrity-review';
   await db().collection('recognition_rule_reviews').updateOne({_id:paper.reference},
    {$set:{reference:paper.reference,revision:reviewRevision(paper),status,
     bibliographyVerified:valid,integrityCleared:valid,
-    integrityCheckScope:'Crossref matching metadata and no explicit indexed retraction notice; not independent scientific validation',
-    evidenceUrl:notice.evidenceUrl||source.source||null,
+    integrityCheckScope:'DOI/title match and no explicit indexed Crossref retraction notice; no abstract or independent scientific review required',
+    evidenceUrl:notice.evidenceUrl||metadata.source||null,
     checkedAt:new Date(),autoAttemptedAt:new Date(),
-    assessmentVersion:deterministic.VERSION,approvalMode:valid?'automatic-source-screen':'pending'}},
+    assessmentVersion:deterministic.VERSION,approvalMode:valid?'automatic-metadata-screen':'pending'}},
    {upsert:true});
   if(valid){
    approved++;
    await db().collection('recognition_audit').insertOne({
-    action:'automatic-known-notice-screen-passed',reference:paper.reference,
+    action:'directory-source-and-notice-screen-passed',reference:paper.reference,
     evidenceUrl:notice.evidenceUrl,createdAt:new Date(),emailEnabled:false,
-    limitation:'No indexed retraction notice is not an independent guarantee of research integrity.'});
+    limitation:'No indexed Crossref retraction notice is not a guarantee of research integrity.'});
   }
  }
  return {checked:todo.length,approved,emailEnabled:false};
@@ -655,8 +658,8 @@ async function activateCycle(){
   const revisionMatches=!!r&&r.revision===reviewRevision(current);
   const qualified=!!current&&!!frozen&&revisionMatches&&
    selector.eligibleReview({...current,assessment:deterministic.directoryAssessment(current),
-    bibliographyVerified:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.bibliographyVerified,
-    integrityCleared:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.integrityCleared,
+    bibliographyVerified:r.assessmentVersion===deterministic.VERSION&&r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.bibliographyVerified,
+    integrityCleared:r.assessmentVersion===deterministic.VERSION&&r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.integrityCleared,
     reviewStatus:r.status,reviewRevisionMatches:true})&&
    current.publicationId===frozen.publicationId&&
    selector.sourceIdentity(current.source)===selector.sourceIdentity(frozen.source)&&
@@ -836,7 +839,7 @@ adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
   const assessment=deterministic.directoryAssessment(p);
   const current=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
   const status=prior?'recognized-once':!assessment.eligibleForEditorialReview?'directory-metadata-pending':
-   !r||r.revision!==rev||!current?'source-integrity-review-needed':r.status==='approved'?'ready-for-shortlist':
+   !r||r.revision!==rev||!current||r.assessmentVersion!==deterministic.VERSION?'source-integrity-review-needed':r.status==='approved'?'ready-for-shortlist':
    'source-integrity-review-needed';
   return {reference:p.reference,title:p.title,publishedAt:p.publishedAt,status,
    publicationId:p.publicationId,score:assessment.total,issues:assessment.evidence.issues};
@@ -1039,7 +1042,6 @@ async function scheduledTick(){
   if(!master.enabled||!master.readyToEnable)return;
   await checkIntegrityNotices();
   if(await recognitionPaused())return;
-  await discoverSourceAbstracts({max:5});
   await autoScreenSourceVerifiedCandidates({max:5});
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
