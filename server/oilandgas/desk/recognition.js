@@ -262,6 +262,27 @@ $('smtp-test').onclick=async()=>{
  }catch(err){$('smtp-test-result').textContent='Test failed: '+err.message}
  finally{button.disabled=false}
 };
+async function loadIntegrityMonitor(){
+ const target=$('integrity-monitor-items');target.replaceChildren();
+ $('integrity-monitor-status').textContent='Reading integrity check records…';
+ try{
+  const result=await api('integrity-monitor');
+  $('integrity-monitor-status').textContent=result.checks.length+' recorded checks · '+
+   result.alerts.length+' integrity alerts. Monitoring requires explicit production activation.';
+  for(const item of result.alerts){
+   const p=node('p',(item.title||item.selectionId)+' — '+item.status,'muted');
+   target.append(p);
+  }
+  for(const item of result.checks.slice(0,10)){
+   const p=node('p',item.selectionId+' — '+item.result+' · '+
+    new Date(item.checkedAt).toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur'}),'muted');
+   target.append(p);
+  }
+  if(!result.checks.length&&!result.alerts.length)
+   target.append(node('p','No scheduled source-integrity checks recorded yet.','muted'));
+ }catch(e){$('integrity-monitor-status').textContent=e.message}
+}
+$('integrity-refresh').onclick=loadIntegrityMonitor;
 $('friday-refresh').onclick=fridayBriefing;
 
 $('refresh').onclick=refresh;$('preview').onclick=preview;
