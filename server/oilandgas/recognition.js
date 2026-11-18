@@ -8,6 +8,7 @@ const selector=require('./recognition-selector');
 const fullText=require('./recognition-evidence');
 const adminAlert=require('./recognition-admin-alert');
 const deterministic=require('./recognition-rules');
+const sourceVerifier=require('./recognition-source');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -118,7 +119,8 @@ async function shortlist(){
 function reviewRevision(p){
  return crypto.createHash('sha256').update(JSON.stringify({
   reference:p.reference,publicationId:p.publicationId,
-  title:p.title,summary:p.summary,source:p.source
+  title:p.title,summary:p.summary,abstract:p.abstract,
+  abstractSourceVerified:p.abstractSourceVerified,source:p.source
  })).digest('hex');
 }
 async function reviewedShortlist(){
@@ -538,6 +540,58 @@ adminRouter.get('/history',async(req,res,next)=>{try{
 // It cannot activate selections, issue certificates, modify database records or email authors.
 // Published research enters the consideration pool automatically; no separate award
 // application is required. This queue is read-only and does not itself score or award.
+// Editor-triggered Crossref ingestion does not pick winners, clear integrity or email authors.
+// It only makes complete verifiable DOI abstracts available to the deterministic scorer.
+adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Valid publication reference required.'});
+ const collection=db().collection('publications');
+ const row=await collection.findOne({reference,status:'published',publication:{$exists:true}});
+ if(!row)return res.status(404).json({error:'Published publication not found.'});
+ const p=entry(row,'publications');
+ const result=await sourceVerifier.crossrefAbstract(p);
+ if(result.status!=='verified')return res.status(409).json({state:result.status,
+  note:'The original abstract could not be independently retrieved and verified. The paper remains pending.'});
+ const revisedAt=new Date();
+ const update=await collection.updateOne({_id:row._id,status:'published',
+  'publication.title':row.publication.title,source:row.source},
+  {$set:{'publication.abstract':result.abstract,'publication.abstractSourceVerified':true,
+   'publication.abstractMetadataSource':result.source,
+   'publication.abstractVerifiedAt':revisedAt}});
+ if(!update.modifiedCount)return res.status(409).json({error:'Publication changed during abstract verification.'});
+ await db().collection('recognition_rule_reviews').updateOne({_id:reference},
+  {$set:{status:'stale-reassessment-required',updatedAt:revisedAt}});
+ await db().collection('recognition_audit').insertOne({action:'doi-abstract-import',
+  reference,metadataSource:result.source,createdAt:revisedAt,emailEnabled:false});
+ res.json({ok:true,state:'original-abstract-verified',
+  words:deterministic.abstractAssessment({...p,abstract:result.abstract,abstractSourceVerified:true}).evidence.abstractWords,
+  selectionActivated:false,emailsSent:false});
+}catch(e){next(e);}});
+adminRouter.post('/rules/approve',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ const evidenceUrl=String(req.body?.integrityEvidenceUrl||'').trim();
+ const rationale=String(req.body?.rationale||'').trim();
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+  rationale.length<30||rationale.length>1200||req.body?.confirm!=='SOURCE_INTEGRITY_CHECKED')
+  return res.status(400).json({error:'Reference, HTTPS integrity evidence, detailed rationale (30–1200 characters), and confirmation required.'});
+ const row=await db().collection('publications').findOne({reference,status:'published',publication:{$exists:true}});
+ if(!row)return res.status(404).json({error:'Published research not found.'});
+ const p=entry(row,'publications'),assessment=deterministic.abstractAssessment(p);
+ if(!policy.publicationEligibility(p).eligible||!assessment.eligibleForEditorialReview)
+  return res.status(422).json({error:'Original abstract and publication details are not sufficiently source verified.',issues:assessment.evidence.issues});
+ const history=await db().collection('recognition_selections').find({},{
+  projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray();
+ if(selector.paperCooldown(p,history))return res.status(409).json({error:'This publication has already received a recognition.'});
+ const now=new Date();
+ await db().collection('recognition_rule_reviews').updateOne({_id:reference},
+ {$set:{reference,revision:reviewRevision(p),status:'approved',bibliographyVerified:true,
+  integrityCleared:true,integrityEvidenceUrl:evidenceUrl,integrityRationale:rationale,
+  assessmentVersion:deterministic.VERSION,approvedAt:now}}, {upsert:true});
+ await db().collection('recognition_audit').insertOne({action:'rules-paper-integrity-approved',
+  reference,rationale,integrityEvidenceUrl:evidenceUrl,createdAt:now,emailEnabled:false});
+ res.json({ok:true,score:assessment.total,version:deterministic.VERSION,
+  shortlistedOnly:true,authorEmailsEnabled:false});
+}catch(e){next(e);}});
 adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
  const all=await candidates();
  const history=await db().collection('recognition_selections').find({},{
