@@ -65,3 +65,14 @@ test('same DOI under a different publication record cannot receive recognition t
  assert.equal(paperCooldown(duplicate,history),true);
  assert.ok(choose([duplicate],history,new Date('2037-01-01')).every(x=>!x.candidate));
 });
+
+test('two records of the same DOI cannot occupy different recognition categories in the same week',()=>{
+ const same='https://doi.org/10.1000/same';
+ const first=p('OG-P-AAAAAAAAAAAAAAAA','A Researcher',{source:same,publicationId:'id-a'});
+ const duplicate=p('OG-P-BBBBBBBBBBBBBBBB','B Researcher',{source:same,publicationId:'id-b'});
+ const other=p('OG-P-CCCCCCCCCCCCCCCC','C Researcher',{source:'https://doi.org/10.1000/other',publicationId:'id-c'});
+ const selected=choose([first,duplicate,other],[],new Date('2026-11-16'));
+ const actual=selected.map(x=>x.candidate).filter(Boolean);
+ assert.equal(actual.length,2);
+ assert.equal(actual.filter(x=>x.source===same).length,1);
+});
