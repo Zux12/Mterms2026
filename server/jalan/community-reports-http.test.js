@@ -14,6 +14,10 @@ test('actual HTTP report API validates origins, JSON-only location, GPS, success
  const data={actor:'synthetic_actor_1234567890123',submissionId:'synthetic_submit_1234567890123',type:'rain',position:[101.687,3.139],heading:90,road:{key:'fixture-road',level:'0:surface'},accuracy:8,fixAt:Date.now()};
  let response=await send('/reports/submit',data);assert.equal(response.status,201);const event=(await response.json()).event;assert.equal(event.type,'rain');
  response=await send('/reports/nearby',{position:data.position});assert.equal(response.status,200);assert.equal((await response.json()).events[0].id,event.id);
+ const traffic=await send('/reports/submit',{...data,type:'traffic',trafficSeverity:'moderate'});
+ assert.equal(traffic.status,201);assert.equal((await traffic.json()).event.trafficSeverity,'moderate');
+ const nearby=await (await send('/reports/nearby',{position:data.position})).json();
+ assert.equal(nearby.events.find(e=>e.type==='traffic').trafficSeverity,'moderate');
  assert.equal((await send('/reports/submit',{...data,accuracy:200})).status,400);
  }finally{await new Promise(resolve=>server.close(resolve));}
 });

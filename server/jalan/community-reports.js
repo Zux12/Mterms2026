@@ -1,17 +1,28 @@
 'use strict';
 // Dedicated JALAN collections only. No location in request URLs or application logs.
 const crypto=require('node:crypto'),P=require('./report-policy');
-const publicEvent=e=>({id:e.id,type:e.type,position:e.position,heading:e.heading,road:e.road,createdAt:e.createdAt,updatedAt:e.updatedAt,expiresAt:e.expiresAt,contributors:Array.isArray(e.contributors)?e.contributors.length:e.contributors,active:e.active});
+const publicEvent=e=>({id:e.id,type:e.type,...(e.trafficSeverity?{trafficSeverity:e.trafficSeverity}:{}),position:e.position,heading:e.heading,road:e.road,createdAt:e.createdAt,updatedAt:e.updatedAt,expiresAt:e.expiresAt,contributors:Array.isArray(e.contributors)?e.contributors.length:e.contributors,active:e.active});
 function createService({repository,secret,now=Date.now,id=()=>crypto.randomUUID()}){
  const hash=value=>crypto.createHmac('sha256',secret).update(value).digest('hex');
  const token=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{20,80}$/.test(value);
  function validate(input){if(!P.types[input?.type]||!P.coord(input.position)||!Number.isFinite(input.accuracy)||input.accuracy<0||input.accuracy>35||!Number.isFinite(input.fixAt)||now()-input.fixAt>10000||input.fixAt-now()>5000||!token(input.actor)||!token(input.submissionId)||!(input.heading===null||P.heading(input.heading))||!(input.road===null||P.road(input.road)))throw Object.assign(Error('A fresh accurate location is required.'),{status:400});}
  async function change(key,fn){for(let attempt=0;attempt<8;attempt++){const record=await repository.get(key),revision=record?.revision??0;const events=(record?.events||[]).filter(e=>P.alive(e,now()));const result=fn(events);if(await repository.cas(key,revision,{events,revision:revision+1,expiresAt:new Date(Math.max(now()+60000,...events.map(e=>e.expiresAt)))}))return result;}throw Object.assign(Error('Please retry your report.'),{status:409});}
  return {
-  async submit(input){validate(input);const actor=hash(input.actor),key=hash(input.type+'|'+(input.road?input.road.key+'|'+input.road.level:'unmatched|'+actor+'|'+input.submissionId));
+  async submit(input){validate(input);
+   if(input.trafficSeverity!==undefined&&(input.type!=='traffic'||!P.trafficLevels.includes(input.trafficSeverity))){
+    throw Object.assign(Error('Invalid traffic severity.'),{status:400});
+   }
+   const actor=hash(input.actor),key=hash(input.type+'|'+(input.road?input.road.key+'|'+input.road.level:'unmatched|'+actor+'|'+input.submissionId));
    return change(key,events=>{let event=events.find(e=>e.submission===hash(input.actor+'|'+input.submissionId)||P.duplicate(e,input));const at=now();
-    if(event){if(!event.contributors.includes(actor)){if(event.contributors.length>=200)throw Object.assign(Error('Event contribution limit reached.'),{status:429});event.contributors.push(actor);event.updatedAt=at;event.expiresAt=at+P.types[event.type].minutes*60000;event.clears=[];}}
+    const newContributor=!event||!event.contributors.includes(actor);
+    if(event){if(newContributor){if(event.contributors.length>=200)throw Object.assign(Error('Event contribution limit reached.'),{status:429});event.contributors.push(actor);event.updatedAt=at;event.expiresAt=at+P.types[event.type].minutes*60000;event.clears=[];}}
     else{event={id:key+'.'+id(),submission:hash(input.actor+'|'+input.submissionId),type:input.type,position:input.position,heading:input.heading,road:input.road,createdAt:at,updatedAt:at,expiresAt:at+P.types[input.type].minutes*60000,contributors:[actor],responses:[],clears:[],active:true};if(events.length>=100)throw Object.assign(Error('Too many active events on this road.'),{status:429});events.push(event);}
+    // A retry cannot replace a newer assessment from a different contributor.
+    if(input.trafficSeverity&&(newContributor||!event.trafficSeverity)&&
+       input.fixAt>=(event.trafficSeverityAt||0)){
+     event.trafficSeverity=input.trafficSeverity;
+     event.trafficSeverityAt=input.fixAt;
+    }
     return {event:publicEvent(event),merged:event.contributors.length>1};});
   },
   async nearby(position){if(!P.coord(position))throw Object.assign(Error('Invalid location.'),{status:400});const events=await repository.nearby(position,now());return events.filter(e=>P.alive(e,now())&&P.distance(e.position,position)<=20000).slice(0,200).map(publicEvent);},
@@ -35,11 +46,11 @@ function createRouter({express,mongoose,env=process.env}){
   const rows=await Model.aggregate([
    {$match:{expiresAt:{$gt:new Date(at)}}},{$unwind:'$events'},
    {$match:{'events.active':true,'events.expiresAt':{$gt:at},'events.position.0':{$gte:position[0]-.25,$lte:position[0]+.25},'events.position.1':{$gte:position[1]-.2,$lte:position[1]+.2}}},
-   {$project:{_id:0,event:{id:'$events.id',type:'$events.type',position:'$events.position',heading:'$events.heading',road:'$events.road',createdAt:'$events.createdAt',updatedAt:'$events.updatedAt',expiresAt:'$events.expiresAt',active:'$events.active',contributors:{$size:'$events.contributors'}}}},{$limit:200}
+   {$project:{_id:0,event:{id:'$events.id',type:'$events.type',trafficSeverity:'$events.trafficSeverity',position:'$events.position',heading:'$events.heading',road:'$events.road',createdAt:'$events.createdAt',updatedAt:'$events.updatedAt',expiresAt:'$events.expiresAt',active:'$events.active',contributors:{$size:'$events.contributors'}}}},{$limit:200}
   ]);return rows.map(r=>r.event);
  }};
  router.use((req,res,next)=>{res.set('Cache-Control','no-store');if(req.query&&Object.keys(req.query).length)return res.status(400).json({error:'Use JSON body; location query parameters are not accepted.'});if(req.get('origin')&&!['https://zux12.github.io','https://mterms2026.com','https://www.mterms2026.com'].includes(req.get('origin')))return res.status(403).json({error:'Origin not allowed.'});next();});
- router.get('/health',(_req,res)=>res.json({ok:true,service:'jalan-community-reports',version:1}));
+ router.get('/health',(_req,res)=>res.json({ok:true,service:'jalan-community-reports',version:2}));
  router.use(express.json({limit:'12kb'}));
  router.use((req,res,next)=>{const at=Date.now();for(const [key,b]of buckets)if(b.until<=at)buckets.delete(key);const key=req.ip||'unknown',b=buckets.get(key)||{n:0,until:at+60000};if(buckets.size>=10000&&!buckets.has(key))return res.status(429).json({error:'Please try again shortly.'});buckets.set(key,b);if(++b.n>60)return res.status(429).json({error:'Please try again shortly.'});if(!env.JALAN_HASH_SECRET||env.JALAN_HASH_SECRET.length<32)return res.status(503).json({error:'Reporting service is not configured.'});if(Buffer.byteLength(JSON.stringify(req.body||{}))>12000)return res.status(413).json({error:'Report is too large.'});next();});
  const service=()=>createService({repository,secret:env.JALAN_HASH_SECRET});

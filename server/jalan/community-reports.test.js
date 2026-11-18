@@ -13,3 +13,19 @@ test('invalid, stale, inaccurate and future GPS cannot create reports',async()=>
 test('directional route projection rejects opposite carriageway and off-route reports',()=>{const line=[[101.68,3.139],[101.70,3.139]],e={position:[101.69,3.139],heading:90};assert.ok(P.routeMatch(e,line));assert.equal(P.routeMatch({...e,heading:270},line),null);assert.equal(P.routeMatch({...e,position:[101.69,3.14]},line),null);assert.ok(P.project(e.position,line).along>1000);});
 
 test('retry of an unmatched submission is idempotent without merging other users',async()=>{const s=setup(),input=s.input(1,{heading:null,road:null});const first=await s.api.submit(input),retry=await s.api.submit(input);assert.equal(first.event.id,retry.event.id);assert.equal((await s.api.nearby(input.position)).length,1);});
+
+test('traffic levels survive grouping, nearby reads and confirmation, including older ungraded reports',async()=>{
+ const s=setup(),report=(n,level)=>s.input(n,{type:'traffic',trafficSeverity:level});
+ const old=await s.api.submit(report(1,undefined));
+ assert.equal(old.event.trafficSeverity,undefined);
+ s.advance(100);const light=await s.api.submit(report(2,'light'));
+ assert.equal(light.event.id,old.event.id);assert.equal(light.event.trafficSeverity,'light');
+ s.advance(100);const heavy=await s.api.submit(report(3,'heavy'));
+ assert.equal(heavy.event.id,old.event.id);assert.equal(heavy.event.contributors,3);
+ await s.api.submit(report(2,'light'));
+ await s.api.submit(report(4,undefined));
+ assert.equal((await s.api.nearby(old.event.position))[0].trafficSeverity,'heavy');
+ assert.equal((await s.api.respond(s.response(old.event.id,5,'still'))).event.trafficSeverity,'heavy');
+ await assert.rejects(s.api.submit(report(5,'severe')),e=>e.status===400);
+ await assert.rejects(s.api.submit(s.input(6,{trafficSeverity:'light'})),e=>e.status===400);
+});
