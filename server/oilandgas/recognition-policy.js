@@ -32,8 +32,10 @@ function authorTokens(p) {
 function verifiedBylineAuthor(p, name) {
   return authorTokens(p).some(x=>normalizedName(x) === normalizedName(name));
 }
+const THRESHOLD_VERSION = 'directory-thresholds-v2-2026-11-18';
+const MINIMUM_SCORE = Object.freeze({'editors-pick':70,'industry-impact':60,'emerging-research':60});
 function thresholdFor(category) {
   if (!categories.includes(category)) throw new Error('Invalid category');
-  return category === 'editors-pick' ? 85 : 75;
+  return MINIMUM_SCORE[category];
 }
-module.exports = {categories,normalizedName,validHttpsUrl,publicationEligibility,authorTokens,verifiedBylineAuthor,thresholdFor};
+module.exports = {categories,normalizedName,validHttpsUrl,publicationEligibility,authorTokens,verifiedBylineAuthor,thresholdFor,THRESHOLD_VERSION,MINIMUM_SCORE};
