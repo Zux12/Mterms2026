@@ -49,11 +49,23 @@ function choose(candidates,history=[],at=new Date(),options={}){
  const verifiedOnly=options.verifiedOnly!==false;
  const remaining=candidates.filter(p=>!paperCooldown(p,history,now)&&
   (!verifiedOnly||eligibleReview(p)));
+ const identity=p=>sourceIdentity(p.source)||p.publicationId||p.kind+':'+p.reference;
  const used=new Set(),selectedAuthors=new Set();
+ const forced=options.forced||{},reserved=new Set(),pinned=new Map();
+ // Reserve all valid admin overrides first so an ordinary category cannot
+ // select a paper that a later category has been specifically assigned.
+ for(const category of categories){
+  const ref=String(forced[category]||'');
+  if(!ref)continue;
+  const p=remaining.find(x=>x.reference===ref&&(x.assessment?.total||0)>=thresholdFor(category));
+  if(!p||reserved.has(identity(p)))continue;
+  reserved.add(identity(p));pinned.set(category,p);
+ }
  const result=[];
  for(const category of categories){
   const threshold=thresholdFor(category);
-  const pool=remaining.filter(p=>!used.has(sourceIdentity(p.source)||p.publicationId||p.kind+':'+p.reference)&&
+  const forcedCandidate=pinned.get(category)||null;
+  const pool=remaining.filter(p=>!reserved.has(identity(p))&&!used.has(identity(p))&&
    (p.assessment?.total||0)>=threshold);
   const ranked=pool.map(p=>{
    const repeats=names(p.byline).some(n=>selectedAuthors.has(n));
@@ -69,12 +81,13 @@ function choose(candidates,history=[],at=new Date(),options={}){
     return Number(Boolean(y.p.malaysianAffiliationVerified))-Number(Boolean(x.p.malaysianAffiliationVerified));
    return y.score-x.score||String(x.p.reference).localeCompare(String(y.p.reference));
   });
-  const winner=ranked[0]?.p||null;
+  const winner=forcedCandidate||ranked[0]?.p||null;
   if(winner){
    used.add(sourceIdentity(winner.source)||winner.publicationId||winner.kind+':'+winner.reference);
    names(winner.byline).forEach(n=>selectedAuthors.add(n));
   }
   result.push({category,candidate:winner,minimumScore:threshold,
+   adminOverrideApplied:!!forcedCandidate,
    status:winner?'proposed':'no-qualified-reviewed-candidate'});
  }
  return result;
