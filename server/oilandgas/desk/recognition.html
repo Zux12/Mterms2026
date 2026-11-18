@@ -18,7 +18,7 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
 <div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or certificates are generated in this version. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
-<section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button></section>
+<section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button><div style="margin-top:18px"><button type="button" id="pause-recognition" style="background:#8f3b25">Emergency pause</button> <button type="button" id="resume-recognition" class="secondary">Resume programme</button><p id="pause-result" role="status" class="muted"></p></div></section>
 <section class="panel"><h2>Friday administrator briefing — 72 hours before publication</h2>
 <p class="muted">Proposed winners are prepared on Friday at 09:00 MYT for the following Monday at 09:00 MYT. Each category has a named proposed winner or a clear unfilled status. A separate branded HTML administrator email can be enabled with a configured recipient after production tests. Author emails remain OFF.</p>
 <p><strong>Next planned publication:</strong> <span id="friday-next">Checking…</span></p>
@@ -116,10 +116,12 @@ function message(s){$('notice').textContent=s}
 function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
 async function refresh(){
  try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
- $('activate').disabled=!status.activationEnabled;
+ $('pause-recognition').disabled=!!status.paused;
+ $('resume-recognition').disabled=!status.paused;
+ $('activate').disabled=!status.activationEnabled||!!status.paused;
  $('activate').textContent=status.activationEnabled?'Activate reviewed recognition — no emails':'Activation locked pending tests';
  $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Activation: '+(status.activationEnabled?'ENABLED':'LOCKED')+' · Emails: OFF'),
- node('p','Active recognitions: '+status.active.length));
+ node('p','Active recognitions: '+status.active.length+' · Administrator pause: '+(status.paused?'ON':'OFF')));
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
@@ -277,6 +279,22 @@ async function fridayBriefing(){
   $('friday-msg').textContent=data.status==='not-prepared'?'No Friday selection has been prepared for this upcoming week.':'Briefing state: '+data.status+' · Vacant categories: '+data.missing.length+'.';
  }catch(e){$('friday-msg').textContent=e.message}
 }
+$('pause-recognition').onclick=async()=>{
+ const reason=prompt('Reason for pausing automatic recognition?');
+ if(!reason)return;
+ if(!confirm('Pause all scheduled recognition selections and admin preview emails?'))return;
+ try{await api('pause',{reason,confirm:'PAUSE_RECOGNITION'});
+ $('pause-result').textContent='Programme paused. No new automatic recognition or Friday briefing will be issued until resumed.';
+ await refresh();
+ }catch(e){$('pause-result').textContent=e.message}
+};
+$('resume-recognition').onclick=async()=>{
+ if(!confirm('Resume the recognition scheduler once its launch flags are enabled? Author emails remain OFF.'))return;
+ try{await api('resume',{confirm:'RESUME_RECOGNITION'});
+ $('pause-result').textContent='Pause lifted. Production scheduling is still controlled by its separate deployment flags.';
+ await refresh();
+ }catch(e){$('pause-result').textContent=e.message}
+};
 $('friday-refresh').onclick=fridayBriefing;
 
 $('refresh').onclick=refresh;$('preview').onclick=preview;
