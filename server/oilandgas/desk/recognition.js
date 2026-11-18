@@ -10,6 +10,35 @@ async function api(path,body){
 }
 function message(s){$('notice').textContent=s}
 function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
+async function refreshMasterSwitch(){
+ const result=await api('activation-control');
+ const toggle=$('master-recognition-toggle'),gates=$('master-gates');
+ toggle.checked=!!result.enabled;
+ toggle.disabled=!result.readyToEnable&&!result.enabled;
+ gates.replaceChildren();
+ for(const item of result.requirements){
+  gates.append(node('p',(item.ok?'✓ ':'○ ')+item.label+(item.ok?' — satisfied':' — pending'),'muted'));
+ }
+ $('master-state').textContent=result.enabled?
+  'MASTER SWITCH ON. Author congratulations remain OFF.':
+  result.readyToEnable?'Master OFF. The programme can be enabled after your explicit confirmation. Author congratulations remain OFF.':
+  'Master OFF and locked. Required deployment testing or release flags are not yet completed.';
+}
+$('master-recognition-toggle').onchange=async enabled=>{
+ const toggle=$('master-recognition-toggle');
+ if(!confirm(enabled?
+  'Enable automatic weekly research recognition? This publishes qualifying winners on schedule but DOES NOT send author congratulations.':
+  'Disable future automatic research recognition cycles? Existing historic records remain.')){
+  toggle.checked=!enabled;return;
+ }
+ toggle.disabled=true;
+ try{
+  await api('activation-control',{enabled,
+   confirm:enabled?'ENABLE_WRRP_NO_AUTHOR_EMAILS':'DISABLE_WRRP'});
+  await refreshMasterSwitch();
+ }catch(e){$('master-state').textContent='Activation change was not applied: '+e.message;
+  await refreshMasterSwitch()}
+};
 async function refresh(){
  try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
  $('pause-recognition').disabled=!!status.paused;
@@ -21,7 +50,7 @@ async function refresh(){
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. Author recognition emails are disabled.');await certificates();await loadLetterTracking();await fridayBriefing();
+ message('Editor controls available. Author recognition emails are disabled.');await refreshMasterSwitch();await certificates();await loadLetterTracking();await fridayBriefing();
  }catch(e){message(e.message)}
 }
 async function preview(){
