@@ -166,3 +166,12 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 **Architecture consequence:** Existing `recognition-review.js` and `recognition-selector.js` currently depend on an OpenAI-produced `ai-full-paper-evidence-assessment` and `OIL_RECOGNITION_OPENAI_API_KEY`; they must be refactored before launch to use purely deterministic evidence assessment. The current gate is not yet compliant; do not claim the program is converted until changes and tests are complete. Keep email and recognition activation OFF.
 
 **Remaining decisions 2–8:** paper evidence/access policy; auto-publication vs editor release safeguards; weekly category vacancy; co-author letter issuance; authorized signatory/verification; withdrawal policy; back-catalogue launch scope. Discuss sequentially with the user, tracking each final approval.
+
+### Decision 2/8: Abstract and source evidence policy — LOCKED (18 November 2026)
+**User decision:** Use the publication abstract as the primary research-content input for rule-based recognition scoring. Do NOT require full-paper access for routine selection. Supplement abstract analysis with original publication/DOI metadata and integrity verification. Full-paper inspection is an exception when the abstract is insufficient or concerns arise.
+
+**Limits:** Abstracts may signal relevance, method, reported results, and potential impact, but cannot independently substantiate scientific novelty or actual deployed industry impact. Do not conflate claims with independently verified evidence or award maximum evidence/credibility points based only on strong abstract language. If source/integrity is unverified, hold recognition.
+
+**Engineering implications:** Remove the currently mandatory full-paper packet gate from `recognition-review.js`, `recognition-selector.js`, `recognition.js`, and editor form before enabling activation; implement deterministic abstract screening with explicit confidence/evidence levels. Keep full-paper evidence as optional escalation. Existing implementation still requires full-paper evidence and uses AI; migration remains pending. Emails and activation OFF.
+
+**Next:** Decision 3/8 — autonomous release policy vs administrator approval for winning papers.
