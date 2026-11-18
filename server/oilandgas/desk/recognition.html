@@ -24,6 +24,12 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p><strong>Next planned publication:</strong> <span id="friday-next">Checking…</span></p>
 <p><strong>Preview preparation:</strong> <span id="friday-time">Checking…</span></p>
 <p><strong>Admin email:</strong> <span id="friday-mail-status">Not configured</span></p>
+<div style="margin:16px 0;padding:14px;border:1px solid #e8ddc9;background:#fffaf1">
+<strong>Hostinger administrator email test</strong>
+<p class="muted">Send one clearly marked SMTP TEST to m.zurix@oilandgas.eu.com. This verifies Hostinger SMTP only. It does not issue awards or enable automated emails, and can be repeated no more than once every 10 minutes.</p>
+<button type="button" id="smtp-test" class="secondary">Send one test email to admin</button>
+<p id="smtp-test-result" role="status" class="muted"></p>
+</div>
 <p><button type="button" class="secondary" id="friday-refresh">Check Friday briefing</button> <a href="recognition/friday-preview/email-html" target="_blank" rel="noopener noreferrer">View styled email mockup ↗</a></p>
 <div id="friday-cards" class="grid"></div>
 <p id="friday-msg" class="muted" role="status"></p>
@@ -294,6 +300,18 @@ $('resume-recognition').onclick=async()=>{
  $('pause-result').textContent='Pause lifted. Production scheduling is still controlled by its separate deployment flags.';
  await refresh();
  }catch(e){$('pause-result').textContent=e.message}
+};
+$('smtp-test').onclick=async()=>{
+ if(!confirm('Send ONE Hostinger SMTP test email to m.zurix@oilandgas.eu.com? No author notification or awards will be issued.'))return;
+ const button=$('smtp-test');button.disabled=true;
+ $('smtp-test-result').textContent='Testing Hostinger SMTP connection and administrator delivery…';
+ try{
+  const result=await api('admin-email/test',{confirm:'SEND_ADMIN_SMTP_TEST'});
+  $('smtp-test-result').textContent=result.status==='smtp-accepted'?
+   'Hostinger SMTP accepted the test email. Please check the inbox and spam folder. This does not yet prove inbox delivery.':
+   'Result: '+result.status;
+ }catch(err){$('smtp-test-result').textContent='Test failed: '+err.message}
+ finally{button.disabled=false}
 };
 $('friday-refresh').onclick=fridayBriefing;
 
