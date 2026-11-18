@@ -238,3 +238,11 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - The message contained a synthetic test preview with all three categories unfilled; **this is not evidence the actual research selection evaluated the papers or found no winners**.
 - Mark one-off Hostinger SMTP administrator email test as PASSED at recipient/inbox level. No author congratulatory email was sent. Friday live alerts and automated weekly recognition remain OFF pending rule-only assessment migration and deployment authorization.
 - User has not approved Decision 6/8 yet.
+
+### Decision 6/8 — Editorial signatory and signature flourish (18 November 2026)
+- User approved signatory label **Oil & Gas Editorial Team** and expressly requested an elegant handwritten-style visual flourish similar to the previously approved A4 mockup.
+- Updated `Zux12/oilandgas-website/letter.html` with a decorative scalable SVG editorial flourish immediately above the typed `Oil & Gas Editorial Team` signatory. It is an **organizational design mark**, not a forged or purported wet signature of a particular human individual.
+- A4 portrait and justified body, wordmark, gold seal, unique reference and recognition verification remain unchanged. Embedded SVG is static and does not fetch external resources.
+- QR code generation and verification destination still need functional testing before calling the letter's QR verification complete; do not invent or link an unverified code.
+- Official author-recognition email delivery and automatic weekly activation remain OFF. Live website deployment and browser print fit require verification.
+- Next: Decision 7/8 — withdrawal/retraction response, then Decision 8/8 — launch scope/back-catalogue (assuming Decision 6's signing requirement accepted as locked).
