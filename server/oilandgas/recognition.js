@@ -10,6 +10,7 @@ const adminAlert=require('./recognition-admin-alert');
 const deterministic=require('./recognition-rules');
 const sourceVerifier=require('./recognition-source');
 const integrityMonitor=require('./recognition-integrity');
+const letterVerification=require('./recognition-letter-verification');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -207,8 +208,7 @@ publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  // This secondary gate protects against partial failure of mass revocation.
  const recognition=await db().collection('recognition_selections').findOne({_id:row.selectionId},
   {projection:{status:1,reference:1,withdrawnAt:1}});
- const status=row.status==='valid'&&['active','archived'].includes(recognition?.status)?'valid':
-  row.status==='withdrawn'||recognition?.status==='withdrawn'?'withdrawn':'invalid';
+ const status=letterVerification.currentLetterStatus(row,recognition);
  res.json({id:row._id,status,author:row.authorName,title:row.title,category:row.category,
   label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,
   recognitionId:row.selectionId,publicationReference:recognition?.reference||null,
