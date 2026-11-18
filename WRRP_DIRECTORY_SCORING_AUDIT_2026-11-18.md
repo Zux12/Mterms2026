@@ -64,3 +64,31 @@ There is also a policy tradeoff: fixed 15-point metadata completeness applies to
 - New explicit regression tests for generic oil/gas double counting, plural sensors, incidental "first", and unrelated "process".
 - **28/28 isolated source-evaluated tests passed** across rule engine, selector and weekly simulation. Full Node/GitHub CI and Heroku integration acceptance remain **unverified**.
 - No recognition, award, letter, SMTP email, author outreach, activation switch or MongoDB write was performed by this audit.
+
+## Authorized recalibration — 18 November 2026 (new controlling thresholds)
+The user instructed **"recalibrate"** after the live audit found that the previous 85/75 cutoffs did not align with the declared short-summary directory-only evidence standard.
+
+**Approved working thresholds, in code:**
+- **Research Editor's Pick: 70/100** (was 85).
+- **Industry Impact: 60/100** (was 75).
+- **Emerging Research: 60/100** (was 75).
+
+The same 100-point rubric and keyword dictionary remain unchanged by this threshold adjustment. The policy version is `directory-thresholds-v2-2026-11-18`, exported from `recognition-policy.js`.
+
+### Distribution based on fixed 124-record cohort, corrected keyword dictionary
+| Threshold scenario | Leading category at/above | Supporting category at/above |
+|---|---:|---:|
+| Former 85/75 | 0 | 2 |
+| 75/65 | 2 | 13 |
+| 72/62 | 2 | 19 |
+| **Adopted 70/60** | **6** | **29** |
+| 68/58 | 9 | 34 |
+| 65/55 | 13 | 51 |
+
+Eligibility counts are NOT actual approved winners. Shortlist candidates still require source/integrity clearance, no repeat paper/DOI, documented overrides, and a frozen Friday preview. The feature may remain empty when there is no qualified candidate, and the same paper cannot fill multiple weekly positions. The leading category remains 10 points more selective.
+
+**Rationale:** 70/60 leaves the programme selective while avoiding the mathematically impossible 85-point top category in the current 124-paper directory. It does not pretend that a keyword score constitutes independent scientific review. With fixed catalogue size and lifetime once-only awards, eventual empty weeks remain expected; this is not a guarantee of three winners each week.
+
+**Engineering changes:** `recognition-policy.js` exports versioned minimum-score mapping; `recognition.js` automatic source-screen uses the minimum of all category thresholds rather than a stale hardcoded 75. A frozen Friday preview and Monday cycle store threshold version and minima; Monday refuses stale/mismatched threshold/rubric drafts instead of changing standards after the admin preview. Regression tests were updated at the lower boundary and **34/34 isolated tests passed**, including policy, rule, selector and simulated cycle. This is NOT live end-to-end testing.
+
+**Safety:** Automatic awards, master activation and author congratulatory email remain disabled. No actual recognition, letter or administrative notification was sent.
