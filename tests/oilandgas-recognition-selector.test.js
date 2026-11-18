@@ -2,14 +2,14 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {choose,authorCooldown,paperCooldown,eligibleReview}=require('../server/oilandgas/recognition-selector');
-const base={kind:'publications',assessment:{mode:'ai-full-paper-evidence-assessment',fullPaperEvidenceReviewed:true,total:92,
+const base={kind:'publications',assessment:{mode:'rule-based-abstract',eligibleForEditorialReview:true,total:92,
  breakdown:{relevance:24,technical:18,practical:19,evidence:14,originality:8,timeliness:9},
- evidence:{bibliographyVerified:true,integrityCleared:true},readyForRecognition:true},
- reviewStatus:'approved',reviewRevisionMatches:true};
+ evidence:{abstractSourceVerified:true},readyForRecognition:false},
+ reviewStatus:'approved',reviewRevisionMatches:true,bibliographyVerified:true,integrityCleared:true};
 const p=(reference,byline,opts={})=>({...base,reference,byline,...opts});
 test('shortlist requires verified approved integrity reviews',()=>{
  const drafts=[p('a','A. Researcher',{reviewStatus:'pending-editorial-and-integrity-review'}),
- p('b','B. Researcher',{assessment:{...base.assessment,evidence:{bibliographyVerified:true,integrityCleared:false}}}),
+ p('b','B. Researcher',{integrityCleared:false}),
  p('c','C. Researcher',{reviewRevisionMatches:false})];
  assert.equal(choose(drafts,[],new Date('2026-11-16')).every(x=>!x.candidate),true);
  assert.equal(eligibleReview(drafts[0]),false);
