@@ -155,3 +155,14 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - The full-paper evidence packet currently requires editorial review/entry of source-backed methodological/findings information. Automatic safe full-text PDF extraction and independent document verification are NOT yet implemented; do not claim uploaded paper files are automatically analyzed end-to-end.
 - Source URL validity alone does not establish publisher availability or research integrity. Editors must inspect the paper and document credibility checks before granting shortlist approval.
 - True browser testing, Heroku deployment status, and full Node test suite execution remain to be verified.
+
+## PRE-DEPLOYMENT DECISION TRACKER — 18 November 2026
+
+### Decision 1/8: Recognition assessment architecture — LOCKED
+**User decision:** Rule-based ONLY, but program it to behave intelligently, with adaptive-looking multi-factor assessment and transparent, explainable decisions. This means NO generative AI, NO model API, and NO LLM in scoring, ranking or automatic selection. Do not present the system as actually performing AI or as understanding scientific merit through a model.
+
+**Design direction:** deterministic evidence/metadata extraction and checks; fixed weighted 100-point scorecard; verifiable research features (source status, methodology markers, quantitative results, operational relevance, limitations, novelty markers) with rule-based NLP/token/phrase extraction where useful; category-specific sorting, uniqueness by DOI/source, minimum thresholds, diversity preferences, written scoring rationale, admin override, integrity hold, and fail-closed behavior for weak or inaccessible evidence. Clear distinction between metadata heuristic signals and verified claims. Repeatable output for identical inputs and a versioned ruleset.
+
+**Architecture consequence:** Existing `recognition-review.js` and `recognition-selector.js` currently depend on an OpenAI-produced `ai-full-paper-evidence-assessment` and `OIL_RECOGNITION_OPENAI_API_KEY`; they must be refactored before launch to use purely deterministic evidence assessment. The current gate is not yet compliant; do not claim the program is converted until changes and tests are complete. Keep email and recognition activation OFF.
+
+**Remaining decisions 2–8:** paper evidence/access policy; auto-publication vs editor release safeguards; weekly category vacancy; co-author letter issuance; authorized signatory/verification; withdrawal policy; back-catalogue launch scope. Discuss sequentially with the user, tracking each final approval.
