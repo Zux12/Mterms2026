@@ -339,6 +339,52 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
 // Friday 09:00 MYT locks the NEXT Monday's proposed winners (72 hours ahead).
 // Drafts use only cleared reviews; the rule-only assessment migration must be
 // completed before the production activation flags can be enabled.
+// Bounded, restart-safe original abstract discovery. Nothing qualifies merely
+// because metadata is present: a complete Crossref abstract must pass the source gate.
+async function discoverSourceAbstracts({max=5,force=false}={}){
+ const now=new Date(),retryCutoff=new Date(now.getTime()-7*86400000);
+ const rows=await db().collection('publications')
+  .find({status:'published',publication:{$exists:true},
+   $or:[{'publication.abstract':{$exists:false}},
+    {'publication.abstractSourceVerified':{$ne:true}}]},
+   {projection:{reference:1,source:1,publication:1,publicationId:1,integrityStatus:1,publishedAt:1}})
+  .limit(10000).toArray();
+ const attempts=await db().collection('recognition_abstract_discovery').find({
+  _id:{$in:rows.map(x=>x.reference)}},{projection:{_id:1,attemptedAt:1}}).toArray();
+ const recent=new Map(attempts.map(x=>[x._id,x.attemptedAt]));
+ const targets=rows.filter(x=>force||!recent.has(x.reference)||
+  new Date(recent.get(x.reference))<retryCutoff).slice(0,Math.min(Math.max(1,max),10));
+ const outcomes=[];
+ for(const row of targets){
+  const paper=entry(row,'publications'),result=await sourceVerifier.crossrefAbstract(paper);
+  await db().collection('recognition_abstract_discovery').updateOne({_id:row.reference},
+   {$set:{attemptedAt:new Date(),status:result.status}}, {upsert:true});
+  if(result.status==='verified'){
+   const write=await db().collection('publications').updateOne({
+    _id:row._id,status:'published','publication.title':row.publication.title,
+    source:row.source,'publication.abstractSourceVerified':{$ne:true}},
+    {$set:{'publication.abstract':result.abstract,'publication.abstractSourceVerified':true,
+     'publication.abstractMetadataSource':result.source,
+     'publication.abstractVerificationMethod':'crossref-title-match',
+     'publication.abstractVerifiedAt':new Date()}});
+   if(write.modifiedCount){
+    await db().collection('recognition_rule_reviews').updateOne({_id:row.reference},
+     {$set:{status:'stale-reassessment-required',updatedAt:new Date()}});
+    await db().collection('recognition_audit').insertOne({action:'automatic-doi-abstract-verified',
+     reference:row.reference,source:result.source,createdAt:new Date(),emailEnabled:false});
+   }
+  }
+  outcomes.push({reference:row.reference,status:result.status});
+ }
+ return {attempted:outcomes.length,verified:outcomes.filter(x=>x.status==='verified').length,
+  results:outcomes,source:'Crossref',recognitionIssued:false,emailEnabled:false};
+}
+adminRouter.post('/rules/discover-batch',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='DISCOVER_NO_AWARDS')
+  return res.status(400).json({error:'Explicit abstract-only discovery confirmation required.'});
+ const results=await discoverSourceAbstracts({max:Math.min(10,Math.max(1,Number(req.body?.limit)||5))});
+ res.set('Cache-Control','private,no-store').json(results);
+}catch(e){next(e);}});
 async function prepareFridayPreview(start){
  const date=new Date(start),id=date.toISOString().slice(0,10);
  const rows=await reviewedShortlist();
@@ -861,6 +907,7 @@ async function scheduledTick(){
  try{
   await checkIntegrityNotices();
   if(await recognitionPaused())return;
+  await discoverSourceAbstracts({max:5});
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
   // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
