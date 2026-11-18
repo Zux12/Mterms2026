@@ -94,7 +94,7 @@ async function loadCandidateQueue(){
  }catch(err){$('candidate-status').textContent='Candidate queue unavailable: '+err.message}
 }
 async function loadRuleScores(){
- const body=$('rules-rows');body.replaceChildren();$('rules-status').textContent='Checking original abstract evidence…';
+ const body=$('rules-rows');body.replaceChildren();$('rules-status').textContent='Assessing available publication titles and summaries…';
  try{
   const data=await api('rules-scorecard'),totals={ready:0,pending:0};
   for(const p of data.items){
@@ -102,7 +102,7 @@ async function loadRuleScores(){
    if(ready)totals.ready++;else totals.pending++;
    const tr=document.createElement('tr');
    const vals=[p.title,assessment.total+'/100',
-    p.previouslyRecognized?'Previously recognized':assessment.eligibleForEditorialReview?'Original abstract verified':'Awaiting full original abstract'];
+    p.previouslyRecognized?'Previously recognized':assessment.eligibleForEditorialReview?'Directory fields complete':'Directory details incomplete'];
    for(const value of vals){const td=node('td',value);td.className='recognition-inline-7';tr.append(td)}
    const td=document.createElement('td'),details=document.createElement('details'),summary=node('summary','Explain scoring');
    details.append(summary);
@@ -113,7 +113,7 @@ async function loadRuleScores(){
    if(assessment.evidence.issues.length)details.append(node('p','Pending: '+assessment.evidence.issues.join(', '),'muted'));
    td.append(details);tr.append(td);body.append(tr);
   }
-  $('rules-status').textContent='Rubric '+data.rubricVersion+' · '+data.total+' published papers · '+totals.ready+' with enough abstract evidence · '+totals.pending+' pending/previously recognized. Read-only simulation; no authors emailed.';
+  $('rules-status').textContent='Rubric '+data.rubricVersion+' · '+data.total+' published papers · '+totals.ready+' eligible for directory scoring · '+totals.pending+' pending/previously recognized. Read-only simulation; no authors emailed.';
  }catch(e){$('rules-status').textContent='Rule simulation unavailable: '+e.message}
 }
 $('rules-discover-batch').onclick=async()=>{
@@ -146,7 +146,7 @@ $('rules-verify-form').onsubmit=async event=>{
  target.textContent='Validating supplied original abstract…';
  try{
   const result=await api('rules/verify-abstract',data);
-  target.textContent='Original abstract verified for scoring. Provisional score: '+result.score+'/100; no award or email issued.';
+  target.textContent='Optional original abstract saved. Directory-only recognition score: '+result.score+'/100; no award or email issued.';
   await loadRuleScores();await loadCandidateQueue();
  }catch(e){target.textContent=e.message}
 };
