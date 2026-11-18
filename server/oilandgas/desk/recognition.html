@@ -32,18 +32,18 @@
 </section>
 <section class="panel"><h2>Legacy provisional keyword discovery</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
 <section class="panel"><h2>Transparent keyword-rule assessment (no AI API)</h2>
-<p class="muted">The approved six-criterion scorecard evaluates complete original abstracts using fixed rules. Each score shows its matched terms and limitations. Papers with only brief directory summaries or without independently verifiable abstracts stay pending, not rejected for low scores. This is a private simulation; no awards or email are issued.</p>
+<p class="muted">The same six-criterion rubric now evaluates the publication title, short summary, topic, byline and original-source link already available in our directory. Each score shows the matching keywords and evidence. No complete abstract is required, and these scores are editorial indicators rather than scientific peer review. This is a private score preview; no awards or email are issued.</p>
 <p><button type="button" id="rules-refresh" class="secondary">Run rules assessment (read-only)</button></p>
 <p id="rules-status" role="status" class="muted">No simulation has been run.</p>
 <div class="recognition-inline-5"><table class="recognition-inline-6"><thead><tr>
 <th class="recognition-inline-7">Paper</th><th class="recognition-inline-7">Score</th><th class="recognition-inline-7">Evidence status</th><th class="recognition-inline-7">Details</th>
 </tr></thead><tbody id="rules-rows"></tbody></table></div>
-<h3>Back-catalogue abstract discovery</h3>
-<p class="muted">Check up to ten published DOI records at a time for a complete publisher-supplied Crossref abstract. A verified original title and sufficient abstract are required; unavailable abstracts remain pending. No scores become awards and no emails are sent.</p>
+<details><summary>Optional original-abstract research tools (not required for recognition scoring)</summary><h3>Back-catalogue abstract discovery</h3>
+<p class="muted">Check up to ten published DOI records at a time for a complete publisher-supplied Crossref abstract. This is an optional research enrichment tool. Abstract availability does not affect recognition scores. No scores become awards and no emails are sent.</p>
 <button type="button" id="rules-discover-batch" class="secondary">Check next five DOI abstracts</button>
 <p id="rules-discover-result" role="status" class="muted"></p>
 <h3>Retrieve original DOI abstract (admin only)</h3>
-<form id="rules-import-form"><label>Published paper reference<input name="reference" pattern="OG-P-[A-F0-9]{16}" required placeholder="OG-P-0123456789ABCDEF"></label>
+<form id="rules-import-form"><label>Published paper reference<input name="reference" pattern="OG-P-([A-F0-9]{16}|MY[A-F0-9]{8})" required placeholder="OG-P-0123456789ABCDEF"></label>
 <button type="submit" class="secondary">Verify/import Crossref abstract — no award</button></form>
 <p id="rules-import-result" role="status" class="muted"></p>
 <h3>Verify an original abstract manually</h3>
@@ -55,8 +55,8 @@
 <label><input type="checkbox" id="rules-verify-confirm" class="recognition-inline-8" required> I have compared this abstract against the original published source.</label>
 <button type="submit" class="secondary">Record verified abstract — no award</button></form>
 <p id="rules-verify-result" role="status" class="muted"></p>
-<h3>Source and research-integrity clearance</h3>
-<p class="muted">Required only after sufficient abstract evidence. An editor must provide a public HTTPS integrity-check reference and a documented rationale. Scoring never establishes scientific integrity by itself.</p>
+</details><h3>Source and research-integrity clearance</h3>
+<p class="muted">Independent of the keyword score, an editor can provide a source-integrity verification URL and documented rationale. Full abstracts are not required. Scoring never establishes scientific integrity by itself.</p>
 <form id="rules-approve-form">
 <label>Paper reference<input name="reference" required pattern="OG-P-[A-F0-9]{16}" placeholder="OG-P-0123456789ABCDEF"></label>
 <label>Integrity evidence URL<input type="url" name="integrityEvidenceUrl" required placeholder="https://publisher-or-doi-source/..."></label>
