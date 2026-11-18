@@ -354,15 +354,19 @@ adminRouter.get('/status',async(req,res,next)=>{try{
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
- res.json({scheduledStart:weekStart().toISOString(),emailEnabled:false,
-  scoring:'rule-based-directory',activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
-  items:(await applyOverrides(await shortlist())).map(x=>({...x,minimumScore:policy.thresholdFor(x.category),
-   passesThreshold:!!x.candidate&&x.candidate.assessment.total>=policy.thresholdFor(x.category)}))});
+ const items=await reviewedShortlist();
+ res.set('Cache-Control','private,no-store').json({
+  scheduledStart:adminAlert.plannedStart().toISOString(),emailEnabled:false,
+  scoring:deterministic.VERSION,
+  activationEnabled:(await activationSnapshot()).enabled,
+  items:items.map(item=>({...item,label:categories.find(x=>x.key===item.category)?.label,
+   passesThreshold:!!item.candidate&&item.candidate.assessment.total>=policy.thresholdFor(item.category)}))
+ });
 }catch(e){next(e);}});
 adminRouter.post('/override',async(req,res,next)=>{try{
  const {category,kind,reference,reason}=req.body||{};
  if(!categories.some(c=>c.key===category)||kind!=='publications'||
- typeof reference!=='string'||!/^OG-[AP]-[A-F0-9]{16}$/.test(reference)||
+ typeof reference!=='string'||!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference)||
  typeof reason!=='string'||reason.trim().length<5||reason.length>500)
  return res.status(400).json({error:'Category, published reference and reason are required.'});
  const record=await db().collection(kind).findOne({reference,status:'published',publication:{$exists:true}});
@@ -735,7 +739,7 @@ adminRouter.get('/history',async(req,res,next)=>{try{
 // It only makes complete verifiable DOI abstracts available to the deterministic scorer.
 adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Valid publication reference required.'});
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference))return res.status(400).json({error:'Valid publication reference required.'});
  const collection=db().collection('publications');
  const row=await collection.findOne({reference,status:'published',publication:{$exists:true}});
  if(!row)return res.status(404).json({error:'Published publication not found.'});
@@ -756,7 +760,7 @@ adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
  await db().collection('recognition_audit').insertOne({action:'doi-abstract-import',
   reference,metadataSource:result.source,createdAt:revisedAt,emailEnabled:false});
  res.json({ok:true,state:'original-abstract-verified',
-  words:deterministic.directoryAssessment(p).evidence.abstractWords,
+  words:result.abstract.trim().split(/\s+/).length,
   selectionActivated:false,emailsSent:false});
 }catch(e){next(e);}});
 // Editor can enter an original publisher/repository abstract if Crossref omits it.
@@ -765,7 +769,7 @@ adminRouter.post('/rules/verify-abstract',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
  const abstract=String(req.body?.abstract||'').trim();
  const evidenceUrl=String(req.body?.evidenceUrl||'').trim();
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
   abstract.length>16000||req.body?.confirm!=='ORIGINAL_ABSTRACT_VERIFIED')
   return res.status(400).json({error:'Reference, valid public HTTPS original abstract URL and explicit source verification confirmation required.'});
  const col=db().collection('publications');
@@ -793,7 +797,7 @@ adminRouter.post('/rules/approve',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
  const evidenceUrl=String(req.body?.integrityEvidenceUrl||'').trim();
  const rationale=String(req.body?.rationale||'').trim();
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
   rationale.length<30||rationale.length>1200||req.body?.confirm!=='SOURCE_INTEGRITY_CHECKED')
   return res.status(400).json({error:'Reference, HTTPS integrity evidence, detailed rationale (30–1200 characters), and confirmation required.'});
  const row=await db().collection('publications').findOne({reference,status:'published',publication:{$exists:true}});
@@ -849,7 +853,7 @@ adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
 }catch(err){next(err);}});
 adminRouter.post('/evidence',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Invalid reference.'});
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference))return res.status(400).json({error:'Invalid reference.'});
  const row=await db().collection('publications').findOne({
   reference,status:'published',publication:{$exists:true}
  },{projection:{reference:1,publication:1,source:1,publicationId:1,publishedAt:1,integrityStatus:1,retractionStatus:1}});
@@ -874,7 +878,7 @@ adminRouter.post('/evidence',async(req,res,next)=>{try{
 }catch(err){next(err);}});
 adminRouter.post('/review-paper',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Invalid paper reference'});
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference))return res.status(400).json({error:'Invalid paper reference'});
  const record=await db().collection('publications').findOne({
   reference,status:'published',publication:{$exists:true}
  },{projection:{reference:1,publication:1,source:1,publishedAt:1,publicationId:1,integrityStatus:1,retractionStatus:1}});
@@ -909,7 +913,7 @@ adminRouter.post('/review-approve',async(req,res,next)=>{try{
  const evidenceUrl=String(req.body?.evidenceUrl||'').trim();
  const rationale=String(req.body?.rationale||'').trim();
  const confirmation=req.body?.confirmation;
- if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+ if(!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
   rationale.length<30||rationale.length>1200||confirmation!=='INTEGRITY_CHECKED')
   return res.status(400).json({error:'Provide a valid reference, public HTTPS evidence URL, detailed rationale (30–1200 characters), and explicit integrity-check confirmation.'});
  const record=await db().collection('publications').findOne({reference,status:'published',publication:{$exists:true}},
