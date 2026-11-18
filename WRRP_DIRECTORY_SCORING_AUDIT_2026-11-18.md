@@ -40,7 +40,7 @@
 |---|---|---|---:|
 | 1= | Processing Capability Improvement Through Parameter Optimization of a Sludge Drying Plant | OG-P-463438DD9AA7645C | 75 |
 | 1= | Parameter Optimization of a Sludge Drying Plant for Processing Capability Improvement | OG-P-CE060BA9E0C7BD8F | 75 |
-| 3 | Energy Optimisation and Management System for Smart Buildings with IoT and Support Vector Regression-Based Predictive Modelling | existing published directory | 71 |
+| 3 | Energy Optimisation and Management System for Smart Buildings with IoT and Support Vector Regression-Based Predictive Modelling | OG-P-47A964319ED21BBF | 71 |
 | 4= | Novel Approach of Tackling Wax Deposition Problems in Pipeline Using Enzymatic Degradation Process: Challenges and Potential Solutions | OG-P-1812BDAADA762B91 | 70 |
 | 4= | Cost Effective Sludge Management Through Processing Capability Improvement of a Sludge Drying Plant | OG-P-56DE87CBBA73D667 | 70 |
 | 4= | STRENGTH DEVELOPMENT OF EPOXY GROUTS FOR PIPELINE REHABILITATION | OG-P-MYCBC2EF58 | 70 |
