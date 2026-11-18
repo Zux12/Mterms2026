@@ -16,10 +16,20 @@ function authorCooldown(candidate,history,now,days=84){
 }
 // Lifetime exclusion: once recognized in ANY category, a paper never qualifies again.
 // Stable publicationId takes priority; reference remains a fallback for older records.
+function sourceIdentity(source){
+ try{const u=new URL(String(source||''));if(u.protocol!=='https:')return '';
+  const host=u.hostname.toLowerCase().replace(/^www\./,'');
+  const path=decodeURIComponent(u.pathname).replace(/\/$/,'').toLowerCase();
+  if(host==='doi.org'||host==='dx.doi.org')return 'doi:'+path;
+  return host+path;
+ }catch{return ''}
+}
 function paperCooldown(candidate,history){
+ const source=sourceIdentity(candidate.source);
  return history.some(h=>h.kind===candidate.kind &&
   (h.reference===candidate.reference ||
-   (candidate.publicationId && h.publicationId && candidate.publicationId===h.publicationId)));
+   (candidate.publicationId && h.publicationId && candidate.publicationId===h.publicationId) ||
+   (source && source===sourceIdentity(h.source))));
 }
 function categoryScore(p,category){
  const b=p.assessment?.breakdown||{};
@@ -68,4 +78,4 @@ function choose(candidates,history=[],at=new Date(),options={}){
  }
  return result;
 }
-module.exports={choose,names,authorCooldown,paperCooldown,categoryScore,eligibleReview};
+module.exports={choose,names,authorCooldown,paperCooldown,sourceIdentity,categoryScore,eligibleReview};
