@@ -207,11 +207,17 @@ publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  // A letter is valid only while its parent recognition is active/archived.
  // This secondary gate protects against partial failure of mass revocation.
  const recognition=await db().collection('recognition_selections').findOne({_id:row.selectionId},
-  {projection:{status:1,reference:1,withdrawnAt:1}});
+  {projection:{status:1,reference:1,withdrawnAt:1,withdrawalReason:1,integrityEvidenceUrl:1}});
  const status=letterVerification.currentLetterStatus(row,recognition);
  res.json({id:row._id,status,author:row.authorName,title:row.title,category:row.category,
   label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,
   recognitionId:row.selectionId,publicationReference:recognition?.reference||null,
+  originallyRecognizedAt:row.start||null,
+  integrityNotice:status==='recognized-with-notice'?{
+   recordedAt:recognition?.withdrawnAt||row.withdrawnAt||null,
+   reason:String(recognition?.withdrawalReason||'A subsequent editorial integrity notice is recorded.'),
+   evidenceUrl:policy.validHttpsUrl(recognition?.integrityEvidenceUrl)?recognition.integrityEvidenceUrl:null
+  }:null,
   note:row.note||'',verifiedAt:new Date().toISOString()});
 }catch(e){next(e);}});
 // A unique opaque link identifies a recognition letter recipient without exposing email.
