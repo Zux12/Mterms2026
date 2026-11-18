@@ -2,6 +2,12 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.JalanReportModel=factory();})(typeof window==='object'?window:globalThis,()=>{
  'use strict';
  const types=Object.freeze(Object.assign(Object.create(null),{traffic:{label:'Traffic',icon:'🚗',minutes:15},accident:{label:'Accident',icon:'💥',minutes:60},roadworks:{label:'Roadworks',icon:'🚧',minutes:240},closure:{label:'Road closed',icon:'⛔',minutes:120},hazard:{label:'Hazard',icon:'⚠️',minutes:30},police:{label:'Police',icon:'👮',minutes:30},rain:{label:'Heavy rain',icon:'🌧️',minutes:30},flood:{label:'Flooding',icon:'🌊',minutes:120},visibility:{label:'Poor visibility',icon:'🌫️',minutes:30}}));
+ const trafficLevels=Object.freeze(['light','moderate','heavy']);
+ function reportLabel(type,severity){
+  if(type!=='traffic')return types[type]?.label||'Road event';
+  if(!trafficLevels.includes(severity))return 'Traffic Jam · severity unknown';
+  return severity[0].toUpperCase()+severity.slice(1)+' Traffic Jam';
+ }
  const coord=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90;
  const heading=h=>typeof h==='number'&&Number.isFinite(h)&&h>=0&&h<360;
  const delta=(a,b)=>Math.abs(((a-b+540)%360)-180);
@@ -20,5 +26,5 @@
  const duplicate=(a,b)=>a.type===b.type&&sameRoad(a.road,b.road)&&heading(a.heading)&&heading(b.heading)&&delta(a.heading,b.heading)<=30&&distance(a.position,b.position)<=100;
  const alive=(event,now=Date.now())=>event&&event.active!==false&&Number.isFinite(event.expiresAt)&&event.expiresAt>now;
  function routeMatch(event,line){const p=project(event.position,line);return p&&p.offset<=25&&heading(event.heading)&&delta(p.heading,event.heading)<=40?p:null;}
- return {types,coord,heading,delta,distance,bearing,project,road,sameRoad,duplicate,alive,routeMatch};
+ return {types,trafficLevels,reportLabel,coord,heading,delta,distance,bearing,project,road,sameRoad,duplicate,alive,routeMatch};
 });
