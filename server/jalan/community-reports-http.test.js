@@ -11,7 +11,7 @@ test('actual HTTP report API validates origins, JSON-only location, GPS, success
  try{assert.equal((await fetch(base+'/reports/health')).status,200);
  assert.equal((await send('/reports/nearby?lat=3',{})).status,400);assert.equal((await send('/reports/nearby',{position:[101.687,3.139]},'https://other.invalid')).status,403);
  assert.equal((await send('/disabled/submit',{})).status,503);assert.equal((await send('/reports/submit',{text:'x'.repeat(13000)})).status,413);
- const data={actor:'synthetic_actor_1234567890123',type:'rain',position:[101.687,3.139],heading:90,road:{key:'fixture-road',level:'0:surface'},accuracy:8,fixAt:Date.now()};
+ const data={actor:'synthetic_actor_1234567890123',submissionId:'synthetic_submit_1234567890123',type:'rain',position:[101.687,3.139],heading:90,road:{key:'fixture-road',level:'0:surface'},accuracy:8,fixAt:Date.now()};
  let response=await send('/reports/submit',data);assert.equal(response.status,201);const event=(await response.json()).event;assert.equal(event.type,'rain');
  response=await send('/reports/nearby',{position:data.position});assert.equal(response.status,200);assert.equal((await response.json()).events[0].id,event.id);
  assert.equal((await send('/reports/submit',{...data,accuracy:200})).status,400);
