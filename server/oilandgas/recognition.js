@@ -5,6 +5,7 @@ const mongoose=require('mongoose');
 const crypto=require('crypto');
 const policy=require('./recognition-policy');
 const selector=require('./recognition-selector');
+const fullText=require('./recognition-evidence');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -318,6 +319,56 @@ adminRouter.get('/history',async(req,res,next)=>{try{
 }catch(e){next(e);}});
 // AI metadata assessment is read-only and invoked by an authenticated editor.
 // It cannot activate selections, issue certificates, modify database records or email authors.
+// Published research enters the consideration pool automatically; no separate award
+// application is required. This queue is read-only and does not itself score or award.
+adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
+ const published=await candidates();
+ const refs=published.map(p=>p.reference);
+ const [evidence,reviews,history]=await Promise.all([
+  db().collection('recognition_evidence').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
+  db().collection('recognition_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
+  db().collection('recognition_selections').find({}, {projection:{reference:1,publicationId:1,kind:1}}).toArray()
+ ]);
+ const evidMap=new Map(evidence.map(x=>[x.reference,x])),
+       reviewMap=new Map(reviews.map(x=>[x.reference,x]));
+ const items=published.map(p=>{
+  const prior=history.some(h=>h.kind===p.kind&&(h.reference===p.reference||
+   (h.publicationId&&p.publicationId&&h.publicationId===p.publicationId)));
+  const rev=reviewRevision(p),e=evidMap.get(p.reference),r=reviewMap.get(p.reference);
+  const status=prior?'recognized-once':!e||e.revision!==rev?'full-paper-evidence-needed':
+   !r||r.revision!==rev?'ai-assessment-needed':r.status==='approved'?'ready-for-shortlist':
+   'editorial-integrity-review-needed';
+  return {reference:p.reference,title:p.title,publishedAt:p.publishedAt,status,
+   publicationId:p.publicationId};
+ });
+ res.set('Cache-Control','private,no-store').json({items,total:items.length,
+  emailEnabled:false,manualAwardApplicationRequired:false});
+}catch(err){next(err);}});
+adminRouter.post('/evidence',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Invalid reference.'});
+ const row=await db().collection('publications').findOne({
+  reference,status:'published',publication:{$exists:true}
+ },{projection:{reference:1,publication:1,source:1,publicationId:1,publishedAt:1,integrityStatus:1,retractionStatus:1}});
+ if(!row)return res.status(404).json({error:'Published publication not found.'});
+ const p=entry(row,'publications');
+ const eligibility=policy.publicationEligibility(p);
+ if(!eligibility.eligible)return res.status(422).json({error:'Publication is ineligible.',reasons:eligibility.reasons});
+ const evidence=fullText.validatePacket(req.body);
+ if(!evidence.valid)return res.status(400).json({error:'Complete all source-verified evidence fields.',issues:evidence.issues});
+ const revision=reviewRevision(p),now=new Date();
+ // Revision-bound evidence makes every subsequent publication edit invalidate its
+ // eligibility. Old AI reviews cannot survive an updated research paper.
+ await db().collection('recognition_evidence').updateOne({_id:reference},{
+  $set:{reference,revision,packet:evidence.packet,status:'verified',verifiedAt:now}
+ },{upsert:true});
+ await db().collection('recognition_reviews').updateOne({_id:reference},{$set:{
+  status:'stale-reassessment-required',updatedAt:now}});
+ await db().collection('recognition_audit').insertOne({
+  action:'research-evidence-recorded',reference,createdAt:now,emailEnabled:false});
+ res.json({ok:true,state:'evidence-recorded',assessmentRequired:true,
+  recognitionActivated:false,emailEnabled:false});
+}catch(err){next(err);}});
 adminRouter.post('/review-paper',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
  if(!/^OG-P-[A-F0-9]{16}$/.test(reference))return res.status(400).json({error:'Invalid paper reference'});
@@ -327,12 +378,13 @@ adminRouter.post('/review-paper',async(req,res,next)=>{try{
  if(!record)return res.status(404).json({error:'Published paper not found'});
  const paper=entry(record,'publications'),eligibility=policy.publicationEligibility(paper);
  if(!eligibility.eligible)return res.status(422).json({error:'Paper ineligible',reasons:eligibility.reasons});
- const result=await require('./recognition-review').review(paper);
+ const revision=reviewRevision(paper);
+ const evidence=await db().collection('recognition_evidence').findOne({_id:reference,revision,status:'verified'});
+ if(!fullText.availableEvidence(evidence,revision))
+  return res.status(409).json({error:'Source-verified full-paper methodology, findings, limitations and practical implications are required before AI assessment.',state:'evidence_required'});
+ const result=await require('./recognition-review').review(paper,{fullPaperPacket:evidence.packet});
  if(result.state==='reviewed'){
-  const revision=crypto.createHash('sha256').update(JSON.stringify({
-   reference:paper.reference,publicationId:paper.publicationId,
-   title:paper.title,summary:paper.summary,source:paper.source
-  })).digest('hex');
+  // Existing revision is computed before AI assessment to bind evidence to the same record.
   await db().collection('recognition_reviews').updateOne({_id:paper.reference},{
    $set:{reference:paper.reference,publicationId:paper.publicationId,
     revision,assessment:result.assessment,
@@ -365,7 +417,9 @@ adminRouter.post('/review-approve',async(req,res,next)=>{try{
  const review=await db().collection('recognition_reviews').findOne({_id:reference});
  if(!review||review.status==='approved')return res.status(409).json({error:'A pending, unapproved AI evidence review is required.'});
  if(review.revision!==reviewRevision(paper)||review.metadata?.state!=='found'||
-  !review.assessment?.evidence?.bibliographyVerified)
+  !review.assessment?.evidence?.bibliographyVerified||
+  review.assessment?.mode!=='ai-full-paper-evidence-assessment'||
+  review.assessment?.fullPaperEvidenceReviewed!==true)
   return res.status(409).json({error:'Bibliographic verification missing or publication has changed; repeat the evidence review.'});
  if(review.assessment.total<75)return res.status(409).json({error:'Assessment below minimum recognition threshold.'});
  const now=new Date();
