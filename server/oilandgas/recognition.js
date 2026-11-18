@@ -409,7 +409,7 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
 async function autoScreenSourceVerifiedCandidates({max=5}={}){
  const papers=await candidates();
  const eligible=papers.map(p=>({...p,assessment:deterministic.directoryAssessment(p)}))
-  .filter(p=>p.assessment.eligibleForEditorialReview&&p.assessment.total>=75);
+  .filter(p=>p.assessment.eligibleForEditorialReview&&p.assessment.total>=Math.min(...policy.categories.map(policy.thresholdFor)));
  const reviewed=await db().collection('recognition_rule_reviews')
   .find({reference:{$in:eligible.map(p=>p.reference)}}).toArray();
  const byRef=new Map(reviewed.map(x=>[x.reference,x]));
@@ -514,6 +514,8 @@ async function prepareFridayPreview(start){
  });
  const now=new Date(),record={_id:id,start:date,previewAt:adminAlert.previewAt(date),
   preparedAt:now,status:'prepared',items:plans,
+  assessmentVersion:deterministic.VERSION,thresholdVersion:policy.THRESHOLD_VERSION,
+  minimumScores:policy.MINIMUM_SCORE,
   missing:plans.filter(x=>!x.candidate).map(x=>x.category),emailStatus:'not-configured'};
  await db().collection('recognition_previews').updateOne({_id:id},{$setOnInsert:record},{upsert:true});
  return db().collection('recognition_previews').findOne({_id:id});
@@ -647,6 +649,8 @@ async function activateCycle(){
  const saved=await db().collection('recognition_previews').findOne({_id:cycleId,status:'prepared'});
  if(!saved||new Date(saved.preparedAt)>start)
   throw Object.assign(new Error('Friday preview missing. Recognition cannot publish without a 72-hour-ahead draft.'),{status:409});
+ if(saved.thresholdVersion!==policy.THRESHOLD_VERSION||saved.assessmentVersion!==deterministic.VERSION)
+  throw Object.assign(new Error('Frozen Friday shortlist uses a different scoring or threshold version; do not silently republish under changed criteria.'),{status:409});
  // Revalidate the EXACT Friday shortlist at publication, not a newly ranked
  // Monday shortlist; new papers must wait until the following cycle.
  const all=await candidates();
@@ -683,7 +687,8 @@ async function activateCycle(){
     throw Object.assign(new Error('Weekly cycle already exists; review before retrying.'),{status:409});
    const now=new Date();
    await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
-    selectionMode:'rules-directory-v3-approved',emailsEnabled:false,createdAt:now},{session});
+    selectionMode:'rules-directory-v3-approved',thresholdVersion:policy.THRESHOLD_VERSION,
+    minimumScores:policy.MINIMUM_SCORE,emailsEnabled:false,createdAt:now},{session});
    await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
    const awardable=proposed.filter(row=>row.candidate);
    if(awardable.length)await selections.insertMany(awardable.map(row=>{
@@ -826,6 +831,7 @@ adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
   assessment:deterministic.directoryAssessment(p),
   previouslyRecognized:selector.paperCooldown(p,history)}));
  res.set('Cache-Control','private,no-store').json({rubricVersion:deterministic.VERSION,
+  thresholdVersion:policy.THRESHOLD_VERSION,minimumScores:policy.MINIMUM_SCORE,
   items,total:items.length,pending:items.filter(x=>!x.assessment.eligibleForEditorialReview).length,
   authorEmailsEnabled:false,simulationOnly:true});
 }catch(e){next(e);}});
