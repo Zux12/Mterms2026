@@ -15,7 +15,7 @@ async function refresh(){
  $('pause-recognition').disabled=!!status.paused;
  $('resume-recognition').disabled=!status.paused;
  $('activate').disabled=!status.activationEnabled||!!status.paused;
- $('activate').textContent=status.activationEnabled?'Activate reviewed recognition — no emails':'Activation locked pending tests';
+ $('activate').textContent=status.activationEnabled?'Activate verified rules recognition — no author emails':'Activation locked pending tests';
  $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Activation: '+(status.activationEnabled?'ENABLED':'LOCKED')+' · Emails: OFF'),
  node('p','Active recognitions: '+status.active.length+' · Administrator pause: '+(status.paused?'ON':'OFF')));
  $('overrides').replaceChildren(node('h3','Staged overrides'));
@@ -181,11 +181,11 @@ $('preview-reviewed').onclick=async()=>{
   for(const item of result.items){
    const article=node('article','','card');
    article.append(node('small',item.category),node('h3',item.candidate?.title||'No cleared candidate'),
-    node('p',item.candidate?('Reviewed score '+item.candidate.assessment.total+' / 100'):'Awaiting independent publication-integrity clearance','muted'));
+    node('p',item.candidate?('Reviewed score '+item.candidate.assessment.total+' / 100'):'Awaiting original abstract and source/integrity verification','muted'));
    target.append(article);
   }
   $('reviewed-note').textContent=result.items.filter(x=>x.candidate).length+
-    ' of 3 cleared selections. Activation remains locked during testing.';
+    ' of 3 categories have source-cleared candidates. Production activation remains locked during testing.';
  }catch(err){$('reviewed-note').textContent='Reviewed shortlist unavailable: '+err.message}
 };
 
