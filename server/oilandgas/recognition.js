@@ -63,7 +63,7 @@ async function candidates(){
  const out=[];
  for(const kind of ['publications']){
   const rows=await db().collection(kind).find({status:'published',publication:{$exists:true}},
-   {projection:{reference:1,publicationId:1,publication:1,source:1,publishedAt:1,authors:1,byline:1,integrityStatus:1,retractionStatus:1}}).limit(1500).toArray();
+   {projection:{reference:1,publicationId:1,publication:1,source:1,publishedAt:1,authors:1,byline:1,integrityStatus:1,retractionStatus:1}}).toArray();
   out.push(...rows.map(r=>entry(r,kind)).filter(p=>policy.publicationEligibility(p).eligible));
  }
  return out;
