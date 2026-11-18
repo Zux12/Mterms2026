@@ -391,3 +391,13 @@ User authorized reviewing real paper rankings and determining suitability of thr
 - Detailed auditable report: `WRRP_DIRECTORY_SCORING_AUDIT_2026-11-18.md` (top papers, matches, categories, score distribution, fairness corrections, and threshold recommendation).
 - **No threshold change authorized or deployed.** Leave vacancies rather than inflate scores; if the user later wants frequent winners under short metadata, openly discuss revised thresholds and consequences, not an invisible adjustment.
 - No database writes, awards, letters, author/admin emails or master activation. Existing release gates remain OFF.
+
+### Approved score-threshold recalibration — 18 November 2026
+- User directed recalibration of the directory-only WRRP system after actual top-paper review.
+- **New category minimums: Research Editor's Pick 70/100; Industry Impact 60/100; Emerging Research 60/100.** Previous limits 85/75/75 now superseded. **Weights and `keyword-directory-v3.0` phrase matching unchanged.**
+- Based on the fixed 124-paper live directory snapshot, 6 papers score >=70 and 29 score >=60. These are only *preliminary textual candidates*, not source-cleared winners. Alternative comparisons: 75/65 => 2/13; 72/62 => 2/19; 68/58 => 9/34.
+- In `recognition-policy.js`, introduced immutable `MINIMUM_SCORE` map and `THRESHOLD_VERSION='directory-thresholds-v2-2026-11-18'`. `recognition.js` guarded automated candidate metadata checks now use the minimum category threshold instead of previous hardcoded 75.
+- Frozen Friday preview saves source assessment and threshold versions, exact minimums; Monday activation fails closed if preview versions are stale. Cycle records the policy version so the historical editorial standard is traceable.
+- Updated selector, policy and weekly simulation boundary tests; **34/34 source-executed isolated tests passed** across core policy/scoring/selection/weekly simulation; backend JavaScript syntax passed. Full Node CI and real Heroku integration were not verified in this turn.
+- Audit appended to `WRRP_DIRECTORY_SCORING_AUDIT_2026-11-18.md`; do not misrepresent this as peer review.
+- **No real research award, letter, email, MongoDB write, configuration flag change or programme activation. Master OFF and author congratulations OFF.**
