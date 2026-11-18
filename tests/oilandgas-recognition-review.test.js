@@ -7,6 +7,11 @@ const paper={reference:'OG-P-1234567890ABCDEF',kind:'publications',
  title:'Novel pipeline integrity evaluation for offshore gas transport',
  summary:'Analysis of corrosion, measurements, risk and maintenance.',topic:'Reliability',
  byline:'A. Researcher, B. Engineer',source:'https://doi.org/10.1000/xyz123'};
+const fullPaperPacket={sourceReviewed:true,evidenceUrl:'https://doi.org/10.1000/xyz123',
+ methodology:'Controlled experimental methodology with calibrated measurements and comparison against baseline operations.',
+ results:'Measured corrosion loss against reference samples and evaluated the observed reliability improvement.',
+ limitations:'The paper reports limited operating conditions and restricted sample sizes requiring further field validation.',
+ industryImplications:'The findings may inform offshore pipeline inspection schedules subject to local operating constraints.'};
 const fixture={message:{title:[paper.title],publisher:'Example Publisher',
  author:[{given:'A.',family:'Researcher'}],published:{'date-parts':[[2025,4,1]]},type:'journal-article'}};
 test('DOI extracted only from recognized HTTPS DOI host',()=>{
@@ -20,7 +25,7 @@ test('bibliographic match is case insensitive but rejects unrelated titles',()=>
 });
 test('Crossref mismatch blocks rather than inventing a score',async()=>{
  const fetcher=async()=>({ok:true,json:async()=>({message:{...fixture.message,title:['Unrelated diagnostic methods for aircraft components']}})});
- const out=await review(paper,{apiKey:'test',fetcher,
+ const out=await review(paper,{apiKey:'test',fetcher,fullPaperPacket,
  client:{chat:{completions:{create:async()=>{throw Error('AI should never run for mismatched bibliographic record')}}}}});
  assert.equal(out.state,'blocked');
  assert.equal(out.emailEnabled,false);
@@ -31,7 +36,7 @@ test('AI assessment is bounded, lacks automatic recognition approval and never e
   scores:{relevance:20,technical:15,practical:16,evidence:10,originality:5,timeliness:7},
   confidence:'medium',reasoning:'Metadata suggests industrial relevance',limitations:['Full text not reviewed']
  })}}]})}}};
- const out=await review(paper,{apiKey:'unused-test',fetcher,client});
+ const out=await review(paper,{apiKey:'unused-test',fetcher,client,fullPaperPacket});
  assert.equal(out.state,'reviewed');
  assert.equal(out.assessment.total,73);
  assert.equal(out.assessment.readyForRecognition,false);
@@ -39,10 +44,16 @@ test('AI assessment is bounded, lacks automatic recognition approval and never e
  assert.equal(out.emailEnabled,false);
 });
 test('no API key does not return a fabricated AI evaluation',async()=>{
- const out=await review(paper,{apiKey:'',fetcher:async()=>({ok:true,json:async()=>fixture})});
+ const out=await review(paper,{apiKey:'',fullPaperPacket,fetcher:async()=>({ok:true,json:async()=>fixture})});
  assert.equal(out.state,'configuration_required');
  assert.ok(!out.assessment);
 });
 test('out-of-range AI score is rejected',()=>{
  assert.throws(()=>normalizeScore({relevance:26,technical:10,practical:10,evidence:10,originality:5,timeliness:5}));
+});
+
+test('title and abstract alone cannot qualify for AI assessment',async()=>{
+ const r=await review(paper,{apiKey:'test',fetcher:async()=>{throw Error('Evidence gate must run first')}});
+ assert.equal(r.state,'evidence_required');
+ assert.equal(r.emailEnabled,false);
 });
