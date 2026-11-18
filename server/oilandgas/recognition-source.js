@@ -2,7 +2,8 @@
 // DOI metadata and source abstract retrieval. Crossref is bibliographic evidence,
 // not scientific peer review or proof that a publication is free of retractions.
 const {validHttpsUrl}=require('./recognition-policy');
-const {titleMatch,doiFrom}=require('./recognition-review');
+function doiFrom(source){try{const u=new URL(source);if(u.protocol!=='https:'||!['doi.org','dx.doi.org'].includes(u.hostname.toLowerCase()))return '';const doi=decodeURIComponent(u.pathname.slice(1));return /^10\.\d{4,9}\/\S+$/i.test(doi)?doi:''}catch{return ''}}
+function titleMatch(a,b){const norm=x=>String(x||'').normalize('NFKC').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();const aa=norm(a),bb=norm(b);if(!aa||!bb)return false;if(aa===bb)return true;const x=new Set(aa.split(' ').filter(w=>w.length>=3)),y=new Set(bb.split(' ').filter(w=>w.length>=3));return [...x].filter(w=>y.has(w)).length/Math.max(x.size,y.size,1)>=0.78;}
 const abstractRules=require('./recognition-rules');
 function cleanMarkup(value){
  const str=String(value||'').slice(0,40000);
