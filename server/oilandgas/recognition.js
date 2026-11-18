@@ -366,6 +366,59 @@ async function sendFridayAdminAlert(preview){
   throw e;
  }
 }
+// Explicitly requested one-off administrative SMTP test, independent of recognition
+// scheduling. Authenticated Editor's Desk only; no author notifications or awards.
+// Global cooldown uses a single MongoDB record so repeated clicks cannot mail-spam.
+adminRouter.post('/admin-email/test',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='SEND_ADMIN_SMTP_TEST')
+  return res.status(400).json({error:'Explicit test confirmation required.'});
+ const user=String(process.env.OIL_RECOGNITION_SMTP_USER||'m.zurix@oilandgas.eu.com').trim();
+ const recipient='m.zurix@oilandgas.eu.com';
+ const password=process.env.OIL_RECOGNITION_SMTP_PASSWORD;
+ if(!password||user!==recipient)return res.status(409).json({
+  error:'Hostinger SMTP mailbox username/password have not been configured.',
+  emailSent:false,authorEmailsEnabled:false});
+ const port=Number(process.env.OIL_RECOGNITION_SMTP_PORT||465);
+ if(![465,587].includes(port))return res.status(409).json({error:'Invalid configured SMTP port.'});
+ const attemptId=crypto.randomUUID(),now=new Date(),cutoff=new Date(now.getTime()-10*60000);
+ const claims=db().collection('recognition_admin_test_email');
+ await claims.updateOne({_id:'single-recipient'},{$setOnInsert:{createdAt:now}},{upsert:true});
+ const claim=await claims.findOneAndUpdate({_id:'single-recipient',
+  $or:[{lastAttemptAt:{$exists:false}},{lastAttemptAt:{$lte:cutoff}}]},
+  {$set:{lastAttemptAt:now,lastAttemptId:attemptId,status:'attempted'}},
+  {returnDocument:'after'});
+ if(!claim)return res.status(429).json({error:'A test has already been attempted in the past 10 minutes; avoid duplicate messages.'});
+ const smtp=require('nodemailer').createTransport({host:'smtp.hostinger.com',
+  port,secure:port===465,requireTLS:port===587,
+  auth:{user,pass:password},connectionTimeout:10000,socketTimeout:20000});
+ const body=adminAlert.mailContents({start:adminAlert.plannedStart(now),items:categories.map(cat=>({
+  category:cat.key,candidate:null
+ }))});
+ const html=body.html.replace('PRIVATE EDITORIAL NOTICE • FRIDAY PREVIEW',
+  'SMTP TEST ONLY • NO REAL WINNERS');
+ const textBody='SMTP TEST ONLY — no research has been selected.\n'+
+  'This verifies the Hostinger administrator email transport. No author emails or recognition were issued.\n\n'+body.text;
+ try{
+  await smtp.verify();
+  const result=await smtp.sendMail({from:{name:'Oil & Gas Research Recognition',address:user},
+   to:recipient,subject:'[SMTP TEST — NO AWARDS] Oil & Gas WRRP Administrator Email',
+   html,text:textBody,
+   headers:{'X-OilAndGas-Test':'recognition-admin-smtp'}});
+  if(!result.accepted?.includes(recipient))throw Error('SMTP did not accept administrator recipient');
+  await claims.updateOne({_id:'single-recipient',lastAttemptId:attemptId},
+   {$set:{status:'smtp-accepted',acceptedAt:new Date(),lastError:null}});
+  await db().collection('recognition_audit').insertOne({action:'admin-email-test-smtp-accepted',
+   createdAt:new Date(),emailEnabled:false,adminRecipient:recipient});
+  res.json({ok:true,status:'smtp-accepted',recipient,
+   note:'Hostinger SMTP accepted the message. Inbox delivery still requires recipient confirmation.',
+   authorEmailsEnabled:false,recognitionActivated:false});
+ }catch(error){
+  await claims.updateOne({_id:'single-recipient',lastAttemptId:attemptId},
+   {$set:{status:'failed',failedAt:new Date(),lastErrorCode:String(error.code||'smtp-error').slice(0,50)}});
+  res.status(503).json({ok:false,status:'failed',error:
+   'Hostinger SMTP test failed. Check mailbox credential, SMTP connectivity and server logs. No author email was sent.'});
+ }
+}catch(error){next(error);}});
 adminRouter.get('/friday-preview',async(req,res,next)=>{try{
  const start=adminAlert.plannedStart();
  const id=start.toISOString().slice(0,10);
