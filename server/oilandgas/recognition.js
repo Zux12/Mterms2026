@@ -255,6 +255,8 @@ adminRouter.get('/status',async(req,res,next)=>{try{
  res.json({programme:'WRRP-001',schedulerEnabled:process.env.OIL_RECOGNITION_AUTO==='true',
   emailEnabled:false,certificateIssuanceEnabled:true,activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
   adminAlertEnabled:process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
+  adminRecipient:'m.zurix@oilandgas.eu.com',
+  smtpConfigured:!!process.env.OIL_RECOGNITION_SMTP_PASSWORD,
   rulesEngineReady:process.env.OIL_RECOGNITION_RULES_READY==='true',paused,
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
@@ -328,24 +330,29 @@ async function prepareFridayPreview(start){
 // Friday email is a distinct, admin-only notification. Never linked to author
 // notification settings. Only sends when a recipient and explicit alert flag exist.
 async function sendFridayAdminAlert(preview){
- const to=String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'').trim();
+ const to=String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'m.zurix@oilandgas.eu.com').trim();
  if(process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED!=='true')return {state:'disabled'};
  if(!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to))return {state:'unconfigured-recipient'};
- if(!process.env.OIL_ARTICLE_RESEND_KEY)return {state:'unconfigured-smtp'};
+ // Hostinger mailbox password stays in the hosting environment, never in Git.
+ const user=String(process.env.OIL_RECOGNITION_SMTP_USER||'m.zurix@oilandgas.eu.com').trim();
+ const password=process.env.OIL_RECOGNITION_SMTP_PASSWORD;
+ if(!password||user!==to)return {state:'unconfigured-smtp'};
  const current=await db().collection('recognition_previews').findOneAndUpdate(
   {_id:preview._id,emailStatus:{$in:['not-configured','retry','disabled']}},
   {$set:{emailStatus:'sending',emailClaimedAt:new Date()}},{returnDocument:'after'});
  if(!current)return {state:'already-claimed'};
  try{
   const mailer=require('nodemailer');
-  const transport=mailer.createTransport({host:'smtp.resend.com',port:465,secure:true,
-   auth:{user:'resend',pass:process.env.OIL_ARTICLE_RESEND_KEY},
+  const port=Number(process.env.OIL_RECOGNITION_SMTP_PORT||465);
+  if(![465,587].includes(port))throw Error('Invalid Hostinger SMTP port configuration');
+  const transport=mailer.createTransport({host:'smtp.hostinger.com',port,secure:port===465,
+   requireTLS:port===587,auth:{user,pass:password},
    connectionTimeout:10000,socketTimeout:20000});
   const body=adminAlert.mailContents({start:preview.start,
    items:preview.items.map(row=>({...row,candidate:row.candidate?{
     ...row.candidate,assessment:row.candidate.score}:null}))});
   const sent=await transport.sendMail({
-   from:'Oil & Gas Editorial <receipts@updates.oilandgas.eu.com>',
+   from:{name:'Oil & Gas Research Recognition',address:user},
    to,subject:body.subject,html:body.html,text:body.text,
    headers:{'Resend-Idempotency-Key':'wrrp-admin-preview-'+preview._id}
   });
@@ -368,7 +375,7 @@ adminRouter.get('/friday-preview',async(req,res,next)=>{try{
   status:preview?.status||'not-prepared',missing:preview?.missing||[],
   emailStatus:preview?.emailStatus||'not-configured',adminAlertEnabled:
   process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
-  adminRecipientConfigured:/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'')),
+  adminRecipientConfigured:/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'m.zurix@oilandgas.eu.com')),
   items:preview?.items||[],authorEmailsEnabled:false});
 }catch(e){next(e);}});
 adminRouter.get('/friday-preview/email-html',async(req,res,next)=>{try{
