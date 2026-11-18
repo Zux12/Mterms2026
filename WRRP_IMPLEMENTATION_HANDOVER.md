@@ -276,3 +276,14 @@ Policy decisions: 8/8 locked, but NOT production ready yet.
 
 ### Decision 8 catalogue scope code adjustment — 18 November 2026
 - Removed the preexisting `.limit(1500)` from `recognition.js` published-paper candidate query so no arbitrary 1,500-item cap excludes older published papers. Syntax checks on recognition backend, selector, reviewer and editor JS passed. Full-load database performance/pagination testing remains pending; do not call this production-ready.
+
+### Legacy OpenAI assessment runtime evaluation — 18 November 2026
+User requested a firm functional verdict about whether the OLD GPT-4.1-mini recognition reviewer can still be used.
+- Reopened current `server/oilandgas/recognition-review.js`, `recognition-evidence.js`, `recognition-policy.js`, `recognition.js` from GitHub.
+- Confirmed reviewer invokes OpenAI Chat Completions default `gpt-4.1-mini` using `OIL_RECOGNITION_OPENAI_API_KEY`, only after source-verified full-paper evidence passes `validatePacket`. Live env variable presence is NOT verifiable via available connector.
+- Ran isolated JavaScript functional execution with mock Crossref fetch and mock OpenAI client, NOT a real paid OpenAI request. With valid simulated metadata and complete verified evidence, scoring finished `state=reviewed`, total 86/100, no automatic approval or author email.
+- Tested missing paper evidence -> `evidence_required`; missing API key -> `configuration_required`; bibliographic title mismatch -> `blocked`; out-of-range scoring rejected. **All isolated functional assertions passed.** Simulated one OpenAI completion; zero real OpenAI requests.
+- Queried connected MongoDB Atlas `oilandgas` database. Collections `recognition_evidence` and `recognition_reviews` do **not exist** (find queries return zero documents). There are published paper records, with abstracts and DOI sources; e.g. `OG-P-77DC6CDBE681033C` points to `https://doi.org/10.1126/sciadv.aaz5120`.
+- Attempted a public real Crossref DOI call; web retrieval was unavailable for the selected DOI, so no live successful Crossref request can be claimed for that paper; Crossref REST API documentation confirms the supported endpoint.
+- **Firm verdict: OLD REVIEWER SOURCE LOGIC WORKS WITH TEST DOUBLES, BUT IS NOT OPERATIONALLY USABLE ON CURRENT PRODUCTION DATA.** Every manual review currently fails before OpenAI due to no verified full-paper evidence record; API credential state and live Heroku service are unverified. Do not say real OpenAI/Crossref integration passed.
+- No recognition selection, author email, admin alert or production configuration changes were made. Continue planned replacement with approved deterministic abstract-first rules engine; production launch flags OFF.
