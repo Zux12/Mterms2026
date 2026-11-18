@@ -39,6 +39,8 @@ test('AI assessment is bounded, lacks automatic recognition approval and never e
  const out=await review(paper,{apiKey:'unused-test',fetcher,client,fullPaperPacket});
  assert.equal(out.state,'reviewed');
  assert.equal(out.assessment.total,73);
+ assert.equal(out.assessment.mode,'ai-full-paper-evidence-assessment');
+ assert.equal(out.assessment.fullPaperEvidenceReviewed,true);
  assert.equal(out.assessment.readyForRecognition,false);
  assert.equal(out.assessment.evidence.integrityCleared,false);
  assert.equal(out.emailEnabled,false);
