@@ -226,6 +226,8 @@ adminRouter.get('/status',async(req,res,next)=>{try{
  .find({status:'active',end:{$gt:now}}).sort({category:1}).toArray();
  res.json({programme:'WRRP-001',schedulerEnabled:process.env.OIL_RECOGNITION_AUTO==='true',
   emailEnabled:false,certificateIssuanceEnabled:true,activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
+  adminAlertEnabled:process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
+  rulesEngineReady:process.env.OIL_RECOGNITION_RULES_READY==='true',
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
@@ -361,18 +363,28 @@ async function activateCycle(){
  const saved=await db().collection('recognition_previews').findOne({_id:cycleId,status:'prepared'});
  if(!saved||new Date(saved.preparedAt)>start)
   throw Object.assign(new Error('Friday preview missing. Recognition cannot publish without a 72-hour-ahead draft.'),{status:409});
- // Recheck Friday winners against Monday's current eligibility; never substitute
- // another paper after the Friday administrator preview.
- const checked=await reviewedShortlist();
- const approved=new Map(checked.filter(x=>x.candidate).map(x=>[x.candidate.reference,x.candidate]));
+ // Revalidate the EXACT Friday shortlist at publication, not a newly ranked
+ // Monday shortlist; new papers must wait until the following cycle.
+ const all=await candidates();
+ const approvedReviews=await db().collection('recognition_reviews').find({
+  reference:{$in:saved.items.filter(x=>x.candidate).map(x=>x.candidate.reference)}}).toArray();
+ const byRef=new Map(all.map(p=>[p.reference,p]));
+ const byReview=new Map(approvedReviews.map(r=>[r.reference,r]));
+ const history=await db().collection('recognition_selections').find({status:{$in:['active','archived','withdrawn']}},
+  {projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray();
  const proposed=saved.items.map(row=>{
-  const candidate=row.candidate;
-  const current=candidate&&approved.get(candidate.reference);
-  const same=current&&current.publicationId===candidate.publicationId&&
-   selector.sourceIdentity(current.source)===selector.sourceIdentity(candidate.source);
-  const eligible=!!same&&policy.publicationEligibility(current).eligible&&
-   current.assessment?.total>=policy.thresholdFor(row.category);
-  return {category:row.category,label:row.label,candidate:eligible?current:null};
+  const frozen=row.candidate;
+  const current=frozen&&byRef.get(frozen.reference),r=current&&byReview.get(current.reference);
+  const revisionMatches=!!r&&r.revision===reviewRevision(current);
+  const qualified=!!current&&!!frozen&&revisionMatches&&
+   selector.eligibleReview({...current,assessment:r.assessment,reviewStatus:r.status,reviewRevisionMatches:true})&&
+   current.publicationId===frozen.publicationId&&
+   selector.sourceIdentity(current.source)===selector.sourceIdentity(frozen.source)&&
+   !selector.paperCooldown(current,history)&&
+   policy.publicationEligibility(current).eligible&&
+   r.assessment.total>=policy.thresholdFor(row.category);
+  return {category:row.category,label:row.label,candidate:qualified?{
+   ...current,assessment:r.assessment}:null};
  });
  const keys=proposed.filter(x=>x.candidate).map(x=>x.candidate.kind+':'+x.candidate.reference);
  if(new Set(keys).size!==keys.length)
@@ -403,7 +415,7 @@ async function activateCycle(){
   unfilled:proposed.filter(x=>!x.candidate).map(x=>x.category),emailEnabled:false};
 }
 adminRouter.post('/activate',async(req,res,next)=>{try{
- if(process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true')
+ if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true')
   return res.status(423).json({error:'Activation locked while research evaluation and deployment tests are incomplete.'});
  if(req.body?.confirm!=='ACTIVATE_NO_EMAIL')return res.status(400).json({error:'Explicit activation confirmation required.'});
  res.json(await activateCycle());
@@ -542,15 +554,24 @@ adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode
  warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
 let schedulerBusy=false;
 async function scheduledTick(){
- if(process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
+ if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
- try{const now=new Date(),start=weekStart(now);
+ try{
+  const now=new Date(),nextStart=adminAlert.plannedStart(now);
+  const fridayTime=adminAlert.previewAt(nextStart);
+  // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
+  if(now>=fridayTime&&now<nextStart){
+   const plan=await prepareFridayPreview(nextStart);
+   await sendFridayAdminAlert(plan);
+  }
+  const start=weekStart(now);
   if(now>=start&&!await db().collection('recognition_cycles').findOne({_id:start.toISOString().slice(0,10)}))
    await activateCycle();
  }catch(err){console.error('Recognition schedule:',err.message);}
  finally{schedulerBusy=false;}
 }
-// Feature flag defaults OFF. This scheduler never sends email.
+// All recognition launch flags default OFF. Only the separate, opt-in
+// ADMIN notification channel can send Friday previews; authors remain OFF.
 setInterval(scheduledTick,15*60000).unref();
 
 
