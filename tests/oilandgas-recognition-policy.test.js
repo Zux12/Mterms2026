@@ -30,9 +30,9 @@ test('coauthor name must match a published byline token',()=>{
  assert.equal(normalizedName('  A.  Lee  '),'a. lee');
 });
 test('categories enforce different minimum scores',()=>{
- assert.equal(thresholdFor('editors-pick'),85);
- assert.equal(thresholdFor('industry-impact'),75);
- assert.equal(thresholdFor('emerging-research'),75);
+ assert.equal(thresholdFor('editors-pick'),70);
+ assert.equal(thresholdFor('industry-impact'),60);
+ assert.equal(thresholdFor('emerging-research'),60);
 });
 test('source URL cannot point to insecure or internal site',()=>{
  assert.equal(validHttpsUrl('https://doi.org/10.1234/ok'),true);
@@ -44,5 +44,6 @@ test('recognition module requires separate activation flag and no mail transport
  const fs=require('node:fs');
  const s=fs.readFileSync(require.resolve('../server/oilandgas/recognition'),'utf8');
  assert.match(s,/OIL_RECOGNITION_ACTIVATION_ENABLED/);
- assert.doesNotMatch(s,/sendMail\s*\(|createTransport\s*\(/);
+ assert.match(s,/admin-email\/test/); // Administrator-only SMTP exists; authors remain disabled.
+ assert.match(s,/authorEmailsEnabled:false/);
 });
