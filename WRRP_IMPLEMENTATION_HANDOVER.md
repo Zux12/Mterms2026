@@ -202,3 +202,11 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 **Pending operational setup:** user must specify the administrator recipient email address (and whether any additional admin recipients are permitted) before configuring `OIL_RECOGNITION_ADMIN_EMAIL`. Confirm sender-domain SMTP acceptance, email-rendering in Gmail/Outlook, and failover alerts for failed sends. Keep admin alert sending OFF until recipient and live tests are confirmed.
 
 **Next:** Decision 5/8 — individually addressed recognition letters for verified co-authors. Continue one by one.
+
+### Administrator recipient and Hostinger SMTP — 18 November 2026 (configured in source, not activated)
+- User designated administrator recipient **m.zurix@oilandgas.eu.com** and requested Hostinger outbound SMTP for Friday WRRP alert emails.
+- Hostinger official settings: `smtp.hostinger.com`, SSL/TLS port `465` (fallback port `587` with STARTTLS). SMTP mailbox username should be the complete mailbox address; FROM is the authenticated address.
+- Recognition administrator alert code now defaults to `OIL_RECOGNITION_ADMIN_EMAIL=m.zurix@oilandgas.eu.com` and `OIL_RECOGNITION_SMTP_USER=m.zurix@oilandgas.eu.com`, uses `OIL_RECOGNITION_SMTP_PASSWORD` (hosting environment secret, not repository), optional `OIL_RECOGNITION_SMTP_PORT=465`, and will only send if `OIL_RECOGNITION_ADMIN_ALERTS_ENABLED=true` plus the separate recognition scheduler launch flags are set.
+- Recognition admin alerts no longer depend on Resend SMTP. Existing other emails using Resend remain untouched. Author congratulatory emails remain disabled.
+- **Environment secret not configured here**, no SMTP connection attempted, no email sent. Hostinger authentication and delivery remain unverified. Avoid asking for mailbox password in chat; set it in Heroku Config Vars or equivalent protected secrets store.
+- Review the domain's actual Hostinger email product settings before sending; default values apply to Hostinger Email mailboxes, not necessarily other mailbox products.
