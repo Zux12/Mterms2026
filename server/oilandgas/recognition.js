@@ -336,6 +336,48 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
  res.json({ok:true});
 }catch(e){next(e);}});
 
+// Automatic editorial screening is deliberately narrower than scientific
+// integrity certification: requires matching Crossref title/abstract, a recent
+// known-retraction lookup, and no explicit Crossref retraction notice.
+async function autoScreenSourceVerifiedCandidates({max=5}={}){
+ const papers=await candidates();
+ const eligible=papers.map(p=>({...p,assessment:deterministic.abstractAssessment(p)}))
+  .filter(p=>p.assessment.eligibleForEditorialReview&&p.assessment.total>=75);
+ const reviewed=await db().collection('recognition_rule_reviews')
+  .find({reference:{$in:eligible.map(p=>p.reference)}}).toArray();
+ const byRef=new Map(reviewed.map(x=>[x.reference,x])),now=new Date();
+ const stale=new Date(now.getTime()-7*86400000);
+ const todo=eligible.filter(p=>{
+  const r=byRef.get(p.reference);
+  return !(r?.status==='approved'&&r.revision===reviewRevision(p))&&
+   (!r?.autoAttemptedAt||new Date(r.autoAttemptedAt)<stale);
+ }).slice(0,Math.min(10,Math.max(1,max)));
+ let approved=0;
+ for(const paper of todo){
+  const source=await sourceVerifier.crossrefAbstract(paper);
+  const notice=await integrityMonitor.inspect(paper);
+  const norm=s=>deterministic.normalize(s).toLowerCase();
+  const same=source.status==='verified'&&norm(source.abstract)===norm(paper.abstract);
+  const valid=same&&notice.state==='no-explicit-notice-found';
+  const status=valid?'approved':'pending-source-or-integrity-review';
+  await db().collection('recognition_rule_reviews').updateOne({_id:paper.reference},
+   {$set:{reference:paper.reference,revision:reviewRevision(paper),status,
+    bibliographyVerified:valid,integrityCleared:valid,
+    integrityCheckScope:'Crossref matching metadata and no explicit indexed retraction notice; not independent scientific validation',
+    evidenceUrl:notice.evidenceUrl||source.source||null,
+    checkedAt:new Date(),autoAttemptedAt:new Date(),
+    assessmentVersion:deterministic.VERSION,approvalMode:valid?'automatic-source-screen':'pending'}},
+   {upsert:true});
+  if(valid){
+   approved++;
+   await db().collection('recognition_audit').insertOne({
+    action:'automatic-known-notice-screen-passed',reference:paper.reference,
+    evidenceUrl:notice.evidenceUrl,createdAt:new Date(),emailEnabled:false,
+    limitation:'No indexed retraction notice is not an independent guarantee of research integrity.'});
+  }
+ }
+ return {checked:todo.length,approved,emailEnabled:false};
+}
 // Friday 09:00 MYT locks the NEXT Monday's proposed winners (72 hours ahead).
 // Drafts use only cleared reviews; the rule-only assessment migration must be
 // completed before the production activation flags can be enabled.
@@ -908,6 +950,7 @@ async function scheduledTick(){
   await checkIntegrityNotices();
   if(await recognitionPaused())return;
   await discoverSourceAbstracts({max:5});
+  await autoScreenSourceVerifiedCandidates({max:5});
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
   // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
