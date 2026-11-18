@@ -76,3 +76,22 @@ test('two records of the same DOI cannot occupy different recognition categories
  assert.equal(actual.length,2);
  assert.equal(actual.filter(x=>x.source===same).length,1);
 });
+
+test('admin override can pin a valid paper without bypassing score or DOI uniqueness',()=>{
+ const pinned=p('PINNED','P Researcher',{source:'https://doi.org/10.1000/pinned'});
+ const other=p('OTHER','O Researcher',{source:'https://doi.org/10.1000/other'});
+ const alternative=p('ALT','A Researcher',{source:'https://doi.org/10.1000/alt'});
+ const rows=choose([pinned,other,alternative],[],new Date('2026-11-16'),{
+  forced:{'industry-impact':'PINNED'}});
+ assert.equal(rows[1].candidate.reference,'PINNED');
+ assert.equal(rows[1].adminOverrideApplied,true);
+ assert.equal(rows.filter(x=>x.candidate?.reference==='PINNED').length,1);
+ const rejected=choose([pinned,other,alternative],[],new Date('2026-11-16'),{
+  forced:{'editors-pick':'LOW'}});
+ assert.equal(rejected[0].adminOverrideApplied,false);
+ const low=p('LOW','L Researcher',{source:'https://doi.org/10.1000/low',
+  assessment:{...base.assessment,total:71}});
+ const guarded=choose([pinned,low,other],[],new Date('2026-11-16'),{
+  forced:{'editors-pick':'LOW'}});
+ assert.equal(guarded[0].adminOverrideApplied,false);
+});
