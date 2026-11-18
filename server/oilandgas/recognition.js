@@ -11,6 +11,7 @@ const deterministic=require('./recognition-rules');
 const sourceVerifier=require('./recognition-source');
 const integrityMonitor=require('./recognition-integrity');
 const letterVerification=require('./recognition-letter-verification');
+const resendOwnerTest=require('./recognition-resend-owner-test');
 const relatedReview=require('./recognition-related-review');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
@@ -1170,6 +1171,37 @@ adminRouter.get('/letter-tracking',async(req,res,next)=>{try{
   .sort({createdAt:-1}).limit(100).toArray();
  res.set('Cache-Control','private, no-store').json({emailEnabled:false,items:rows,
   interpretation:'Link requested may be an email security scanner. Letter page loaded is not proof of human reading; neither establishes email open or download.'});
+}catch(e){next(e);}});
+// Isolated API test to a single fixed owner address; never an author campaign.
+adminRouter.get('/resend-owner-test/readiness',(req,res)=>{
+ res.set('Cache-Control','private,no-store').json(resendOwnerTest.readiness());
+});
+adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='SEND_RESEND_OWNER_TEST_ONLY')
+  return res.status(400).json({error:'Explicit owner-only Resend test confirmation required.'});
+ const key=process.env.OIL_RECOGNITION_RESEND_API_KEY;
+ if(!resendOwnerTest.readiness().configured)
+  return res.status(409).json({error:'Dedicated recognition Resend API key missing. Verified parent sending domain and Heroku secret configuration required.',emailSent:false});
+ const id=crypto.randomUUID(),now=new Date();
+ const col=db().collection('recognition_resend_owner_tests');
+ const prior=await col.findOne({_id:'owner'});
+ if(prior?.lastAttemptAt&&new Date(prior.lastAttemptAt)>new Date(Date.now()-24*3600000))
+  return res.status(429).json({error:'One recognition Resend owner test per 24 hours.'});
+ await col.updateOne({_id:'owner',lastAttemptAt:{$exists:false}},
+  {$set:{lastAttemptAt:now,lastAttemptId:id,state:'attempting'}},{upsert:true});
+ // A concurrent request must not send twice.
+ const claimed=await col.findOne({_id:'owner',lastAttemptId:id});
+ if(!claimed)return res.status(409).json({error:'Owner test already claimed.'});
+ try{
+  const result=await resendOwnerTest.sendOwnerTest({key,idempotencyKey:'wrrp-owner-test-'+id});
+  await col.updateOne({_id:'owner',lastAttemptId:id},{$set:{state:result.state,
+   providerMessageId:result.providerMessageId,acceptedAt:new Date()}});
+  return res.set('Cache-Control','private,no-store').json({ok:true,...result,authorEmailsEnabled:false});
+ }catch(error){
+  await col.updateOne({_id:'owner',lastAttemptId:id},
+   {$set:{state:'failed',failedAt:new Date(),failureCode:String(error.code||'send-error').slice(0,60)}});
+  return res.status(502).json({ok:false,error:'Resend owner test not accepted; check domain verification and configured key.',authorEmailsEnabled:false});
+ }
 }catch(e){next(e);}});
 adminRouter.get('/notifications',async(req,res)=>res.json({emailEnabled:false,mode:'placeholder',
  message:'No emails will be queued or sent. Notification system awaits acceptance testing and explicit approval.',
