@@ -31,6 +31,7 @@ function entry(row,kind){
  return {kind,reference:row.reference,publicationId:row.publicationId||null,
  title:String(p.title||row.title||''),summary:String(p.summary||p.note||row.note||''),
  abstract:String(p.abstract||''),abstractSourceVerified:p.abstractSourceVerified===true,
+ verifiedAuthors:Array.isArray(p.verifiedAuthors)?p.verifiedAuthors.slice(0,150):[],
  byline:String(p.byline||row.byline||(row.authors||[]).map(x=>x.name).join(', ')),
  topic:String(p.topic||row.topic||''),
  source:kind==='publications'&&/^https:\/\//.test(row.source||'')?row.source:'',
@@ -121,7 +122,7 @@ function reviewRevision(p){
  return crypto.createHash('sha256').update(JSON.stringify({
   reference:p.reference,publicationId:p.publicationId,
   title:p.title,summary:p.summary,abstract:p.abstract,
-  abstractSourceVerified:p.abstractSourceVerified,source:p.source
+  abstractSourceVerified:p.abstractSourceVerified,verifiedAuthors:p.verifiedAuthors,source:p.source
  })).digest('hex');
 }
 async function reviewedShortlist(){
@@ -409,6 +410,7 @@ async function discoverSourceAbstracts({max=5,force=false}={}){
     source:row.source,'publication.abstractSourceVerified':{$ne:true}},
     {$set:{'publication.abstract':result.abstract,'publication.abstractSourceVerified':true,
      'publication.abstractMetadataSource':result.source,
+   'publication.verifiedAuthors':result.verifiedAuthors,
      'publication.abstractVerificationMethod':'crossref-title-match',
      'publication.abstractVerifiedAt':new Date()}});
    if(write.modifiedCount){
@@ -440,6 +442,7 @@ async function prepareFridayPreview(start){
   return {category:cat.key,label:cat.label,candidate:qualified?{
    kind:p.kind,reference:p.reference,publicationId:p.publicationId||null,
    title:p.title,byline:p.byline,summary:p.summary,topic:p.topic,source:p.source,
+   verifiedAuthors:p.verifiedAuthors,
    score:p.assessment
   }:null};
  });
