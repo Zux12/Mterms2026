@@ -1,0 +1,216 @@
+
+'use strict';
+const apiBase='recognition/';
+const $=id=>document.getElementById(id);
+async function api(path,body){
+ const response=await fetch(apiBase+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.error||(response.status===401?'Sign in via Editor’s Desk first.':'Request failed.'));
+ return data;
+}
+function message(s){$('notice').textContent=s}
+function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
+async function refresh(){
+ try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
+ $('pause-recognition').disabled=!!status.paused;
+ $('resume-recognition').disabled=!status.paused;
+ $('activate').disabled=!status.activationEnabled||!!status.paused;
+ $('activate').textContent=status.activationEnabled?'Activate reviewed recognition — no emails':'Activation locked pending tests';
+ $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Activation: '+(status.activationEnabled?'ENABLED':'LOCKED')+' · Emails: OFF'),
+ node('p','Active recognitions: '+status.active.length+' · Administrator pause: '+(status.paused?'ON':'OFF')));
+ $('overrides').replaceChildren(node('h3','Staged overrides'));
+ for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
+ $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
+ message('Editor controls available. Author recognition emails are disabled.');await certificates();await loadLetterTracking();await fridayBriefing();
+ }catch(e){message(e.message)}
+}
+async function preview(){
+ try{message('Checking published candidates…');const data=await api('preview');$('candidates').replaceChildren();
+ for(const item of data.items){const card=node('article','','card');
+ card.append(node('small',item.label),node('h3',item.candidate?.title||'No eligible candidate'),
+ node('p',item.candidate?.byline||'', 'muted'),
+ node('p',item.candidate?'Provisional score: '+item.candidate.assessment.total+'/100 · minimum '+item.minimumScore+' · '+(item.passesThreshold?'threshold reached':'below threshold'):'Unfilled category','muted'));
+ card.append(node('p','Eligibility is based on available metadata, not independent research integrity verification.','muted'));
+ $('candidates').append(card)}
+ message('Preview completed. Nothing was published or emailed.');
+ }catch(e){message(e.message)}
+}
+
+async function certificates(){
+ try{const [history,issued]=await Promise.all([api('history'),api('certificates')]);
+ const select=$('certificate-selection');select.replaceChildren(new Option('Select an activated recognition',''));
+ const withdrawal=$('withdraw-selection');withdrawal.replaceChildren(new Option('Select recognition',''));
+ for(const item of history.items){if(!['active','archived'].includes(item.status))continue;select.add(new Option(item.label+' · '+item.title,item.id));withdrawal.add(new Option(item.label+' · '+item.title,item.id))}
+ const target=$('certificate-list');target.replaceChildren();
+ if(!issued.items.length)target.append(node('p','No certificates issued yet.','muted'));
+ for(const c of issued.items){const p=node('p',c.authorName+' · '+c.title+' · ');
+ const a=node('a','Open A4 letter ↗');a.href='https://oilandgas.eu.com/letter.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
+ }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
+}
+$('integrity-approval').onsubmit=async e=>{e.preventDefault();const state=$('integrity-approval-state');
+ if(!$('integrity-confirm').checked)return;
+ if(!confirm('Confirm independent research-integrity checks were performed. Approve this paper for the future shortlist? This sends no email and issues no certificate.'))return;
+ try{const data=Object.fromEntries(new FormData(e.target).entries());data.confirmation='INTEGRITY_CHECKED';
+ const result=await api('review-approve',data);state.textContent='Assessment approved for automatic shortlisting. No recognition activated or email sent.';
+ await $('preview-reviewed').onclick();
+ }catch(err){state.textContent=err.message}};
+async function loadCandidateQueue(){
+ const body=$('candidate-rows');body.replaceChildren();$('candidate-status').textContent='Loading published papers…';
+ try{const result=await api('candidate-queue');const summary={};
+  for(const p of result.items){summary[p.status]=(summary[p.status]||0)+1;
+   const tr=document.createElement('tr');[p.title,p.reference,p.status.replaceAll('-',' ')].forEach(value=>{
+    const td=document.createElement('td');td.style.padding='8px';td.style.borderBottom='1px solid #eee';td.textContent=value;tr.append(td)});
+   body.append(tr);}
+  $('candidate-status').textContent=result.total+' published candidates · '+Object.entries(summary).map(([k,v])=>k+': '+v).join(' · ');
+ }catch(err){$('candidate-status').textContent='Candidate queue unavailable: '+err.message}
+}
+$('candidate-refresh').onclick=loadCandidateQueue;
+$('evidence-form').onsubmit=async e=>{e.preventDefault();const target=$('evidence-form-state');
+ if(!$('evidence-confirm').checked)return;
+ const data=Object.fromEntries(new FormData(e.target).entries());data.sourceReviewed=true;
+ try{await api('evidence',data);
+  target.textContent='Source-backed evidence recorded. The paper may now undergo AI assessment; no award or email was issued.';
+  await loadCandidateQueue();
+ }catch(err){target.textContent=err.message}
+};
+$('paper-review').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');
+ button.disabled=true;$('paper-review-state').textContent='Checking publication evidence…';
+ $('paper-review-result').hidden=true;
+ try{const data=Object.fromEntries(new FormData(e.target).entries());
+ const result=await api('review-paper',data);
+ $('paper-review-state').textContent='Review status: '+result.state+'. No recognition or email has been issued.';
+ const body=result.assessment?{score:result.assessment.total,confidence:result.assessment.confidence,
+   reasoning:result.assessment.reasoning,limitations:result.assessment.limitations,
+   evidence:result.assessment.evidence,decision:result.assessment.decision}:
+   {reason:result.reason,evidence:result.evidence,metadata:result.metadata&&{doi:result.metadata.doi,title:result.metadata.title}};
+ $('paper-review-result').textContent=JSON.stringify(body,null,2);
+ $('paper-review-result').hidden=false;
+ }catch(err){$('paper-review-state').textContent=err.message}
+ finally{button.disabled=false}};
+$('withdraw').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());
+ if(!confirm('Withdraw this editorial recognition and invalidate every associated certificate?'))return;
+ const result=await api('withdraw',data);
+ $('withdraw-message').textContent=result.alreadyWithdrawn?'This recognition was already withdrawn.':'Recognition withdrawn and certificates invalidated.';
+ await refresh();
+ }catch(err){$('withdraw-message').textContent=err.message}};
+$('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());
+ if(!confirm('Confirm that this name appears as an author on the selected published research paper?'))return;
+ const result=await api('certificate/issue',data);
+ $('certificate-result').textContent=result.alreadyIssued?'Letter already exists: '+result.id:'Letter issued: '+result.id+' (no email sent).';
+ await certificates();
+ }catch(err){$('certificate-result').textContent=err.message}};
+
+
+$('preview-reviewed').onclick=async()=>{
+ const target=$('reviewed-candidates');target.replaceChildren();
+ $('reviewed-note').textContent='Checking reviewed candidates…';
+ try{
+  const result=await api('preview-reviewed');
+  for(const item of result.items){
+   const article=node('article','','card');
+   article.append(node('small',item.category),node('h3',item.candidate?.title||'No cleared candidate'),
+    node('p',item.candidate?('Reviewed score '+item.candidate.assessment.total+' / 100'):'Awaiting independent publication-integrity clearance','muted'));
+   target.append(article);
+  }
+  $('reviewed-note').textContent=result.items.filter(x=>x.candidate).length+
+    ' of 3 cleared selections. Activation remains locked during testing.';
+ }catch(err){$('reviewed-note').textContent='Reviewed shortlist unavailable: '+err.message}
+};
+
+function formatTrackingDate(value){return value?new Date(value).toLocaleString('en-MY',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'}):'—'}
+async function loadLetterTracking(){
+ const body=$('tracking-rows');body.replaceChildren();
+ try{
+  const result=await api('letter-tracking');
+  let requested=0,loaded=0;
+  for(const item of result.items){
+   requested+=item.linkRequests||0;loaded+=item.letterLoads||0;
+   const row=document.createElement('tr');
+   const vals=[(item.authorName||'Author')+' · '+item.letterId,
+    item.emailStatus||'disabled',
+    String(item.linkRequests||0),
+    String(item.letterLoads||0),
+    formatTrackingDate(item.lastLetterLoadAt||item.lastLinkRequestAt)];
+   vals.forEach(v=>{const td=document.createElement('td');td.style.padding='10px';td.style.borderBottom='1px solid #eee';td.textContent=v;row.append(td)});
+   body.append(row);
+  }
+  $('tracking-requests').textContent=requested;
+  $('tracking-views').textContent=loaded;
+  $('tracking-message').textContent=result.items.length?
+   'Tracked records: '+result.items.length+'. Link requests may include automated security scans; page loads are not proof of human reading.':
+   'No tracked letters yet. Recognition emails remain disabled.';
+ }catch(err){$('tracking-message').textContent=err.message}
+}
+$('tracking-refresh').onclick=loadLetterTracking;
+$('tracking-create').onsubmit=async e=>{e.preventDefault();
+ const result=$('tracking-link-result');
+ try{
+  const data=Object.fromEntries(new FormData(e.target).entries());
+  const created=await api('letter-link/create',data);
+  result.replaceChildren(document.createTextNode('Private preview link created (not emailed): '));
+  const link=document.createElement('a');link.href=created.url;link.textContent='Open tracked A4 letter';
+  link.target='_blank';link.rel='noopener noreferrer';result.append(link);
+  await loadLetterTracking();
+ }catch(err){result.textContent=err.message}
+};
+
+async function fridayBriefing(){
+ $('friday-msg').textContent='Checking scheduled administrator briefing…';
+ try{
+  const data=await api('friday-preview');
+  const local=v=>new Date(v).toLocaleString('en-MY',{dateStyle:'full',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'});
+  $('friday-next').textContent=local(data.nextPublication);
+  $('friday-time').textContent=local(data.previewScheduledAt);
+  $('friday-mail-status').textContent=(data.adminAlertEnabled&&data.adminRecipientConfigured?'Configured':'Not activated')+
+   ' · '+data.emailStatus;
+  const cards=$('friday-cards');cards.replaceChildren();
+  for(const cat of [{key:'editors-pick',name:"Editor's Pick"},{key:'industry-impact',name:'Industry Impact'},{key:'emerging-research',name:'Emerging Research'}]){
+   const slot=data.items.find(x=>x.category===cat.key),p=slot?.candidate;
+   const c=node('div','','card');c.append(node('small',cat.name),node('h3',p?.title||'Awaiting Friday selection'),
+    node('p',p?p.byline+' · '+(p.score?.total??'—')+'/100':'Not yet prepared; a vacant category will remain unfilled.','muted'));
+   cards.append(c);
+  }
+  $('friday-msg').textContent=data.status==='not-prepared'?'No Friday selection has been prepared for this upcoming week.':'Briefing state: '+data.status+' · Vacant categories: '+data.missing.length+'.';
+ }catch(e){$('friday-msg').textContent=e.message}
+}
+$('pause-recognition').onclick=async()=>{
+ const reason=prompt('Reason for pausing automatic recognition?');
+ if(!reason)return;
+ if(!confirm('Pause all scheduled recognition selections and admin preview emails?'))return;
+ try{await api('pause',{reason,confirm:'PAUSE_RECOGNITION'});
+ $('pause-result').textContent='Programme paused. No new automatic recognition or Friday briefing will be issued until resumed.';
+ await refresh();
+ }catch(e){$('pause-result').textContent=e.message}
+};
+$('resume-recognition').onclick=async()=>{
+ if(!confirm('Resume the recognition scheduler once its launch flags are enabled? Author emails remain OFF.'))return;
+ try{await api('resume',{confirm:'RESUME_RECOGNITION'});
+ $('pause-result').textContent='Pause lifted. Production scheduling is still controlled by its separate deployment flags.';
+ await refresh();
+ }catch(e){$('pause-result').textContent=e.message}
+};
+$('smtp-test').onclick=async()=>{
+ if(!confirm('Send ONE Hostinger SMTP test email to m.zurix@oilandgas.eu.com? No author notification or awards will be issued.'))return;
+ const button=$('smtp-test');button.disabled=true;
+ $('smtp-test-result').textContent='Testing Hostinger SMTP connection and administrator delivery…';
+ try{
+  const result=await api('admin-email/test',{confirm:'SEND_ADMIN_SMTP_TEST'});
+  $('smtp-test-result').textContent=result.status==='smtp-accepted'?
+   'Hostinger SMTP accepted the test email. Please check the inbox and spam folder. This does not yet prove inbox delivery.':
+   'Result: '+result.status;
+ }catch(err){$('smtp-test-result').textContent='Test failed: '+err.message}
+ finally{button.disabled=false}
+};
+$('friday-refresh').onclick=fridayBriefing;
+
+$('refresh').onclick=refresh;$('preview').onclick=preview;
+$('override').onsubmit=async e=>{e.preventDefault();try{
+ const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
+ message('Override staged successfully.');await refresh();
+}catch(err){message(err.message)}};
+$('activate').onclick=async()=>{if(!confirm('Publish three recognition records for this week? No emails or certificates will be issued.'))return;
+ try{const data=await api('activate',{confirm:'ACTIVATE_NO_EMAIL'});message('Weekly activation result: '+JSON.stringify(data));await refresh()}
+ catch(e){message(e.message)}};
+refresh();
