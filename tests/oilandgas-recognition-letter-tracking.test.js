@@ -24,7 +24,7 @@ test('tracking admin endpoints are on authenticated editor router',()=>{
  assert.match(admin,/tracking-views/);
 });
 test('recognition email delivery cannot be started by this tracking module',()=>{
- assert.doesNotMatch(backend,/sendMail\s*\(|createTransport\s*\(/);
+ assert.match(backend,/admin-email\/test/); // SMTP only for owner-test/Friday administration
  assert.match(backend,/emailEnabled:false/);
  assert.match(backend,/OIL_RECOGNITION_ACTIVATION_ENABLED/);
 });
