@@ -25,6 +25,26 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <button id="preview-reviewed" class="secondary" type="button">Check evidence-cleared shortlist</button>
 <p id="reviewed-note" role="status">No approved shortlist has been checked yet.</p>
 <div id="reviewed-candidates" class="grid"></div></section>
+<section class="panel"><h2>Newly published research — recognition candidate queue</h2>
+<p class="muted">All published papers enter this queue automatically. They are not selected for recognition until full-paper evidence, AI assessment, and independent integrity review are completed. No author applies separately and no congratulatory emails are sent.</p>
+<button id="candidate-refresh" class="secondary" type="button">Refresh candidate queue</button>
+<p id="candidate-status" role="status">Select Refresh to inspect the current queue.</p>
+<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font:13px Arial,sans-serif;text-align:left">
+<thead><tr><th style="padding:8px;border-bottom:1px solid #ddd">Publication</th><th style="padding:8px;border-bottom:1px solid #ddd">Reference</th><th style="padding:8px;border-bottom:1px solid #ddd">Recognition stage</th></tr></thead>
+<tbody id="candidate-rows"></tbody></table></div></section>
+<section class="panel"><h2>Full-paper research evidence</h2>
+<p class="muted">An editor must review the original paper and supply grounded evidence of its methodology, results, limitations and industry implications. A title or abstract alone is insufficient. The saved evidence is never made public by this form.</p>
+<form id="evidence-form">
+<label>Published paper reference<input name="reference" required pattern="OG-P-[A-F0-9]{16}" maxlength="21" placeholder="OG-P-0123456789ABCDEF"></label>
+<label>Original full-paper evidence link<input name="evidenceUrl" required type="url" maxlength="2048" placeholder="https://publisher-or-repository/..."></label>
+<label>Methodology (30–4000 characters)<textarea name="methodology" required minlength="30" maxlength="4000"></textarea></label>
+<label>Findings and results (30–4000 characters)<textarea name="results" required minlength="30" maxlength="4000"></textarea></label>
+<label>Limitations and uncertainties (30–4000 characters)<textarea name="limitations" required minlength="30" maxlength="4000"></textarea></label>
+<label>Industry implications (30–4000 characters)<textarea name="industryImplications" required minlength="30" maxlength="4000"></textarea></label>
+<label><input type="checkbox" id="evidence-confirm" required style="width:auto;margin-right:6px"> I examined the original published paper and confirmed the evidence above.</label>
+<button type="submit">Save source-backed evidence — no recognition issued</button></form>
+<p id="evidence-form-state" role="status"></p>
+</section>
 <section class="panel"><h2>Evidence-aware AI paper review</h2>
 <p class="muted">Check one published paper against Crossref (where a DOI exists), then request a bounded AI assessment using only verified bibliographic data and the stored paper summary. The result is advisory only; it cannot activate recognition, issue a certificate or send an email. AI configuration is required on the backend.</p>
 <form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
@@ -127,6 +147,25 @@ $('integrity-approval').onsubmit=async e=>{e.preventDefault();const state=$('int
  const result=await api('review-approve',data);state.textContent='Assessment approved for automatic shortlisting. No recognition activated or email sent.';
  await $('preview-reviewed').onclick();
  }catch(err){state.textContent=err.message}};
+async function loadCandidateQueue(){
+ const body=$('candidate-rows');body.replaceChildren();$('candidate-status').textContent='Loading published papers…';
+ try{const result=await api('candidate-queue');const summary={};
+  for(const p of result.items){summary[p.status]=(summary[p.status]||0)+1;
+   const tr=document.createElement('tr');[p.title,p.reference,p.status.replaceAll('-',' ')].forEach(value=>{
+    const td=document.createElement('td');td.style.padding='8px';td.style.borderBottom='1px solid #eee';td.textContent=value;tr.append(td)});
+   body.append(tr);}
+  $('candidate-status').textContent=result.total+' published candidates · '+Object.entries(summary).map(([k,v])=>k+': '+v).join(' · ');
+ }catch(err){$('candidate-status').textContent='Candidate queue unavailable: '+err.message}
+}
+$('candidate-refresh').onclick=loadCandidateQueue;
+$('evidence-form').onsubmit=async e=>{e.preventDefault();const target=$('evidence-form-state');
+ if(!$('evidence-confirm').checked)return;
+ const data=Object.fromEntries(new FormData(e.target).entries());data.sourceReviewed=true;
+ try{await api('evidence',data);
+  target.textContent='Source-backed evidence recorded. The paper may now undergo AI assessment; no award or email was issued.';
+  await loadCandidateQueue();
+ }catch(err){target.textContent=err.message}
+};
 $('paper-review').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');
  button.disabled=true;$('paper-review-state').textContent='Checking publication evidence…';
  $('paper-review-result').hidden=true;
