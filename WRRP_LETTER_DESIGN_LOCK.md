@@ -42,3 +42,11 @@ A one-time randomly generated 32-byte opaque token is SHA-256 hashed before data
 3. Test document under Chrome/Safari Print → A4 portrait → Save PDF, including justified text and one-page fit; compare against locked visual mockup.
 4. Add formally generated signed/verified QR code and authorized signature only once configured.
 5. Do not authorize email until user explicitly approves after full testing.
+
+## QR verification implementation — 18 November 2026
+- Added a self-hosted MIT-licensed QRCode.js generator to `Zux12/oilandgas-website/vendor/qrcode.min.js`, with the original MIT attribution in `vendor/qrcode-LICENSE.txt`. No external QR-image service receives letter details.
+- `letter.html` now places a high-contrast printed QR in the A4 footer only after the individual letter record has returned `valid` from the recognition API. The encoded URL is `https://oilandgas.eu.com/verify-letter.html?id=OG-WRS-...`, containing **only the public unique letter ID**, never private visit tokens or author email details.
+- Added `verify-letter.html` with official live verification states: valid, withdrawn, invalid/not-found, unavailable. It displays author, paper, category, issuance date and recognition ID from the server; it **never** treats a failed/offline verification as valid.
+- Backend `GET /api/oilandgas/recognition/verify/:id` now resolves status using BOTH the issued letter and its parent recognition. A valid letter with missing, withdrawn or invalid parent is invalid/withdrawn even when the letter record itself was not yet marked withdrawn. Added `recognition-letter-verification.js` for testable fail-closed status logic.
+- Added `tests/oilandgas-recognition-qr-verification.test.js` and included it in the recognition GitHub Actions workflow. Ten isolated source checks passed for status outcomes, URL, bundled QR generator and syntax.
+- **Remaining independent acceptance:** verify deployed GitHub Pages/Heroku URLs, test scanning from a physical printed A4/PDF in Safari/Chrome and check one-page fit, exercise real database valid/withdrawn/unknown records without creating a public winner, and observe CI completion. No author emails, production awards or activation flags were enabled.
