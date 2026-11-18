@@ -5,7 +5,7 @@
 <header><strong>oil &amp; gas<span class="recognition-inline-1">.</span> / Editor's Desk</strong><a href="desk.html">Back to dashboard</a></header>
 <main><small>WRRP-001 / Test workspace</small><h1>Weekly Research Recognition</h1>
 <p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
-<div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or certificates are generated in this version. The weekly scheduler is disabled by default.</div>
+<div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or recognition letters are sent by this control page. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
 <section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button><div class="recognition-inline-2"><button type="button" id="pause-recognition" class="recognition-inline-3">Emergency pause</button> <button type="button" id="resume-recognition" class="secondary">Resume programme</button><p id="pause-result" role="status" class="muted"></p></div></section>
 <section class="panel"><h2>Friday administrator briefing — 72 hours before publication</h2>
@@ -24,20 +24,41 @@
 <p id="friday-msg" class="muted" role="status"></p>
 </section>
 <section class="panel"><h2>Weekly preview</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
+<section class="panel"><h2>Transparent keyword-rule assessment (no AI API)</h2>
+<p class="muted">The approved six-criterion scorecard evaluates complete original abstracts using fixed rules. Each score shows its matched terms and limitations. Papers with only brief directory summaries or without independently verifiable abstracts stay pending, not rejected for low scores. This is a private simulation; no awards or email are issued.</p>
+<p><button type="button" id="rules-refresh" class="secondary">Run rules assessment (read-only)</button></p>
+<p id="rules-status" role="status" class="muted">No simulation has been run.</p>
+<div class="recognition-inline-5"><table class="recognition-inline-6"><thead><tr>
+<th class="recognition-inline-7">Paper</th><th class="recognition-inline-7">Score</th><th class="recognition-inline-7">Evidence status</th><th class="recognition-inline-7">Details</th>
+</tr></thead><tbody id="rules-rows"></tbody></table></div>
+<h3>Retrieve original DOI abstract (admin only)</h3>
+<form id="rules-import-form"><label>Published paper reference<input name="reference" pattern="OG-P-[A-F0-9]{16}" required placeholder="OG-P-0123456789ABCDEF"></label>
+<button type="submit" class="secondary">Verify/import Crossref abstract — no award</button></form>
+<p id="rules-import-result" role="status" class="muted"></p>
+<h3>Source and research-integrity clearance</h3>
+<p class="muted">Required only after sufficient abstract evidence. An editor must provide a public HTTPS integrity-check reference and a documented rationale. Scoring never establishes scientific integrity by itself.</p>
+<form id="rules-approve-form">
+<label>Paper reference<input name="reference" required pattern="OG-P-[A-F0-9]{16}" placeholder="OG-P-0123456789ABCDEF"></label>
+<label>Integrity evidence URL<input type="url" name="integrityEvidenceUrl" required placeholder="https://publisher-or-doi-source/..."></label>
+<label>Editorial verification rationale (30–1200 characters)<textarea name="rationale" minlength="30" maxlength="1200" required></textarea></label>
+<label><input id="rules-check-confirm" type="checkbox" class="recognition-inline-8" required> I personally checked the publication source and available integrity notices.</label>
+<button type="submit">Approve source/integrity checks only — no recognition</button></form>
+<p id="rules-approve-result" role="status" class="muted"></p>
+</section>
 <section class="panel"><h2>Evidence-cleared automatic shortlist</h2>
-<p class="muted">This is the production-eligibility view. Only papers with a matching saved review, independently cleared integrity, and an approved AI assessment may be considered. It is intentionally separate from provisional keyword rankings.</p>
+<p class="muted">This is the production-eligibility view. Only papers with a matching deterministic ruleset assessment, verified source and independently cleared integrity may be considered. It is intentionally separate from provisional keyword rankings.</p>
 <button id="preview-reviewed" class="secondary" type="button">Check evidence-cleared shortlist</button>
 <p id="reviewed-note" role="status">No approved shortlist has been checked yet.</p>
 <div id="reviewed-candidates" class="grid"></div></section>
 <section class="panel"><h2>Newly published research — recognition candidate queue</h2>
-<p class="muted">All published papers enter this queue automatically. They are not selected for recognition until full-paper evidence, AI assessment, and independent integrity review are completed. No author applies separately and no congratulatory emails are sent.</p>
+<p class="muted">All published papers enter this queue automatically. Only full original abstracts with verified source and publication-integrity evidence can advance to recognition. No author applies separately and no congratulatory emails are sent.</p>
 <button id="candidate-refresh" class="secondary" type="button">Refresh candidate queue</button>
 <p id="candidate-status" role="status">Select Refresh to inspect the current queue.</p>
 <div class="recognition-inline-5"><table class="recognition-inline-6">
 <thead><tr><th class="recognition-inline-7">Publication</th><th class="recognition-inline-7">Reference</th><th class="recognition-inline-7">Recognition stage</th></tr></thead>
 <tbody id="candidate-rows"></tbody></table></div></section>
-<section class="panel"><h2>Full-paper research evidence</h2>
-<p class="muted">An editor must review the original paper and supply grounded evidence of its methodology, results, limitations and industry implications. A title or abstract alone is insufficient. The saved evidence is never made public by this form.</p>
+<section class="panel"><h2>Optional full-paper research evidence (exception review)</h2>
+<p class="muted">When abstract evidence is insufficient, an editor may optionally review the original paper and supply grounded evidence of its methodology, results, limitations and industry implications. A title or abstract alone is insufficient. The saved evidence is never made public by this form.</p>
 <form id="evidence-form">
 <label>Published paper reference<input name="reference" required pattern="OG-P-[A-F0-9]{16}" maxlength="21" placeholder="OG-P-0123456789ABCDEF"></label>
 <label>Original full-paper evidence link<input name="evidenceUrl" required type="url" maxlength="2048" placeholder="https://publisher-or-repository/..."></label>
@@ -49,7 +70,7 @@
 <button type="submit">Save source-backed evidence — no recognition issued</button></form>
 <p id="evidence-form-state" role="status"></p>
 </section>
-<section class="panel"><h2>Evidence-aware AI paper review</h2>
+<section class="panel"><h2>Legacy AI reviewer (not used for recognition selection)</h2>
 <p class="muted">Check one published paper against Crossref (where a DOI exists), then request a bounded AI assessment using only verified bibliographic data and the stored paper summary. The result is advisory only; it cannot activate recognition, issue a certificate or send an email. AI configuration is required on the backend.</p>
 <form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
 <button type="submit">Review research evidence</button></form>
