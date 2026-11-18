@@ -69,7 +69,7 @@ async function candidates(){
 }
 async function shortlist(){
  const existing=await db().collection('recognition_selections').find({status:{$in:['active','archived','withdrawn']}},
-  {projection:{reference:1,kind:1,publicationId:1}}).toArray();
+  {projection:{reference:1,kind:1,publicationId:1,source:1}}).toArray();
  const now=weekStart();
  const all=await candidates();
  const authorKeys=[...new Set(all.flatMap(p=>p.byline.split(/[,;]+/).map(normalizeName).filter(Boolean)))];
@@ -81,7 +81,8 @@ async function shortlist(){
    .some(key=>/\bmalaysia\b|\buniversiti\b|\butm\b|\butp\b|\bukm\b|\bupm\b|\bcyberjaya\b|\bgeomatika\b/i.test(affiliationMap.get(key)||''));
  }
  const ranked=all.filter(p=>!existing.some(e=>e.kind===p.kind &&
-  (e.reference===p.reference || (e.publicationId&&p.publicationId&&e.publicationId===p.publicationId))))
+  (e.reference===p.reference || (e.publicationId&&p.publicationId&&e.publicationId===p.publicationId) ||
+  (selector.sourceIdentity(p.source)&&selector.sourceIdentity(p.source)===selector.sourceIdentity(e.source)))))
  .map(p=>({...p,assessment:scorePaper(p)}))
  .sort((a,b)=>b.assessment.total-a.assessment.total ||
   Number(isMY(b))-Number(isMY(a)) ||
@@ -104,7 +105,7 @@ function reviewRevision(p){
 async function reviewedShortlist(){
  const all=await candidates();
  const history=await db().collection('recognition_selections')
-  .find({status:{$in:['active','archived','withdrawn']}},{projection:{reference:1,kind:1,publicationId:1,start:1,byline:1}})
+  .find({status:{$in:['active','archived','withdrawn']}},{projection:{reference:1,kind:1,publicationId:1,source:1,start:1,byline:1}})
   .toArray();
  const refs=all.map(p=>p.reference);
  const reviews=await db().collection('recognition_reviews').find({reference:{$in:refs}}).toArray();
@@ -327,13 +328,12 @@ adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
  const [evidence,reviews,history]=await Promise.all([
   db().collection('recognition_evidence').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
   db().collection('recognition_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
-  db().collection('recognition_selections').find({}, {projection:{reference:1,publicationId:1,kind:1}}).toArray()
+  db().collection('recognition_selections').find({}, {projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray()
  ]);
  const evidMap=new Map(evidence.map(x=>[x.reference,x])),
        reviewMap=new Map(reviews.map(x=>[x.reference,x]));
  const items=published.map(p=>{
-  const prior=history.some(h=>h.kind===p.kind&&(h.reference===p.reference||
-   (h.publicationId&&p.publicationId&&h.publicationId===p.publicationId)));
+  const prior=selector.paperCooldown(p,history);
   const rev=reviewRevision(p),e=evidMap.get(p.reference),r=reviewMap.get(p.reference);
   const status=prior?'recognized-once':!e||e.revision!==rev?'full-paper-evidence-needed':
    !r||r.revision!==rev?'ai-assessment-needed':r.status==='approved'?'ready-for-shortlist':
