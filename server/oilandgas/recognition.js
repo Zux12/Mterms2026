@@ -171,7 +171,7 @@ publicRouter.get('/archive',async(req,res,next)=>{try{
  const category=typeof req.query.category==='string'?req.query.category:'';
  const q=typeof req.query.q==='string'?req.query.q.trim():'';
  if(q.length>100||(category&&!categories.some(c=>c.key===category)))return res.status(400).json({error:'Invalid archive filter'});
- const match={status:{$in:['active','archived']}};
+ const match={status:{$in:['active','archived','withdrawn']}};
  if(category)match.category=category;
  if(q){const literal=q.replace(/[^a-zA-Z0-9À-ž\s-]/g,'');
   if(literal)match.$or=['title','byline','topic','label'].map(k=>({[k]:{$regex:literal,$options:'i'}}));}
@@ -180,6 +180,14 @@ publicRouter.get('/archive',async(req,res,next)=>{try{
   db().collection('recognition_selections').find(match).sort({start:-1,_id:1}).skip(page*12).limit(12).toArray()
  ]);
  res.json({total:count,page,items:items.map(publicRecord)});
+}catch(e){next(e);}});
+publicRouter.get('/record/:id',async(req,res,next)=>{try{
+ const id=String(req.params.id||'');
+ if(!/^\d{4}-\d{2}-\d{2}:(editors-pick|industry-impact|emerging-research)$/.test(id))
+  return res.sendStatus(404);
+ const record=await db().collection('recognition_selections').findOne({_id:id});
+ if(!record||!['active','archived','withdrawn'].includes(record.status))return res.sendStatus(404);
+ res.set('Cache-Control','public,max-age=60').json(publicRecord(record));
 }catch(e){next(e);}});
 publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  if(!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(req.params.id))return res.sendStatus(404);
