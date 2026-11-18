@@ -35,6 +35,15 @@
 <form id="rules-import-form"><label>Published paper reference<input name="reference" pattern="OG-P-[A-F0-9]{16}" required placeholder="OG-P-0123456789ABCDEF"></label>
 <button type="submit" class="secondary">Verify/import Crossref abstract — no award</button></form>
 <p id="rules-import-result" role="status" class="muted"></p>
+<h3>Verify an original abstract manually</h3>
+<p class="muted">Use only when Crossref has no complete abstract. Copy the original abstract from the publisher/repository, include the source URL, and confirm its provenance. This is independent of the rules score.</p>
+<form id="rules-verify-form">
+<label>Published paper reference<input name="reference" required pattern="OG-P-[A-F0-9]{16}" placeholder="OG-P-0123456789ABCDEF"></label>
+<label>Original abstract source URL<input name="evidenceUrl" type="url" required placeholder="https://publisher-or-repository/..."></label>
+<label>Original full abstract<textarea name="abstract" required minlength="450" maxlength="16000" rows="6"></textarea></label>
+<label><input type="checkbox" id="rules-verify-confirm" class="recognition-inline-8" required> I have compared this abstract against the original published source.</label>
+<button type="submit" class="secondary">Record verified abstract — no award</button></form>
+<p id="rules-verify-result" role="status" class="muted"></p>
 <h3>Source and research-integrity clearance</h3>
 <p class="muted">Required only after sufficient abstract evidence. An editor must provide a public HTTPS integrity-check reference and a documented rationale. Scoring never establishes scientific integrity by itself.</p>
 <form id="rules-approve-form">
