@@ -44,3 +44,16 @@ Current threshold: Editor's Pick 85/100; Industry Impact and Emerging Research 7
 - The currently implemented keyword scorer is **a discovery-only provisional heuristic**, not yet a fair winner-selection engine.
 - The reviewed-only automatic selector still depends on the old AI/full-paper path. Conversion to deterministic, abstract-first selection remains an engineering blocker.
 - Do not activate automatic awards or author emails until graded rules, comparable inputs and evaluation tests are complete.
+
+## DECISION SUPERSEDING ABSTRACT-FIRST SCORING — 18 November 2026
+The user explicitly requested the weekly recognition competition to **score using only information already available in the Oil & Gas publication directory**. This supersedes earlier REQUIREMENT to retrieve full original abstracts before awarding directory-based editorial recognition.
+
+**Live scoring implementation:** `server/oilandgas/recognition-rules.js` rubric `keyword-directory-v3.0`, deterministic, no LLM/OpenAI, using the SAME `title`, `summary`, `topic`, `byline`, and `source` fields for every published paper. Abstracts, author affiliations, unpublished data, missing external PDF, unknown journal impact factors, and length of external paper content **do not count toward the six scores**.
+
+Criterion weights unchanged: industry relevance 25, described technical methods 20, described practical applicability 20, publication metadata traceability 15, textual originality indicators 10, and industry priority terms 10. **15 evidence points mean source link and directory metadata completeness only, not experimental/peer-review credibility**. Each score records specific keyword matches and a versioned, reproducible explanation. Keywords are grouped to reduce bias from repeated words and to avoid requiring unrelated sectors. Short summaries are not disqualified because of their length.
+
+**Independent eligibility/safety screening still applies** (published status, named author, valid source URL, no explicit integrity hold, once-only award, active source notice checks). DOI title check may be used to independently confirm bibliographic identity even when Crossref does not carry an abstract; for non-DOI sources the authenticated editor must supply documented source review. This is NOT part of the score.
+
+**Directory scan 18 Nov 2026:** all **124** existing published papers pass the publication eligibility gate with both existing reference formats (`OG-P-{16 hex}` and `OG-P-MY{8 hex}`), and all 124 have sufficient directory data for uniform scoring. At current unchanged thresholds, **0 score ≥85**, **3 score ≥75**; maximum score 76. This is a dry-run scoring distribution, NOT approval of those papers, and cannot populate more winners than qualified source-cleared candidates. Do not lower existing 85/75 thresholds to manufacture winners.
+
+Old abstract-scoring descriptions above are retained as historical context only; this paragraph is the current controlling rubric decision. Optional original abstracts remain a separate research-enrichment tool and are not required for recognition assessment. Master activation and author emails remain OFF.
