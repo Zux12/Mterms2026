@@ -379,6 +379,7 @@ adminRouter.get('/friday-preview/email-html',async(req,res,next)=>{try{
   ...row.candidate,assessment:row.candidate.score}:null})):categories.map(cat=>({
   category:cat.key,candidate:null
  }));
+ res.set('Content-Security-Policy',"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'");
  res.set('Cache-Control','private, no-store').type('html').send(
   adminAlert.mailContents({start,items:data}).html);
 }catch(e){next(e);}});
