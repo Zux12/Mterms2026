@@ -2,7 +2,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {choose,authorCooldown,paperCooldown,eligibleReview}=require('../server/oilandgas/recognition-selector');
-const base={kind:'publications',assessment:{mode:'ai-metadata-assessment',total:92,
+const base={kind:'publications',assessment:{mode:'ai-full-paper-evidence-assessment',fullPaperEvidenceReviewed:true,total:92,
  breakdown:{relevance:24,technical:18,practical:19,evidence:14,originality:8,timeliness:9},
  evidence:{bibliographyVerified:true,integrityCleared:true},readyForRecognition:true},
  reviewStatus:'approved',reviewRevisionMatches:true};
