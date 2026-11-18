@@ -29,7 +29,7 @@ function categoryScore(p,category){
 }
 function eligibleReview(p){
  const a=p.assessment||{};
- return a.mode==='ai-metadata-assessment'&&a.evidence?.bibliographyVerified===true&&
+ return a.mode==='ai-full-paper-evidence-assessment'&&a.fullPaperEvidenceReviewed===true&&a.evidence?.bibliographyVerified===true&&
  a.evidence?.integrityCleared===true&&a.readyForRecognition===true&&
  p.reviewStatus==='approved'&&p.reviewRevisionMatches===true;
 }
