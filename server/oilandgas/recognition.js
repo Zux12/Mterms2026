@@ -221,13 +221,41 @@ publicRouter.post('/letter-view',letterNoStore,express.json({limit:'2kb'}),async
  res.json({recorded:true,meaning:'Letter page loaded; this does not prove the recipient personally viewed it.'});
 }catch(e){next(e);}});
 adminRouter.use(express.json({limit:'20kb'}));
+async function recognitionPaused(){
+ const controls=await db().collection('recognition_controls').findOne({_id:'programme'});
+ return controls?.paused===true;
+}
+adminRouter.post('/pause',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='PAUSE_RECOGNITION')
+  return res.status(400).json({error:'Explicit pause confirmation required.'});
+ const reason=String(req.body?.reason||'').trim();
+ if(reason.length<5||reason.length>300)
+  return res.status(400).json({error:'Provide a pause reason (5–300 characters).'});
+ const now=new Date();
+ await db().collection('recognition_controls').updateOne({_id:'programme'},
+  {$set:{paused:true,reason,pausedAt:now}},{upsert:true});
+ await db().collection('recognition_audit').insertOne({action:'programme-paused',
+  reason,createdAt:now,emailEnabled:false});
+ res.json({ok:true,paused:true,emailEnabled:false});
+}catch(e){next(e);}});
+adminRouter.post('/resume',async(req,res,next)=>{try{
+ if(req.body?.confirm!=='RESUME_RECOGNITION')
+  return res.status(400).json({error:'Explicit resume confirmation required.'});
+ const now=new Date();
+ await db().collection('recognition_controls').updateOne({_id:'programme'},
+  {$set:{paused:false,resumedAt:now}},{upsert:true});
+ await db().collection('recognition_audit').insertOne({action:'programme-resumed',
+  createdAt:now,emailEnabled:false});
+ res.json({ok:true,paused:false,emailEnabled:false});
+}catch(e){next(e);}});
 adminRouter.get('/status',async(req,res,next)=>{try{
+ const paused=await recognitionPaused();
  const now=new Date();const active=await db().collection('recognition_selections')
  .find({status:'active',end:{$gt:now}}).sort({category:1}).toArray();
  res.json({programme:'WRRP-001',schedulerEnabled:process.env.OIL_RECOGNITION_AUTO==='true',
   emailEnabled:false,certificateIssuanceEnabled:true,activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
   adminAlertEnabled:process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
-  rulesEngineReady:process.env.OIL_RECOGNITION_RULES_READY==='true',
+  rulesEngineReady:process.env.OIL_RECOGNITION_RULES_READY==='true',paused,
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
@@ -355,6 +383,7 @@ adminRouter.get('/friday-preview/email-html',async(req,res,next)=>{try{
   adminAlert.mailContents({start,items:data}).html);
 }catch(e){next(e);}});
 async function activateCycle(){
+ if(await recognitionPaused())throw Object.assign(new Error('Recognition paused by administrator.'),{status:423});
  const start=weekStart(),end=new Date(start.getTime()+7*86400000);
  const cycleId=start.toISOString().slice(0,10);
  const selections=db().collection('recognition_selections');
@@ -557,6 +586,7 @@ async function scheduledTick(){
  if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
  try{
+  if(await recognitionPaused())return;
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
   // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
