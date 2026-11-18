@@ -167,7 +167,7 @@ publicRouter.use((req,res,next)=>{const origin=req.get('Origin');
 publicRouter.get('/current',async(req,res,next)=>{try{
  const now=new Date();const items=await db().collection('recognition_selections')
  .find({status:'active',start:{$lte:now},end:{$gt:now}}).sort({category:1}).limit(3).toArray();
- res.json({programme:'WRRP-001',emailEnabled:false,items:items.map(publicRecord)});
+ res.json({programme:'WRRP-001',programmeActive:process.env.OIL_RECOGNITION_RULES_READY==='true'&&process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true'&&process.env.OIL_RECOGNITION_AUTO==='true',emailEnabled:false,items:items.map(publicRecord)});
 }catch(e){next(e);}});
 publicRouter.get('/archive',async(req,res,next)=>{try{
  const page=Number(req.query.page||0);
