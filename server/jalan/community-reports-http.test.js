@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),express=require('express');
 const {createRouter}=require('./community-reports');
 const docs=new Map();class Schema{static Types={Mixed:Object};index(){}}
-const Model={findById(key){return {lean:async()=>structuredClone(docs.get(key)||null)};},async updateOne(query,update){const row=docs.get(query._id);if(row&&row.revision!==query.revision)throw Object.assign(Error('duplicate'),{code:11000});docs.set(query._id,structuredClone(update.$set));return {modifiedCount:row?1:0,upsertedCount:row?0:1};},find(){return {limit(){return this;},lean:async()=>[...docs.values()]};}};
+const Model={findById(key){return {lean:async()=>structuredClone(docs.get(key)||null)};},async updateOne(query,update){const row=docs.get(query._id);if(row&&row.revision!==query.revision)throw Object.assign(Error('duplicate'),{code:11000});docs.set(query._id,structuredClone(update.$set));return {modifiedCount:row?1:0,upsertedCount:row?0:1};},async aggregate(){return [...docs.values()].flatMap(d=>d.events.filter(e=>e.active).map(e=>({event:{...e,contributors:e.contributors.length}})));}};
 const mongoose={Schema,connection:{useDb:()=>({models:{},model:()=>Model})}};
 test('actual HTTP report API validates origins, JSON-only location, GPS, successful write/read and disabled configuration',async()=>{
  const app=express();app.use(express.json({limit:'5mb'}));app.use('/reports',createRouter({express,mongoose,env:{JALAN_HASH_SECRET:'synthetic-secret'.repeat(4)}}));app.use('/disabled',createRouter({express,mongoose,env:{}}));
