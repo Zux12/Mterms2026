@@ -45,8 +45,24 @@ function scorePaper(p){
   timeliness:words.impact.test(txt)?10:0
  };
  const total=Object.values(found).reduce((a,b)=>a+b,0);
- return {total,breakdown:found,mode:'rule-based-provisional',
-  note:'Textual discovery score only. Technical merit, novelty and scientific quality require editorial/AI evidence review.'};
+ // Diagnostic evidence for admin review. Does not alter the established scoring.
+ // Each field records the exact matched text, never an invented research claim.
+ const match=regex=>{const found=regex.exec(txt);return found?found[0]:null;};
+ const signals={
+  relevance:match(words.relevance),technical:match(words.method),
+  practical:match(words.application),evidence:p.source?'original-source-url-present':null,
+  originality:match(words.novelty),timeliness:match(words.impact)
+ };
+ const explanations=Object.entries(found).map(([criterion,points])=>({
+  criterion,points,signal:signals[criterion],
+  limitation:criterion==='evidence'?'A publication link is not independent verification of research quality.':
+   criterion==='originality'?'A novelty keyword is not proof of original scientific contribution.':
+   'A textual match is a topical indicator, not validation of the underlying claim.'
+ }));
+ return {total,breakdown:found,signals,explanations,
+  rubricVersion:'provisional-keyword-v1',inputCharacters:txt.length,
+  mode:'rule-based-provisional',
+  note:'Textual screening score only. Do not use as evidence of technical merit or award eligibility until abstract comparability and integrity checks are complete.'};
 }
 function weekStart(date=new Date()){
  // Monday 09:00 Malaysia = Monday 01:00 UTC, Malaysia has no daylight-saving adjustment.
