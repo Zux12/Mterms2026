@@ -9,6 +9,7 @@ const fullText=require('./recognition-evidence');
 const adminAlert=require('./recognition-admin-alert');
 const deterministic=require('./recognition-rules');
 const sourceVerifier=require('./recognition-source');
+const integrityMonitor=require('./recognition-integrity');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -770,11 +771,96 @@ adminRouter.get('/scorecard',async(req,res)=>res.json({programme:'WRRP-001',mode
  maxScore:MAX_SCORE,weights:{relevance:25,technical:20,practical:20,evidence:15,originality:10,timeliness:10},
  warning:'This provisional text matching engine is not yet an AI technical-quality evaluation. Review before full production activation.'}));
 let schedulerBusy=false;
+// Conservative automated retraction response: only explicit authoritative
+// Crossref retraction notices cause withdrawal. No notice never means "cleared".
+async function checkIntegrityNotices(){
+ const now=new Date(),cutoff=new Date(now.getTime()-24*3600000);
+ const selections=await db().collection('recognition_selections')
+  .find({status:{$in:['active','archived']}},{projection:{_id:1,title:1,reference:1,source:1}}).toArray();
+ const records=await db().collection('recognition_integrity_checks')
+  .find({_id:{$in:selections.map(x=>x._id)}},{projection:{_id:1,checkedAt:1}}).toArray();
+ const checked=new Map(records.map(x=>[x._id,x]));
+ const todo=selections.filter(x=>!checked.has(x._id)||new Date(checked.get(x._id).checkedAt)<cutoff)
+  .slice(0,3);
+ for(const paper of todo){
+  const result=await integrityMonitor.inspect(paper);
+  await db().collection('recognition_integrity_checks').updateOne({_id:paper._id},
+   {$set:{checkedAt:new Date(),result:result.state,evidenceUrl:result.evidenceUrl||null}},{upsert:true});
+  if(result.state!=='explicit-retraction')continue;
+  const reason='Confirmed Crossref retraction notice; see '+result.evidenceUrl;
+  const session=await mongoose.connection.startSession();
+  try{
+   await session.withTransaction(async()=>{
+    const changed=await db().collection('recognition_selections').updateOne({
+     _id:paper._id,status:{$in:['active','archived']}},
+     {$set:{status:'withdrawn',withdrawnAt:new Date(),withdrawalReason:reason,
+      integrityEvidenceUrl:result.evidenceUrl,automaticRetractionNotice:true}},{session});
+    if(!changed.modifiedCount)return;
+    await db().collection('recognition_certificates').updateMany({selectionId:paper._id},
+     {$set:{status:'withdrawn',withdrawnAt:new Date()}},{session});
+    await db().collection('recognition_audit').insertOne({action:'verified-crossref-retraction-withdrawal',
+     selectionId:paper._id,evidenceUrl:result.evidenceUrl,createdAt:new Date(),emailEnabled:false},{session});
+    await db().collection('recognition_integrity_alerts').updateOne({_id:paper._id},
+     {$setOnInsert:{title:paper.title,evidenceUrl:result.evidenceUrl,
+      status:'pending',createdAt:new Date()}},{upsert:true,session});
+   });
+  }finally{await session.endSession();}
+ }
+ await sendPendingIntegrityAlerts();
+}
+async function sendPendingIntegrityAlerts(){
+ if(process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED!=='true')return;
+ const user=String(process.env.OIL_RECOGNITION_SMTP_USER||'m.zurix@oilandgas.eu.com').trim();
+ const password=process.env.OIL_RECOGNITION_SMTP_PASSWORD;
+ if(user!=='m.zurix@oilandgas.eu.com'||!password)return;
+ const rows=await db().collection('recognition_integrity_alerts').find({status:'pending'}).limit(3).toArray();
+ for(const alert of rows){
+  const claim=await db().collection('recognition_integrity_alerts').updateOne({_id:alert._id,status:'pending'},
+   {$set:{status:'sending',claimedAt:new Date()}});
+  if(!claim.modifiedCount)continue;
+  try{
+   const port=Number(process.env.OIL_RECOGNITION_SMTP_PORT||465);
+   if(![465,587].includes(port))throw Error('Invalid SMTP port');
+   const smtp=require('nodemailer').createTransport({host:'smtp.hostinger.com',port,
+    secure:port===465,requireTLS:port===587,auth:{user,pass:password},
+    connectionTimeout:10000,socketTimeout:20000});
+   const safe=x=>String(x||'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+   const html='<table role="presentation" style="width:100%;max-width:620px;border-collapse:collapse;font:14px Arial,sans-serif">'+
+    '<tr><td style="background:#242c29;color:white;padding:24px;font-size:24px;font-weight:700">oil &amp; gas<span style="color:#f66520">.</span></td></tr>'+
+    '<tr><td style="background:#c19a52;padding:13px 24px;font-weight:700">URGENT EDITORIAL INTEGRITY NOTICE</td></tr>'+
+    '<tr><td style="padding:24px"><h2 style="color:#9b2925">Research Recognition Withdrawn</h2>'+
+    '<p><strong>'+safe(alert.title)+'</strong></p><p>A verified Crossref retraction notice triggered suspension of this recognition and withdrawal of its co-author letters.</p>'+
+    '<p>Evidence: <a href="'+safe(alert.evidenceUrl)+'">'+safe(alert.evidenceUrl)+'</a></p>'+
+    '<p>Review the recognition record in your Editor’s Desk.</p></td></tr></table>';
+   const sent=await smtp.sendMail({from:{name:'Oil & Gas Research Recognition',address:user},
+    to:user,subject:'[ACTION REQUIRED] Research recognition withdrawn — '+String(alert._id),
+    html,text:'Research recognition withdrawn: '+alert.title+'\nEvidence: '+alert.evidenceUrl,
+    headers:{'X-OilAndGas-Integrity-Notice':String(alert._id)}});
+   if(!sent.accepted?.includes(user))throw Error('SMTP recipient not accepted');
+   await db().collection('recognition_integrity_alerts').updateOne({_id:alert._id,status:'sending'},
+    {$set:{status:'sent',sentAt:new Date()}});
+  }catch(e){
+   await db().collection('recognition_integrity_alerts').updateOne({_id:alert._id,status:'sending'},
+    {$set:{status:'pending',lastFailureAt:new Date()}});
+   console.error('Recognition integrity alert SMTP failed:',e.code||e.name);
+  }
+ }
+}
+adminRouter.get('/integrity-monitor',async(req,res,next)=>{try{
+ const checks=await db().collection('recognition_integrity_checks').find({}).sort({checkedAt:-1}).limit(30).toArray();
+ const alerts=await db().collection('recognition_integrity_alerts').find({}).sort({createdAt:-1}).limit(30).toArray();
+ res.set('Cache-Control','private,no-store').json({checks:checks.map(x=>({
+  selectionId:x._id,checkedAt:x.checkedAt,result:x.result,evidenceUrl:x.evidenceUrl})),
+  alerts:alerts.map(x=>({selectionId:x._id,status:x.status,title:x.title,createdAt:x.createdAt})),
+  note:'Only explicit authoritative Crossref retraction notices cause automatic withdrawal. No notice is not an integrity guarantee.'});
+}catch(e){next(e);}});
 async function scheduledTick(){
  if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
  try{
   if(await recognitionPaused())return;
+  await checkIntegrityNotices();
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
   // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
