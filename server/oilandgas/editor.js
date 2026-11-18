@@ -48,7 +48,7 @@ router.use((req,res,next)=>{
   next();
 });
 router.get('/',(req,res)=>res.redirect(302,req.baseUrl+'/desk.html'));
-for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css','authors.js','authors.css','membership-admin.js','membership-admin.css','membership-history.js','membership-history.css','recognition.html','recognition-email-preview.html']) {
+for (const file of ['desk.html','desk.css','desk.js','story-picker.js','reader.js','read.html','bulk.js','bulk.css','authors.js','authors.css','membership-admin.js','membership-admin.css','membership-history.js','membership-history.css','recognition.html','recognition.css','recognition.js','recognition-email-preview.html']) {
   router.get('/'+file,(req,res)=>res.sendFile(path.join(__dirname,'desk',file)));
 }
 
