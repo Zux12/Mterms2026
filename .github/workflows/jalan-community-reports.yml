@@ -1,0 +1,23 @@
+name: JALAN community report service
+on:
+  pull_request:
+    paths: ['server/jalan/community-reports*', 'server/jalan/report-policy.js', 'server/jalan/routes.js', '.github/workflows/jalan-community-reports.yml']
+  push:
+    branches: [main]
+    paths: ['server/jalan/community-reports*', 'server/jalan/report-policy.js', 'server/jalan/routes.js', '.github/workflows/jalan-community-reports.yml']
+permissions:
+  contents: read
+jobs:
+  reporting:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix /tmp/jalan-report-test --no-save --ignore-scripts --no-audit --no-fund express@4.21.2
+      - run: node --check server/jalan/community-reports.js && node --check server/jalan/report-policy.js && node --check server/jalan/routes.js
+      - run: node --test server/jalan/community-reports.test.js server/jalan/community-reports-http.test.js
+        env:
+          NODE_PATH: /tmp/jalan-report-test/node_modules
