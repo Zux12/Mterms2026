@@ -39,9 +39,10 @@ function categoryScore(p,category){
 }
 function eligibleReview(p){
  const a=p.assessment||{};
- return a.mode==='ai-full-paper-evidence-assessment'&&a.fullPaperEvidenceReviewed===true&&a.evidence?.bibliographyVerified===true&&
- a.evidence?.integrityCleared===true&&a.readyForRecognition===true&&
- p.reviewStatus==='approved'&&p.reviewRevisionMatches===true;
+ return a.mode==='rule-based-abstract'&&a.eligibleForEditorialReview===true&&
+  a.evidence?.abstractSourceVerified===true&&
+  p.bibliographyVerified===true&&p.integrityCleared===true&&
+  p.reviewStatus==='approved'&&p.reviewRevisionMatches===true;
 }
 function choose(candidates,history=[],at=new Date(),options={}){
  const now=new Date(at).getTime();
