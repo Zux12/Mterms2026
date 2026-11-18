@@ -273,3 +273,6 @@ Policy decisions: 8/8 locked, but NOT production ready yet.
 9. **TEST & DEPLOY:** Full CI and E2E checks, permissions, historical selection migration, data integrity and production traffic load not yet established. Strict CSP fix was verified via user's screenshots; isolated source checks do not equal production acceptance. Maintain all activation gates OFF until explicit approval.
 
 **Launch gate:** DO NOT enable `OIL_RECOGNITION_AUTO`, `OIL_RECOGNITION_ACTIVATION_ENABLED`, `OIL_RECOGNITION_RULES_READY`, or author email sending until implementation/test evidence satisfies the above and user approves release.
+
+### Decision 8 catalogue scope code adjustment — 18 November 2026
+- Removed the preexisting `.limit(1500)` from `recognition.js` published-paper candidate query so no arbitrary 1,500-item cap excludes older published papers. Syntax checks on recognition backend, selector, reviewer and editor JS passed. Full-load database performance/pagination testing remains pending; do not call this production-ready.
