@@ -1184,14 +1184,13 @@ adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
   return res.status(409).json({error:'Dedicated recognition Resend API key missing. Verified parent sending domain and Heroku secret configuration required.',emailSent:false});
  const id=crypto.randomUUID(),now=new Date();
  const col=db().collection('recognition_resend_owner_tests');
- const prior=await col.findOne({_id:'owner'});
- if(prior?.lastAttemptAt&&new Date(prior.lastAttemptAt)>new Date(Date.now()-24*3600000))
-  return res.status(429).json({error:'One recognition Resend owner test per 24 hours.'});
- await col.updateOne({_id:'owner',lastAttemptAt:{$exists:false}},
-  {$set:{lastAttemptAt:now,lastAttemptId:id,state:'attempting'}},{upsert:true});
- // A concurrent request must not send twice.
- const claimed=await col.findOne({_id:'owner',lastAttemptId:id});
- if(!claimed)return res.status(409).json({error:'Owner test already claimed.'});
+ await col.updateOne({_id:'owner'},{$setOnInsert:{createdAt:now}},{upsert:true});
+ const claim=await col.findOneAndUpdate({_id:'owner',$or:[
+   {lastAttemptAt:{$exists:false}},
+   {lastAttemptAt:{$lt:new Date(Date.now()-24*3600000)}}]},
+  {$set:{lastAttemptAt:now,lastAttemptId:id,state:'attempting'}},{returnDocument:'after'});
+ if(!claim||claim.lastAttemptId!==id)
+  return res.status(429).json({error:'A Resend owner test has already been claimed within 24 hours.'});
  try{
   const result=await resendOwnerTest.sendOwnerTest({key,idempotencyKey:'wrrp-owner-test-'+id});
   await col.updateOne({_id:'owner',lastAttemptId:id},{$set:{state:result.state,
