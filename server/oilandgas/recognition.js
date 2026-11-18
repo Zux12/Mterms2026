@@ -133,9 +133,10 @@ async function reviewedShortlist(){
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
  return selector.choose(all.map(p=>{
   const r=byRef.get(p.reference),assessment=deterministic.abstractAssessment(p);
+  const recent=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
   return {...p,assessment,reviewStatus:r?.status,
-   bibliographyVerified:r?.bibliographyVerified===true,
-   integrityCleared:r?.integrityCleared===true,
+   bibliographyVerified:recent&&r?.bibliographyVerified===true,
+   integrityCleared:recent&&r?.integrityCleared===true,
    reviewRevisionMatches:!!r&&r.revision===reviewRevision(p)};
  }),history,new Date(),{verifiedOnly:true});
 }
@@ -349,7 +350,8 @@ async function autoScreenSourceVerifiedCandidates({max=5}={}){
  const stale=new Date(now.getTime()-7*86400000);
  const todo=eligible.filter(p=>{
   const r=byRef.get(p.reference);
-  return !(r?.status==='approved'&&r.revision===reviewRevision(p))&&
+  return !(r?.status==='approved'&&r.revision===reviewRevision(p)&&
+   r.checkedAt&&new Date(r.checkedAt)>stale)&&
    (!r?.autoAttemptedAt||new Date(r.autoAttemptedAt)<stale);
  }).slice(0,Math.min(10,Math.max(1,max)));
  let approved=0;
@@ -588,7 +590,8 @@ async function activateCycle(){
   const revisionMatches=!!r&&r.revision===reviewRevision(current);
   const qualified=!!current&&!!frozen&&revisionMatches&&
    selector.eligibleReview({...current,assessment:deterministic.abstractAssessment(current),
-    bibliographyVerified:r.bibliographyVerified,integrityCleared:r.integrityCleared,
+    bibliographyVerified:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.bibliographyVerified,
+    integrityCleared:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.integrityCleared,
     reviewStatus:r.status,reviewRevisionMatches:true})&&
    current.publicationId===frozen.publicationId&&
    selector.sourceIdentity(current.source)===selector.sourceIdentity(frozen.source)&&
@@ -716,7 +719,7 @@ adminRouter.post('/rules/approve',async(req,res,next)=>{try{
  await db().collection('recognition_rule_reviews').updateOne({_id:reference},
  {$set:{reference,revision:reviewRevision(p),status:'approved',bibliographyVerified:true,
   integrityCleared:true,integrityEvidenceUrl:evidenceUrl,integrityRationale:rationale,
-  assessmentVersion:deterministic.VERSION,approvedAt:now}}, {upsert:true});
+  assessmentVersion:deterministic.VERSION,approvedAt:now,checkedAt:now}}, {upsert:true});
  await db().collection('recognition_audit').insertOne({action:'rules-paper-integrity-approved',
   reference,rationale,integrityEvidenceUrl:evidenceUrl,createdAt:now,emailEnabled:false});
  res.json({ok:true,score:assessment.total,version:deterministic.VERSION,
