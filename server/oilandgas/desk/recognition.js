@@ -64,6 +64,52 @@ async function loadCandidateQueue(){
   $('candidate-status').textContent=result.total+' published candidates · '+Object.entries(summary).map(([k,v])=>k+': '+v).join(' · ');
  }catch(err){$('candidate-status').textContent='Candidate queue unavailable: '+err.message}
 }
+async function loadRuleScores(){
+ const body=$('rules-rows');body.replaceChildren();$('rules-status').textContent='Checking original abstract evidence…';
+ try{
+  const data=await api('rules-scorecard'),totals={ready:0,pending:0};
+  for(const p of data.items){
+   const assessment=p.assessment,ready=assessment.eligibleForEditorialReview&&!p.previouslyRecognized;
+   if(ready)totals.ready++;else totals.pending++;
+   const tr=document.createElement('tr');
+   const vals=[p.title,assessment.total+'/100',
+    p.previouslyRecognized?'Previously recognized':assessment.eligibleForEditorialReview?'Original abstract verified':'Awaiting full original abstract'];
+   for(const value of vals){const td=node('td',value);td.className='recognition-inline-7';tr.append(td)}
+   const td=document.createElement('td'),details=document.createElement('details'),summary=node('summary','Explain scoring');
+   details.append(summary);
+   for(const [key,value]of Object.entries(assessment.breakdown)){
+    const evidence=assessment.matches[key]||[];
+    details.append(node('p',key+': '+value+' / '+assessment.weights[key]+' · '+(evidence.map(x=>x.signal+': '+x.term).join('; ')||'No explicit phrase'),'muted'));
+   }
+   if(assessment.evidence.issues.length)details.append(node('p','Pending: '+assessment.evidence.issues.join(', '),'muted'));
+   td.append(details);tr.append(td);body.append(tr);
+  }
+  $('rules-status').textContent='Rubric '+data.rubricVersion+' · '+data.total+' published papers · '+totals.ready+' with enough abstract evidence · '+totals.pending+' pending/previously recognized. Read-only simulation; no authors emailed.';
+ }catch(e){$('rules-status').textContent='Rule simulation unavailable: '+e.message}
+}
+$('rules-refresh').onclick=loadRuleScores;
+$('rules-import-form').onsubmit=async event=>{
+ event.preventDefault();const target=$('rules-import-result');target.textContent='Checking original DOI metadata and abstract…';
+ try{
+  const data=Object.fromEntries(new FormData(event.target).entries());
+  const result=await api('rules/import-abstract',data);
+  target.textContent='Original abstract verified and recorded ('+result.words+' words). No recognition was issued.';
+  await loadRuleScores();await loadCandidateQueue();
+ }catch(e){target.textContent=e.message}
+};
+$('rules-approve-form').onsubmit=async event=>{
+ event.preventDefault();const target=$('rules-approve-result');
+ if(!$('rules-check-confirm').checked)return;
+ if(!confirm('Confirm that you independently checked the original publication and available integrity notices? This does not issue an award or email anyone.'))return;
+ try{
+  const data=Object.fromEntries(new FormData(event.target).entries());
+  data.confirm='SOURCE_INTEGRITY_CHECKED';
+  const result=await api('rules/approve',data);
+  target.textContent='Evidence cleared for future rules shortlist. Score: '+result.score+'/100. No award or email issued.';
+  await loadCandidateQueue();
+ }catch(e){target.textContent=e.message}
+};
+
 $('candidate-refresh').onclick=loadCandidateQueue;
 $('evidence-form').onsubmit=async e=>{e.preventDefault();const target=$('evidence-form-state');
  if(!$('evidence-confirm').checked)return;
