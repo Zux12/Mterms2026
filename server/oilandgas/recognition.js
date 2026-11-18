@@ -11,6 +11,7 @@ const deterministic=require('./recognition-rules');
 const sourceVerifier=require('./recognition-source');
 const integrityMonitor=require('./recognition-integrity');
 const letterVerification=require('./recognition-letter-verification');
+const relatedReview=require('./recognition-related-review');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -822,6 +823,18 @@ adminRouter.post('/rules/approve',async(req,res,next)=>{try{
   reference,rationale,integrityEvidenceUrl:evidenceUrl,createdAt:now,emailEnabled:false});
  res.json({ok:true,score:assessment.total,version:deterministic.VERSION,
   shortlistedOnly:true,authorEmailsEnabled:false});
+}catch(e){next(e);}});
+adminRouter.get('/related-review',async(req,res,next)=>{try{
+ const all=await candidates();
+ const examined=all.map(p=>({...p,assessment:deterministic.directoryAssessment(p)}));
+ const items=relatedReview.reviewPairs(examined,{
+  minimumScore:Math.min(...policy.categories.map(policy.thresholdFor))
+ });
+ res.set('Cache-Control','private,no-store').json({
+  totalReviewed:examined.length,minimumScore:Math.min(...policy.categories.map(policy.thresholdFor)),
+  pairs:items,automaticallyRejected:0,emailsSent:false,
+  warning:'Similarity signals prompt source-level editorial review, not a finding of duplication or research misconduct.'
+ });
 }catch(e){next(e);}});
 adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
  const all=await candidates();
