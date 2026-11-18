@@ -97,6 +97,19 @@ $('rules-import-form').onsubmit=async event=>{
   await loadRuleScores();await loadCandidateQueue();
  }catch(e){target.textContent=e.message}
 };
+$('rules-verify-form').onsubmit=async event=>{
+ event.preventDefault();const target=$('rules-verify-result');
+ if(!$('rules-verify-confirm').checked)return;
+ if(!confirm('Confirm this is the complete original abstract, copied accurately from the linked publication source?'))return;
+ const data=Object.fromEntries(new FormData(event.target).entries());
+ data.confirm='ORIGINAL_ABSTRACT_VERIFIED';
+ target.textContent='Validating supplied original abstract…';
+ try{
+  const result=await api('rules/verify-abstract',data);
+  target.textContent='Original abstract verified for scoring. Provisional score: '+result.score+'/100; no award or email issued.';
+  await loadRuleScores();await loadCandidateQueue();
+ }catch(e){target.textContent=e.message}
+};
 $('rules-approve-form').onsubmit=async event=>{
  event.preventDefault();const target=$('rules-approve-result');
  if(!$('rules-check-confirm').checked)return;
