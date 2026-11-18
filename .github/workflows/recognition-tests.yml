@@ -14,6 +14,7 @@ on:
       - 'server/oilandgas/recognition-integrity.js'
       - 'server/oilandgas/recognition-letter-verification.js'
       - 'tests/oilandgas-recognition-qr-verification.test.js'
+      - 'tests/oilandgas-recognition-simulation.test.js'
       - 'tests/oilandgas-recognition-integrity.test.js'
       - 'tests/oilandgas-recognition-rules.test.js'
       - 'tests/oilandgas-recognition-source.test.js'
@@ -51,4 +52,4 @@ jobs:
           node --check server/oilandgas/recognition-admin-alert.js
           node --check server/oilandgas/recognition-selector.js
       - name: Run recognition safety and scoring tests
-        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js tests/oilandgas-recognition-selector.test.js tests/oilandgas-recognition-letter-tracking.test.js tests/oilandgas-recognition-evidence.test.js tests/oilandgas-recognition-admin-alert.test.js tests/oilandgas-recognition-rules.test.js tests/oilandgas-recognition-source.test.js tests/oilandgas-recognition-integrity.test.js tests/oilandgas-recognition-qr-verification.test.js
+        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js tests/oilandgas-recognition-selector.test.js tests/oilandgas-recognition-letter-tracking.test.js tests/oilandgas-recognition-evidence.test.js tests/oilandgas-recognition-admin-alert.test.js tests/oilandgas-recognition-rules.test.js tests/oilandgas-recognition-source.test.js tests/oilandgas-recognition-integrity.test.js tests/oilandgas-recognition-qr-verification.test.js tests/oilandgas-recognition-simulation.test.js
