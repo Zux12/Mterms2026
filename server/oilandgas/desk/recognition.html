@@ -19,6 +19,15 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or certificates are generated in this version. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
 <section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button></section>
+<section class="panel"><h2>Friday administrator briefing — 72 hours before publication</h2>
+<p class="muted">Proposed winners are prepared on Friday at 09:00 MYT for the following Monday at 09:00 MYT. Each category has a named proposed winner or a clear unfilled status. A separate branded HTML administrator email can be enabled with a configured recipient after production tests. Author emails remain OFF.</p>
+<p><strong>Next planned publication:</strong> <span id="friday-next">Checking…</span></p>
+<p><strong>Preview preparation:</strong> <span id="friday-time">Checking…</span></p>
+<p><strong>Admin email:</strong> <span id="friday-mail-status">Not configured</span></p>
+<p><button type="button" class="secondary" id="friday-refresh">Check Friday briefing</button> <a href="recognition/friday-preview/email-html" target="_blank" rel="noopener noreferrer">View styled email mockup ↗</a></p>
+<div id="friday-cards" class="grid"></div>
+<p id="friday-msg" class="muted" role="status"></p>
+</section>
 <section class="panel"><h2>Weekly preview</h2><p class="muted">Provisional keyword-assisted score only; not a verified AI review of technical quality. No selection becomes public until activated.</p><div id="candidates" class="grid"></div></section>
 <section class="panel"><h2>Evidence-cleared automatic shortlist</h2>
 <p class="muted">This is the production-eligibility view. Only papers with a matching saved review, independently cleared integrity, and an approved AI assessment may be considered. It is intentionally separate from provisional keyword rankings.</p>
@@ -114,7 +123,7 @@ async function refresh(){
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. No emails are enabled.');await certificates();await loadLetterTracking();
+ message('Editor controls available. Author recognition emails are disabled.');await certificates();await loadLetterTracking();await fridayBriefing();
  }catch(e){message(e.message)}
 }
 async function preview(){
@@ -248,6 +257,27 @@ $('tracking-create').onsubmit=async e=>{e.preventDefault();
   await loadLetterTracking();
  }catch(err){result.textContent=err.message}
 };
+
+async function fridayBriefing(){
+ $('friday-msg').textContent='Checking scheduled administrator briefing…';
+ try{
+  const data=await api('friday-preview');
+  const local=v=>new Date(v).toLocaleString('en-MY',{dateStyle:'full',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'});
+  $('friday-next').textContent=local(data.nextPublication);
+  $('friday-time').textContent=local(data.previewScheduledAt);
+  $('friday-mail-status').textContent=(data.adminAlertEnabled&&data.adminRecipientConfigured?'Configured':'Not activated')+
+   ' · '+data.emailStatus;
+  const cards=$('friday-cards');cards.replaceChildren();
+  for(const cat of [{key:'editors-pick',name:"Editor's Pick"},{key:'industry-impact',name:'Industry Impact'},{key:'emerging-research',name:'Emerging Research'}]){
+   const slot=data.items.find(x=>x.category===cat.key),p=slot?.candidate;
+   const c=node('div','','card');c.append(node('small',cat.name),node('h3',p?.title||'Awaiting Friday selection'),
+    node('p',p?p.byline+' · '+(p.score?.total??'—')+'/100':'Not yet prepared; a vacant category will remain unfilled.','muted'));
+   cards.append(c);
+  }
+  $('friday-msg').textContent=data.status==='not-prepared'?'No Friday selection has been prepared for this upcoming week.':'Briefing state: '+data.status+' · Vacant categories: '+data.missing.length+'.';
+ }catch(e){$('friday-msg').textContent=e.message}
+}
+$('friday-refresh').onclick=fridayBriefing;
 
 $('refresh').onclick=refresh;$('preview').onclick=preview;
 $('override').onsubmit=async e=>{e.preventDefault();try{
