@@ -127,6 +127,27 @@ $('rules-discover-batch').onclick=async()=>{
  }catch(e){target.textContent='Source discovery error: '+e.message}
  finally{button.disabled=false}
 };
+async function reviewRelatedPapers(){
+ const target=$('related-review-rows');target.replaceChildren();
+ $('related-review-status').textContent='Comparing publication titles and published author lists…';
+ try{
+  const result=await api('related-review');
+  $('related-review-status').textContent=result.pairs.length+
+   ' potentially related pairs within '+result.totalReviewed+
+   ' published records. These are editorial flags, NOT findings of duplication.';
+  for(const pair of result.pairs){
+   const card=node('article','','card');
+   card.append(node('h3','Potentially related research — editorial source comparison required'),
+    node('p',pair.titleA+' ('+pair.referenceA+', '+pair.scoreA+'/100)'),
+    node('p',pair.titleB+' ('+pair.referenceB+', '+pair.scoreB+'/100)'),
+    node('p','Title overlap '+Math.round(pair.titleOverlap*100)+'% · author overlap '+
+     Math.round(pair.authorOverlap*100)+'%. Different sources may be legitimate separate research.','muted'));
+   target.append(card);
+  }
+  if(!result.pairs.length)target.append(node('p','No high-similarity pairs found among papers meeting the shortlist scoring minima.','muted'));
+ }catch(e){$('related-review-status').textContent='Related-paper check unavailable: '+e.message}
+}
+$('related-review-refresh').onclick=reviewRelatedPapers;
 $('rules-refresh').onclick=loadRuleScores;
 $('rules-import-form').onsubmit=async event=>{
  event.preventDefault();const target=$('rules-import-result');target.textContent='Checking original DOI metadata and abstract…';
