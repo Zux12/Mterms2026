@@ -31,6 +31,10 @@
 <div class="recognition-inline-5"><table class="recognition-inline-6"><thead><tr>
 <th class="recognition-inline-7">Paper</th><th class="recognition-inline-7">Score</th><th class="recognition-inline-7">Evidence status</th><th class="recognition-inline-7">Details</th>
 </tr></thead><tbody id="rules-rows"></tbody></table></div>
+<h3>Back-catalogue abstract discovery</h3>
+<p class="muted">Check up to ten published DOI records at a time for a complete publisher-supplied Crossref abstract. A verified original title and sufficient abstract are required; unavailable abstracts remain pending. No scores become awards and no emails are sent.</p>
+<button type="button" id="rules-discover-batch" class="secondary">Check next five DOI abstracts</button>
+<p id="rules-discover-result" role="status" class="muted"></p>
 <h3>Retrieve original DOI abstract (admin only)</h3>
 <form id="rules-import-form"><label>Published paper reference<input name="reference" pattern="OG-P-[A-F0-9]{16}" required placeholder="OG-P-0123456789ABCDEF"></label>
 <button type="submit" class="secondary">Verify/import Crossref abstract — no award</button></form>
