@@ -132,14 +132,17 @@ async function reviewedShortlist(){
  const refs=all.map(p=>p.reference);
  const reviews=await db().collection('recognition_rule_reviews').find({reference:{$in:refs}}).toArray();
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
- return selector.choose(all.map(p=>{
+ const approved=all.map(p=>{
   const r=byRef.get(p.reference),assessment=deterministic.abstractAssessment(p);
   const recent=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
   return {...p,assessment,reviewStatus:r?.status,
    bibliographyVerified:recent&&r?.bibliographyVerified===true,
    integrityCleared:recent&&r?.integrityCleared===true,
    reviewRevisionMatches:!!r&&r.revision===reviewRevision(p)};
- }),history,new Date(),{verifiedOnly:true});
+ });
+ const overrides=await db().collection('recognition_overrides').find({state:'pending'}).toArray();
+ const forced=Object.fromEntries(overrides.map(x=>[x.category,x.reference]));
+ return selector.choose(approved,history,new Date(),{verifiedOnly:true,forced});
 }
 async function applyOverrides(proposed) {
  const overrides=await db().collection('recognition_overrides').find({}).toArray();
