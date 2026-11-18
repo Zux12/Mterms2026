@@ -138,3 +138,20 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - The **12-week author cooldown remains a preference** between distinct eligible papers, not a ban on an author ever receiving recognition for a different paper.
 - Added lifetime exclusion regression tests for years-later selection, renamed reference with same publication ID, and exhausted pool. Four isolated checks passed using fetched JavaScript; full Node CI and deployment remain unverified.
 - No emails, awards, tracking links, production recognition records or scheduler settings were changed.
+
+## Continued implementation — 18 November 2026 (newly published papers and full-paper evidence gate)
+- User approved newly uploaded/published papers entering recognition consideration automatically, with no separate award application, fair competition and full-paper evidence requirements (not just title/abstract).
+- Added `server/oilandgas/recognition-evidence.js`: validates four source-backed research evidence sections (methodology, results, limitations and industry implications), original HTTPS evidence URL, and editorial confirmation that the full paper was examined.
+- Added authenticated `GET /api/oilandgas/editor/recognition/candidate-queue`: derives a private recognition consideration queue from the existing `status:'published'` publication collection. Because it is computed from current published data, new publications appear without a separate recognition application. States: recognized-once, full-paper-evidence-needed, ai-assessment-needed, editorial-integrity-review-needed, ready-for-shortlist.
+- Added authenticated `POST /api/oilandgas/editor/recognition/evidence`: stores a revision-bound editorial evidence packet in `recognition_evidence`, records an audit entry and invalidates prior AI review status if evidence changes. No recognition or email sent.
+- Updated `recognition-review.js` to refuse AI assessments if no full-paper evidence packet is present (returns `evidence_required`). The AI prompt now uses manuscript evidence extracts as well as the publication metadata; no claim that the model independently read the original PDF is made. Results are labeled `ai-full-paper-evidence-assessment`.
+- Updated the reviewed-only automatic selector and editorial approval gate to reject all metadata-only AI assessments. Approval remains conditional on matching bibliographic record, independently documented publication-integrity clearance and minimum scores.
+- Added admin candidate queue and source-backed evidence entry panel in `server/oilandgas/desk/recognition.html`.
+- Strengthened once-only permanent exclusion using source/DOI identity in addition to reference and stable publication ID to discourage duplicate re-entry.
+- Updated tests for `recognition-review`, `recognition-selector`; created `tests/oilandgas-recognition-evidence.test.js`, expanded GitHub Actions workflow. Syntax checks passed for updated JavaScript modules and admin inline JS. Isolated evidence validation checks passed with a URL implementation supplied to the testing sandbox; complete Node CI/live deployment still unconfirmed.
+- No author emails sent or enabled. WRRP activation flags remain OFF/LOCKED. No real recognition awarded or letter issued.
+
+### Remaining implementation limitations
+- The full-paper evidence packet currently requires editorial review/entry of source-backed methodological/findings information. Automatic safe full-text PDF extraction and independent document verification are NOT yet implemented; do not claim uploaded paper files are automatically analyzed end-to-end.
+- Source URL validity alone does not establish publisher availability or research integrity. Editors must inspect the paper and document credibility checks before granting shortlist approval.
+- True browser testing, Heroku deployment status, and full Node test suite execution remain to be verified.
