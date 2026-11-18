@@ -23,3 +23,9 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 .recognition-inline-10{width:100%;border-collapse:collapse;text-align:left;font:13px Arial,sans-serif}
 .recognition-inline-11{padding:10px;border-bottom:1px solid #ddd}
 .recognition-inline-12{margin-top:22px}
+
+/* Locked programme master toggle: never imply the release has passed testing. */
+.master-switch{display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px;margin:16px 0}
+.master-switch input{width:42px;height:22px;accent-color:#26735f;margin:0}
+#master-gates p{margin:7px 0}
+#master-state{font-weight:700}
