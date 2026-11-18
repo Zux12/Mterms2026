@@ -122,8 +122,7 @@ async function shortlist(){
 function reviewRevision(p){
  return crypto.createHash('sha256').update(JSON.stringify({
   reference:p.reference,publicationId:p.publicationId,
-  title:p.title,summary:p.summary,abstract:p.abstract,
-  abstractSourceVerified:p.abstractSourceVerified,verifiedAuthors:p.verifiedAuthors,source:p.source
+  title:p.title,summary:p.summary,topic:p.topic,byline:p.byline,source:p.source
  })).digest('hex');
 }
 async function reviewedShortlist(){
@@ -134,7 +133,7 @@ async function reviewedShortlist(){
  const reviews=await db().collection('recognition_rule_reviews').find({reference:{$in:refs}}).toArray();
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
  const approved=all.map(p=>{
-  const r=byRef.get(p.reference),assessment=deterministic.abstractAssessment(p);
+  const r=byRef.get(p.reference),assessment=deterministic.directoryAssessment(p);
   const recent=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
   return {...p,assessment,reviewStatus:r?.status,
    bibliographyVerified:recent&&r?.bibliographyVerified===true,
@@ -356,7 +355,7 @@ adminRouter.get('/status',async(req,res,next)=>{try{
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
  res.json({scheduledStart:weekStart().toISOString(),emailEnabled:false,
-  scoring:'rule-based-provisional',activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
+  scoring:'rule-based-directory',activationEnabled:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
   items:(await applyOverrides(await shortlist())).map(x=>({...x,minimumScore:policy.thresholdFor(x.category),
    passesThreshold:!!x.candidate&&x.candidate.assessment.total>=policy.thresholdFor(x.category)}))});
 }catch(e){next(e);}});
@@ -380,7 +379,7 @@ adminRouter.post('/override',async(req,res,next)=>{try{
 adminRouter.get('/preview-reviewed',async(req,res,next)=>{try{
  const items=await reviewedShortlist();
  res.set('Cache-Control','no-store').json({
-  programme:'WRRP-001',mode:'deterministic-abstract-reviewed-only',emailEnabled:false,
+  programme:'WRRP-001',mode:'deterministic-directory-reviewed-only',emailEnabled:false,
   activationEnabled:false,items,
   warning:'Rule-based scoring is textual editorial screening; independent publication integrity confirmation is required.'
  });
@@ -403,7 +402,7 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
 // known-retraction lookup, and no explicit Crossref retraction notice.
 async function autoScreenSourceVerifiedCandidates({max=5}={}){
  const papers=await candidates();
- const eligible=papers.map(p=>({...p,assessment:deterministic.abstractAssessment(p)}))
+ const eligible=papers.map(p=>({...p,assessment:deterministic.directoryAssessment(p)}))
   .filter(p=>p.assessment.eligibleForEditorialReview&&p.assessment.total>=75);
  const reviewed=await db().collection('recognition_rule_reviews')
   .find({reference:{$in:eligible.map(p=>p.reference)}}).toArray();
@@ -655,7 +654,7 @@ async function activateCycle(){
   const current=frozen&&byRef.get(frozen.reference),r=current&&byReview.get(current.reference);
   const revisionMatches=!!r&&r.revision===reviewRevision(current);
   const qualified=!!current&&!!frozen&&revisionMatches&&
-   selector.eligibleReview({...current,assessment:deterministic.abstractAssessment(current),
+   selector.eligibleReview({...current,assessment:deterministic.directoryAssessment(current),
     bibliographyVerified:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.bibliographyVerified,
     integrityCleared:r.checkedAt&&new Date(r.checkedAt)>new Date(Date.now()-7*86400000)&&r.integrityCleared,
     reviewStatus:r.status,reviewRevisionMatches:true})&&
@@ -663,9 +662,9 @@ async function activateCycle(){
    selector.sourceIdentity(current.source)===selector.sourceIdentity(frozen.source)&&
    !selector.paperCooldown(current,history)&&
    policy.publicationEligibility(current).eligible&&
-   deterministic.abstractAssessment(current).total>=policy.thresholdFor(row.category);
+   deterministic.directoryAssessment(current).total>=policy.thresholdFor(row.category);
   return {category:row.category,label:row.label,candidate:qualified?{
-   ...current,assessment:deterministic.abstractAssessment(current)}:null};
+   ...current,assessment:deterministic.directoryAssessment(current)}:null};
  });
  const keys=proposed.filter(x=>x.candidate).map(x=>x.candidate.kind+':'+x.candidate.reference);
  if(new Set(keys).size!==keys.length)
@@ -677,7 +676,7 @@ async function activateCycle(){
     throw Object.assign(new Error('Weekly cycle already exists; review before retrying.'),{status:409});
    const now=new Date();
    await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
-    selectionMode:'rules-abstract-v2-approved',emailsEnabled:false,createdAt:now},{session});
+    selectionMode:'rules-directory-v3-approved',emailsEnabled:false,createdAt:now},{session});
    await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
    const awardable=proposed.filter(row=>row.candidate);
    if(awardable.length)await selections.insertMany(awardable.map(row=>{
@@ -754,7 +753,7 @@ adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
  await db().collection('recognition_audit').insertOne({action:'doi-abstract-import',
   reference,metadataSource:result.source,createdAt:revisedAt,emailEnabled:false});
  res.json({ok:true,state:'original-abstract-verified',
-  words:deterministic.abstractAssessment({...p,abstract:result.abstract,abstractSourceVerified:true}).evidence.abstractWords,
+  words:deterministic.directoryAssessment(p).evidence.abstractWords,
   selectionActivated:false,emailsSent:false});
 }catch(e){next(e);}});
 // Editor can enter an original publisher/repository abstract if Crossref omits it.
@@ -770,7 +769,7 @@ adminRouter.post('/rules/verify-abstract',async(req,res,next)=>{try{
  const row=await col.findOne({reference,status:'published',publication:{$exists:true}});
  if(!row)return res.status(404).json({error:'Published paper not found.'});
  const p=entry(row,'publications');
- const assessment=deterministic.abstractAssessment({...p,abstract,abstractSourceVerified:true});
+ const assessment=deterministic.directoryAssessment(p);
  if(!assessment.eligibleForEditorialReview)return res.status(422).json({
   error:'Insufficient original abstract or publication evidence.',issues:assessment.evidence.issues});
  const changed=await col.updateOne({_id:row._id,status:'published',
@@ -796,9 +795,9 @@ adminRouter.post('/rules/approve',async(req,res,next)=>{try{
   return res.status(400).json({error:'Reference, HTTPS integrity evidence, detailed rationale (30–1200 characters), and confirmation required.'});
  const row=await db().collection('publications').findOne({reference,status:'published',publication:{$exists:true}});
  if(!row)return res.status(404).json({error:'Published research not found.'});
- const p=entry(row,'publications'),assessment=deterministic.abstractAssessment(p);
+ const p=entry(row,'publications'),assessment=deterministic.directoryAssessment(p);
  if(!policy.publicationEligibility(p).eligible||!assessment.eligibleForEditorialReview)
-  return res.status(422).json({error:'Original abstract and publication details are not sufficiently source verified.',issues:assessment.evidence.issues});
+  return res.status(422).json({error:'Publication directory fields or source integrity checks are incomplete.',issues:assessment.evidence.issues});
  const history=await db().collection('recognition_selections').find({},{
   projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray();
  if(selector.paperCooldown(p,history))return res.status(409).json({error:'This publication has already received a recognition.'});
@@ -817,7 +816,7 @@ adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
  const history=await db().collection('recognition_selections').find({},{
   projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray();
  const items=all.map(p=>({reference:p.reference,title:p.title,byline:p.byline,
-  assessment:deterministic.abstractAssessment(p),
+  assessment:deterministic.directoryAssessment(p),
   previouslyRecognized:selector.paperCooldown(p,history)}));
  res.set('Cache-Control','private,no-store').json({rubricVersion:deterministic.VERSION,
   items,total:items.length,pending:items.filter(x=>!x.assessment.eligibleForEditorialReview).length,
@@ -826,19 +825,18 @@ adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
 adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
  const published=await candidates();
  const refs=published.map(p=>p.reference);
- const [evidence,reviews,history]=await Promise.all([
-  db().collection('recognition_evidence').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
-  db().collection('recognition_rule_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
+ const [reviews,history]=await Promise.all([
+  db().collection('recognition_rule_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1,checkedAt:1}}).toArray(),
   db().collection('recognition_selections').find({}, {projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray()
  ]);
- const evidMap=new Map(evidence.map(x=>[x.reference,x])),
-       reviewMap=new Map(reviews.map(x=>[x.reference,x]));
+ const reviewMap=new Map(reviews.map(x=>[x.reference,x]));
  const items=published.map(p=>{
   const prior=selector.paperCooldown(p,history);
-  const rev=reviewRevision(p),e=evidMap.get(p.reference),r=reviewMap.get(p.reference);
-  const assessment=deterministic.abstractAssessment(p);
-  const status=prior?'recognized-once':!assessment.eligibleForEditorialReview?'abstract-or-source-pending':
-   !r||r.revision!==rev?'source-integrity-review-needed':r.status==='approved'?'ready-for-shortlist':
+  const rev=reviewRevision(p),r=reviewMap.get(p.reference);
+  const assessment=deterministic.directoryAssessment(p);
+  const current=!!r?.checkedAt&&new Date(r.checkedAt).getTime()>Date.now()-7*86400000;
+  const status=prior?'recognized-once':!assessment.eligibleForEditorialReview?'directory-metadata-pending':
+   !r||r.revision!==rev||!current?'source-integrity-review-needed':r.status==='approved'?'ready-for-shortlist':
    'source-integrity-review-needed';
   return {reference:p.reference,title:p.title,publishedAt:p.publishedAt,status,
    publicationId:p.publicationId,score:assessment.total,issues:assessment.evidence.issues};
