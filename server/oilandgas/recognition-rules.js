@@ -5,26 +5,26 @@ const VERSION='keyword-directory-v3.0';
 const weights={relevance:25,technical:20,practical:20,evidence:15,originality:10,timeliness:10};
 const groups={
  relevance:[
-  ['upstream',/\b(?:oil|petroleum|hydrocarbon|reservoir|drill(?:ing)?|well(?:bore)?|upstream|production)\b/i],
-  ['midstream',/\b(?:gas|lng|pipeline|midstream|transmission|storage|transport|fiscal)\b/i],
-  ['downstream',/\b(?:refiner(?:y|ies)|refin(?:ing|ery)|petrochemical|process(?:ing)?|distillation|combustion|sludge|crude)\b/i],
-  ['measurement',/\b(?:measur(?:e|ement|ing)|meter(?:ing)?|instrument(?:ation)?|calibrat(?:ion|e)|analy[sz]er|sensor|monitoring|flow)\b/i],
-  ['industry priorities',/\b(?:energy|safety|integrity|risk|corrosion|emission|methane|environment|sustainab|renewable|digital|reliab)/i]
+  ['upstream',/\b(?:upstream|reservoir|drill(?:ing)?|well(?:bore)?|exploration|oil production|petroleum production|crude oil production)\b/i],
+  ['midstream',/\b(?:midstream|lng|liquefied natural gas|pipeline(?:s)?|gas transmission|gas transport|gas storage|fiscal metering)\b/i],
+  ['downstream',/\b(?:refiner(?:y|ies)|refin(?:ing|ery)|petrochemical(?:s)?|gas processing|petroleum processing|distillation|combustion|sludge|crude)\b/i],
+  ['measurement',/\b(?:measur(?:e|es|ement|ements|ing)|meter(?:s|ing)?|instrument(?:s|ation)?|calibrat(?:ion|e|ed)|analy[sz]ers?|sensors?|monitor(?:ing|s)?|flow)\b/i],
+  ['sector and priorities',/\b(?:oil\s+(?:and|&)\s+gas|petroleum|hydrocarbon|natural gas|energy|safety|integrity|risk|corrosion|emissions?|methane|environment(?:al)?|sustainab\w*|renewable|digital|reliab\w*)\b/i]
  ],
  technical:[
   ['technical approach',/\b(?:method(?:ology)?|approach|algorithm|technique|framework|design|system|technology|develop(?:ment|ed)?)\b/i],
   ['analysis',/\b(?:analy[sz](?:e|ing|sis)|model(?:ling|ing)?|simulat(?:ion|e)|prediction|assess(?:ment)?|evaluation|statistical)\b/i],
-  ['measurement and experimentation',/\b(?:experiment(?:al)?|test(?:ing)?|measur(?:ement|ed)|sensor|survey|observation|data|sample)\b/i],
+  ['measurement and experimentation',/\b(?:experiment(?:al)?|test(?:ing)?|measur(?:ement|ements|ed)|sensors?|survey|observations?|data|samples?)\b/i],
   ['comparison or improvement',/\b(?:compar(?:ison|ative)|improv(?:e|ement)|optimi[sz](?:ation|e)|performance|result|reduction|enhanc(?:e|ement))\b/i]
  ],
  practical:[
   ['engineering setting',/\b(?:plant|refiner(?:y|ies)|platform|offshore|pipeline|field|facilit(?:y|ies)|industrial|operat(?:ion|ing)|upstream)\b/i],
   ['implementation',/\b(?:implementation|deploy(?:ment|ed)|application|case study|pilot|prototype|installation|processing)\b/i],
   ['operational benefit',/\b(?:reliability|efficien(?:cy|t)|cost|safety|risk|maintenance|emissions?|environmental|integrity|production|performance)\b/i],
-  ['applicable subject',/\b(?:instrument|meter|sensor|calibrat|inspection|monitoring|optimisation|optimization|prediction|recycling|treatment|removal|filtration|flow)\b/i]
+  ['applicable subject',/\b(?:instruments?|meters?|sensors?|calibrat\w*|inspection|monitoring|optimisation|optimization|prediction|recycling|treatment|removal|filtration|flow)\b/i]
  ],
  originality:[
-  ['explicit novelty',/\b(?:novel|innovativ(?:e|ion)|new|emerging|first|original|next.generation)\b/i],
+  ['explicit novelty',/\b(?:novel|innovativ(?:e|ion)|new|emerging|original|first[- ](?:reported|demonstration|application)|next.generation)\b/i],
   ['development or improvement',/\b(?:develop(?:ment|ed)|design|advanc(?:ed|ement)|improv(?:ed|ement)|propos(?:ed|al)|framework)\b/i]
  ],
  timeliness:[
