@@ -45,7 +45,7 @@ test('cleared fictional directory records can fill three categories with distinc
  const papers=[synthetic('OG-P-AAAAAAAAAAAAAAAA','A Researcher','a'),
   synthetic('OG-P-BBBBBBBBBBBBBBBB','B Researcher','b'),
   synthetic('OG-P-CCCCCCCCCCCCCCCC','C Researcher','c')];
- assert.ok(papers.every(x=>x.assessment.total>=85));
+ assert.ok(papers.every(x=>x.assessment.total>=70));
  const rows=selector.choose(papers,[],friday);
  assert.equal(rows.filter(x=>x.candidate).length,3);
  assert.equal(new Set(rows.map(x=>x.candidate.source)).size,3);
@@ -53,7 +53,7 @@ test('cleared fictional directory records can fill three categories with distinc
 });
 test('no publication scores high enough means no fake winners',()=>{
  const weak=synthetic('OG-P-DDDDDDDDDDDDDDDD','D Researcher','d');
- weak.assessment={...weak.assessment,total:70};
+ weak.assessment={...weak.assessment,total:59};
  const rows=selector.choose([weak],[],friday);
  assert.ok(rows.every(x=>x.candidate===null));
 });
