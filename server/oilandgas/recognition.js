@@ -663,6 +663,7 @@ adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
   'publication.title':row.publication.title,source:row.source},
   {$set:{'publication.abstract':result.abstract,'publication.abstractSourceVerified':true,
    'publication.abstractMetadataSource':result.source,
+   'publication.verifiedAuthors':result.verifiedAuthors,
    'publication.abstractVerifiedAt':revisedAt}});
  if(!update.modifiedCount)return res.status(409).json({error:'Publication changed during abstract verification.'});
  await db().collection('recognition_rule_reviews').updateOne({_id:reference},
