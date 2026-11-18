@@ -24,3 +24,22 @@ test('recognition never enables email transport',()=>{
  assert.doesNotMatch(file,/sendMail\s*\(/);
  assert.doesNotMatch(file,/createTransport\s*\(/);
 });
+
+test('provisional keyword scores are reproducible and explain each criterion',()=>{
+ const paper={title:'Novel oil and gas measurement method',summary:'The paper describes emissions analysis for a refinery with validated case study results.',topic:'Measurement',source:'https://doi.org/10.1000/example'};
+ const first=scorePaper(paper),second=scorePaper(paper);
+ assert.deepEqual(first,second);
+ assert.equal(first.explanations.length,6);
+ assert.equal(first.rubricVersion,'provisional-keyword-v1');
+ for(const e of first.explanations){
+  assert.equal(e.points,first.breakdown[e.criterion]);
+  assert.equal(typeof e.limitation,'string');
+  if(e.criterion!=='evidence'&&e.points>0) assert.ok(e.signal);
+ }
+});
+test('provisional evidence URL does not claim independently proven research quality',()=>{
+ const s=scorePaper({title:'General research paper',summary:'',topic:'',source:'https://doi.org/10.1000/test'});
+ assert.equal(s.breakdown.evidence,15);
+ assert.match(s.explanations.find(x=>x.criterion==='evidence').limitation,/not independent verification/i);
+ assert.match(s.note,/Do not use as evidence of technical merit/i);
+});
