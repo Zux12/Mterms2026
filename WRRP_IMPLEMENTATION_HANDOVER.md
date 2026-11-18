@@ -175,3 +175,12 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 **Engineering implications:** Remove the currently mandatory full-paper packet gate from `recognition-review.js`, `recognition-selector.js`, `recognition.js`, and editor form before enabling activation; implement deterministic abstract screening with explicit confidence/evidence levels. Keep full-paper evidence as optional escalation. Existing implementation still requires full-paper evidence and uses AI; migration remains pending. Emails and activation OFF.
 
 **Next:** Decision 3/8 — autonomous release policy vs administrator approval for winning papers.
+
+### Decision 3/8: Autonomous weekly release — LOCKED (18 November 2026)
+**User decision:** Option A, fully automatic weekly publication of qualifying recognition winners, with administrator override, withdrawal, and emergency pause controls. Scheduled target: Mondays at 09:00 Asia/Kuala_Lumpur.
+
+**Safety interpretation:** "Qualifying" means the paper has met the locked deterministic abstract-first evaluation, source/DOI checks, evidence and integrity requirements, category score threshold, and permanent once-only recognition constraint. Failed/unavailable checks must never be treated as passes. Autonomous release must provide an audit record, be idempotent for the weekly cycle, and support admin pause/withdrawal after issue.
+
+**Operational status:** This is a POLICY DECISION, not authorization to turn on production scheduling now. Recognition activation and email delivery remain OFF until implementation and tests finish; only a separate deployment decision can enable automatic publication. Recipient congratulations by email still require explicit approval later.
+
+**Next:** Decision 4/8 — whether to leave a category unfilled when fewer than three qualifying new papers are available.
