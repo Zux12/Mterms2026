@@ -34,7 +34,9 @@ async function crossrefAbstract(p,{fetcher=fetch}={}){
   if(!screened.eligibleForEditorialReview)
    return {status:'abstract-insufficient',doi,metadataTitle:title,
     length:abstract.length,words:screened.evidence.abstractWords};
-  return {status:'verified',doi,metadataTitle:title,abstract,
+  const authors=(Array.isArray(w.author)?w.author:[]).slice(0,150)
+  .map(a=>[a.given,a.family].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean);
+ return {status:'verified',doi,metadataTitle:title,abstract,verifiedAuthors:authors,
    source:'https://api.crossref.org/works/'+encodeURIComponent(doi),
    evidenceState:'crossref-title-and-abstract-match',retrievedAt:new Date()};
  }catch(e){return {status:'crossref-unavailable'};}
