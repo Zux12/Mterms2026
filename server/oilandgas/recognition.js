@@ -7,6 +7,7 @@ const policy=require('./recognition-policy');
 const selector=require('./recognition-selector');
 const fullText=require('./recognition-evidence');
 const adminAlert=require('./recognition-admin-alert');
+const deterministic=require('./recognition-rules');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -27,6 +28,7 @@ function entry(row,kind){
  const p=row.publication||{};
  return {kind,reference:row.reference,publicationId:row.publicationId||null,
  title:String(p.title||row.title||''),summary:String(p.summary||p.note||row.note||''),
+ abstract:String(p.abstract||''),abstractSourceVerified:p.abstractSourceVerified===true,
  byline:String(p.byline||row.byline||(row.authors||[]).map(x=>x.name).join(', ')),
  topic:String(p.topic||row.topic||''),
  source:kind==='publications'&&/^https:\/\//.test(row.source||'')?row.source:'',
@@ -122,17 +124,17 @@ function reviewRevision(p){
 async function reviewedShortlist(){
  const all=await candidates();
  const history=await db().collection('recognition_selections')
-  .find({status:{$in:['active','archived','withdrawn']}},{projection:{reference:1,kind:1,publicationId:1,source:1,start:1,byline:1}})
-  .toArray();
+  .find({status:{$in:['active','archived','withdrawn']}},{projection:{reference:1,kind:1,publicationId:1,source:1,start:1,byline:1}}).toArray();
  const refs=all.map(p=>p.reference);
- const reviews=await db().collection('recognition_reviews').find({reference:{$in:refs}}).toArray();
+ const reviews=await db().collection('recognition_rule_reviews').find({reference:{$in:refs}}).toArray();
  const byRef=new Map(reviews.map(r=>[r.reference,r]));
- const eligible=all.map(p=>{
-  const r=byRef.get(p.reference);
-  return {...p,assessment:r?.assessment,reviewStatus:r?.status,
+ return selector.choose(all.map(p=>{
+  const r=byRef.get(p.reference),assessment=deterministic.abstractAssessment(p);
+  return {...p,assessment,reviewStatus:r?.status,
+   bibliographyVerified:r?.bibliographyVerified===true,
+   integrityCleared:r?.integrityCleared===true,
    reviewRevisionMatches:!!r&&r.revision===reviewRevision(p)};
- });
- return selector.choose(eligible,history,new Date(),{verifiedOnly:true});
+ }),history,new Date(),{verifiedOnly:true});
 }
 async function applyOverrides(proposed) {
  const overrides=await db().collection('recognition_overrides').find({}).toArray();
@@ -302,9 +304,9 @@ adminRouter.post('/override',async(req,res,next)=>{try{
 adminRouter.get('/preview-reviewed',async(req,res,next)=>{try{
  const items=await reviewedShortlist();
  res.set('Cache-Control','no-store').json({
-  programme:'WRRP-001',mode:'evidence-approved-only',emailEnabled:false,
+  programme:'WRRP-001',mode:'deterministic-abstract-reviewed-only',emailEnabled:false,
   activationEnabled:false,items,
-  warning:'A bibliographic AI draft is never sufficient by itself. Approved records require independent integrity clearance.'
+  warning:'Rule-based scoring is textual editorial screening; independent publication integrity confirmation is required.'
  });
 }catch(e){next(e);}});
 adminRouter.get('/overrides',async(req,res,next)=>{try{
@@ -472,7 +474,7 @@ async function activateCycle(){
  // Revalidate the EXACT Friday shortlist at publication, not a newly ranked
  // Monday shortlist; new papers must wait until the following cycle.
  const all=await candidates();
- const approvedReviews=await db().collection('recognition_reviews').find({
+ const approvedReviews=await db().collection('recognition_rule_reviews').find({
   reference:{$in:saved.items.filter(x=>x.candidate).map(x=>x.candidate.reference)}}).toArray();
  const byRef=new Map(all.map(p=>[p.reference,p]));
  const byReview=new Map(approvedReviews.map(r=>[r.reference,r]));
@@ -483,14 +485,16 @@ async function activateCycle(){
   const current=frozen&&byRef.get(frozen.reference),r=current&&byReview.get(current.reference);
   const revisionMatches=!!r&&r.revision===reviewRevision(current);
   const qualified=!!current&&!!frozen&&revisionMatches&&
-   selector.eligibleReview({...current,assessment:r.assessment,reviewStatus:r.status,reviewRevisionMatches:true})&&
+   selector.eligibleReview({...current,assessment:deterministic.abstractAssessment(current),
+    bibliographyVerified:r.bibliographyVerified,integrityCleared:r.integrityCleared,
+    reviewStatus:r.status,reviewRevisionMatches:true})&&
    current.publicationId===frozen.publicationId&&
    selector.sourceIdentity(current.source)===selector.sourceIdentity(frozen.source)&&
    !selector.paperCooldown(current,history)&&
    policy.publicationEligibility(current).eligible&&
-   r.assessment.total>=policy.thresholdFor(row.category);
+   deterministic.abstractAssessment(current).total>=policy.thresholdFor(row.category);
   return {category:row.category,label:row.label,candidate:qualified?{
-   ...current,assessment:r.assessment}:null};
+   ...current,assessment:deterministic.abstractAssessment(current)}:null};
  });
  const keys=proposed.filter(x=>x.candidate).map(x=>x.candidate.kind+':'+x.candidate.reference);
  if(new Set(keys).size!==keys.length)
@@ -502,7 +506,7 @@ async function activateCycle(){
     throw Object.assign(new Error('Weekly cycle already exists; review before retrying.'),{status:409});
    const now=new Date();
    await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
-    selectionMode:'evidence-approved-ranking',emailsEnabled:false,createdAt:now},{session});
+    selectionMode:'rules-abstract-v2-approved',emailsEnabled:false,createdAt:now},{session});
    await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
    const awardable=proposed.filter(row=>row.candidate);
    if(awardable.length)await selections.insertMany(awardable.map(row=>{
@@ -534,12 +538,23 @@ adminRouter.get('/history',async(req,res,next)=>{try{
 // It cannot activate selections, issue certificates, modify database records or email authors.
 // Published research enters the consideration pool automatically; no separate award
 // application is required. This queue is read-only and does not itself score or award.
+adminRouter.get('/rules-scorecard',async(req,res,next)=>{try{
+ const all=await candidates();
+ const history=await db().collection('recognition_selections').find({},{
+  projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray();
+ const items=all.map(p=>({reference:p.reference,title:p.title,byline:p.byline,
+  assessment:deterministic.abstractAssessment(p),
+  previouslyRecognized:selector.paperCooldown(p,history)}));
+ res.set('Cache-Control','private,no-store').json({rubricVersion:deterministic.VERSION,
+  items,total:items.length,pending:items.filter(x=>!x.assessment.eligibleForEditorialReview).length,
+  authorEmailsEnabled:false,simulationOnly:true});
+}catch(e){next(e);}});
 adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
  const published=await candidates();
  const refs=published.map(p=>p.reference);
  const [evidence,reviews,history]=await Promise.all([
   db().collection('recognition_evidence').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
-  db().collection('recognition_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
+  db().collection('recognition_rule_reviews').find({reference:{$in:refs}},{projection:{reference:1,revision:1,status:1}}).toArray(),
   db().collection('recognition_selections').find({}, {projection:{reference:1,publicationId:1,source:1,kind:1}}).toArray()
  ]);
  const evidMap=new Map(evidence.map(x=>[x.reference,x])),
@@ -547,11 +562,12 @@ adminRouter.get('/candidate-queue',async(req,res,next)=>{try{
  const items=published.map(p=>{
   const prior=selector.paperCooldown(p,history);
   const rev=reviewRevision(p),e=evidMap.get(p.reference),r=reviewMap.get(p.reference);
-  const status=prior?'recognized-once':!e||e.revision!==rev?'full-paper-evidence-needed':
-   !r||r.revision!==rev?'ai-assessment-needed':r.status==='approved'?'ready-for-shortlist':
-   'editorial-integrity-review-needed';
+  const assessment=deterministic.abstractAssessment(p);
+  const status=prior?'recognized-once':!assessment.eligibleForEditorialReview?'abstract-or-source-pending':
+   !r||r.revision!==rev?'source-integrity-review-needed':r.status==='approved'?'ready-for-shortlist':
+   'source-integrity-review-needed';
   return {reference:p.reference,title:p.title,publishedAt:p.publishedAt,status,
-   publicationId:p.publicationId};
+   publicationId:p.publicationId,score:assessment.total,issues:assessment.evidence.issues};
  });
  res.set('Cache-Control','private,no-store').json({items,total:items.length,
   emailEnabled:false,manualAwardApplicationRequired:false});
