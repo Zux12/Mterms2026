@@ -53,7 +53,7 @@ function choose(candidates,history=[],at=new Date(),options={}){
  const result=[];
  for(const category of categories){
   const threshold=thresholdFor(category);
-  const pool=remaining.filter(p=>!used.has(p.kind+':'+p.reference)&&
+  const pool=remaining.filter(p=>!used.has(sourceIdentity(p.source)||p.publicationId||p.kind+':'+p.reference)&&
    (p.assessment?.total||0)>=threshold);
   const ranked=pool.map(p=>{
    const repeats=names(p.byline).some(n=>selectedAuthors.has(n));
@@ -71,7 +71,7 @@ function choose(candidates,history=[],at=new Date(),options={}){
   });
   const winner=ranked[0]?.p||null;
   if(winner){
-   used.add(winner.kind+':'+winner.reference);
+   used.add(sourceIdentity(winner.source)||winner.publicationId||winner.kind+':'+winner.reference);
    names(winner.byline).forEach(n=>selectedAuthors.add(n));
   }
   result.push({category,candidate:winner,minimumScore:threshold,
