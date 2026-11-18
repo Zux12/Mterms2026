@@ -184,3 +184,21 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 **Operational status:** This is a POLICY DECISION, not authorization to turn on production scheduling now. Recognition activation and email delivery remain OFF until implementation and tests finish; only a separate deployment decision can enable automatic publication. Recipient congratulations by email still require explicit approval later.
 
 **Next:** Decision 4/8 — whether to leave a category unfilled when fewer than three qualifying new papers are available.
+
+### Decision 4/8: Vacant categories and Friday admin alerts — LOCKED (18 November 2026)
+**User decision:** Option A: publish only qualified winners; any category without a qualifying paper remains **unfilled**. Do not reduce thresholds, postpone the other qualified winners, or reuse a previously awarded paper. Additional requirements: admin must get an email alert if a category is vacant, admin must be shown the upcoming proposed winners, and winners must be selected **three days (72 hours) before Monday 09:00 MYT publication**. The admin alert email must have polished CSS branding.
+
+**Implementation committed (not yet live-verified):**
+- New `server/oilandgas/recognition-admin-alert.js`: Friday 09:00 MYT / Monday 09:00 MYT scheduling calculations; charcoal, orange and gold table-based HTML email with inline email-client-compatible CSS; plain text alternative; editorial winners, author names, scores, references, and conspicuous unfilled-category warning; HTML escaping for all publication metadata.
+- `recognition.js` now prepares a frozen draft in `recognition_previews` for the following Monday when scheduler fires Friday 09:00 MYT; reserves one candidate or an explicit vacancy per category. On Monday, only Friday's proposed selections are reverified for current eligibility and publication integrity. If a proposed winner becomes invalid, category remains unfilled; no unannounced last-minute replacement is made.
+- Monday activation now supports 0–3 actual winners, recording unfilled categories. Selection identity/date remain unique, with previous recognition permanently excluded.
+- Admin-only `GET /api/oilandgas/editor/recognition/friday-preview` reports status, next Monday, Friday prep time, planned winners, vacancies and email setup state; `GET .../friday-preview/email-html` previews the branded HTML email without sending.
+- Admin dashboard now shows the Friday briefing, a link to styled HTML email preview, and persistent emergency pause/resume controls. Pause blocks scheduler and manual activation and is audited.
+- Admin-only SMTP delivery uses the existing Resend SMTP transport via `OIL_ARTICLE_RESEND_KEY`, but needs `OIL_RECOGNITION_ADMIN_EMAIL` set to the user's chosen recipient and explicit `OIL_RECOGNITION_ADMIN_ALERTS_ENABLED=true` once tested. It uses a dedicated `recognition_previews.emailStatus` idempotency claim and never connects to author email sending. Do NOT guess admin email; not configured by these commits.
+- For safety, the live schedule ALSO requires `OIL_RECOGNITION_RULES_READY=true`, `OIL_RECOGNITION_ACTIVATION_ENABLED=true` and `OIL_RECOGNITION_AUTO=true`, all OFF by default. This prevents accidentally launching the old AI-dependent reviewed selection before completing Decisions 1–2 migration.
+- Added `tests/oilandgas-recognition-admin-alert.test.js` to GitHub Actions; isolated 9/9 checks passed for time arithmetic, vacancy handling, escaping, admin-only settings, disabled author email and launch gate. Full CI and live Heroku/mail delivery not yet confirmed.
+- Neither an admin email nor any author congratulatory email was sent. No scheduled preview was created in production during these code commits.
+
+**Pending operational setup:** user must specify the administrator recipient email address (and whether any additional admin recipients are permitted) before configuring `OIL_RECOGNITION_ADMIN_EMAIL`. Confirm sender-domain SMTP acceptance, email-rendering in Gmail/Outlook, and failover alerts for failed sends. Keep admin alert sending OFF until recipient and live tests are confirmed.
+
+**Next:** Decision 5/8 — individually addressed recognition letters for verified co-authors. Continue one by one.
