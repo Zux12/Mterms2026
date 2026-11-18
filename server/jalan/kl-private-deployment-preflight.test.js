@@ -68,6 +68,25 @@ test('private pilot release gate distinguishes new code slug from config-only re
   'deployment secrets remain restricted to the trusted branch');
 });
 
+test('manual pilot release is code-only: no provisioning, credential rotation or config PATCH',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'),
+  'existing app, current and previous release config must be checked via GET');
+ assert.doesNotMatch(yaml,/run:\s*node server\/jalan\/configure-heroku-private-pilot\.js/,
+  'never call the side-effecting Heroku config reconciliation helper in a code release');
+ assert.doesNotMatch(yaml,/\/config-vars[^\n]*PATCH|method:\s*['"]PATCH['"]/,
+  'no Heroku config mutation permitted in manual code-only release');
+ const gate=yaml.indexOf('BLOCK private deploy unless prior code release is eligible to restore');
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ assert.ok(gate>0&&baseline>gate&&push>baseline);
+ assert.match(yaml,/workflow_dispatch:/);
+ assert.doesNotMatch(yaml.split('permissions:')[0],/\n\s*push:/,
+  'no automatic code deployment');
+});
+
 test('merging routing safeguards cannot automatically deploy the Heroku pilot',()=>{
  const fs=require('node:fs'),path=require('node:path');
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
@@ -142,7 +161,6 @@ test('manual validation-only retry pins supported Chromium OS and skips Heroku w
  assert.match(yaml,/if: \$\{\{ inputs\.validation_only \}\}/,
   'validation-only mode must be explicit and visible in logs');
  for(const name of [
-  'Configure JALAN pilot credentials only (never mterm2026)',
   'Record pre-push Heroku release baseline (non-secret)',
   'Deploy experimental branch to dedicated Heroku Git remote',
   'Verify canonical private pilot URL rejects anonymous visitors',
@@ -214,10 +232,14 @@ test('manual private code deployment cannot begin before qualified rollback pref
   'jalan-heroku-private-pilot-deploy.yml'),'utf8');
  const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
  const safeguard=yaml.indexOf('BLOCK private deploy unless prior code release is eligible to restore');
- const credential=yaml.indexOf('Configure JALAN pilot credentials only');
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
  const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
- assert.ok(privacy>0&&safeguard>privacy&&credential>safeguard&&push>credential,
-  'qualified rollback preflight must run before configuration writes or code push');
+ assert.ok(privacy>0&&safeguard>privacy&&baseline>safeguard&&push>baseline,
+  'qualified GET-only rollback preflight must run before the code push');
+ assert.ok(!yaml.includes('run: node server/jalan/configure-heroku-private-pilot.js'),
+  'code-only release must not write or rotate private Heroku config');
+ assert.ok(!yaml.includes('/config-vars\',\'PATCH'),
+  'deployment workflow must never PATCH config variables');
  assert.ok(yaml.slice(safeguard,credential).includes('if: ${{ !inputs.validation_only }}'),
   'existing read-only validation-only flow must skip the release gate');
  assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'));
