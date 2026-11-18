@@ -87,6 +87,45 @@ test('manual pilot release is code-only: no provisioning, credential rotation or
   'no automatic code deployment');
 });
 
+test('Heroku Git remote name must match approved immutable private app ID (GET only)',async()=>{
+ const {verify}=require('./assert-heroku-private-git-target-readonly');
+ const {APPS}=require('./audit-heroku-retention-metadata-readonly');
+ const app=APPS.find(a=>a.role==='private');
+ const live={id:app.id,name:app.name,web_url:'https://jalan-kl-private-pilot.herokuapp.com/'};
+ const seen=[];
+ const mock=(byId=live,byName=live)=>async(url,options)=>{
+  seen.push({url,options});
+  return {status:200,json:async()=>url.endsWith('/'+app.id)?byId:byName};
+ };
+ const key='read-only-fixture-token-123456789';
+ const result=await verify({fetcher:mock(),key});
+ assert.equal(result.id,app.id);
+ assert.deepEqual(seen.map(x=>x.url),[
+  'https://api.heroku.com/apps/'+app.id,'https://api.heroku.com/apps/'+app.name]);
+ assert.ok(seen.every(x=>x.options.method==='GET'&&x.options.redirect==='error'));
+ await assert.rejects(()=>verify({fetcher:mock(live,{...live,id:'another-app-id'}),key}),
+  /identity-mismatch/,'name reused by a different app must fail closed');
+ await assert.rejects(()=>verify({fetcher:mock({...live,name:'renamed-app'},live),key}),
+  /identity-mismatch/,'approved app renamed must fail closed');
+ await assert.rejects(()=>verify({fetcher:async()=>({status:401}),key}),
+  /identity-unavailable/);
+ await assert.rejects(()=>verify({fetcher:mock(),key:''}),/identity-unavailable/);
+});
+
+test('manual code deployment pins name-based Git target before push and validates it again afterwards',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ const guard=yaml.lastIndexOf('node server/jalan/assert-heroku-private-git-target-readonly.js',push);
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
+ const after=yaml.indexOf("const {verify}=require('./server/jalan/assert-heroku-private-git-target-readonly')");
+ assert.ok(baseline>0&&guard>baseline&&push>guard&&after>push);
+ assert.match(yaml,/on:\s*\n\s*workflow_dispatch:/);
+ assert.ok(yaml.includes('await verify()'),'post-push canonical URL must recheck app identity');
+ assert.doesNotMatch(yaml,/run:\s*node server\/jalan\/configure-heroku-private-pilot\.js/);
+});
+
 test('merging routing safeguards cannot automatically deploy the Heroku pilot',()=>{
  const fs=require('node:fs'),path=require('node:path');
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
