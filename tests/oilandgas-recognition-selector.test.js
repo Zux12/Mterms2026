@@ -57,3 +57,11 @@ test('all exhausted categories remain empty instead of recycling old papers',()=
  const results=choose([p('exhausted','A. Researcher')],[old],new Date('2036-01-01'));
  assert.ok(results.every(x=>x.candidate===null));
 });
+
+test('same DOI under a different publication record cannot receive recognition twice',()=>{
+ const history=[{kind:'publications',reference:'old-reference',publicationId:'old-id',
+  source:'https://doi.org/10.1000/SAME-PAPER',byline:'A. Researcher',start:new Date('2020-01-01')}];
+ const duplicate=p('new-reference','Different Listed Author',{publicationId:'new-id',source:'https://doi.org/10.1000/same-paper'});
+ assert.equal(paperCooldown(duplicate,history),true);
+ assert.ok(choose([duplicate],history,new Date('2037-01-01')).every(x=>!x.candidate));
+});
