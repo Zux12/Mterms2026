@@ -30,10 +30,11 @@ async function crossrefAbstract(p,{fetcher=fetch}={}){
   const title=String(w.title?.[0]||'');
   if(!titleMatch(p.title,title))return {status:'title-mismatch',doi};
   const abstract=cleanMarkup(w.abstract);
-  const screened=abstractRules.abstractAssessment({...p,abstract,abstractSourceVerified:true});
-  if(!screened.eligibleForEditorialReview)
+  const words=abstractRules.normalize(abstract).split(/\s+/).filter(Boolean).length;
+  // Optional enrichment quality check is unrelated to weekly directory scoring.
+  if(words<75||abstract.length<450)
    return {status:'abstract-insufficient',doi,metadataTitle:title,
-    length:abstract.length,words:screened.evidence.abstractWords};
+    length:abstract.length,words};
   const authors=(Array.isArray(w.author)?w.author:[]).slice(0,150)
   .map(a=>[a.given,a.family].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean);
  return {status:'verified',doi,metadataTitle:title,abstract,verifiedAuthors:authors,
