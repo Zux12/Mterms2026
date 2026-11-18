@@ -6,11 +6,10 @@ const formatDate=d=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',
 const plannedStart=(now=new Date())=>{
  const shifted=new Date(new Date(now).getTime()+8*3600000);
  const dow=(shifted.getUTCDay()+6)%7;
- // Current week's Monday 09 MYT, then next if we are past Friday 09 MYT.
+ // Next Monday 09:00 MYT following the current instant.
  shifted.setUTCHours(9,0,0,0);shifted.setUTCDate(shifted.getUTCDate()-dow);
  let monday=new Date(shifted.getTime()-8*3600000);
- const friday=new Date(monday.getTime()-3*86400000);
- if(new Date(now)>=monday||new Date(now)>=friday)monday=new Date(monday.getTime()+7*86400000);
+ if(new Date(now)>=monday)monday=new Date(monday.getTime()+7*86400000);
  return monday;
 };
 const previewAt=start=>new Date(new Date(start).getTime()-3*86400000);
