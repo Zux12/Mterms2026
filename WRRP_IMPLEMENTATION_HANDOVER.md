@@ -401,3 +401,15 @@ User authorized reviewing real paper rankings and determining suitability of thr
 - Updated selector, policy and weekly simulation boundary tests; **34/34 source-executed isolated tests passed** across core policy/scoring/selection/weekly simulation; backend JavaScript syntax passed. Full Node CI and real Heroku integration were not verified in this turn.
 - Audit appended to `WRRP_DIRECTORY_SCORING_AUDIT_2026-11-18.md`; do not misrepresent this as peer review.
 - **No real research award, letter, email, MongoDB write, configuration flag change or programme activation. Master OFF and author congratulations OFF.**
+
+### Source-checked 70/60/60 shortlist dry run — 18 November 2026
+- Conducted read-only actual MongoDB 124-publication directory dry run with latest `keyword-directory-v3.0` scorer and 70/60/60 category minimums. `recognition_selections`, `recognition_overrides`, `recognition_rule_reviews` and `recognition_controls` had no records. **Production-qualified winners: ZERO.**
+- Provisional dry-run (`verifiedOnly:false`) returned:
+  1. Research Editor's Pick: `OG-P-463438DD9AA7645C`, *Processing Capability Improvement Through Parameter Optimization of a Sludge Drying Plant*, 75/100.
+  2. Industry Impact: `OG-P-00C378D8ACA439B7`, *Cost Analysis Study Through Optimization of a Sludge Drying Plant for a Petroleum Refinery*, 68/100.
+  3. Emerging Research: `OG-P-47A964319ED21BBF`, *Energy Optimisation and Management System for Smart Buildings with IoT and Support Vector Regression-Based Predictive Modelling*, 71/100.
+- Externally corroborated first paper in UiTM Shah Alam 2012 IEEE proceedings index; second 2015 ARPN PDF original title and authors; third 2025 i-PACT conference schedule and author ORCID profile. Direct live Crossref/title/retraction API and full source integrity checks NOT yet passed.
+- Related work: 2012 UiTM Shah Alam paper and 2012 Bandung ICCSII DOI `10.1109/CCSII.2012.6470467` have the same four authors and near-identical title words, though independently recorded in distinct conference proceedings. Legitimate overlapping versions versus distinct studies **NOT** resolved; do not accuse either of duplication or automatically award both. 2015 cost-analysis paper and several other sludge papers form a related research family; source-level method/results comparison required. The 2025 building energy study requires transparent cross-industry relevance rationale before a claimed oil/gas industry spotlight.
+- Created `WRRP_DRY_RUN_SOURCE_REVIEW_2026-11-18.md` with detailed proposal, source URLs, caveats and editorial next actions.
+- Added read-only related-publication caution: `server/oilandgas/recognition-related-review.js`, private `GET .../related-review`, Editor's Desk `Related research screening` panel, and 4/4 isolated helper regression checks. Does not automatically disqualify any research and sends no emails.
+- No live awards, letter records, preview persistence, MongoDB mutations, author/admin mail or activation changes. Master switch OFF; next step manual source-level comparison and live integration acceptance.
