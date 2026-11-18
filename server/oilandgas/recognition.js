@@ -156,7 +156,10 @@ async function applyOverrides(proposed) {
 }
 function publicRecord(s){return {id:s._id,category:s.category,label:s.label,kind:s.kind,reference:s.reference,
  title:s.title,summary:s.summary,byline:s.byline,topic:s.topic,source:s.source||'',start:s.start,end:s.end,
- status:s.status,certificateStatus:'not-issued',emailStatus:'disabled'};}
+ status:s.status,assessment:s.score?{total:s.score.total,breakdown:s.score.breakdown,
+  rubricVersion:s.score.version||s.score.rubricVersion||'',reasons:s.score.reasons||null}:null,
+ withdrawnAt:s.withdrawnAt||null,withdrawalReason:s.status==='withdrawn'?String(s.withdrawalReason||''):null,
+ certificateStatus:'not-issued',emailStatus:'disabled'};}
 publicRouter.use((req,res,next)=>{const origin=req.get('Origin');
  if(['https://oilandgas.eu.com','https://www.oilandgas.eu.com'].includes(origin)){res.set('Access-Control-Allow-Origin',origin);res.vary('Origin');}
  res.set('Cache-Control','public,max-age=120');next();});
