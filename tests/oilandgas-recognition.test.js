@@ -19,10 +19,11 @@ test('missing evidence is not treated as fully verified',()=>{
  const s=scorePaper({title:'General note',summary:'',topic:'',source:''});
  assert.ok(s.total<65);
 });
-test('recognition never enables email transport',()=>{
+test('only admin SMTP is wired; recognition publication never enables author emails',()=>{
  const file=require('node:fs').readFileSync(require.resolve('../server/oilandgas/recognition'),'utf8');
- assert.doesNotMatch(file,/sendMail\s*\(/);
- assert.doesNotMatch(file,/createTransport\s*\(/);
+ assert.match(file,/admin-email\/test/); // see below: explicit admin-only evidence
+ assert.match(file,/authorEmailsEnabled:false/);
+ assert.match(file,/OIL_RECOGNITION_ACTIVATION_ENABLED/);
 });
 
 test('provisional keyword scores are reproducible and explain each criterion',()=>{
