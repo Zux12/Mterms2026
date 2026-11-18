@@ -87,6 +87,17 @@ async function loadRuleScores(){
   $('rules-status').textContent='Rubric '+data.rubricVersion+' · '+data.total+' published papers · '+totals.ready+' with enough abstract evidence · '+totals.pending+' pending/previously recognized. Read-only simulation; no authors emailed.';
  }catch(e){$('rules-status').textContent='Rule simulation unavailable: '+e.message}
 }
+$('rules-discover-batch').onclick=async()=>{
+ const button=$('rules-discover-batch'),target=$('rules-discover-result');
+ if(!confirm('Check the next five published DOI papers for verified original abstracts? This will not select winners or send emails.'))return;
+ button.disabled=true;target.textContent='Checking DOI metadata…';
+ try{const result=await api('rules/discover-batch',{confirm:'DISCOVER_NO_AWARDS',limit:5});
+  target.textContent='Checked '+result.attempted+' publications; '+result.verified+
+   ' complete abstracts verified. Unavailable sources remain pending; no awards or emails issued.';
+  await loadRuleScores();await loadCandidateQueue();
+ }catch(e){target.textContent='Source discovery error: '+e.message}
+ finally{button.disabled=false}
+};
 $('rules-refresh').onclick=loadRuleScores;
 $('rules-import-form').onsubmit=async event=>{
  event.preventDefault();const target=$('rules-import-result');target.textContent='Checking original DOI metadata and abstract…';
