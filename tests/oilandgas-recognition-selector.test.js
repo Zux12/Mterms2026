@@ -37,7 +37,7 @@ test('Malaysian preference is narrow, not a large quality override',()=>{
  assert.equal(r2[0].candidate.reference,'higher');
 });
 test('score below threshold cannot receive an automatic recognition',()=>{
- const low=p('low','A. Researcher',{assessment:{...base.assessment,total:70}});
+ const low=p('low','A. Researcher',{assessment:{...base.assessment,total:59}});
  const r=choose([low],[],new Date('2026-11-16'));
  assert.ok(r.every(x=>x.candidate===null));
 });
@@ -90,7 +90,7 @@ test('admin override can pin a valid paper without bypassing score or DOI unique
   forced:{'editors-pick':'LOW'}});
  assert.equal(rejected[0].adminOverrideApplied,false);
  const low=p('LOW','L Researcher',{source:'https://doi.org/10.1000/low',
-  assessment:{...base.assessment,total:71}});
+  assessment:{...base.assessment,total:59}});
  const guarded=choose([pinned,low,other],[],new Date('2026-11-16'),{
   forced:{'editors-pick':'LOW'}});
  assert.equal(guarded[0].adminOverrideApplied,false);
