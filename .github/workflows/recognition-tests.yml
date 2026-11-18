@@ -7,6 +7,8 @@ on:
       - 'tests/oilandgas-recognition-policy.test.js'
       - 'server/oilandgas/recognition-policy.js'
       - 'server/oilandgas/recognition-review.js'
+      - 'server/oilandgas/recognition-evidence.js'
+      - 'tests/oilandgas-recognition-evidence.test.js'
       - 'tests/oilandgas-recognition-review.test.js'
       - 'tests/oilandgas-recognition-selector.test.js'
       - 'server/oilandgas/recognition-selector.js'
@@ -31,6 +33,7 @@ jobs:
           node --check server/oilandgas/recognition.js
           node --check server/oilandgas/recognition-policy.js
           node --check server/oilandgas/recognition-review.js
+          node --check server/oilandgas/recognition-evidence.js
           node --check server/oilandgas/recognition-selector.js
       - name: Run recognition safety and scoring tests
-        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js tests/oilandgas-recognition-selector.test.js tests/oilandgas-recognition-letter-tracking.test.js
+        run: node --test tests/oilandgas-recognition.test.js tests/oilandgas-recognition-policy.test.js tests/oilandgas-recognition-review.test.js tests/oilandgas-recognition-selector.test.js tests/oilandgas-recognition-letter-tracking.test.js tests/oilandgas-recognition-evidence.test.js
