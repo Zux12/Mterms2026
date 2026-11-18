@@ -262,6 +262,46 @@ async function recognitionPaused(){
  const controls=await db().collection('recognition_controls').findOne({_id:'programme'});
  return controls?.paused===true;
 }
+// Master programme switch is deliberately OFF by default and is separate from
+// the author's email-notification consent/transport. A UI click cannot bypass
+// deployment readiness flags or change hosting environment variables.
+async function activationSnapshot(){
+ const control=await db().collection('recognition_controls').findOne({_id:'programme'});
+ const needed=[
+  {key:'rules',ok:process.env.OIL_RECOGNITION_RULES_READY==='true',
+   label:'Rule-based abstract scoring approved for launch'},
+  {key:'schedule',ok:process.env.OIL_RECOGNITION_AUTO==='true',
+   label:'Friday/Monday schedule production gate'},
+  {key:'activation',ok:process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true',
+   label:'Recognition activation production gate'},
+  {key:'release',ok:process.env.OIL_RECOGNITION_RELEASE_APPROVED==='true',
+   label:'Full end-to-end testing and release explicitly approved'}
+ ];
+ return {enabled:control?.enabled===true,paused:control?.paused===true,
+  readyToEnable:needed.every(x=>x.ok),requirements:needed,
+  authorEmailsEnabled:false,adminEmailAlertsEnabled:
+   process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
+  note:'Turning on the programme does not enable or send author congratulations.'};
+}
+adminRouter.get('/activation-control',async(req,res,next)=>{try{
+ res.set('Cache-Control','private,no-store').json(await activationSnapshot());
+}catch(e){next(e);}});
+adminRouter.post('/activation-control',async(req,res,next)=>{try{
+ const enabled=req.body?.enabled;
+ if(typeof enabled!=='boolean'||req.body?.confirm!==
+  (enabled?'ENABLE_WRRP_NO_AUTHOR_EMAILS':'DISABLE_WRRP'))
+  return res.status(400).json({error:'Explicit programme toggle confirmation required.'});
+ const status=await activationSnapshot();
+ if(enabled&&!status.readyToEnable)
+  return res.status(423).json({error:'Release checklist is incomplete; activation remains locked.',
+   requirements:status.requirements,enabled:status.enabled});
+ const now=new Date();
+ await db().collection('recognition_controls').updateOne({_id:'programme'},
+  {$set:{enabled,changedAt:now}},{upsert:true});
+ await db().collection('recognition_audit').insertOne({action:enabled?'programme-master-enabled':'programme-master-disabled',
+  createdAt:now,authorEmailsEnabled:false});
+ res.set('Cache-Control','private,no-store').json(await activationSnapshot());
+}catch(e){next(e);}});
 adminRouter.post('/pause',async(req,res,next)=>{try{
  if(req.body?.confirm!=='PAUSE_RECOGNITION')
   return res.status(400).json({error:'Explicit pause confirmation required.'});
@@ -295,6 +335,7 @@ adminRouter.get('/status',async(req,res,next)=>{try{
   adminRecipient:'m.zurix@oilandgas.eu.com',
   smtpConfigured:!!process.env.OIL_RECOGNITION_SMTP_PASSWORD,
   rulesEngineReady:process.env.OIL_RECOGNITION_RULES_READY==='true',paused,
+  programmeMasterEnabled:(await activationSnapshot()).enabled,
   mode:'testing',active:active.map(publicRecord)});
 }catch(e){next(e);}});
 adminRouter.get('/preview',async(req,res,next)=>{try{
@@ -572,6 +613,9 @@ adminRouter.get('/friday-preview/email-html',async(req,res,next)=>{try{
   adminAlert.mailContents({start,items:data}).html);
 }catch(e){next(e);}});
 async function activateCycle(){
+ const master=await activationSnapshot();
+ if(!master.enabled||!master.readyToEnable)
+  throw Object.assign(new Error('Master recognition switch or release checks are OFF.'),{status:423});
  if(await recognitionPaused())throw Object.assign(new Error('Recognition paused by administrator.'),{status:423});
  const start=weekStart(),end=new Date(start.getTime()+7*86400000);
  const cycleId=start.toISOString().slice(0,10);
@@ -977,6 +1021,8 @@ async function scheduledTick(){
  if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
  try{
+  const master=await activationSnapshot();
+  if(!master.enabled||!master.readyToEnable)return;
   await checkIntegrityNotices();
   if(await recognitionPaused())return;
   await discoverSourceAbstracts({max:5});
