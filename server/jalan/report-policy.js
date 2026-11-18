@@ -1,7 +1,7 @@
 /* Shared browser/server community-report policy. Coordinates are [longitude, latitude]. */
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.JalanReportModel=factory();})(typeof window==='object'?window:globalThis,()=>{
  'use strict';
- const types=Object.freeze({traffic:{label:'Traffic',icon:'🚗',minutes:15},accident:{label:'Accident',icon:'💥',minutes:60},roadworks:{label:'Roadworks',icon:'🚧',minutes:240},closure:{label:'Road closed',icon:'⛔',minutes:120},hazard:{label:'Hazard',icon:'⚠️',minutes:30},police:{label:'Police',icon:'👮',minutes:30},rain:{label:'Heavy rain',icon:'🌧️',minutes:30},flood:{label:'Flooding',icon:'🌊',minutes:120},visibility:{label:'Poor visibility',icon:'🌫️',minutes:30}});
+ const types=Object.freeze(Object.assign(Object.create(null),{traffic:{label:'Traffic',icon:'🚗',minutes:15},accident:{label:'Accident',icon:'💥',minutes:60},roadworks:{label:'Roadworks',icon:'🚧',minutes:240},closure:{label:'Road closed',icon:'⛔',minutes:120},hazard:{label:'Hazard',icon:'⚠️',minutes:30},police:{label:'Police',icon:'👮',minutes:30},rain:{label:'Heavy rain',icon:'🌧️',minutes:30},flood:{label:'Flooding',icon:'🌊',minutes:120},visibility:{label:'Poor visibility',icon:'🌫️',minutes:30}}));
  const coord=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90;
  const heading=h=>typeof h==='number'&&Number.isFinite(h)&&h>=0&&h<360;
  const delta=(a,b)=>Math.abs(((a-b+540)%360)-180);
