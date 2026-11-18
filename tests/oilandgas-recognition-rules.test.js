@@ -45,3 +45,31 @@ test('engine contains no LLM, AI API or author mail sender',()=>{
  assert.doesNotMatch(file,/require\(['"]openai['"]\)/);
  assert.doesNotMatch(file,/sendMail\s*\(/);
 });
+
+test('generic oil and gas sector wording does not count as both upstream and midstream',()=>{
+ const a=directoryAssessment({title:'Enterprise risk management in the oil and gas sector',
+  summary:'This review examines enterprise governance for management performance.',
+  topic:'Other',byline:'A Researcher',source:'https://doi.org/10.1000/erm'});
+ assert.equal(a.matches.relevance.some(x=>x.signal==='upstream'),false);
+ assert.equal(a.matches.relevance.some(x=>x.signal==='midstream'),false);
+ assert.equal(a.matches.relevance.some(x=>x.signal==='sector and priorities'),true);
+});
+test('plural sensors and measurements count as measurement terminology',()=>{
+ const a=directoryAssessment({title:'Sensors for ultrasonic measurements',
+  summary:'Research sensors support calibration and instrument monitoring.',
+  topic:'Sensors',byline:'A Researcher',source:'https://doi.org/10.1000/sensors'});
+ assert.equal(a.matches.relevance.some(x=>x.signal==='measurement'),true);
+ assert.equal(a.matches.technical.some(x=>x.signal==='measurement and experimentation'),true);
+});
+test('ordinary use of first is not an originality claim',()=>{
+ const a=directoryAssessment({title:'Risk assessment of operational hazards',
+  summary:'The team decides which risk to address first.',
+  topic:'Safety',byline:'A Researcher',source:'https://doi.org/10.1000/risk'});
+ assert.equal(a.matches.originality.some(x=>x.signal==='explicit novelty'),false);
+});
+test('generic analytic hierarchy process is not evidence of refinery processing',()=>{
+ const a=directoryAssessment({title:'Analytic hierarchy process for manufacturing risk',
+  summary:'An industrial safety study based on prioritization.',
+  topic:'Safety',byline:'A Researcher',source:'https://doi.org/10.1000/ahp'});
+ assert.equal(a.matches.relevance.some(x=>x.signal==='downstream'),false);
+});
