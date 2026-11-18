@@ -6,6 +6,7 @@ const crypto=require('crypto');
 const policy=require('./recognition-policy');
 const selector=require('./recognition-selector');
 const fullText=require('./recognition-evidence');
+const adminAlert=require('./recognition-admin-alert');
 const publicRouter=express.Router();
 const adminRouter=express.Router();
 const db=()=>mongoose.connection.useDb('oilandgas',{useCache:true}).db;
@@ -271,21 +272,111 @@ adminRouter.post('/override/clear',async(req,res,next)=>{try{
  res.json({ok:true});
 }catch(e){next(e);}});
 
+// Friday 09:00 MYT locks the NEXT Monday's proposed winners (72 hours ahead).
+// Drafts use only cleared reviews; the rule-only assessment migration must be
+// completed before the production activation flags can be enabled.
+async function prepareFridayPreview(start){
+ const date=new Date(start),id=date.toISOString().slice(0,10);
+ const rows=await reviewedShortlist();
+ const plans=categories.map(cat=>{
+  const choice=rows.find(r=>r.category===cat.key);
+  const p=choice?.candidate;
+  const qualified=!!p&&policy.publicationEligibility(p).eligible&&
+   p.assessment?.total>=policy.thresholdFor(cat.key);
+  return {category:cat.key,label:cat.label,candidate:qualified?{
+   kind:p.kind,reference:p.reference,publicationId:p.publicationId||null,
+   title:p.title,byline:p.byline,summary:p.summary,topic:p.topic,source:p.source,
+   score:p.assessment
+  }:null};
+ });
+ const now=new Date(),record={_id:id,start:date,previewAt:adminAlert.previewAt(date),
+  preparedAt:now,status:'prepared',items:plans,
+  missing:plans.filter(x=>!x.candidate).map(x=>x.category),emailStatus:'not-configured'};
+ await db().collection('recognition_previews').updateOne({_id:id},{$setOnInsert:record},{upsert:true});
+ return db().collection('recognition_previews').findOne({_id:id});
+}
+// Friday email is a distinct, admin-only notification. Never linked to author
+// notification settings. Only sends when a recipient and explicit alert flag exist.
+async function sendFridayAdminAlert(preview){
+ const to=String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'').trim();
+ if(process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED!=='true')return {state:'disabled'};
+ if(!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to))return {state:'unconfigured-recipient'};
+ if(!process.env.OIL_ARTICLE_RESEND_KEY)return {state:'unconfigured-smtp'};
+ const current=await db().collection('recognition_previews').findOneAndUpdate(
+  {_id:preview._id,emailStatus:{$in:['not-configured','retry','disabled']}},
+  {$set:{emailStatus:'sending',emailClaimedAt:new Date()}},{returnDocument:'after'});
+ if(!current)return {state:'already-claimed'};
+ try{
+  const mailer=require('nodemailer');
+  const transport=mailer.createTransport({host:'smtp.resend.com',port:465,secure:true,
+   auth:{user:'resend',pass:process.env.OIL_ARTICLE_RESEND_KEY},
+   connectionTimeout:10000,socketTimeout:20000});
+  const body=adminAlert.mailContents({start:preview.start,
+   items:preview.items.map(row=>({...row,candidate:row.candidate?{
+    ...row.candidate,assessment:row.candidate.score}:null}))});
+  const sent=await transport.sendMail({
+   from:'Oil & Gas Editorial <receipts@updates.oilandgas.eu.com>',
+   to,subject:body.subject,html:body.html,text:body.text,
+   headers:{'Resend-Idempotency-Key':'wrrp-admin-preview-'+preview._id}
+  });
+  if(!sent.accepted?.length)throw Error('Admin email not accepted');
+  await db().collection('recognition_previews').updateOne({_id:preview._id,emailStatus:'sending'},
+   {$set:{emailStatus:'sent',emailSentAt:new Date()}});
+  return {state:'sent'};
+ }catch(e){
+  await db().collection('recognition_previews').updateOne({_id:preview._id,emailStatus:'sending'},
+   {$set:{emailStatus:'retry',emailErrorAt:new Date()}});
+  throw e;
+ }
+}
+adminRouter.get('/friday-preview',async(req,res,next)=>{try{
+ const start=adminAlert.plannedStart();
+ const id=start.toISOString().slice(0,10);
+ const preview=await db().collection('recognition_previews').findOne({_id:id});
+ res.set('Cache-Control','no-store').json({nextPublication:start.toISOString(),
+  previewScheduledAt:adminAlert.previewAt(start).toISOString(),
+  status:preview?.status||'not-prepared',missing:preview?.missing||[],
+  emailStatus:preview?.emailStatus||'not-configured',adminAlertEnabled:
+  process.env.OIL_RECOGNITION_ADMIN_ALERTS_ENABLED==='true',
+  adminRecipientConfigured:/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(String(process.env.OIL_RECOGNITION_ADMIN_EMAIL||'')),
+  items:preview?.items||[],authorEmailsEnabled:false});
+}catch(e){next(e);}});
+adminRouter.get('/friday-preview/email-html',async(req,res,next)=>{try{
+ // Read-only HTML preview, never dispatches an email.
+ const start=adminAlert.plannedStart();
+ const preview=await db().collection('recognition_previews').findOne({_id:start.toISOString().slice(0,10)});
+ const data=preview?preview.items.map(row=>({...row,candidate:row.candidate?{
+  ...row.candidate,assessment:row.candidate.score}:null})):categories.map(cat=>({
+  category:cat.key,candidate:null
+ }));
+ res.set('Cache-Control','private, no-store').type('html').send(
+  adminAlert.mailContents({start,items:data}).html);
+}catch(e){next(e);}});
 async function activateCycle(){
  const start=weekStart(),end=new Date(start.getTime()+7*86400000);
  const cycleId=start.toISOString().slice(0,10);
  const selections=db().collection('recognition_selections');
  const previous=await db().collection('recognition_cycles').findOne({_id:cycleId,status:'active'});
  if(previous)return {ok:true,alreadyActive:true,cycleId};
- const proposed=await reviewedShortlist();
- // Activation uses exclusively verified, approved assessments. Provisional rankings
- // and manual featured-story overrides cannot bypass integrity clearance.
- const invalid=proposed.filter(row=>!row.candidate||!policy.publicationEligibility(row.candidate).eligible||
-  (row.candidate.assessment.total<policy.thresholdFor(row.category)));
- if(invalid.length)throw Object.assign(new Error('Insufficient eligible, qualified publications: '+invalid.map(x=>x.category).join(', ')),{status:409});
- const keys=proposed.map(x=>x.candidate&&x.candidate.kind+':'+x.candidate.reference);
- if(keys.some(x=>!x)||new Set(keys).size!==3)
-  throw Object.assign(new Error('Cannot activate until three distinct, published eligible papers are available.'),{status:409});
+ const saved=await db().collection('recognition_previews').findOne({_id:cycleId,status:'prepared'});
+ if(!saved||new Date(saved.preparedAt)>start)
+  throw Object.assign(new Error('Friday preview missing. Recognition cannot publish without a 72-hour-ahead draft.'),{status:409});
+ // Recheck Friday winners against Monday's current eligibility; never substitute
+ // another paper after the Friday administrator preview.
+ const checked=await reviewedShortlist();
+ const approved=new Map(checked.filter(x=>x.candidate).map(x=>[x.candidate.reference,x.candidate]));
+ const proposed=saved.items.map(row=>{
+  const candidate=row.candidate;
+  const current=candidate&&approved.get(candidate.reference);
+  const same=current&&current.publicationId===candidate.publicationId&&
+   selector.sourceIdentity(current.source)===selector.sourceIdentity(candidate.source);
+  const eligible=!!same&&policy.publicationEligibility(current).eligible&&
+   current.assessment?.total>=policy.thresholdFor(row.category);
+  return {category:row.category,label:row.label,candidate:eligible?current:null};
+ });
+ const keys=proposed.filter(x=>x.candidate).map(x=>x.candidate.kind+':'+x.candidate.reference);
+ if(new Set(keys).size!==keys.length)
+  throw Object.assign(new Error('Duplicate recognized publication in weekly cycle'),{status:409});
  const session=await mongoose.connection.startSession();
  try{
   await session.withTransaction(async()=>{
@@ -295,7 +386,8 @@ async function activateCycle(){
    await db().collection('recognition_cycles').insertOne({_id:cycleId,start,end,status:'active',
     selectionMode:'evidence-approved-ranking',emailsEnabled:false,createdAt:now},{session});
    await selections.updateMany({status:'active',end:{$lte:now}},{$set:{status:'archived',archivedAt:now}},{session});
-   await selections.insertMany(proposed.map(row=>{
+   const awardable=proposed.filter(row=>row.candidate);
+   if(awardable.length)await selections.insertMany(awardable.map(row=>{
     const p=row.candidate;
     return {_id:cycleId+':'+row.category,cycleId,category:row.category,label:row.label,
      kind:p.kind,reference:p.reference,publicationId:p.publicationId,
@@ -303,10 +395,12 @@ async function activateCycle(){
      start,end,status:'active',score:p.assessment,createdAt:now,emailStatus:'disabled'};
    }),{session});
    await db().collection('recognition_audit').insertOne({action:'weekly-activation',cycleId,
+    awarded:proposed.filter(x=>x.candidate).length,unfilled:proposed.filter(x=>!x.candidate).map(x=>x.category),
     createdAt:now,emailEnabled:false},{session});
   });
  }finally{await session.endSession();}
- return {ok:true,cycleId,activated:3,emailEnabled:false};
+ return {ok:true,cycleId,activated:proposed.filter(x=>x.candidate).length,
+  unfilled:proposed.filter(x=>!x.candidate).map(x=>x.category),emailEnabled:false};
 }
 adminRouter.post('/activate',async(req,res,next)=>{try{
  if(process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true')
