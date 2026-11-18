@@ -210,3 +210,8 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - Recognition admin alerts no longer depend on Resend SMTP. Existing other emails using Resend remain untouched. Author congratulatory emails remain disabled.
 - **Environment secret not configured here**, no SMTP connection attempted, no email sent. Hostinger authentication and delivery remain unverified. Avoid asking for mailbox password in chat; set it in Heroku Config Vars or equivalent protected secrets store.
 - Review the domain's actual Hostinger email product settings before sending; default values apply to Hostinger Email mailboxes, not necessarily other mailbox products.
+
+### Decision 5/8: Individual verified co-author letters — LOCKED (18 November 2026)
+- User explicitly approved **a separate personalized A4 Letter of Recognition for every verified co-author** on the winning research paper, rather than one shared letter.
+- Per-letter name must match verified published byline. Each letter has a unique verification reference linked to the single lifetime recognition of that paper. Co-author recognition must not bypass one-time-only paper selection. Author congratulatory email delivery remains OFF; this decision covers the document, not activation of author mail.
+- Next: test standalone Hostinger SMTP administrative test email (explicit user consent to test), then Decision 6/8 (authorized letter signatory and QR verification).
