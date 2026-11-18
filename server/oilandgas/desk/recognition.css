@@ -1,0 +1,25 @@
+
+:root{font-family:Arial,sans-serif;color:#252725;background:#f9f8f5}*{box-sizing:border-box}body{margin:0}
+header{padding:22px max(20px,calc((100vw - 1100px)/2));background:#1d2524;color:white;display:flex;justify-content:space-between;align-items:center}
+header a{color:white}main{max-width:1100px;padding:35px 20px;margin:auto}h1{font:normal 38px Georgia,serif}h2{font:normal 26px Georgia,serif}
+small{letter-spacing:.1em;color:#b45a2b;text-transform:uppercase;font-weight:bold}.panel{border:1px solid #dcd9d2;background:white;padding:25px;margin:22px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{border:1px solid #ddd;padding:18px;min-width:0}
+button{background:#222;color:#fff;padding:10px 15px;border:0;cursor:pointer}button.secondary{background:white;color:#222;border:1px solid #aaa}
+input,select,textarea{width:100%;padding:10px;margin:7px 0 15px;border:1px solid #bbb;font:inherit}
+label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-height:1.6}.warning{padding:14px;background:#fff0d8;color:#6a4b0e}
+.status{padding:12px 0;min-height:40px}a{color:#a54518}pre{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:750px){.grid{grid-template-columns:1fr}h1{font-size:30px}}
+
+/* Extracted legacy inline declarations to respect the editor CSP. */
+.recognition-inline-1{color:#ff842d}
+.recognition-inline-2{margin-top:18px}
+.recognition-inline-3{background:#8f3b25}
+.recognition-inline-4{margin:16px 0;padding:14px;border:1px solid #e8ddc9;background:#fffaf1}
+.recognition-inline-5{overflow:auto}
+.recognition-inline-6{width:100%;border-collapse:collapse;font:13px Arial,sans-serif;text-align:left}
+.recognition-inline-7{padding:8px;border-bottom:1px solid #ddd}
+.recognition-inline-8{width:auto;margin-right:6px}
+.recognition-inline-9{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f4f3ee;padding:14px}
+.recognition-inline-10{width:100%;border-collapse:collapse;text-align:left;font:13px Arial,sans-serif}
+.recognition-inline-11{padding:10px;border-bottom:1px solid #ddd}
+.recognition-inline-12{margin-top:22px}
