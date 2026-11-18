@@ -1,34 +1,46 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {abstractAssessment,VERSION,weights}=require('../server/oilandgas/recognition-rules');
-const abstract='We use new satellite observations and an atmospheric inversion model to quantify methane emissions from a natural gas and oil production basin. Based on actual satellite observations collected across multiple operating regions, measured methane emissions were 2.7 ± 0.5 Tg per year, which is more than two times higher than bottom-up inventory based estimates. This comparison of measured data and baseline results demonstrates potential applications of the method in operational monitoring and environmental risk assessment. The new approach may help operators identify areas requiring closer inspection and reduce uncertainty in regional emission inventories. The study is limited by satellite coverage and seasonal sampling, and further validation in different basins would be valuable.';
-const paper={abstract,abstractSourceVerified:true,source:'https://doi.org/10.1126/sciadv.aaz5120',integrityStatus:''};
-test('deterministic 100-point weighted assessment explains every category',()=>{
- const x=abstractAssessment(paper),y=abstractAssessment(paper);
- assert.deepEqual(x,y);assert.equal(x.version,VERSION);
- assert.equal(Object.values(weights).reduce((a,b)=>a+b,0),100);
- assert.equal(Object.values(x.breakdown).reduce((a,b)=>a+b,0),x.total);
- assert.equal(Object.keys(x.reasons).length,6);
- assert.ok(x.total>=0&&x.total<=100);
- assert.equal(x.eligibleForEditorialReview,true);
- assert.equal(x.readyForRecognition,false);
+const {directoryAssessment,VERSION,weights}=require('../server/oilandgas/recognition-rules');
+const p={title:'Novel safety monitoring method for oil and gas pipelines',
+ summary:'A field case study presents a measurement system for process risk and reliability improvement.',
+ topic:'Measurement',byline:'A. Test Researcher',source:'https://doi.org/10.1000/sample'};
+test('directory keyword score is repeatable and totals exactly six weighted categories',()=>{
+ const a=directoryAssessment(p),b=directoryAssessment(p);
+ assert.deepEqual(a,b);assert.equal(a.version,VERSION);
+ assert.equal(Object.values(weights).reduce((x,y)=>x+y,0),100);
+ assert.equal(Object.values(a.breakdown).reduce((x,y)=>x+y,0),a.total);
+ assert.equal(Object.keys(a.reasons).length,6);assert.equal(a.mode,'rule-based-directory');
+ assert.equal(a.eligibleForEditorialReview,true);
 });
-test('short summary cannot qualify even if high scoring keywords are present',()=>{
- const p=abstractAssessment({...paper,abstract:'Novel refinery model with methane and pipeline simulation.'});
- assert.equal(p.eligibleForEditorialReview,false);
- assert.ok(p.evidence.issues.includes('source-backed-abstract-insufficient'));
+test('short published summary is assessed using exactly the same rules',()=>{
+ const tiny=directoryAssessment({...p,summary:'Field measurement and reliability analysis.'});
+ assert.equal(tiny.eligibleForEditorialReview,true);
+ assert.deepEqual(tiny.evidence.inputFields,['title','summary','topic','source','byline']);
+ assert.ok(tiny.total>=0&&tiny.total<=100);
 });
-test('unverified abstract and integrity holds do not pass',()=>{
- assert.equal(abstractAssessment({...paper,abstractSourceVerified:false}).eligibleForEditorialReview,false);
- assert.equal(abstractAssessment({...paper,integrityStatus:'retracted'}).eligibleForEditorialReview,false);
+test('external abstract is neither required nor allowed to change the competition score',()=>{
+ const a=directoryAssessment({...p,abstract:'Novel innovation massive gains',abstractSourceVerified:true});
+ const b=directoryAssessment({...p,abstract:'unrelated external text',abstractSourceVerified:false});
+ assert.deepEqual(a,b);
 });
-test('same keyword repeated cannot earn extra points',()=>{
- const first=abstractAssessment(paper);
- const repeated=abstractAssessment({...paper,abstract:abstract+' methane methane methane methane'});
- assert.equal(first.breakdown.relevance,repeated.breakdown.relevance);
+test('repeating a word does not inflate the score',()=>{
+ const original=directoryAssessment(p);
+ const repeated=directoryAssessment({...p,summary:p.summary+' oil oil oil oil oil'});
+ assert.equal(original.breakdown.relevance,repeated.breakdown.relevance);
 });
-test('no AI dependency or author email in deterministic engine',()=>{
+test('scores alone cannot clear a retraction hold or missing identity',()=>{
+ const retracted=directoryAssessment({...p,integrityStatus:'retracted'});
+ assert.equal(retracted.eligibleForEditorialReview,false);
+ const missing=directoryAssessment({...p,byline:''});
+ assert.equal(missing.eligibleForEditorialReview,false);
+});
+test('evidence points mean metadata traceability, not experiment validation',()=>{
+ const a=directoryAssessment(p);
+ assert.ok(a.reasons.evidence.includes('source link provided'));
+ assert.match(a.note,/not scientific validation/i);
+});
+test('engine contains no LLM, AI API or author mail sender',()=>{
  const file=require('node:fs').readFileSync(require.resolve('../server/oilandgas/recognition-rules'),'utf8');
  assert.doesNotMatch(file,/require\(['"]openai['"]\)/);
  assert.doesNotMatch(file,/sendMail\s*\(/);
