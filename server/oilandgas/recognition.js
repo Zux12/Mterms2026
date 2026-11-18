@@ -859,8 +859,8 @@ async function scheduledTick(){
  if(process.env.OIL_RECOGNITION_RULES_READY!=='true'||process.env.OIL_RECOGNITION_ACTIVATION_ENABLED!=='true'||process.env.OIL_RECOGNITION_AUTO!=='true'||schedulerBusy||mongoose.connection.readyState!==1)return;
  schedulerBusy=true;
  try{
-  if(await recognitionPaused())return;
   await checkIntegrityNotices();
+  if(await recognitionPaused())return;
   const now=new Date(),nextStart=adminAlert.plannedStart(now);
   const fridayTime=adminAlert.previewAt(nextStart);
   // Preview preparation starts Friday 09:00 MYT (exactly 72h before Monday 09:00).
