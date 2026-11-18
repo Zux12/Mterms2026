@@ -5,7 +5,7 @@ const {previewAt,plannedStart,mailContents,escapeHtml}=require('../server/oiland
 test('Friday 9 AM MYT is exactly 72 hours before Monday 9 AM MYT',()=>{
  const now=new Date('2026-11-18T04:00:00Z'); // Wednesday 12:00 MYT
  const monday=plannedStart(now);
- assert.equal(monday.toISOString(),'2026-11-22T01:00:00.000Z'.replace('22','23'));
+ assert.equal(monday.toISOString(),'2026-11-23T01:00:00.000Z');
  assert.equal(previewAt(monday).toISOString(),'2026-11-20T01:00:00.000Z');
  assert.equal(monday-previewAt(monday),72*3600000);
 });
