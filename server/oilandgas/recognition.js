@@ -622,10 +622,30 @@ async function activateCycle(){
     return {_id:cycleId+':'+row.category,cycleId,category:row.category,label:row.label,
      kind:p.kind,reference:p.reference,publicationId:p.publicationId,
      title:p.title,summary:p.summary,byline:p.byline,topic:p.topic,source:p.source,
+     verifiedAuthors:p.verifiedAuthors||[],
      start,end,status:'active',score:p.assessment,createdAt:now,emailStatus:'disabled'};
    }),{session});
+   // Issue independent A4 letter records only for Crossref-confirmed coauthors
+   // whose complete names appear exactly in the published byline. Do not guess
+   // unclear identities; the editor may verify and issue those separately.
+   const letters=[];
+   for(const row of awardable){
+    const p=row.candidate,seen=new Set();
+    for(const raw of (Array.isArray(p.verifiedAuthors)?p.verifiedAuthors:[]).slice(0,150)){
+     const authorName=String(raw||'').trim(),authorKey=normalizeName(authorName);
+     if(!authorKey||seen.has(authorKey)||!policy.verifiedBylineAuthor(p,authorName))continue;
+     seen.add(authorKey);
+     letters.push({_id:'OG-WRS-'+crypto.randomBytes(12).toString('hex').toUpperCase(),
+      selectionId:cycleId+':'+row.category,authorKey,authorName,
+      title:p.title,category:row.category,label:row.label,start,end,
+      issuedAt:now,status:'valid',note:'Individual editorial research recognition; no author email sent',
+      issuanceMode:'verified-publisher-coauthor-automatic'});
+    }
+   }
+   if(letters.length)await db().collection('recognition_certificates').insertMany(letters,{session});
    await db().collection('recognition_audit').insertOne({action:'weekly-activation',cycleId,
     awarded:proposed.filter(x=>x.candidate).length,unfilled:proposed.filter(x=>!x.candidate).map(x=>x.category),
+    lettersIssued:letters.length,
     createdAt:now,emailEnabled:false},{session});
   });
  }finally{await session.endSession();}
