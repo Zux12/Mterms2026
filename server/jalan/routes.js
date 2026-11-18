@@ -149,4 +149,7 @@ router.use('/kl-preview-v4100', require('./kl-preview-v4100').router);
 router.use('/kl-preview-v4101', require('./kl-preview-v4101').router);
 router.use('/kl-segment-v4102', require('./kl-segment-v4102').router);
 
+// Community reports use a dedicated collection, expiring events and body-only locations.
+router.use('/reports', require('./community-reports').createRouter({ express, mongoose }));
+
 module.exports = router;
