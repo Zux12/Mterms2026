@@ -344,3 +344,8 @@ User asked to finish as much of the WRRP recognition section as possible and ret
 - QR does not carry a private tracking token, email address or sensitive secret; library is self-hosted under its MIT license with attribution. Printed letter retains the approved A4 portrait presentation and a QR in the footer.
 - Ten isolated source-level assertions passed; GitHub Actions regression test file/workflow updated. **Real live QR scanning, production deployment verification and A4 single-page print checks remain pending**, so this is implemented, not fully field-tested.
 - No recognition winners issued, no author notifications sent, master activation stays OFF. The next action is a controlled staging letter and end-to-end printed scan including revocation.
+
+### Permanent dated recognition QR policy correction — 18 November 2026
+- User rejected treating historical awards as expiring or becoming absent from QR verification. Recognition is a permanent dated historical record tied to the author and original paper, regardless of a seven-day spotlight period.
+- Changed verification status and public detail UI: `recognized` after current/archive; `recognized-with-notice` if a subsequent editorial/integrity notice arose. Retain original recognition date and show later notice separately for factual transparency. Only missing/malformed records are not verified.
+- Letter remains retrievable/printable as historical recognition even after subsequent notice. No email or award issued. Updated QR regression coverage.
