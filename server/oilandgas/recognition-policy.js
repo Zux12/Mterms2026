@@ -16,7 +16,7 @@ function validHttpsUrl(value) {
 function publicationEligibility(p) {
   const reasons = [];
   if (p.kind !== 'publications') reasons.push('not-a-research-publication');
-  if (!/^OG-P-[A-F0-9]{16}$/.test(String(p.reference || ''))) reasons.push('invalid-reference');
+  if (!/^OG-P-(?:[A-F0-9]{16}|MY[A-F0-9]{8})$/.test(String(p.reference || ''))) reasons.push('invalid-reference');
   if (String(p.title || '').trim().length < 15) reasons.push('missing-title');
   if (String(p.byline || '').trim().length < 3) reasons.push('missing-byline');
   if (!validHttpsUrl(p.source)) reasons.push('no-verifiable-original-source');
