@@ -1,30 +1,19 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Weekly Recognition | Editor's Desk</title>
-<style>
-:root{font-family:Arial,sans-serif;color:#252725;background:#f9f8f5}*{box-sizing:border-box}body{margin:0}
-header{padding:22px max(20px,calc((100vw - 1100px)/2));background:#1d2524;color:white;display:flex;justify-content:space-between;align-items:center}
-header a{color:white}main{max-width:1100px;padding:35px 20px;margin:auto}h1{font:normal 38px Georgia,serif}h2{font:normal 26px Georgia,serif}
-small{letter-spacing:.1em;color:#b45a2b;text-transform:uppercase;font-weight:bold}.panel{border:1px solid #dcd9d2;background:white;padding:25px;margin:22px 0}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{border:1px solid #ddd;padding:18px;min-width:0}
-button{background:#222;color:#fff;padding:10px 15px;border:0;cursor:pointer}button.secondary{background:white;color:#222;border:1px solid #aaa}
-input,select,textarea{width:100%;padding:10px;margin:7px 0 15px;border:1px solid #bbb;font:inherit}
-label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-height:1.6}.warning{padding:14px;background:#fff0d8;color:#6a4b0e}
-.status{padding:12px 0;min-height:40px}a{color:#a54518}pre{white-space:pre-wrap;overflow-wrap:anywhere}
-@media(max-width:750px){.grid{grid-template-columns:1fr}h1{font-size:30px}}
-</style></head><body>
-<header><strong>oil &amp; gas<span style="color:#ff842d">.</span> / Editor's Desk</strong><a href="desk.html">Back to dashboard</a></header>
+<link rel="stylesheet" href="recognition.css?v=20261118-1"></head><body>
+<header><strong>oil &amp; gas<span class="recognition-inline-1">.</span> / Editor's Desk</strong><a href="desk.html">Back to dashboard</a></header>
 <main><small>WRRP-001 / Test workspace</small><h1>Weekly Research Recognition</h1>
 <p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
 <div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or certificates are generated in this version. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
-<section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button><div style="margin-top:18px"><button type="button" id="pause-recognition" style="background:#8f3b25">Emergency pause</button> <button type="button" id="resume-recognition" class="secondary">Resume programme</button><p id="pause-result" role="status" class="muted"></p></div></section>
+<section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button><div class="recognition-inline-2"><button type="button" id="pause-recognition" class="recognition-inline-3">Emergency pause</button> <button type="button" id="resume-recognition" class="secondary">Resume programme</button><p id="pause-result" role="status" class="muted"></p></div></section>
 <section class="panel"><h2>Friday administrator briefing — 72 hours before publication</h2>
 <p class="muted">Proposed winners are prepared on Friday at 09:00 MYT for the following Monday at 09:00 MYT. Each category has a named proposed winner or a clear unfilled status. A separate branded HTML administrator email can be enabled with a configured recipient after production tests. Author emails remain OFF.</p>
 <p><strong>Next planned publication:</strong> <span id="friday-next">Checking…</span></p>
 <p><strong>Preview preparation:</strong> <span id="friday-time">Checking…</span></p>
 <p><strong>Admin email:</strong> <span id="friday-mail-status">Not configured</span></p>
-<div style="margin:16px 0;padding:14px;border:1px solid #e8ddc9;background:#fffaf1">
+<div class="recognition-inline-4">
 <strong>Hostinger administrator email test</strong>
 <p class="muted">Send one clearly marked SMTP TEST to m.zurix@oilandgas.eu.com. This verifies Hostinger SMTP only. It does not issue awards or enable automated emails, and can be repeated no more than once every 10 minutes.</p>
 <button type="button" id="smtp-test" class="secondary">Send one test email to admin</button>
@@ -44,8 +33,8 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p class="muted">All published papers enter this queue automatically. They are not selected for recognition until full-paper evidence, AI assessment, and independent integrity review are completed. No author applies separately and no congratulatory emails are sent.</p>
 <button id="candidate-refresh" class="secondary" type="button">Refresh candidate queue</button>
 <p id="candidate-status" role="status">Select Refresh to inspect the current queue.</p>
-<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font:13px Arial,sans-serif;text-align:left">
-<thead><tr><th style="padding:8px;border-bottom:1px solid #ddd">Publication</th><th style="padding:8px;border-bottom:1px solid #ddd">Reference</th><th style="padding:8px;border-bottom:1px solid #ddd">Recognition stage</th></tr></thead>
+<div class="recognition-inline-5"><table class="recognition-inline-6">
+<thead><tr><th class="recognition-inline-7">Publication</th><th class="recognition-inline-7">Reference</th><th class="recognition-inline-7">Recognition stage</th></tr></thead>
 <tbody id="candidate-rows"></tbody></table></div></section>
 <section class="panel"><h2>Full-paper research evidence</h2>
 <p class="muted">An editor must review the original paper and supply grounded evidence of its methodology, results, limitations and industry implications. A title or abstract alone is insufficient. The saved evidence is never made public by this form.</p>
@@ -56,7 +45,7 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <label>Findings and results (30–4000 characters)<textarea name="results" required minlength="30" maxlength="4000"></textarea></label>
 <label>Limitations and uncertainties (30–4000 characters)<textarea name="limitations" required minlength="30" maxlength="4000"></textarea></label>
 <label>Industry implications (30–4000 characters)<textarea name="industryImplications" required minlength="30" maxlength="4000"></textarea></label>
-<label><input type="checkbox" id="evidence-confirm" required style="width:auto;margin-right:6px"> I examined the original published paper and confirmed the evidence above.</label>
+<label><input type="checkbox" id="evidence-confirm" required class="recognition-inline-8"> I examined the original published paper and confirmed the evidence above.</label>
 <button type="submit">Save source-backed evidence — no recognition issued</button></form>
 <p id="evidence-form-state" role="status"></p>
 </section>
@@ -64,14 +53,14 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 <p class="muted">Check one published paper against Crossref (where a DOI exists), then request a bounded AI assessment using only verified bibliographic data and the stored paper summary. The result is advisory only; it cannot activate recognition, issue a certificate or send an email. AI configuration is required on the backend.</p>
 <form id="paper-review"><label>Published research reference<input name="reference" required placeholder="OG-P-0123456789ABCDEF" pattern="OG-P-[A-F0-9]{16}" maxlength="21"></label>
 <button type="submit">Review research evidence</button></form>
-<p id="paper-review-state" role="status"></p><pre id="paper-review-result" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f4f3ee;padding:14px" hidden></pre></section>
+<p id="paper-review-state" role="status"></p><pre id="paper-review-result" hidden class="recognition-inline-9"></pre></section>
 <section class="panel"><h2>Documented integrity approval (testing)</h2>
 <p class="muted">Only an already reviewed publication with matching Crossref metadata can be approved for the future automatic shortlist. Check the original publisher's status and reliable correction/retraction notices first; record the public evidence and editorial rationale. This does not feature the paper, issue a certificate, or send an email.</p>
 <form id="integrity-approval">
 <label>Published paper reference<input name="reference" required maxlength="21" pattern="OG-P-[A-F0-9]{16}" placeholder="OG-P-0123456789ABCDEF"></label>
 <label>Independent publication-status evidence URL<input name="evidenceUrl" type="url" required placeholder="https://publisher-or-index.org/..."></label>
 <label>Editorial verification rationale<textarea name="rationale" minlength="30" maxlength="1200" required placeholder="Describe the checks performed and what the linked publisher/index record establishes."></textarea></label>
-<label><input type="checkbox" id="integrity-confirm" required style="width:auto;margin-right:6px"> I have checked the original publication record and available integrity notices.</label>
+<label><input type="checkbox" id="integrity-confirm" required class="recognition-inline-8"> I have checked the original publication record and available integrity notices.</label>
 <button type="submit">Approve review for future selection (no publication)</button>
 </form><p id="integrity-approval-state" role="status"></p></section>
 <section class="panel"><h2>Administrator override</h2><p class="muted">Stage a replacement paper for one recognition category. Changes are audited and applied at activation; staging itself does not change the website.</p>
@@ -98,230 +87,14 @@ label{font-weight:bold;font-size:13px}.muted{color:#666;font-size:13px;line-heig
 </div>
 <p><button type="button" class="secondary" id="tracking-refresh">Refresh letter activity</button></p>
 <p id="tracking-message" role="status">No email outreach is active. Test-only links can be generated for existing valid letters.</p>
-<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;text-align:left;font:13px Arial,sans-serif"><thead>
-<tr><th style="padding:10px;border-bottom:1px solid #ddd">Author / Letter</th><th style="padding:10px;border-bottom:1px solid #ddd">Email status</th><th style="padding:10px;border-bottom:1px solid #ddd">Link requested</th><th style="padding:10px;border-bottom:1px solid #ddd">Letter loaded</th><th style="padding:10px;border-bottom:1px solid #ddd">Last activity</th></tr>
+<div class="recognition-inline-5"><table class="recognition-inline-10"><thead>
+<tr><th class="recognition-inline-11">Author / Letter</th><th class="recognition-inline-11">Email status</th><th class="recognition-inline-11">Link requested</th><th class="recognition-inline-11">Letter loaded</th><th class="recognition-inline-11">Last activity</th></tr>
 </thead><tbody id="tracking-rows"></tbody></table></div>
-<form id="tracking-create" style="margin-top:22px">
+<form id="tracking-create" class="recognition-inline-12">
 <label>Existing issued letter ID<input name="letterId" required pattern="OG-WRS-[A-Z0-9-]{8,64}" maxlength="75" placeholder="OG-WRS-..."></label>
 <button type="submit" class="secondary">Generate private test tracking link — no email</button>
 </form>
 <p id="tracking-link-result" role="status"></p>
 </section>
 <section class="panel"><h2>Recognition email design</h2><p class="muted">A short, premium HTML email layout using Oil &amp; Gas charcoal, orange and gold. Design preview only — author notification sending is still completely disabled.</p><p><a href="recognition-email-preview.html" target="_blank" rel="noopener noreferrer">Open branded email preview ↗</a></p></section><section class="panel"><h2>Email placeholder</h2><p id="notifications">Not connected.</p></section>
-</main><script>
-'use strict';
-const apiBase='recognition/';
-const $=id=>document.getElementById(id);
-async function api(path,body){
- const response=await fetch(apiBase+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
- const data=await response.json().catch(()=>({}));
- if(!response.ok)throw Error(data.error||(response.status===401?'Sign in via Editor’s Desk first.':'Request failed.'));
- return data;
-}
-function message(s){$('notice').textContent=s}
-function node(t,txt,cls){const e=document.createElement(t);e.textContent=txt||'';if(cls)e.className=cls;return e}
-async function refresh(){
- try{const [status,overrides,notice]=await Promise.all([api('status'),api('overrides'),api('notifications')]);
- $('pause-recognition').disabled=!!status.paused;
- $('resume-recognition').disabled=!status.paused;
- $('activate').disabled=!status.activationEnabled||!!status.paused;
- $('activate').textContent=status.activationEnabled?'Activate reviewed recognition — no emails':'Activation locked pending tests';
- $('status').replaceChildren(node('p','Recognition scheduler: '+(status.schedulerEnabled?'ENABLED':'OFF')+' · Activation: '+(status.activationEnabled?'ENABLED':'LOCKED')+' · Emails: OFF'),
- node('p','Active recognitions: '+status.active.length+' · Administrator pause: '+(status.paused?'ON':'OFF')));
- $('overrides').replaceChildren(node('h3','Staged overrides'));
- for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
- $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. Author recognition emails are disabled.');await certificates();await loadLetterTracking();await fridayBriefing();
- }catch(e){message(e.message)}
-}
-async function preview(){
- try{message('Checking published candidates…');const data=await api('preview');$('candidates').replaceChildren();
- for(const item of data.items){const card=node('article','','card');
- card.append(node('small',item.label),node('h3',item.candidate?.title||'No eligible candidate'),
- node('p',item.candidate?.byline||'', 'muted'),
- node('p',item.candidate?'Provisional score: '+item.candidate.assessment.total+'/100 · minimum '+item.minimumScore+' · '+(item.passesThreshold?'threshold reached':'below threshold'):'Unfilled category','muted'));
- card.append(node('p','Eligibility is based on available metadata, not independent research integrity verification.','muted'));
- $('candidates').append(card)}
- message('Preview completed. Nothing was published or emailed.');
- }catch(e){message(e.message)}
-}
-
-async function certificates(){
- try{const [history,issued]=await Promise.all([api('history'),api('certificates')]);
- const select=$('certificate-selection');select.replaceChildren(new Option('Select an activated recognition',''));
- const withdrawal=$('withdraw-selection');withdrawal.replaceChildren(new Option('Select recognition',''));
- for(const item of history.items){if(!['active','archived'].includes(item.status))continue;select.add(new Option(item.label+' · '+item.title,item.id));withdrawal.add(new Option(item.label+' · '+item.title,item.id))}
- const target=$('certificate-list');target.replaceChildren();
- if(!issued.items.length)target.append(node('p','No certificates issued yet.','muted'));
- for(const c of issued.items){const p=node('p',c.authorName+' · '+c.title+' · ');
- const a=node('a','Open A4 letter ↗');a.href='https://oilandgas.eu.com/letter.html?id='+encodeURIComponent(c.id);a.target='_blank';a.rel='noopener noreferrer';p.append(a);target.append(p)}
- }catch(e){$('certificate-result').textContent='Certificate listing unavailable: '+e.message}
-}
-$('integrity-approval').onsubmit=async e=>{e.preventDefault();const state=$('integrity-approval-state');
- if(!$('integrity-confirm').checked)return;
- if(!confirm('Confirm independent research-integrity checks were performed. Approve this paper for the future shortlist? This sends no email and issues no certificate.'))return;
- try{const data=Object.fromEntries(new FormData(e.target).entries());data.confirmation='INTEGRITY_CHECKED';
- const result=await api('review-approve',data);state.textContent='Assessment approved for automatic shortlisting. No recognition activated or email sent.';
- await $('preview-reviewed').onclick();
- }catch(err){state.textContent=err.message}};
-async function loadCandidateQueue(){
- const body=$('candidate-rows');body.replaceChildren();$('candidate-status').textContent='Loading published papers…';
- try{const result=await api('candidate-queue');const summary={};
-  for(const p of result.items){summary[p.status]=(summary[p.status]||0)+1;
-   const tr=document.createElement('tr');[p.title,p.reference,p.status.replaceAll('-',' ')].forEach(value=>{
-    const td=document.createElement('td');td.style.padding='8px';td.style.borderBottom='1px solid #eee';td.textContent=value;tr.append(td)});
-   body.append(tr);}
-  $('candidate-status').textContent=result.total+' published candidates · '+Object.entries(summary).map(([k,v])=>k+': '+v).join(' · ');
- }catch(err){$('candidate-status').textContent='Candidate queue unavailable: '+err.message}
-}
-$('candidate-refresh').onclick=loadCandidateQueue;
-$('evidence-form').onsubmit=async e=>{e.preventDefault();const target=$('evidence-form-state');
- if(!$('evidence-confirm').checked)return;
- const data=Object.fromEntries(new FormData(e.target).entries());data.sourceReviewed=true;
- try{await api('evidence',data);
-  target.textContent='Source-backed evidence recorded. The paper may now undergo AI assessment; no award or email was issued.';
-  await loadCandidateQueue();
- }catch(err){target.textContent=err.message}
-};
-$('paper-review').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');
- button.disabled=true;$('paper-review-state').textContent='Checking publication evidence…';
- $('paper-review-result').hidden=true;
- try{const data=Object.fromEntries(new FormData(e.target).entries());
- const result=await api('review-paper',data);
- $('paper-review-state').textContent='Review status: '+result.state+'. No recognition or email has been issued.';
- const body=result.assessment?{score:result.assessment.total,confidence:result.assessment.confidence,
-   reasoning:result.assessment.reasoning,limitations:result.assessment.limitations,
-   evidence:result.assessment.evidence,decision:result.assessment.decision}:
-   {reason:result.reason,evidence:result.evidence,metadata:result.metadata&&{doi:result.metadata.doi,title:result.metadata.title}};
- $('paper-review-result').textContent=JSON.stringify(body,null,2);
- $('paper-review-result').hidden=false;
- }catch(err){$('paper-review-state').textContent=err.message}
- finally{button.disabled=false}};
-$('withdraw').onsubmit=async e=>{e.preventDefault();try{
- const data=Object.fromEntries(new FormData(e.target).entries());
- if(!confirm('Withdraw this editorial recognition and invalidate every associated certificate?'))return;
- const result=await api('withdraw',data);
- $('withdraw-message').textContent=result.alreadyWithdrawn?'This recognition was already withdrawn.':'Recognition withdrawn and certificates invalidated.';
- await refresh();
- }catch(err){$('withdraw-message').textContent=err.message}};
-$('certificate-issue').onsubmit=async e=>{e.preventDefault();try{
- const data=Object.fromEntries(new FormData(e.target).entries());
- if(!confirm('Confirm that this name appears as an author on the selected published research paper?'))return;
- const result=await api('certificate/issue',data);
- $('certificate-result').textContent=result.alreadyIssued?'Letter already exists: '+result.id:'Letter issued: '+result.id+' (no email sent).';
- await certificates();
- }catch(err){$('certificate-result').textContent=err.message}};
-
-
-$('preview-reviewed').onclick=async()=>{
- const target=$('reviewed-candidates');target.replaceChildren();
- $('reviewed-note').textContent='Checking reviewed candidates…';
- try{
-  const result=await api('preview-reviewed');
-  for(const item of result.items){
-   const article=node('article','','card');
-   article.append(node('small',item.category),node('h3',item.candidate?.title||'No cleared candidate'),
-    node('p',item.candidate?('Reviewed score '+item.candidate.assessment.total+' / 100'):'Awaiting independent publication-integrity clearance','muted'));
-   target.append(article);
-  }
-  $('reviewed-note').textContent=result.items.filter(x=>x.candidate).length+
-    ' of 3 cleared selections. Activation remains locked during testing.';
- }catch(err){$('reviewed-note').textContent='Reviewed shortlist unavailable: '+err.message}
-};
-
-function formatTrackingDate(value){return value?new Date(value).toLocaleString('en-MY',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'}):'—'}
-async function loadLetterTracking(){
- const body=$('tracking-rows');body.replaceChildren();
- try{
-  const result=await api('letter-tracking');
-  let requested=0,loaded=0;
-  for(const item of result.items){
-   requested+=item.linkRequests||0;loaded+=item.letterLoads||0;
-   const row=document.createElement('tr');
-   const vals=[(item.authorName||'Author')+' · '+item.letterId,
-    item.emailStatus||'disabled',
-    String(item.linkRequests||0),
-    String(item.letterLoads||0),
-    formatTrackingDate(item.lastLetterLoadAt||item.lastLinkRequestAt)];
-   vals.forEach(v=>{const td=document.createElement('td');td.style.padding='10px';td.style.borderBottom='1px solid #eee';td.textContent=v;row.append(td)});
-   body.append(row);
-  }
-  $('tracking-requests').textContent=requested;
-  $('tracking-views').textContent=loaded;
-  $('tracking-message').textContent=result.items.length?
-   'Tracked records: '+result.items.length+'. Link requests may include automated security scans; page loads are not proof of human reading.':
-   'No tracked letters yet. Recognition emails remain disabled.';
- }catch(err){$('tracking-message').textContent=err.message}
-}
-$('tracking-refresh').onclick=loadLetterTracking;
-$('tracking-create').onsubmit=async e=>{e.preventDefault();
- const result=$('tracking-link-result');
- try{
-  const data=Object.fromEntries(new FormData(e.target).entries());
-  const created=await api('letter-link/create',data);
-  result.replaceChildren(document.createTextNode('Private preview link created (not emailed): '));
-  const link=document.createElement('a');link.href=created.url;link.textContent='Open tracked A4 letter';
-  link.target='_blank';link.rel='noopener noreferrer';result.append(link);
-  await loadLetterTracking();
- }catch(err){result.textContent=err.message}
-};
-
-async function fridayBriefing(){
- $('friday-msg').textContent='Checking scheduled administrator briefing…';
- try{
-  const data=await api('friday-preview');
-  const local=v=>new Date(v).toLocaleString('en-MY',{dateStyle:'full',timeStyle:'short',timeZone:'Asia/Kuala_Lumpur'});
-  $('friday-next').textContent=local(data.nextPublication);
-  $('friday-time').textContent=local(data.previewScheduledAt);
-  $('friday-mail-status').textContent=(data.adminAlertEnabled&&data.adminRecipientConfigured?'Configured':'Not activated')+
-   ' · '+data.emailStatus;
-  const cards=$('friday-cards');cards.replaceChildren();
-  for(const cat of [{key:'editors-pick',name:"Editor's Pick"},{key:'industry-impact',name:'Industry Impact'},{key:'emerging-research',name:'Emerging Research'}]){
-   const slot=data.items.find(x=>x.category===cat.key),p=slot?.candidate;
-   const c=node('div','','card');c.append(node('small',cat.name),node('h3',p?.title||'Awaiting Friday selection'),
-    node('p',p?p.byline+' · '+(p.score?.total??'—')+'/100':'Not yet prepared; a vacant category will remain unfilled.','muted'));
-   cards.append(c);
-  }
-  $('friday-msg').textContent=data.status==='not-prepared'?'No Friday selection has been prepared for this upcoming week.':'Briefing state: '+data.status+' · Vacant categories: '+data.missing.length+'.';
- }catch(e){$('friday-msg').textContent=e.message}
-}
-$('pause-recognition').onclick=async()=>{
- const reason=prompt('Reason for pausing automatic recognition?');
- if(!reason)return;
- if(!confirm('Pause all scheduled recognition selections and admin preview emails?'))return;
- try{await api('pause',{reason,confirm:'PAUSE_RECOGNITION'});
- $('pause-result').textContent='Programme paused. No new automatic recognition or Friday briefing will be issued until resumed.';
- await refresh();
- }catch(e){$('pause-result').textContent=e.message}
-};
-$('resume-recognition').onclick=async()=>{
- if(!confirm('Resume the recognition scheduler once its launch flags are enabled? Author emails remain OFF.'))return;
- try{await api('resume',{confirm:'RESUME_RECOGNITION'});
- $('pause-result').textContent='Pause lifted. Production scheduling is still controlled by its separate deployment flags.';
- await refresh();
- }catch(e){$('pause-result').textContent=e.message}
-};
-$('smtp-test').onclick=async()=>{
- if(!confirm('Send ONE Hostinger SMTP test email to m.zurix@oilandgas.eu.com? No author notification or awards will be issued.'))return;
- const button=$('smtp-test');button.disabled=true;
- $('smtp-test-result').textContent='Testing Hostinger SMTP connection and administrator delivery…';
- try{
-  const result=await api('admin-email/test',{confirm:'SEND_ADMIN_SMTP_TEST'});
-  $('smtp-test-result').textContent=result.status==='smtp-accepted'?
-   'Hostinger SMTP accepted the test email. Please check the inbox and spam folder. This does not yet prove inbox delivery.':
-   'Result: '+result.status;
- }catch(err){$('smtp-test-result').textContent='Test failed: '+err.message}
- finally{button.disabled=false}
-};
-$('friday-refresh').onclick=fridayBriefing;
-
-$('refresh').onclick=refresh;$('preview').onclick=preview;
-$('override').onsubmit=async e=>{e.preventDefault();try{
- const data=Object.fromEntries(new FormData(e.target).entries());await api('override',data);
- message('Override staged successfully.');await refresh();
-}catch(err){message(err.message)}};
-$('activate').onclick=async()=>{if(!confirm('Publish three recognition records for this week? No emails or certificates will be issued.'))return;
- try{const data=await api('activate',{confirm:'ACTIVATE_NO_EMAIL'});message('Weekly activation result: '+JSON.stringify(data));await refresh()}
- catch(e){message(e.message)}};
-refresh();
-</script></body></html>
+</main><script defer src="recognition.js?v=20261118-1"></script></body></html>
