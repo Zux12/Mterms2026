@@ -223,3 +223,11 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - Added confirmation-button **Send one test email to admin** in the authenticated `server/oilandgas/desk/recognition.html`; it reports SMTP acceptance (distinct from confirmed inbox delivery).
 - **Live result:** Not sent or verified by assistant; the authenticated Heroku editor view cannot be reached from the available web transport. The user can log into Editor’s Desk and click once after the deployed code is available. Verify Heroku deployment and post-test inbox receipt; avoid saying a message was sent until SMTP accepted it.
 - WRRP decisions tracker is now **5/8 locked**. Next Decision 6 is the authorized letter signatory and working QR verification.
+
+### Safari CSP editor dashboard fix — 18 November 2026
+- User supplied Safari screenshot of `/api/oilandgas/editor/recognition.html`: the editor page displayed unstyled plain HTML and Safari Inspector showed `Refused to apply a stylesheet` and `Refused to execute a script` due to `style-src 'self'` / `script-src 'self'` Content Security Policy.
+- Root cause: original recognition.html embedded an inline `<style>` and `<script>` and 20 `style="` attributes; CSP correctly prohibited them. This was NOT proof the button was missing or that Heroku had not deployed the latest HTML.
+- Extracted stylesheet to `server/oilandgas/desk/recognition.css` and JavaScript to `server/oilandgas/desk/recognition.js`, with relative versioned URLs and transformed all static inline style attributes into CSS classes.
+- Updated Editor's Desk `server/oilandgas/editor.js` static asset allowlist to serve those exact external files. Kept strict CSP, no inline JS, no unsafe-inline policy relaxation.
+- Validated editor HTML has no inline script/style attributes, external resources are referenced, CSP permits self-hosted files, SMTP test button and click handler are present, and JavaScript syntax check passed (13 assertions). The live URL could not be retrieved from available web tool, so **actual Heroku deploy and Safari functional retest remain unverified**.
+- Admin test-email sending remains manual and requires an explicit click in the authenticated Editor's Desk. No email sent; author emails and recognition activation remain disabled.
