@@ -215,3 +215,11 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - User explicitly approved **a separate personalized A4 Letter of Recognition for every verified co-author** on the winning research paper, rather than one shared letter.
 - Per-letter name must match verified published byline. Each letter has a unique verification reference linked to the single lifetime recognition of that paper. Co-author recognition must not bypass one-time-only paper selection. Author congratulatory email delivery remains OFF; this decision covers the document, not activation of author mail.
 - Next: test standalone Hostinger SMTP administrative test email (explicit user consent to test), then Decision 6/8 (authorized letter signatory and QR verification).
+
+### One-off admin SMTP test facility — 18 November 2026
+- User confirmed `OIL_RECOGNITION_SMTP_PASSWORD` was added to Heroku Config Vars and approved conducting a Hostinger SMTP test now.
+- Added authenticated `POST /api/oilandgas/editor/recognition/admin-email/test`: requires explicit confirmation token `SEND_ADMIN_SMTP_TEST`, tests Hostinger SMTP connectivity via `nodemailer.verify()`, then sends exactly one test message to **m.zurix@oilandgas.eu.com** using the existing environment secret; no secret returned or written to GitHub.
+- Email subject is clearly prefixed **[SMTP TEST — NO AWARDS]**. Message explicitly states it is a test and does not represent real winners. Test uses styled admin notice layout. Sending is limited to once every 10 minutes by MongoDB claim, with status and audit record. This endpoint is separate from (and does not enable) automated Friday alert scheduling or author congratulations.
+- Added confirmation-button **Send one test email to admin** in the authenticated `server/oilandgas/desk/recognition.html`; it reports SMTP acceptance (distinct from confirmed inbox delivery).
+- **Live result:** Not sent or verified by assistant; the authenticated Heroku editor view cannot be reached from the available web transport. The user can log into Editor’s Desk and click once after the deployed code is available. Verify Heroku deployment and post-test inbox receipt; avoid saying a message was sent until SMTP accepted it.
+- WRRP decisions tracker is now **5/8 locked**. Next Decision 6 is the authorized letter signatory and working QR verification.
