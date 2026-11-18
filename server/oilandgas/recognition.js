@@ -200,9 +200,19 @@ publicRouter.get('/record/:id',async(req,res,next)=>{try{
 }catch(e){next(e);}});
 publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  if(!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(req.params.id))return res.sendStatus(404);
+ res.set('Cache-Control','no-store');
  const row=await db().collection('recognition_certificates').findOne({_id:req.params.id});
  if(!row)return res.sendStatus(404);
- res.json({id:row._id,status:row.status,author:row.authorName,title:row.title,category:row.category,label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,note:row.note});
+ // A letter is valid only while its parent recognition is active/archived.
+ // This secondary gate protects against partial failure of mass revocation.
+ const recognition=await db().collection('recognition_selections').findOne({_id:row.selectionId},
+  {projection:{status:1,reference:1,withdrawnAt:1}});
+ const status=row.status==='valid'&&['active','archived'].includes(recognition?.status)?'valid':
+  row.status==='withdrawn'||recognition?.status==='withdrawn'?'withdrawn':'invalid';
+ res.json({id:row._id,status,author:row.authorName,title:row.title,category:row.category,
+  label:row.label,start:row.start,end:row.end,issuedAt:row.issuedAt||null,
+  recognitionId:row.selectionId,publicationReference:recognition?.reference||null,
+  note:row.note||'',verifiedAt:new Date().toISOString()});
 }catch(e){next(e);}});
 // A unique opaque link identifies a recognition letter recipient without exposing email.
 // GET events mean a link was requested (including possible automated link scanners).
