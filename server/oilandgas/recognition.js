@@ -578,6 +578,36 @@ adminRouter.post('/rules/import-abstract',async(req,res,next)=>{try{
   words:deterministic.abstractAssessment({...p,abstract:result.abstract,abstractSourceVerified:true}).evidence.abstractWords,
   selectionActivated:false,emailsSent:false});
 }catch(e){next(e);}});
+// Editor can enter an original publisher/repository abstract if Crossref omits it.
+// Requires positive source attribution; never accepts a directory teaser as evidence.
+adminRouter.post('/rules/verify-abstract',async(req,res,next)=>{try{
+ const reference=String(req.body?.reference||'').trim();
+ const abstract=String(req.body?.abstract||'').trim();
+ const evidenceUrl=String(req.body?.evidenceUrl||'').trim();
+ if(!/^OG-P-[A-F0-9]{16}$/.test(reference)||!policy.validHttpsUrl(evidenceUrl)||
+  abstract.length>16000||req.body?.confirm!=='ORIGINAL_ABSTRACT_VERIFIED')
+  return res.status(400).json({error:'Reference, valid public HTTPS original abstract URL and explicit source verification confirmation required.'});
+ const col=db().collection('publications');
+ const row=await col.findOne({reference,status:'published',publication:{$exists:true}});
+ if(!row)return res.status(404).json({error:'Published paper not found.'});
+ const p=entry(row,'publications');
+ const assessment=deterministic.abstractAssessment({...p,abstract,abstractSourceVerified:true});
+ if(!assessment.eligibleForEditorialReview)return res.status(422).json({
+  error:'Insufficient original abstract or publication evidence.',issues:assessment.evidence.issues});
+ const changed=await col.updateOne({_id:row._id,status:'published',
+  'publication.title':row.publication.title,source:row.source},
+  {$set:{'publication.abstract':abstract,'publication.abstractSourceVerified':true,
+   'publication.abstractMetadataSource':evidenceUrl,
+   'publication.abstractVerificationMethod':'documented-editorial-source-check',
+   'publication.abstractVerifiedAt':new Date()}});
+ if(!changed.modifiedCount)return res.status(409).json({error:'Paper was modified during verification.'});
+ await db().collection('recognition_rule_reviews').updateOne({_id:reference},
+  {$set:{status:'stale-reassessment-required',updatedAt:new Date()}});
+ await db().collection('recognition_audit').insertOne({action:'manual-source-abstract-verified',
+  reference,evidenceUrl,createdAt:new Date(),emailEnabled:false});
+ res.json({ok:true,source:'editor-verified-original-abstract',score:assessment.total,
+  emailsSent:false,recognitionIssued:false});
+}catch(e){next(e);}});
 adminRouter.post('/rules/approve',async(req,res,next)=>{try{
  const reference=String(req.body?.reference||'').trim();
  const evidenceUrl=String(req.body?.integrityEvidenceUrl||'').trim();
