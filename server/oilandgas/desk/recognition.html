@@ -7,6 +7,13 @@
 <p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
 <div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or recognition letters are sent by this control page. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
+<section class="panel" id="master-activation-panel"><h2>Recognition Programme — Master Activation</h2>
+<p class="muted">This is the master ON/OFF control for automatic Friday preselection and Monday publication. It is locked until deployment tests and all release prerequisites are approved. The switch does <strong>not</strong> enable congratulatory emails to authors.</p>
+<label class="master-switch"><input type="checkbox" id="master-recognition-toggle" disabled aria-describedby="master-state"> Enable automatic research recognition</label>
+<p id="master-state" role="status" class="muted">Checking deployment safeguards…</p>
+<div id="master-gates" class="muted"></div>
+<p class="warning"><strong>Separate controls:</strong> Administrator Friday briefings and author congratulatory emails are not the same. Author email delivery remains disabled and will require its own approval and verified recipient contact information.</p>
+</section>
 <section class="panel"><h2>Programme status</h2><div id="status"></div><button id="refresh" class="secondary">Refresh</button> <button id="preview">Preview candidate selections</button><div class="recognition-inline-2"><button type="button" id="pause-recognition" class="recognition-inline-3">Emergency pause</button> <button type="button" id="resume-recognition" class="secondary">Resume programme</button><p id="pause-result" role="status" class="muted"></p></div></section>
 <section class="panel"><h2>Friday administrator briefing — 72 hours before publication</h2>
 <p class="muted">Proposed winners are prepared on Friday at 09:00 MYT for the following Monday at 09:00 MYT. Each category has a named proposed winner or a clear unfilled status. A separate branded HTML administrator email can be enabled with a configured recipient after production tests. Author emails remain OFF.</p>
