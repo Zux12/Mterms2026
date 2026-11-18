@@ -238,9 +238,9 @@ test('manual private code deployment cannot begin before qualified rollback pref
   'qualified GET-only rollback preflight must run before the code push');
  assert.ok(!yaml.includes('run: node server/jalan/configure-heroku-private-pilot.js'),
   'code-only release must not write or rotate private Heroku config');
- assert.ok(!yaml.includes('/config-vars\',\'PATCH'),
+ assert.doesNotMatch(yaml,/\/config-vars[^\n]*PATCH/,
   'deployment workflow must never PATCH config variables');
- assert.ok(yaml.slice(safeguard,credential).includes('if: ${{ !inputs.validation_only }}'),
+ assert.ok(yaml.slice(safeguard,baseline).includes('if: ${{ !inputs.validation_only }}'),
   'existing read-only validation-only flow must skip the release gate');
  assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'));
  assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
