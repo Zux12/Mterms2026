@@ -112,12 +112,55 @@ test('Heroku Git remote name must match approved immutable private app ID (GET o
  await assert.rejects(()=>verify({fetcher:mock(),key:''}),/identity-unavailable/);
 });
 
+test('manual Heroku Git push rechecks query redaction and exact release snapshot (GET only)',async()=>{
+ const {verifyPrePush}=require('./assert-heroku-private-git-target-readonly');
+ const {APPS}=require('./audit-heroku-retention-metadata-readonly');
+ const app=APPS.find(a=>a.role==='private');
+ const baseline={id:'release-15-fixture',version:15,slugId:'slug-15-fixture'};
+ const idResponse={id:app.id,name:app.name};
+ const feature={name:'http-router-no-log-query',enabled:true};
+ const release={id:baseline.id,version:baseline.version,
+  slug:{id:baseline.slugId},status:'succeeded'};
+ const key='synthetic-local-test-key-0123456789';
+ const requestLog=[];
+ const mock=(valueFeature=feature,valueRelease=release,options={})=>
+  async(url,req)=>{
+   requestLog.push({url,req});
+   if(options.http401)return {status:401};
+   if(url.endsWith('/features/http-router-no-log-query'))
+    return {status:200,json:async()=>valueFeature};
+   if(url.endsWith('/releases'))
+    return {status:200,headers:{get:()=>options.nextRange?'more-pages':null},
+     json:async()=>[valueRelease]};
+   return {status:200,json:async()=>idResponse};
+  };
+ assert.deepEqual(await verifyPrePush({fetcher:mock(),key,baseline}),
+  {appIdentityPinned:true,routerRedactionEnabled:true,baselineUnchanged:true});
+ assert.equal(requestLog.length,4);
+ assert.ok(requestLog.every(x=>x.req.method==='GET'&&x.req.redirect==='error'));
+ assert.ok(requestLog.some(x=>x.url.endsWith('/'+app.id+'/releases')));
+ await assert.rejects(()=>verifyPrePush({fetcher:mock({...feature,enabled:false}),key,baseline}),
+  /router-redaction-not-enabled/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,version:16}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,slug:{id:'different-slug'}}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,status:'pending'}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,release,{http401:true}),key,baseline}),
+  /identity-unavailable/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,release,{nextRange:true}),key,baseline}),
+  /metadata-unavailable/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(),key,baseline:{...baseline,version:0}}),
+  /baseline-invalid/);
+});
+
 test('manual code deployment pins name-based Git target before push and validates it again afterwards',()=>{
  const fs=require('node:fs'),path=require('node:path');
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
   'jalan-heroku-private-pilot-deploy.yml'),'utf8');
  const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
- const guard=yaml.lastIndexOf('node server/jalan/assert-heroku-private-git-target-readonly.js',push);
+ const guard=yaml.lastIndexOf('node server/jalan/assert-heroku-private-git-target-readonly.js --prepush',push);
  const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
  const after=yaml.indexOf("const {verify}=require('./server/jalan/assert-heroku-private-git-target-readonly')");
  assert.ok(baseline>0&&guard>baseline&&push>guard&&after>push);

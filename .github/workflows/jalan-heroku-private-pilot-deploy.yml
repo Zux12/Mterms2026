@@ -104,7 +104,10 @@ jobs:
           # The Heroku Git remote is name-based: verify its current name resolves
           # to the approved immutable pilot UUID immediately before pushing.
           # This GET-only guard fails closed on rename/reuse or missing access.
-          node server/jalan/assert-heroku-private-git-target-readonly.js
+          # Recheck after the baseline capture: another operator might have
+          # advanced the release or disabled router-query redaction meanwhile.
+          # Abort rather than pushing against stale restore/safety assumptions.
+          node server/jalan/assert-heroku-private-git-target-readonly.js --prepush
           git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main
           rm -f "$askpass"
       - name: Verify canonical private pilot URL rejects anonymous visitors
