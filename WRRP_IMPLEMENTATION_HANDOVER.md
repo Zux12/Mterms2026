@@ -246,3 +246,10 @@ Cert issuance: available as an authenticated manual workflow only for a selected
 - QR code generation and verification destination still need functional testing before calling the letter's QR verification complete; do not invent or link an unverified code.
 - Official author-recognition email delivery and automatic weekly activation remain OFF. Live website deployment and browser print fit require verification.
 - Next: Decision 7/8 — withdrawal/retraction response, then Decision 8/8 — launch scope/back-catalogue (assuming Decision 6's signing requirement accepted as locked).
+
+### Decision 7/8 — Retraction and integrity withdrawal policy — LOCKED (18 November 2026)
+- User approved **automatic suspension of recognition** when a credible retraction or serious research-integrity notice is detected. Suspended recognition must be hidden from active featured winners pending validation and re-checks; its official letters should be invalidated and the administrator notified.
+- Retain an archival record marked **Recognition Withdrawn** rather than silently deleting recognition history. Maintain the reason, evidence URL(s), detection timestamp, and audit history, and do not allow withdrawn papers to be recognized again under the once-only policy.
+- Technical safety requirements for implementation: authoritative-source verification (e.g. publisher/Crossmark or Crossref updates where supported), conservative conflict handling, review for disputed/unclear signals; avoid automatically labeling a paper as scientifically retracted on weak signals. Existing manual withdrawal workflow is not proof that automated retraction monitoring is implemented.
+- Keep administrator Friday alerts independent from author congratulatory emails. Recognition automation and author emails remain OFF pending complete testing.
+- Next Decision 8/8: whether the initial pool includes **all existing eligible published papers** plus incoming ones, or only newly published papers after launch.
