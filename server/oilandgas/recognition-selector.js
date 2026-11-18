@@ -39,8 +39,7 @@ function categoryScore(p,category){
 }
 function eligibleReview(p){
  const a=p.assessment||{};
- return a.mode==='rule-based-abstract'&&a.eligibleForEditorialReview===true&&
-  a.evidence?.abstractSourceVerified===true&&
+ return a.mode==='rule-based-directory'&&a.eligibleForEditorialReview===true&&
   p.bibliographyVerified===true&&p.integrityCleared===true&&
   p.reviewStatus==='approved'&&p.reviewRevisionMatches===true;
 }
