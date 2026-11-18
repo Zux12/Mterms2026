@@ -60,7 +60,7 @@ jobs:
           node <<'NODE'
           const fs=require('node:fs'),path=require('node:path');
           (async()=>{
-            const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot/releases',{
+            const r=await fetch('https://api.heroku.com/apps/'+require('./server/jalan/audit-heroku-retention-metadata-readonly').APPS.find(a=>a.role==='private').id+'/releases',{
               headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
                 Accept:'application/vnd.heroku+json; version=3'},
               signal:AbortSignal.timeout(15000),redirect:'error'});
@@ -101,6 +101,10 @@ jobs:
           SCRIPT
           chmod 700 "$askpass"
           export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          # The Heroku Git remote is name-based: verify its current name resolves
+          # to the approved immutable pilot UUID immediately before pushing.
+          # This GET-only guard fails closed on rename/reuse or missing access.
+          node server/jalan/assert-heroku-private-git-target-readonly.js
           git push --force https://git.heroku.com/jalan-kl-private-pilot.git HEAD:refs/heads/main
           rm -f "$askpass"
       - name: Verify canonical private pilot URL rejects anonymous visitors
@@ -110,12 +114,8 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           (async () => {
-            const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot',{
-              headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
-                Accept:'application/vnd.heroku+json; version=3'},
-              signal:AbortSignal.timeout(15000)});
-            if(!r.ok)throw Error('Heroku app lookup failed with HTTP '+r.status);
-            const app=await r.json();
+            const {verify}=require('./server/jalan/assert-heroku-private-git-target-readonly');
+            const app=await verify();
             const url=new URL(app.web_url);
             if(url.protocol!=='https:'||!/^[a-z0-9-]+\.herokuapp\.com$/.test(url.hostname))
               throw Error('Heroku canonical domain mismatch');
@@ -150,7 +150,7 @@ jobs:
             const base=JSON.parse(fs.readFileSync(filename,'utf8'));
             let latest=null;
             for(let i=0;i<18;i++){
-              const r=await fetch('https://api.heroku.com/apps/jalan-kl-private-pilot/releases',{
+              const r=await fetch('https://api.heroku.com/apps/'+require('./server/jalan/audit-heroku-retention-metadata-readonly').APPS.find(a=>a.role==='private').id+'/releases',{
                 headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
                   Accept:'application/vnd.heroku+json; version=3'},
                 signal:AbortSignal.timeout(15000),redirect:'error'});
@@ -171,7 +171,7 @@ jobs:
                     'jalan-expected-heroku-commit'),'utf8').trim();
                   if(!/^[a-f0-9]{40}$/.test(expected))throw Error('Missing expected Git SHA');
                   const slugResponse=await fetch(
-                    'https://api.heroku.com/apps/jalan-kl-private-pilot/slugs/'+encodeURIComponent(latest.slug.id),{
+                    'https://api.heroku.com/apps/'+require('./server/jalan/audit-heroku-retention-metadata-readonly').APPS.find(a=>a.role==='private').id+'/slugs/'+encodeURIComponent(latest.slug.id),{
                       headers:{Authorization:'Bearer '+process.env.HEROKU_API_KEY,
                         Accept:'application/vnd.heroku+json; version=3'},
                       signal:AbortSignal.timeout(15000),redirect:'error'});
