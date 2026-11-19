@@ -68,6 +68,31 @@ test('private pilot release gate distinguishes new code slug from config-only re
   'deployment secrets remain restricted to the trusted branch');
 });
 
+test('manual Heroku dispatch defaults to read-only and requires an explicit live-release phrase',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const dispatch=yaml.split('permissions:')[0];
+ assert.match(dispatch,/validation_only:\\n(?:[^\\n]*\\n){0,5}\\s*default: true\\n/,
+  'default dispatch must not deploy private code');
+ assert.match(dispatch,/release_approval:\\n(?:[^\\n]*\\n){0,6}\\s*type: string/,
+  'manual live release must expose a separate explicit operator approval input');
+ const approval=yaml.indexOf('BLOCK private code release unless operator typed explicit deployment approval');
+ const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ assert.ok(approval>0&&privacy>approval&&push>privacy,
+  'explicit operator approval must precede any private write');
+ const approvalStep=yaml.slice(approval,privacy);
+ assert.ok(approvalStep.includes('if: ${{ !inputs.validation_only }}'),
+  'read-only validation must not require the release phrase');
+ assert.ok(approvalStep.includes('JALAN_PRIVATE_RELEASE_CONFIRMATION: ${{ inputs.release_approval }}'),
+  'operator-provided phrase must enter via an env var, not raw shell expression');
+ assert.ok(approvalStep.includes('RELEASE_JALAN_PRIVATE_HEROKU_CODE'));
+ assert.ok(approvalStep.includes('exit 1'));
+ assert.ok(!approvalStep.includes('echo "$JALAN_PRIVATE_RELEASE_CONFIRMATION"'),
+  'do not print operator input');
+});
+
 test('manual pilot release is code-only: no provisioning, credential rotation or config PATCH',()=>{
  const fs=require('node:fs'),path=require('node:path');
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
