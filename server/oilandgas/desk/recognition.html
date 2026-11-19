@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="recognition.css?v=20261118-1"></head><body>
 <header><strong>oil &amp; gas<span class="recognition-inline-1">.</span> / Editor's Desk</strong><a href="desk.html">Back to dashboard</a></header>
 <main><small>WRRP-001 / Test workspace</small><h1>Weekly Research Recognition</h1>
-<p>The weekly selection engine, administrator overrides and public archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
+<p>The weekly selection engine, administrator overrides and private historical archive are being tested. This is a separate programme from the existing homepage story selectors.</p>
 <div class="warning"><strong>Author emails are OFF.</strong> The notification service is a placeholder. No congratulatory emails or recognition letters are sent by this control page. The weekly scheduler is disabled by default.</div>
 <p id="notice" role="status" class="status">Checking editor session…</p>
 <section class="panel" id="master-activation-panel"><h2>Recognition Programme — Master Activation</h2>
@@ -133,6 +133,18 @@
 <section class="panel"><h2>Controlled activation</h2><p>Only activate a weekly selection after checking the candidate publications and their authors. Activation publishes recognition data to its own public endpoint and archive, but <strong>does not send emails</strong>.</p>
 <button id="activate" class="secondary" disabled>Activation locked pending tests</button></section>
 <section class="panel"><h2>Withdraw invalid recognition</h2><p class="muted">A withdrawn selection is removed from active and archive feeds. Previously issued certificates are invalidated, but verification remains available and shows the withdrawn status. No emails are sent.</p><form id="withdraw"><label>Recognition to withdraw<select name="selectionId" id="withdraw-selection" required><option value="">Select recognition</option></select></label><label>Reason<textarea name="reason" minlength="10" maxlength="500" required placeholder="Explain the editorial or integrity concern"></textarea></label><button type="submit" class="secondary">Withdraw selected recognition</button></form><p id="withdraw-message" role="status"></p></section>
+<section class="panel" id="private-recognition-archive">
+<h2>Private Historical Recognition Archive — Admin Only</h2>
+<p class="muted">Accessible exclusively through the authenticated Editor's Desk. This records current, archived and historically withdrawn editorial recognitions. Public visitors cannot browse the archive or retrieve internal scoring details. Individual letter and QR verification stays available by unique reference.</p>
+<form id="private-archive-filter" class="recognition-inline-4">
+<label>Search paper or author <input id="private-archive-query" type="search" maxlength="100" placeholder="Title, author, or topic"></label>
+<label>Category <select id="private-archive-category"><option value="">All categories</option><option value="editors-pick">Editor's Pick</option><option value="industry-impact">Industry Impact</option><option value="emerging-research">Emerging Research</option></select></label>
+<button type="submit" class="secondary">Search private archive</button>
+</form>
+<div id="private-archive-list" class="grid"></div>
+<p id="private-archive-status" class="muted" role="status">Not loaded.</p>
+<div class="recognition-inline-4"><button id="private-archive-prev" class="secondary" type="button" disabled>Previous</button><button id="private-archive-next" class="secondary" type="button" disabled>Next</button></div>
+</section>
 <section class="panel"><h2>Co-author recognition letters</h2>
 <p class="muted">Issue a formal A4 Letter of Recognition only after confirming a co-author's exact published byline name. Letters are verifiable and can be printed or saved as PDF. No email will be sent.</p>
 <form id="certificate-issue"><label>Recognition selection<select name="selectionId" id="certificate-selection" required><option value="">Select an activated recognition</option></select></label>
