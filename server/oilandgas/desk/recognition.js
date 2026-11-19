@@ -320,6 +320,7 @@ async function checkResendOwnerTestReadiness(){
    'Dedicated recognition Resend key detected. Only the owner-only test is available; no researcher emails are enabled.':
    'Dedicated Resend recognition key not detected in the deployed backend. Confirm Heroku Config Vars and deployment.';
   button.disabled=!data.configured;
+  $('resend-congratulations-demo-send').disabled=!data.configured;
  }catch(error){status.textContent='Resend readiness unavailable: '+error.message}
 }
 $('resend-owner-test-send').onclick=async()=>{
@@ -335,6 +336,18 @@ $('resend-owner-test-send').onclick=async()=>{
  finally{await checkResendOwnerTestReadiness()}
 };
 checkResendOwnerTestReadiness();
+$('resend-congratulations-demo-send').onclick=async()=>{
+ if(!confirm('Send ONE fictional congratulations email to m.zurix@oilandgas.eu.com? The message is marked DESIGN TEST — NO AWARDS. No real personal letter or QR record will be issued.'))return;
+ const button=$('resend-congratulations-demo-send'),target=$('resend-congratulations-demo-result');
+ button.disabled=true;target.textContent='Requesting owner-only sample congratulations email via Resend…';
+ try{
+  const result=await api('resend-owner-test/send',{confirm:'SEND_RESEND_CONGRATULATIONS_DEMO'});
+  target.textContent=result.state==='accepted-by-resend'?
+   'Resend accepted the design test. Message ID: '+result.providerMessageId+'. Check your inbox and Resend delivery status. This does not issue a real recognition.':
+   'Unexpected test response: '+String(result.state||'unknown');
+ }catch(error){target.textContent='Sample email was not confirmed: '+error.message}
+ finally{await checkResendOwnerTestReadiness()}
+};
 $('smtp-test').onclick=async()=>{
  if(!confirm('Send ONE Hostinger SMTP test email to m.zurix@oilandgas.eu.com? No author notification or awards will be issued.'))return;
  const button=$('smtp-test');button.disabled=true;
