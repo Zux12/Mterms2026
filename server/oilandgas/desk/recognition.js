@@ -321,6 +321,7 @@ async function checkResendOwnerTestReadiness(){
    'Dedicated Resend recognition key not detected in the deployed backend. Confirm Heroku Config Vars and deployment.';
   button.disabled=!data.configured;
   $('resend-congratulations-demo-send').disabled=!data.configured;
+  $('resend-letter-staging-demo-send').disabled=!data.configured;
  }catch(error){status.textContent='Resend readiness unavailable: '+error.message}
 }
 $('resend-owner-test-send').onclick=async()=>{
@@ -346,6 +347,18 @@ $('resend-congratulations-demo-send').onclick=async()=>{
    'Resend accepted the design test. Message ID: '+result.providerMessageId+'. Check your inbox and Resend delivery status. This does not issue a real recognition.':
    'Unexpected test response: '+String(result.state||'unknown');
  }catch(error){target.textContent='Sample email was not confirmed: '+error.message}
+ finally{await checkResendOwnerTestReadiness()}
+};
+$('resend-letter-staging-demo-send').onclick=async()=>{
+ if(!confirm('Send ONE watermarked A4 Letter of Recognition + demonstration QR test to m.zurix@oilandgas.eu.com? This will not create a real award or contact researchers.'))return;
+ const button=$('resend-letter-staging-demo-send'),target=$('resend-letter-staging-demo-result');
+ button.disabled=true;target.textContent='Submitting owner-only A4 letter and QR staging test through Resend…';
+ try{
+  const result=await api('resend-owner-test/send',{confirm:'SEND_RESEND_LETTER_STAGING_DEMO'});
+  target.textContent=result.state==='accepted-by-resend'?
+   'Resend accepted your sample letter email. Message ID: '+result.providerMessageId+'. Check the inbox, open the specimen letter, print A4 and scan the test QR.':
+   'Unexpected test response: '+String(result.state||'unknown');
+ }catch(error){target.textContent='Sample letter email not confirmed: '+error.message}
  finally{await checkResendOwnerTestReadiness()}
 };
 $('smtp-test').onclick=async()=>{
