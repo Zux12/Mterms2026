@@ -18,14 +18,30 @@ async function resend(url,options){
  if(!r.ok)throw Error('Resend HTTP '+r.status+': '+(j.message||'request failed'));
  return j;
 }
+let audienceCache=null;
+async function resolveAudience(){
+ const configured=config().audience;
+ if(configured)return configured;
+ if(audienceCache)return audienceCache;
+ // Use an existing dedicated audience if available; otherwise create one.
+ const response=await resend('/audiences',{method:'GET'});
+ const audiences=response.data||response.audiences||[];
+ const existing=audiences.find(a=>a.name==='BIRT Lab Research Digest');
+ if(existing){audienceCache=existing.id;return audienceCache}
+ const created=await resend('/audiences',{method:'POST',body:JSON.stringify({name:'BIRT Lab Research Digest'})});
+ if(!created.id)throw Error('Resend did not return an audience ID');
+ audienceCache=created.id;
+ return audienceCache;
+}
 router.post('/subscribe',limited,async(req,res)=>{
  if(!ORIGINS.has(req.get('Origin')))return res.status(403).json({message:'Origin not permitted'});
- const {key,audience}=config();
- if(!key||!audience)return res.status(503).json({message:'Newsletter subscriptions are not yet open'});
+ const {key}=config();
+ if(!key)return res.status(503).json({message:'Newsletter subscriptions are not yet open'});
  const email=String(req.body?.email||'').trim().toLowerCase();
  if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||req.body?.consent!==true)
   return res.status(400).json({message:'Valid email and explicit newsletter consent required'});
  try{
+  const audience=await resolveAudience();
   // Create contact directly; do not automatically reactivate existing contacts
   // that previously unsubscribed.
   await resend('/contacts',{method:'POST',body:JSON.stringify({email,audience_id:audience,unsubscribed:false})});
@@ -37,5 +53,5 @@ router.post('/subscribe',limited,async(req,res)=>{
   res.status(502).json({message:'Unable to complete subscription. Please try again later.'});
  }
 });
-router.get('/health',(_req,res)=>res.json({service:'BIRT newsletter direct opt-in',configured:!!(config().key&&config().audience),sendingEnabled:false}));
+router.get('/health',(_req,res)=>res.json({service:'BIRT newsletter direct opt-in',configured:!!config().key,sendingEnabled:false}));
 module.exports=router;
