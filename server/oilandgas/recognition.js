@@ -1178,7 +1178,7 @@ adminRouter.get('/resend-owner-test/readiness',(req,res)=>{
 });
 adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
  const confirmation=req.body?.confirm;
- if(!['SEND_RESEND_OWNER_TEST_ONLY','SEND_RESEND_REPLY_TO_FIX_TEST'].includes(confirmation))
+ if(!['SEND_RESEND_OWNER_TEST_ONLY','SEND_RESEND_REPLY_TO_FIX_TEST','SEND_RESEND_CONGRATULATIONS_DEMO'].includes(confirmation))
   return res.status(400).json({error:'Explicit owner-only Resend test confirmation required.'});
  const key=process.env.OIL_RECOGNITION_RESEND_API_KEY;
  if(!resendOwnerTest.readiness().configured)
@@ -1187,7 +1187,8 @@ adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
  const col=db().collection('recognition_resend_owner_tests');
  // A separate one-time corrected-header test does not bypass the normal
  // 24h cooldown. Each test lane still has an atomic 24h rate limit.
- const testLane=confirmation==='SEND_RESEND_REPLY_TO_FIX_TEST'?'reply-to-fix-v2':'owner';
+ const testLane=confirmation==='SEND_RESEND_CONGRATULATIONS_DEMO'?'congratulations-demo-v1':
+  confirmation==='SEND_RESEND_REPLY_TO_FIX_TEST'?'reply-to-fix-v2':'owner';
  await col.updateOne({_id:testLane},{$setOnInsert:{createdAt:now}},{upsert:true});
  const claim=await col.findOneAndUpdate({_id:testLane,$or:[
    {lastAttemptAt:{$exists:false}},
@@ -1196,7 +1197,8 @@ adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
  if(!claim||claim.lastAttemptId!==id)
   return res.status(429).json({error:'A Resend owner test has already been claimed within 24 hours.'});
  try{
-  const result=await resendOwnerTest.sendOwnerTest({key,idempotencyKey:'wrrp-owner-test-'+id});
+  const result=await resendOwnerTest.sendOwnerTest({key,idempotencyKey:'wrrp-owner-test-'+id,
+   variant:confirmation==='SEND_RESEND_CONGRATULATIONS_DEMO'?'congratulations-demo':'identity'});
   await col.updateOne({_id:testLane,lastAttemptId:id},{$set:{state:result.state,
    providerMessageId:result.providerMessageId,acceptedAt:new Date()}});
   return res.set('Cache-Control','private,no-store').json({ok:true,...result,authorEmailsEnabled:false});
