@@ -40,7 +40,7 @@ router.post('/test-digest',requireAdmin,async(req,res)=>{
   const fetched=await fetch(source,{signal:AbortSignal.timeout(18000),headers:{Accept:'text/html'}});
   if(!fetched.ok)throw Error('Newsletter source HTTP '+fetched.status);
   const html=await fetched.text();
-  if(html.length<2500||html.length>350000||!html.includes('BIRT Lab Research Digest')||!html.includes('ORIGINAL SOURCE'))throw Error('Published digest HTML failed validation');
+  if(html.length<2500||html.length>350000||!/<html\b/i.test(html)||!/<title>[^<]*BIRT Lab Research Digest/i.test(html)||!/<a\b[^>]*href=["']https:\/\/(?:europepmc\.org|doi\.org|api\.openalex\.org|openalex\.org|www\.ebi\.ac\.uk)\//i.test(html))throw Error('Published digest HTML failed validation: missing expected title or research source links');
   const issue=(html.match(/<title>[^<]*?(\d{4}-\d{2}-\d{2})<\/title>/i)||[])[1];
   if(!issue)throw Error('Cannot identify the published digest issue date');
   const text='BIRT Lab Research Digest — '+issue+'\nRead the full published edition: '+source+'\nThis is a private test. Weekly distribution is not active.';
