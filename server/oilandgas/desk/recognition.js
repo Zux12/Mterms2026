@@ -323,13 +323,13 @@ async function checkResendOwnerTestReadiness(){
  }catch(error){status.textContent='Resend readiness unavailable: '+error.message}
 }
 $('resend-owner-test-send').onclick=async()=>{
- if(!confirm('Send ONE Resend recognition test email from recognition@oilandgas.eu.com to m.zurix@oilandgas.eu.com? No researcher notifications or awards will be issued.'))return;
+ if(!confirm('Send ONE corrected-header Resend test from recognition@oilandgas.eu.com to your inbox? The email must contain no separate Reply-To. No researcher notifications or awards will be issued.'))return;
  const button=$('resend-owner-test-send'),result=$('resend-owner-test-result');
  button.disabled=true;result.textContent='Requesting one owner-only Resend test email…';
  try{
-  const sent=await api('resend-owner-test/send',{confirm:'SEND_RESEND_OWNER_TEST_ONLY'});
+  const sent=await api('resend-owner-test/send',{confirm:'SEND_RESEND_REPLY_TO_FIX_TEST'});
   result.textContent=sent.state==='accepted-by-resend'?
-   'Resend accepted the owner-only test. Message ID: '+sent.providerMessageId+'. Confirm delivered status in Resend and check your inbox or spam folder.':
+   'Resend accepted the corrected-header owner test. Verify its Reply-To in the received email. Message ID: '+sent.providerMessageId+'. Confirm delivered status in Resend and check your inbox or spam folder.':
    'Resend test response: '+String(sent.state||'unknown');
  }catch(error){result.textContent='Owner-only Resend test was not confirmed: '+error.message}
  finally{await checkResendOwnerTestReadiness()}
