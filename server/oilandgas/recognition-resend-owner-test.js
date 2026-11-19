@@ -27,13 +27,13 @@ function demoEmail(){
  '<div style="border-left:4px solid #c19a52;background:#f8f6f0;padding:18px;margin:20px 0"><strong>ILLUSTRATIVE PAPER — NOT A REAL AWARD</strong><br>'+escapeHtml(paper)+
  '<br><small>Sample featured week: '+escapeHtml(period)+'</small></div>'+
  '<p>An awarded researcher will receive an individually issued A4 Letter of Recognition with a unique QR code confirming the original recognition date, paper title and recipient in our permanent historical archive.</p>'+
- '<p style="text-align:center;margin:26px 0"><a href="https://oilandgas.eu.com/recognition.html" style="display:inline-block;background:#26312e;color:white;text-decoration:none;padding:13px 22px;border-radius:4px">View Research Recognition Archive</a></p>'+
- '<p style="font-size:12px;color:#6c6e68"><strong>Test limitation:</strong> No personal letter or scannable letter-verification QR exists for this fictional paper. The button opens the public programme archive, not a purported issued letter.</p>'+
+ '<p style="text-align:center;margin:26px 0"><a href="https://oilandgas.eu.com/letter-demo.html" style="display:inline-block;background:#26312e;color:white;text-decoration:none;padding:13px 22px;border-radius:4px">View Sample A4 Letter</a></p>'+
+ '<p style="font-size:12px;color:#6c6e68"><strong>Test limitation:</strong> No personal letter or scannable letter-verification QR exists for this fictional paper. The button opens a specimen A4 letter with a demonstration QR, not an officially issued recognition.</p>'+
  '<p>Warm regards,<br><strong>Oil &amp; Gas Editorial Team</strong></p></td></tr>'+
  '<tr><td style="background:#f7f5f0;padding:17px;text-align:center;font-size:11px">oilandgas.eu.com · Editorial recognition is not accredited academic certification.</td></tr></table></body></html>';
  const text='DEMONSTRATION EMAIL — NO RECOGNITION ISSUED\n\nCongratulations, Sample Researcher!\n'+
  'Sample category: '+category+'\nSample paper: '+paper+'\n'+period+
- '\n\nNo real recognition or individual letter has been issued. Real recipients will receive a personal A4 letter and permanently verifiable QR. Programme archive: https://oilandgas.eu.com/recognition.html\n\nOil & Gas Editorial Team';
+ '\n\nNo real recognition or individual letter has been issued. Real recipients will receive a personal A4 letter and permanently verifiable QR. Sample letter: https://oilandgas.eu.com/letter-demo.html\n\nOil & Gas Editorial Team';
  return {subject:'[DESIGN TEST — NO AWARDS] Congratulations! Oil & Gas Research Recognition',html,text};
 }
 // Owner-only email showing the actual A4 specimen and its demo-only QR.
