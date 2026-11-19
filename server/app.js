@@ -28,6 +28,7 @@ const birtMembershipRouter = require('./birt/membership');
 const birtExpertsAdminRouter = require('./birt/experts-admin');
 const birtNewsletterTestRouter = require('./birt/newsletter-test');
 const birtNewsletterSubscriptionsRouter = require('./birt/newsletter-subscriptions');
+const birtNewsletterScheduler = require('./birt/newsletter-scheduler');
 
 const {
   setupMtermsIrc
@@ -174,6 +175,7 @@ mongoose.connect(
         console.log(
           `Server listening on :${PORT}`
         );
+        birtNewsletterScheduler.start();
 
       }
     );
