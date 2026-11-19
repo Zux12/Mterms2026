@@ -18,7 +18,11 @@ test('Mock Resend request sends ONLY to owner with stable idempotency key',async
  assert.equal(request.headers['Idempotency-Key'],'wrrp-owner-test-123e4567-e89b-12d3-a456-426614174000');
  const body=JSON.parse(request.body);
  assert.deepEqual(body.to,['m.zurix@oilandgas.eu.com']);
- assert.equal(body.from,FROM);assert.equal(body.reply_to,TO);
+ assert.equal(body.from,FROM);
+ assert.equal(Object.hasOwn(body,'reply_to'),false);
+ assert.equal(JSON.stringify(body).includes('m.zurix@oilandgas.eu.com'),true);
+ assert.equal(body.html.includes('m.zurix@oilandgas.eu.com'),false);
+ assert.equal(body.text.includes('m.zurix@oilandgas.eu.com'),false);
  assert.match(body.subject,/OWNER TEST/);
  assert.equal(result.state,'accepted-by-resend');
 });
