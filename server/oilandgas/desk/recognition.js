@@ -311,6 +311,30 @@ $('resume-recognition').onclick=async()=>{
  await refresh();
  }catch(e){$('pause-result').textContent=e.message}
 };
+async function checkResendOwnerTestReadiness(){
+ const status=$('resend-owner-test-readiness'),button=$('resend-owner-test-send');
+ button.disabled=true;
+ try{
+  const data=await api('resend-owner-test/readiness');
+  status.textContent=data.configured?
+   'Dedicated recognition Resend key detected. Only the owner-only test is available; no researcher emails are enabled.':
+   'Dedicated Resend recognition key not detected in the deployed backend. Confirm Heroku Config Vars and deployment.';
+  button.disabled=!data.configured;
+ }catch(error){status.textContent='Resend readiness unavailable: '+error.message}
+}
+$('resend-owner-test-send').onclick=async()=>{
+ if(!confirm('Send ONE Resend recognition test email from recognition@oilandgas.eu.com to m.zurix@oilandgas.eu.com? No researcher notifications or awards will be issued.'))return;
+ const button=$('resend-owner-test-send'),result=$('resend-owner-test-result');
+ button.disabled=true;result.textContent='Requesting one owner-only Resend test email…';
+ try{
+  const sent=await api('resend-owner-test/send',{confirm:'SEND_RESEND_OWNER_TEST_ONLY'});
+  result.textContent=sent.state==='accepted-by-resend'?
+   'Resend accepted the owner-only test. Message ID: '+sent.providerMessageId+'. Confirm delivered status in Resend and check your inbox or spam folder.':
+   'Resend test response: '+String(sent.state||'unknown');
+ }catch(error){result.textContent='Owner-only Resend test was not confirmed: '+error.message}
+ finally{await checkResendOwnerTestReadiness()}
+};
+checkResendOwnerTestReadiness();
 $('smtp-test').onclick=async()=>{
  if(!confirm('Send ONE Hostinger SMTP test email to m.zurix@oilandgas.eu.com? No author notification or awards will be issued.'))return;
  const button=$('smtp-test');button.disabled=true;
