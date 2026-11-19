@@ -73,9 +73,9 @@ test('manual Heroku dispatch defaults to read-only and requires an explicit live
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
   'jalan-heroku-private-pilot-deploy.yml'),'utf8');
  const dispatch=yaml.split('permissions:')[0];
- assert.match(dispatch,/validation_only:\\n(?:[^\\n]*\\n){0,5}\\s*default: true\\n/,
+ assert.match(dispatch,/validation_only:\n(?:[^\n]*\n){0,5}\s*default: true\n/,
   'default dispatch must not deploy private code');
- assert.match(dispatch,/release_approval:\\n(?:[^\\n]*\\n){0,6}\\s*type: string/,
+ assert.match(dispatch,/release_approval:\n(?:[^\n]*\n){0,6}\s*type: string/,
   'manual live release must expose a separate explicit operator approval input');
  const approval=yaml.indexOf('BLOCK private code release unless operator typed explicit deployment approval');
  const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
