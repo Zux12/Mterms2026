@@ -176,7 +176,8 @@ publicRouter.get('/current',async(req,res,next)=>{try{
  .find({status:'active',start:{$lte:now},end:{$gt:now}}).sort({category:1}).limit(3).toArray();
  res.json({programme:'WRRP-001',programmeActive:process.env.OIL_RECOGNITION_RULES_READY==='true'&&process.env.OIL_RECOGNITION_ACTIVATION_ENABLED==='true'&&process.env.OIL_RECOGNITION_AUTO==='true',emailEnabled:false,items:items.map(publicRecord)});
 }catch(e){next(e);}});
-publicRouter.get('/archive',async(req,res,next)=>{try{
+// Admin-only archive. Mounted behind Editor's Desk authentication; public router intentionally has no archive route.
+adminRouter.get('/archive',async(req,res,next)=>{try{
  const page=Number(req.query.page||0);
  if(!Number.isSafeInteger(page)||page<0||page>1000)return res.status(400).json({error:'Invalid page'});
  const category=typeof req.query.category==='string'?req.query.category:'';
@@ -190,15 +191,15 @@ publicRouter.get('/archive',async(req,res,next)=>{try{
   db().collection('recognition_selections').countDocuments(match),
   db().collection('recognition_selections').find(match).sort({start:-1,_id:1}).skip(page*12).limit(12).toArray()
  ]);
- res.json({total:count,page,items:items.map(publicRecord)});
+ res.set({'Cache-Control':'no-store, private','X-Robots-Tag':'noindex, nofollow'}).json({total:count,page,items:items.map(publicRecord)});
 }catch(e){next(e);}});
-publicRouter.get('/record/:id',async(req,res,next)=>{try{
+adminRouter.get('/record/:id',async(req,res,next)=>{try{
  const id=String(req.params.id||'');
  if(!/^\d{4}-\d{2}-\d{2}:(editors-pick|industry-impact|emerging-research)$/.test(id))
   return res.sendStatus(404);
  const record=await db().collection('recognition_selections').findOne({_id:id});
  if(!record||!['active','archived','withdrawn'].includes(record.status))return res.sendStatus(404);
- res.set('Cache-Control','public,max-age=60').json(publicRecord(record));
+ res.set({'Cache-Control':'no-store, private','X-Robots-Tag':'noindex, nofollow'}).json(publicRecord(record));
 }catch(e){next(e);}});
 publicRouter.get('/verify/:id',async(req,res,next)=>{try{
  if(!/^OG-WRS-[A-Z0-9-]{8,64}$/.test(req.params.id))return res.sendStatus(404);
