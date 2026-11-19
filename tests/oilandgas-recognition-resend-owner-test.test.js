@@ -38,3 +38,28 @@ test('Provider rejection does not claim delivery',async()=>{
   fetcher:async()=>({ok:false,status:403,json:async()=>({name:'validation_error'})})}),
   /declined/);
 });
+
+test('mock congratulations design test is only addressed to owner with no Reply-To or fabricated award',async()=>{
+ let body=null;
+ const result=await sendOwnerTest({key:'re_fake_for_test',variant:'congratulations-demo',
+  idempotencyKey:'wrrp-owner-test-123e4567-e89b-12d3-a456-426614174000',
+  fetcher:async(_url,opts)=>{body=JSON.parse(opts.body);return {ok:true,json:async()=>({id:'demo-owner-test-id'})}}});
+ assert.deepEqual(body.to,['m.zurix@oilandgas.eu.com']);
+ assert.equal(body.from,FROM);
+ assert.equal(Object.hasOwn(body,'reply_to'),false);
+ assert.match(body.subject,/DESIGN TEST — NO AWARDS/);
+ assert.match(body.html,/Congratulations!/);
+ assert.match(body.html,/DEMONSTRATION EMAIL — NO RECOGNITION ISSUED/);
+ assert.match(body.html,/Illustrative Research Paper/);
+ assert.match(body.html,/https:\/\/oilandgas\.eu\.com\/recognition\.html/);
+ assert.doesNotMatch(body.html,/letter\.html\?id=|OG-WRS-[A-Z0-9-]+/);
+ assert.doesNotMatch(body.html,/m\.zurix@/);
+ assert.equal(result.state,'accepted-by-resend');
+});
+test('unexpected sender variant is rejected before contacting provider',async()=>{
+ let called=false;
+ await assert.rejects(()=>sendOwnerTest({key:'re_fake_for_test',variant:'author-notification',
+  idempotencyKey:'wrrp-owner-test-123e4567-e89b-12d3-a456-426614174000',
+  fetcher:async()=>{called=true;return {ok:true,json:async()=>({id:'wrong'})}}}));
+ assert.equal(called,false);
+});
