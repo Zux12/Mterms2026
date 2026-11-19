@@ -6,10 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       validation_only:
-        description: 'Validate existing private pilot without redeploying'
+        description: 'Safe default: verify current pilot without deploying'
         required: true
-        default: false
+        default: true
         type: boolean
+      release_approval:
+        description: 'Only for live code release: type RELEASE_JALAN_PRIVATE_HEROKU_CODE'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -42,6 +47,18 @@ jobs:
           node --check server/jalan/run-kl-preview-railway.js
           test -n "$HEROKU_API_KEY"
           test -n "$JALAN_READONLY_MONGODB_URI"
+      - name: BLOCK private code release unless operator typed explicit deployment approval
+        if: ${{ !inputs.validation_only }}
+        env:
+          JALAN_PRIVATE_RELEASE_CONFIRMATION: ${{ inputs.release_approval }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$JALAN_PRIVATE_RELEASE_CONFIRMATION" != 'RELEASE_JALAN_PRIVATE_HEROKU_CODE' ]]; then
+            echo 'Private Heroku code release BLOCKED: explicit approval phrase missing or incorrect.' >&2
+            exit 1
+          fi
+          echo 'Explicit private code-release approval recognized; read-only safety checks follow.'
       - name: BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled (GET only)
         if: ${{ !inputs.validation_only }}
         env:
