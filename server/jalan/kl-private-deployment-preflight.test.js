@@ -68,6 +68,132 @@ test('private pilot release gate distinguishes new code slug from config-only re
   'deployment secrets remain restricted to the trusted branch');
 });
 
+test('manual Heroku dispatch defaults to read-only and requires an explicit live-release phrase',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const dispatch=yaml.split('permissions:')[0];
+ assert.match(dispatch,/validation_only:\n(?:[^\n]*\n){0,5}\s*default: true\n/,
+  'default dispatch must not deploy private code');
+ assert.match(dispatch,/release_approval:\n(?:[^\n]*\n){0,6}\s*type: string/,
+  'manual live release must expose a separate explicit operator approval input');
+ const approval=yaml.indexOf('BLOCK private code release unless operator typed explicit deployment approval');
+ const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ assert.ok(approval>0&&privacy>approval&&push>privacy,
+  'explicit operator approval must precede any private write');
+ const approvalStep=yaml.slice(approval,privacy);
+ assert.ok(approvalStep.includes('if: ${{ !inputs.validation_only }}'),
+  'read-only validation must not require the release phrase');
+ assert.ok(approvalStep.includes('JALAN_PRIVATE_RELEASE_CONFIRMATION: ${{ inputs.release_approval }}'),
+  'operator-provided phrase must enter via an env var, not raw shell expression');
+ assert.ok(approvalStep.includes('RELEASE_JALAN_PRIVATE_HEROKU_CODE'));
+ assert.ok(approvalStep.includes('exit 1'));
+ assert.ok(!approvalStep.includes('echo "$JALAN_PRIVATE_RELEASE_CONFIRMATION"'),
+  'do not print operator input');
+});
+
+test('manual pilot release is code-only: no provisioning, credential rotation or config PATCH',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'),
+  'existing app, current and previous release config must be checked via GET');
+ assert.doesNotMatch(yaml,/run:\s*node server\/jalan\/configure-heroku-private-pilot\.js/,
+  'never call the side-effecting Heroku config reconciliation helper in a code release');
+ assert.doesNotMatch(yaml,/\/config-vars[^\n]*PATCH|method:\s*['"]PATCH['"]/,
+  'no Heroku config mutation permitted in manual code-only release');
+ const gate=yaml.indexOf('BLOCK private deploy unless prior code release is eligible to restore');
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ assert.ok(gate>0&&baseline>gate&&push>baseline);
+ assert.match(yaml,/workflow_dispatch:/);
+ assert.doesNotMatch(yaml.split('permissions:')[0],/\n\s*push:/,
+  'no automatic code deployment');
+});
+
+test('Heroku Git remote name must match approved immutable private app ID (GET only)',async()=>{
+ const {verify}=require('./assert-heroku-private-git-target-readonly');
+ const {APPS}=require('./audit-heroku-retention-metadata-readonly');
+ const app=APPS.find(a=>a.role==='private');
+ const live={id:app.id,name:app.name,web_url:'https://jalan-kl-private-pilot.herokuapp.com/'};
+ const seen=[];
+ const mock=(byId=live,byName=live)=>async(url,options)=>{
+  seen.push({url,options});
+  return {status:200,json:async()=>url.endsWith('/'+app.id)?byId:byName};
+ };
+ const key='read-only-fixture-token-123456789';
+ const result=await verify({fetcher:mock(),key});
+ assert.equal(result.id,app.id);
+ assert.deepEqual(seen.map(x=>x.url),[
+  'https://api.heroku.com/apps/'+app.id,'https://api.heroku.com/apps/'+app.name]);
+ assert.ok(seen.every(x=>x.options.method==='GET'&&x.options.redirect==='error'));
+ await assert.rejects(()=>verify({fetcher:mock(live,{...live,id:'another-app-id'}),key}),
+  /identity-mismatch/,'name reused by a different app must fail closed');
+ await assert.rejects(()=>verify({fetcher:mock({...live,name:'renamed-app'},live),key}),
+  /identity-mismatch/,'approved app renamed must fail closed');
+ await assert.rejects(()=>verify({fetcher:async()=>({status:401}),key}),
+  /identity-unavailable/);
+ await assert.rejects(()=>verify({fetcher:mock(),key:''}),/identity-unavailable/);
+});
+
+test('manual Heroku Git push rechecks query redaction and exact release snapshot (GET only)',async()=>{
+ const {verifyPrePush}=require('./assert-heroku-private-git-target-readonly');
+ const {APPS}=require('./audit-heroku-retention-metadata-readonly');
+ const app=APPS.find(a=>a.role==='private');
+ const baseline={id:'release-15-fixture',version:15,slugId:'slug-15-fixture'};
+ const idResponse={id:app.id,name:app.name};
+ const feature={name:'http-router-no-log-query',enabled:true};
+ const release={id:baseline.id,version:baseline.version,
+  slug:{id:baseline.slugId},status:'succeeded'};
+ const key='synthetic-local-test-key-0123456789';
+ const requestLog=[];
+ const mock=(valueFeature=feature,valueRelease=release,options={})=>
+  async(url,req)=>{
+   requestLog.push({url,req});
+   if(options.http401)return {status:401};
+   if(url.endsWith('/features/http-router-no-log-query'))
+    return {status:200,json:async()=>valueFeature};
+   if(url.endsWith('/releases'))
+    return {status:200,headers:{get:()=>options.nextRange?'more-pages':null},
+     json:async()=>[valueRelease]};
+   return {status:200,json:async()=>idResponse};
+  };
+ assert.deepEqual(await verifyPrePush({fetcher:mock(),key,baseline}),
+  {appIdentityPinned:true,routerRedactionEnabled:true,baselineUnchanged:true});
+ assert.equal(requestLog.length,4);
+ assert.ok(requestLog.every(x=>x.req.method==='GET'&&x.req.redirect==='error'));
+ assert.ok(requestLog.some(x=>x.url.endsWith('/'+app.id+'/releases')));
+ await assert.rejects(()=>verifyPrePush({fetcher:mock({...feature,enabled:false}),key,baseline}),
+  /router-redaction-not-enabled/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,version:16}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,slug:{id:'different-slug'}}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,{...release,status:'pending'}),key,baseline}),
+  /release-baseline-changed/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,release,{http401:true}),key,baseline}),
+  /identity-unavailable/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(feature,release,{nextRange:true}),key,baseline}),
+  /metadata-unavailable/);
+ await assert.rejects(()=>verifyPrePush({fetcher:mock(),key,baseline:{...baseline,version:0}}),
+  /baseline-invalid/);
+});
+
+test('manual code deployment pins name-based Git target before push and validates it again afterwards',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
+  'jalan-heroku-private-pilot-deploy.yml'),'utf8');
+ const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
+ const guard=yaml.lastIndexOf('node server/jalan/assert-heroku-private-git-target-readonly.js --prepush',push);
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
+ const after=yaml.indexOf("const {verify}=require('./server/jalan/assert-heroku-private-git-target-readonly')");
+ assert.ok(baseline>0&&guard>baseline&&push>guard&&after>push);
+ assert.match(yaml,/on:\s*\n\s*workflow_dispatch:/);
+ assert.ok(yaml.includes('await verify()'),'post-push canonical URL must recheck app identity');
+ assert.doesNotMatch(yaml,/run:\s*node server\/jalan\/configure-heroku-private-pilot\.js/);
+});
+
 test('merging routing safeguards cannot automatically deploy the Heroku pilot',()=>{
  const fs=require('node:fs'),path=require('node:path');
  const yaml=fs.readFileSync(path.join(__dirname,'..','..','.github','workflows',
@@ -142,7 +268,6 @@ test('manual validation-only retry pins supported Chromium OS and skips Heroku w
  assert.match(yaml,/if: \$\{\{ inputs\.validation_only \}\}/,
   'validation-only mode must be explicit and visible in logs');
  for(const name of [
-  'Configure JALAN pilot credentials only (never mterm2026)',
   'Record pre-push Heroku release baseline (non-secret)',
   'Deploy experimental branch to dedicated Heroku Git remote',
   'Verify canonical private pilot URL rejects anonymous visitors',
@@ -214,11 +339,15 @@ test('manual private code deployment cannot begin before qualified rollback pref
   'jalan-heroku-private-pilot-deploy.yml'),'utf8');
  const privacy=yaml.indexOf('BLOCK manual code deployment unless dedicated private Heroku query redaction is enabled');
  const safeguard=yaml.indexOf('BLOCK private deploy unless prior code release is eligible to restore');
- const credential=yaml.indexOf('Configure JALAN pilot credentials only');
+ const baseline=yaml.indexOf('Record pre-push Heroku release baseline (non-secret)');
  const push=yaml.indexOf('git push --force https://git.heroku.com/jalan-kl-private-pilot.git');
- assert.ok(privacy>0&&safeguard>privacy&&credential>safeguard&&push>credential,
-  'qualified rollback preflight must run before configuration writes or code push');
- assert.ok(yaml.slice(safeguard,credential).includes('if: ${{ !inputs.validation_only }}'),
+ assert.ok(privacy>0&&safeguard>privacy&&baseline>safeguard&&push>baseline,
+  'qualified GET-only rollback preflight must run before the code push');
+ assert.ok(!yaml.includes('run: node server/jalan/configure-heroku-private-pilot.js'),
+  'code-only release must not write or rotate private Heroku config');
+ assert.doesNotMatch(yaml,/\/config-vars[^\n]*PATCH/,
+  'deployment workflow must never PATCH config variables');
+ assert.ok(yaml.slice(safeguard,baseline).includes('if: ${{ !inputs.validation_only }}'),
   'existing read-only validation-only flow must skip the release gate');
  assert.ok(yaml.includes('run: node server/jalan/check-pilot-manual-release-safety.js'));
  assert.ok(yaml.includes("if: github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'"));
