@@ -50,7 +50,7 @@ async function refresh(){
  $('overrides').replaceChildren(node('h3','Staged overrides'));
  for(const o of overrides.items){$('overrides').append(node('p',o.category+' — '+o.reference+' ('+o.reason+')'))}
  $('notifications').textContent=notice.message+' Queued: '+notice.queued+' · Sent: '+notice.sent;
- message('Editor controls available. Author recognition emails are disabled.');await refreshMasterSwitch();await certificates();await loadLetterTracking();await fridayBriefing();
+ message('Editor controls available. Author recognition emails are disabled.');await refreshMasterSwitch();await loadPrivateArchive();await certificates();await loadLetterTracking();await fridayBriefing();
  }catch(e){message(e.message)}
 }
 async function preview(){
@@ -65,6 +65,41 @@ async function preview(){
  }catch(e){message(e.message)}
 }
 
+let privateArchivePage=0;
+async function loadPrivateArchive(){
+ const list=$('private-archive-list'),status=$('private-archive-status');
+ list.replaceChildren();status.textContent='Loading private historical recognition records…';
+ try{
+  const params=new URLSearchParams({page:String(privateArchivePage),
+   q:$('private-archive-query').value.trim(),category:$('private-archive-category').value});
+  const result=await api('archive?'+params);
+  if(!result.items.length)list.append(node('p','No recognition records match the current criteria.','muted'));
+  for(const r of result.items){
+   const card=node('article','','card');
+   card.append(node('small',r.label||r.category),node('h3',r.title),
+    node('p',r.byline||'Author byline not recorded','muted'),
+    node('p','Recognition week: '+new Date(r.start).toLocaleDateString('en-MY',
+     {day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Kuala_Lumpur'})+
+     ' · Status: '+r.status,'muted'),node('p','Paper reference: '+r.reference,'muted'));
+   const details=document.createElement('details'),heading=node('summary','View private scorecard');
+   details.append(heading);
+   if(r.assessment){
+    details.append(node('p','Recorded score: '+r.assessment.total+'/100','muted'));
+    for(const [key,value] of Object.entries(r.assessment.breakdown||{})){
+     details.append(node('p',key+': '+value+' · '+(r.assessment.reasons?.[key]||''),'muted'));
+    }
+   }else details.append(node('p','No recorded scorecard.','muted'));
+   card.append(details);list.append(card);
+  }
+  $('private-archive-prev').disabled=privateArchivePage===0;
+  $('private-archive-next').disabled=(privateArchivePage+1)*12>=result.total;
+  status.textContent=result.total+' private recognition records · page '+(privateArchivePage+1)+
+   '. This archive is accessible to authenticated editors only.';
+ }catch(err){status.textContent='Private archive unavailable: '+err.message}
+}
+$('private-archive-filter').onsubmit=e=>{e.preventDefault();privateArchivePage=0;loadPrivateArchive()};
+$('private-archive-prev').onclick=()=>{if(privateArchivePage>0){privateArchivePage--;loadPrivateArchive()}};
+$('private-archive-next').onclick=()=>{privateArchivePage++;loadPrivateArchive()};
 async function certificates(){
  try{const [history,issued]=await Promise.all([api('history'),api('certificates')]);
  const select=$('certificate-selection');select.replaceChildren(new Option('Select an activated recognition',''));
