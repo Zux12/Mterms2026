@@ -63,3 +63,19 @@ test('unexpected sender variant is rejected before contacting provider',async()=
   fetcher:async()=>{called=true;return {ok:true,json:async()=>({id:'wrong'})}}}));
  assert.equal(called,false);
 });
+
+test('staging A4 letter and QR sample is only sent to owner without fake recognition',async()=>{
+ let body;
+ const result=await sendOwnerTest({key:'re_fake_for_test',variant:'letter-demo',
+  idempotencyKey:'wrrp-owner-test-123e4567-e89b-12d3-a456-426614174000',
+  fetcher:async(_url,opts)=>{body=JSON.parse(opts.body);return {ok:true,json:async()=>({id:'letter-demo-test-id'})}}});
+ assert.equal(result.state,'accepted-by-resend');
+ assert.deepEqual(body.to,['m.zurix@oilandgas.eu.com']);
+ assert.equal(body.from,FROM);
+ assert.equal(Object.hasOwn(body,'reply_to'),false);
+ assert.match(body.subject,/STAGING TEST — NO AWARDS/);
+ assert.match(body.html,/letter-demo\.html/);
+ assert.match(body.html,/NO AWARD ISSUED/);
+ assert.doesNotMatch(body.html,/letter\.html\?id=|OG-WRS-[A-Z0-9-]+/);
+ assert.doesNotMatch(body.html,/m\.zurix@/);
+});
