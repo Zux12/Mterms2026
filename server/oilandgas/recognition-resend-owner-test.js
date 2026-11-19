@@ -36,11 +36,32 @@ function demoEmail(){
  '\n\nNo real recognition or individual letter has been issued. Real recipients will receive a personal A4 letter and permanently verifiable QR. Programme archive: https://oilandgas.eu.com/recognition.html\n\nOil & Gas Editorial Team';
  return {subject:'[DESIGN TEST — NO AWARDS] Congratulations! Oil & Gas Research Recognition',html,text};
 }
+// Owner-only email showing the actual A4 specimen and its demo-only QR.
+// Never generates or references a real recognition certificate.
+function letterDemoEmail(){
+ const url='https://oilandgas.eu.com/letter-demo.html';
+ const html='<!doctype html><html><body style="margin:0;background:#f0efeb;padding:25px 10px;font:15px/1.65 Arial,sans-serif;color:#29312d">'+
+ '<table role="presentation" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;margin:auto;background:#fff;border-collapse:collapse">'+
+ '<tr><td style="background:#27312e;color:#fff;text-align:center;padding:30px"><div style="font-weight:800;font-size:32px">oil &amp; gas<span style="color:#f66520">.</span></div><small>KNOWLEDGE • EXPERTISE • EXCHANGE</small></td></tr>'+
+ '<tr><td style="padding:12px 22px;background:#c19a52;text-align:center;font-weight:700">STAGING TEST — NO AWARD ISSUED</td></tr>'+
+ '<tr><td style="padding:32px"><h1 style="font:normal 32px Georgia,serif;text-align:center">A4 Letter of Recognition — Test</h1>'+
+ '<p>Dear Dr. Ir. M. Zurix Mohamed,</p>'+
+ '<p>This email tests the complete specimen recognition-letter presentation, PDF printing and QR scanning experience. No real research recognition has been granted.</p>'+
+ '<div style="background:#f8f6f0;border-left:4px solid #c19a52;padding:18px"><strong>ILLUSTRATIVE PAPER — DEMONSTRATION ONLY</strong><br>Research Editor\'s Pick of the Week<br>Sample date: 19 November 2026</div>'+
+ '<p style="text-align:center;margin:28px 0"><a href="'+url+'" style="background:#27312e;color:#fff;text-decoration:none;padding:15px 24px;display:inline-block">View Sample A4 Letter &amp; QR</a></p>'+
+ '<p>The letter is marked <strong>SPECIMEN</strong>. Its QR opens a demonstration-only page, not a valid award verification record.</p>'+
+ '<p>Regards,<br><strong>Oil &amp; Gas Editorial Team</strong></p></td></tr>'+
+ '<tr><td style="padding:18px;background:#f7f5f0;text-align:center;font-size:11px">Editorial design test only · oilandgas.eu.com</td></tr></table></body></html>';
+ const text='STAGING TEST — NO AWARD ISSUED\n\nDear Dr. Ir. M. Zurix Mohamed,\n\n'+
+ 'View the specimen A4 Letter of Recognition and its demo-only QR: '+url+
+ '\n\nThis is not a real recognition. The specimen letter cannot verify a genuine award.\n\nOil & Gas Editorial Team';
+ return {subject:'[STAGING TEST — NO AWARDS] Your A4 Recognition Letter and QR',html,text};
+}
 async function sendOwnerTest({key,fetcher=fetch,idempotencyKey,variant='identity'}){
  if(!/^re_[a-zA-Z0-9_\-]+$/.test(String(key||'')))throw Error('Resend key not configured');
  if(!/^wrrp-owner-test-[0-9a-f-]{36}$/.test(idempotencyKey))throw Error('Invalid test idempotency key');
- if(!['identity','congratulations-demo'].includes(variant))throw Error('Unsupported email test variant');
- const content=variant==='congratulations-demo'?demoEmail():{
+ if(!['identity','congratulations-demo','letter-demo'].includes(variant))throw Error('Unsupported email test variant');
+ const content=variant==='letter-demo'?letterDemoEmail():variant==='congratulations-demo'?demoEmail():{
   subject:'[OWNER TEST — NO AWARDS] Oil & Gas Research Recognition',
   html:'<div style="font-family:Arial,sans-serif;max-width:580px;margin:auto"><h1 style="color:#c19a52">Oil &amp; Gas Research Recognition</h1><p>This is a controlled Resend sender-identity test for the editorial team.</p><p>No researcher was recognized, and no author emails or letters were issued.</p><p>Sender: recognition@oilandgas.eu.com</p></div>',
   text:'Oil & Gas Research Recognition — OWNER TEST ONLY. No awards or author emails were issued.'};
@@ -60,4 +81,4 @@ async function sendOwnerTest({key,fetcher=fetch,idempotencyKey,variant='identity
  return {providerMessageId:String(data.id).slice(0,100),state:'accepted-by-resend',
   note:'Provider accepted; actual delivery must be confirmed from Resend event/inbox.'};
 }
-module.exports={FROM,TO,readiness,sendOwnerTest,demoEmail};
+module.exports={FROM,TO,readiness,sendOwnerTest,demoEmail,letterDemoEmail};
