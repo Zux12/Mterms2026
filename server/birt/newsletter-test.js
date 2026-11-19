@@ -28,4 +28,30 @@ router.post('/test-email',requireAdmin,async(req,res)=>{
   return res.json({status:'submitted',recipient:RECIPIENT,resendId:data.id||null});
  }catch(error){console.error('BIRT Resend test request failed',error.message);return res.status(502).json({status:'error',message:'Resend request failed'});}
 });
+
+router.post('/test-digest',requireAdmin,async(req,res)=>{
+ if(process.env.BIRT_NEWSLETTER_TEST_ENABLED!=='true')return res.status(503).json({status:'disabled',message:'Test sending is disabled. Set BIRT_NEWSLETTER_TEST_ENABLED=true temporarily.'});
+ const key=process.env.BIRT_RESEND_API_KEY;
+ if(!key)return res.status(503).json({status:'error',message:'Resend key is not configured'});
+ try{
+  // Fetch only the published issue from our fixed, trusted origin. Never accept an
+  // arbitrary URL from a request body (SSRF protection).
+  const source='https://birtlab.com/research-digest-latest.html';
+  const fetched=await fetch(source,{signal:AbortSignal.timeout(18000),headers:{Accept:'text/html'}});
+  if(!fetched.ok)throw Error('Newsletter source HTTP '+fetched.status);
+  const html=await fetched.text();
+  if(html.length<2500||html.length>350000||!html.includes('BIRT Lab Research Digest')||!html.includes('ORIGINAL SOURCE'))throw Error('Published digest HTML failed validation');
+  const issue=(html.match(/<title>[^<]*?(\d{4}-\d{2}-\d{2})<\/title>/i)||[])[1];
+  if(!issue)throw Error('Cannot identify the published digest issue date');
+  const text='BIRT Lab Research Digest — '+issue+'\nRead the full published edition: '+source+'\nThis is a private test. Weekly distribution is not active.';
+  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{
+   Authorization:'Bearer '+key,'Content-Type':'application/json',
+   'Idempotency-Key':'birt-digest-full-test-'+issue+'-'+new Date().toISOString().slice(0,10)
+  },body:JSON.stringify({from:FROM,to:[RECIPIENT],subject:'[TEST] BIRT Lab Research Digest — '+issue,html,text}) ,signal:AbortSignal.timeout(20000)});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){console.error('BIRT full digest test rejected',response.status,data.message||'');return res.status(502).json({status:'error',message:'Resend rejected full newsletter test',detail:data.message||null});}
+  res.json({status:'submitted',recipient:RECIPIENT,issue,source,resendId:data.id||null,note:'Provider accepted request; inbox delivery not yet confirmed.'});
+ }catch(error){console.error('BIRT full digest test failed',error.message);res.status(502).json({status:'error',message:'Unable to send published digest',detail:error.message});}
+});
+
 module.exports=router;
