@@ -1177,15 +1177,19 @@ adminRouter.get('/resend-owner-test/readiness',(req,res)=>{
  res.set('Cache-Control','private,no-store').json(resendOwnerTest.readiness());
 });
 adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
- if(req.body?.confirm!=='SEND_RESEND_OWNER_TEST_ONLY')
+ const confirmation=req.body?.confirm;
+ if(!['SEND_RESEND_OWNER_TEST_ONLY','SEND_RESEND_REPLY_TO_FIX_TEST'].includes(confirmation))
   return res.status(400).json({error:'Explicit owner-only Resend test confirmation required.'});
  const key=process.env.OIL_RECOGNITION_RESEND_API_KEY;
  if(!resendOwnerTest.readiness().configured)
   return res.status(409).json({error:'Dedicated recognition Resend API key missing. Verified parent sending domain and Heroku secret configuration required.',emailSent:false});
  const id=crypto.randomUUID(),now=new Date();
  const col=db().collection('recognition_resend_owner_tests');
- await col.updateOne({_id:'owner'},{$setOnInsert:{createdAt:now}},{upsert:true});
- const claim=await col.findOneAndUpdate({_id:'owner',$or:[
+ // A separate one-time corrected-header test does not bypass the normal
+ // 24h cooldown. Each test lane still has an atomic 24h rate limit.
+ const testLane=confirmation==='SEND_RESEND_REPLY_TO_FIX_TEST'?'reply-to-fix-v2':'owner';
+ await col.updateOne({_id:testLane},{$setOnInsert:{createdAt:now}},{upsert:true});
+ const claim=await col.findOneAndUpdate({_id:testLane,$or:[
    {lastAttemptAt:{$exists:false}},
    {lastAttemptAt:{$lt:new Date(Date.now()-24*3600000)}}]},
   {$set:{lastAttemptAt:now,lastAttemptId:id,state:'attempting'}},{returnDocument:'after'});
@@ -1193,11 +1197,11 @@ adminRouter.post('/resend-owner-test/send',async(req,res,next)=>{try{
   return res.status(429).json({error:'A Resend owner test has already been claimed within 24 hours.'});
  try{
   const result=await resendOwnerTest.sendOwnerTest({key,idempotencyKey:'wrrp-owner-test-'+id});
-  await col.updateOne({_id:'owner',lastAttemptId:id},{$set:{state:result.state,
+  await col.updateOne({_id:testLane,lastAttemptId:id},{$set:{state:result.state,
    providerMessageId:result.providerMessageId,acceptedAt:new Date()}});
   return res.set('Cache-Control','private,no-store').json({ok:true,...result,authorEmailsEnabled:false});
  }catch(error){
-  await col.updateOne({_id:'owner',lastAttemptId:id},
+  await col.updateOne({_id:testLane,lastAttemptId:id},
    {$set:{state:'failed',failedAt:new Date(),failureCode:String(error.code||'send-error').slice(0,60)}});
   return res.status(502).json({ok:false,error:'Resend owner test not accepted; check domain verification and configured key.',authorEmailsEnabled:false});
  }
