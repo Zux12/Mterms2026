@@ -1,7 +1,7 @@
 'use strict';
 // Restricted to the owner's mailbox. Does not implement author notifications.
 const FROM='Oil & Gas Editorial Team <recognition@oilandgas.eu.com>';
-const TO='m.zurix@oilandgas.eu.com';
+const TO='m.zurix@oilandgas.eu.com'; // PRIVATE, fixed test recipient only; never a Reply-To
 function readiness(env=process.env){
  return {configured:typeof env.OIL_RECOGNITION_RESEND_API_KEY==='string'&&
   /^re_[a-zA-Z0-9_\-]+$/.test(env.OIL_RECOGNITION_RESEND_API_KEY),
@@ -13,7 +13,9 @@ async function sendOwnerTest({key,fetcher=fetch,idempotencyKey}){
  const response=await fetcher('https://api.resend.com/emails',{
   method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json',
    'Idempotency-Key':idempotencyKey},
-  body:JSON.stringify({from:FROM,to:[TO],reply_to:TO,
+  // Deliberately omit Reply-To: provider defaults to the editorial From address.
+  // Never expose the owner's private administrative recipient to researchers.
+  body:JSON.stringify({from:FROM,to:[TO],
    subject:'[OWNER TEST — NO AWARDS] Oil & Gas Research Recognition',
    html:'<div style="font-family:Arial,sans-serif;max-width:580px;margin:auto"><h1 style="color:#c19a52">Oil &amp; Gas Research Recognition</h1><p>This is a controlled Resend sender-identity test for the editorial team.</p><p>No researcher was recognized, and no author emails or letters were issued.</p><p>Sender: recognition@oilandgas.eu.com</p></div>',
    text:'Oil & Gas Research Recognition — OWNER TEST ONLY. No awards or author emails were issued.'})
