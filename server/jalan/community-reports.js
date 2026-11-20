@@ -57,9 +57,23 @@ function createRouter({express,mongoose,env=process.env}){
   ]);return rows.map(r=>r.event);
  }};
  router.use((req,res,next)=>{res.set('Cache-Control','no-store');if(req.query&&Object.keys(req.query).length)return res.status(400).json({error:'Use JSON body; location query parameters are not accepted.'});if(req.get('origin')&&!['https://zux12.github.io','https://mterms2026.com','https://www.mterms2026.com'].includes(req.get('origin')))return res.status(403).json({error:'Origin not allowed.'});next();});
- router.get('/health',(_req,res)=>res.json({ok:true,service:'jalan-community-reports',version:3,flowVersion:2}));
+ router.get('/health',(_req,res)=>res.json({ok:true,service:'jalan-community-reports',version:3,flowVersion:3}));
  router.use(express.json({limit:'12kb'}));
- router.use((req,res,next)=>{const at=Date.now();for(const [key,b]of buckets)if(b.until<=at)buckets.delete(key);const key=req.ip||'unknown',b=buckets.get(key)||{n:0,until:at+60000};if(buckets.size>=10000&&!buckets.has(key))return res.status(429).json({error:'Please try again shortly.'});buckets.set(key,b);if(++b.n>60)return res.status(429).json({error:'Please try again shortly.'});if(!env.JALAN_HASH_SECRET||env.JALAN_HASH_SECRET.length<32)return res.status(503).json({error:'Reporting service is not configured.'});if(Buffer.byteLength(JSON.stringify(req.body||{}))>12000)return res.status(413).json({error:'Report is too large.'});next();});
+ router.use((req,res,next)=>{
+  const at=Date.now();
+  for(const [key,b]of buckets)if(b.until<=at)buckets.delete(key);
+  // Traffic observations from phones behind one carrier address must not use
+  // the request allowance for explicit reports, votes or nearby lookups.
+  const scope=req.path==='/flow/observe'?'observe':req.path==='/flow/read'?'read':'reports';
+  const key=scope+'|'+(req.ip||'unknown'),b=buckets.get(key)||{n:0,until:at+60000};
+  if(buckets.size>=10000&&!buckets.has(key))return res.status(429).json({error:'Please try again shortly.'});
+  buckets.set(key,b);
+  const limit=scope==='observe'?1200:scope==='read'?240:60;
+  if(++b.n>limit)return res.status(429).json({error:'Please try again shortly.'});
+  if(!env.JALAN_HASH_SECRET||env.JALAN_HASH_SECRET.length<32)return res.status(503).json({error:'Reporting service is not configured.'});
+  if(Buffer.byteLength(JSON.stringify(req.body||{}))>12000)return res.status(413).json({error:'Report is too large.'});
+  next();
+ });
  const service=()=>createService({repository,secret:env.JALAN_HASH_SECRET});
  const flowSchema=new mongoose.Schema({_id:String,revision:Number,segment:String,region:String,samples:[mongoose.Schema.Types.Mixed],baseline:mongoose.Schema.Types.Mixed,state:mongoose.Schema.Types.Mixed,expiresAt:Date},{versionKey:false,collection:'community_flow_segments'});
  flowSchema.index({expiresAt:1},{expireAfterSeconds:0});flowSchema.index({region:1,'state.expiresAt':1});
