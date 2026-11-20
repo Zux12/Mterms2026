@@ -9,15 +9,22 @@ function score(samples,normal,at){
  const fresh=samples.filter(s=>s.at>at-windowMs);
  if(fresh.length<3||!(normal>=15))return null;
  const slow=fresh.filter(s=>s.speed<normal*.9),fast=fresh.filter(s=>s.speed>=normal*.8&&s.passSpeed>=normal*.8&&s.passedAt>at-windowMs);
- const speed=median(fresh.map(s=>s.speed)),ratio=speed/normal;
- // Keep one latest speed per installation. A fast majority with three completed
- // passages can clear the old queue even while older slow samples are expiring.
- const fastEnough=fresh.filter(s=>s.speed>=normal*.8).length>fresh.length/2&&ratio>=.8;
- if(!fastEnough&&(slow.length<3||slow.length<=fresh.length/2||ratio>=.9||
-     Math.max(...slow.map(s=>s.at))-Math.max(at-windowMs,Math.min(...slow.map(s=>s.slowSince??s.at)))<sustainMs))return null;
- return {type:fastEnough?'smooth':ratio>=.7?'light':ratio>=.45?'moderate':'heavy',
+ // Three completed passages after the last slow car establish recovery even
+ // when the five-minute window still contains the original queue.
+ const thirdPass=fast.map(s=>s.passedAt).sort((a,b)=>b-a)[2]??null;
+ const moving=fresh.filter(s=>s.speed>=normal*.8);
+ const lastCrawl=Math.max(0,...fresh.filter(s=>s.speed<normal*.8).map(s=>s.at));
+ const recovered=thirdPass!==null&&thirdPass>lastCrawl;
+ const recentSlow=slow.filter(s=>s.at>Math.max(0,...moving.map(v=>v.at)));
+ const sustained=group=>group.length>=3&&Math.max(...group.map(s=>s.at))-
+  Math.max(at-windowMs,Math.min(...group.map(s=>s.slowSince??s.at)))>=sustainMs;
+ const forming=sustained(recentSlow);
+ const speed=median((recovered?fast:forming?recentSlow:fresh).map(s=>s.speed)),ratio=speed/normal;
+ const smooth=recovered||(!forming&&moving.length>fresh.length/2&&ratio>=.8);
+ if(!smooth&&!forming&&(slow.length<=fresh.length/2||ratio>=.9||!sustained(slow)))return null;
+ return {type:smooth?'smooth':ratio>=.7?'light':ratio>=.45?'moderate':'heavy',
   speed:Math.max(1,Math.round(speed)),normal,expiresAt:Math.min(...fresh.map(s=>s.at+windowMs)),
-  clearAfter:fastEnough&&fast.length>=3?fast.map(s=>s.passedAt).sort((a,b)=>b-a)[2]:null};
+  clearAfter:smooth?thirdPass:null};
 }
 function createFlowService({store,secret,clear,now=Date.now}){
  const hash=s=>crypto.createHmac('sha256',secret).update(s).digest('hex');
