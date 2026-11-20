@@ -67,3 +67,10 @@ test('one slow driver among moving traffic is smooth only with three independent
  await f.obs(4,60,{passAgeMs:8000});const [r]=await f.read();assert.equal(r.type,'smooth');
  assert.equal(f.clears[0][2],982000);f.advance(300001);assert.deepEqual(await f.read(),[]);
 });
+test('three new fast traversals clear an established queue before its slow samples expire',async()=>{
+ const f=traffic();await f.obs(1,10);f.advance(60000);await f.obs(2,10);f.advance(60000);
+ await f.obs(3,10);await f.obs(4,10);assert.equal((await f.read())[0].type,'heavy');
+ f.advance(45000);for(const n of [5,6])await f.obs(n,59,{passAgeMs:5000});
+ assert.equal(f.clears.length,0);await f.obs(7,59,{passAgeMs:5000});
+ assert.equal((await f.read())[0].type,'smooth');assert.equal(f.clears.length,1);
+});
