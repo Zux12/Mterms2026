@@ -12,12 +12,12 @@ function score(samples,normal,at){
  const speed=median(fresh.map(s=>s.speed)),ratio=speed/normal;
  // Keep one latest speed per installation. A fast majority with three completed
  // passages can clear the old queue even while older slow samples are expiring.
- const fastEnough=fast.length>=3&&fast.length>fresh.length/2;
+ const fastEnough=fresh.filter(s=>s.speed>=normal*.8).length>fresh.length/2&&ratio>=.8;
  if(!fastEnough&&(slow.length<3||slow.length<=fresh.length/2||ratio>=.9||
      Math.max(...slow.map(s=>s.at))-Math.max(at-windowMs,Math.min(...slow.map(s=>s.slowSince??s.at)))<sustainMs))return null;
  return {type:fastEnough?'smooth':ratio>=.7?'light':ratio>=.45?'moderate':'heavy',
   speed:Math.max(1,Math.round(speed)),normal,expiresAt:Math.min(...fresh.map(s=>s.at+windowMs)),
-  clearAfter:fastEnough?fast.map(s=>s.passedAt).sort((a,b)=>b-a)[2]:null};
+  clearAfter:fastEnough&&fast.length>=3?fast.map(s=>s.passedAt).sort((a,b)=>b-a)[2]:null};
 }
 function createFlowService({store,secret,clear,now=Date.now}){
  const hash=s=>crypto.createHmac('sha256',secret).update(s).digest('hex');

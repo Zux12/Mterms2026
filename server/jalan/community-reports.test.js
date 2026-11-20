@@ -63,7 +63,7 @@ test('shared speeds require three independent, sustained, same-road observations
 });
 test('one slow driver among moving traffic is smooth only with three independent fast traversals',async()=>{
  const f=traffic();await f.obs(1,10);await f.obs(2,60,{passAgeMs:8000});await f.obs(3,55,{passAgeMs:5000});await f.obs(4,62);
- assert.equal(f.clears.length,0);await f.obs(2,60,{passAgeMs:3000});assert.equal(f.clears.length,0);
+ assert.equal(f.clears.length,0);assert.equal((await f.read())[0].type,'smooth');await f.obs(2,60,{passAgeMs:3000});assert.equal(f.clears.length,0);
  await f.obs(4,60,{passAgeMs:8000});const [r]=await f.read();assert.equal(r.type,'smooth');
  assert.equal(f.clears[0][2],982000);f.advance(300001);assert.deepEqual(await f.read(),[]);
 });
