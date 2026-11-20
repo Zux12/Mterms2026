@@ -29,3 +29,41 @@ test('traffic levels survive grouping, nearby reads and confirmation, including 
  await assert.rejects(s.api.submit(report(5,'severe')),e=>e.status===400);
  await assert.rejects(s.api.submit(s.input(6,{trafficSeverity:'light'})),e=>e.status===400);
 });
+
+test('traffic confirmations count installations once and auto-clear only after newer same-stretch passages',async()=>{
+ const s=setup(),segment='s1234123412341234';
+ const first=(await s.api.submit(s.input(1,{type:'traffic',segment}))).event;
+ assert.equal(first.status,'reported');const key=first.id.split('.')[0];
+ s.advance(5000);const self=await s.api.respond(s.response(first.id,1,'still'));
+ assert.equal(self.event.expiresAt,first.expiresAt);
+ const confirmed=(await s.api.respond(s.response(first.id,2,'still'))).event;
+ assert.equal(confirmed.status,'confirmed');assert.equal(confirmed.contributors,2);
+ s.advance(5000);assert.equal((await s.api.submit(s.input(2,{type:'traffic',segment}))).event.updatedAt,confirmed.updatedAt);
+ await s.api.clearFromFlow(key,segment,first.updatedAt+1);await s.api.clearFromFlow(key,'sffffffffffffffff',confirmed.updatedAt+1);
+ assert.equal((await s.api.nearby(first.position)).length,1);
+ await s.api.clearFromFlow(key,segment,confirmed.updatedAt+1);assert.deepEqual(await s.api.nearby(first.position),[]);
+});
+const {createFlowService}=require('./community-reports-flow');
+function traffic(){
+ let at=1000000;const rows=new Map(),clears=[];
+ const store={get:k=>structuredClone(rows.get(k)),async cas(k,rev,v){if((rows.get(k)?.revision||0)!==rev)return false;rows.set(k,structuredClone(v));return true;},read:regions=>[...rows.values()].filter(r=>regions.includes(r.region))};
+ const service=createFlowService({store,now:()=>at,secret:'test',clear:(...args)=>clears.push(args)});
+ const obs=(n,speed,options={})=>service.observe({segment:'saaaaaaaaaaaaaaaa',region:'r1016_31',speed,driver:n.toString(16).padStart(64,'0'),passAgeMs:null,normal:60,road:{key:'vector-abba',level:'0:surface'},...options});
+ return {obs,clears,read:async()=>(await service.read({regions:['r1016_31']})).sections,advance:ms=>at+=ms};
+}
+test('shared speeds require three independent, sustained, same-road observations and expire',async()=>{
+ const f=traffic();await f.obs(1,15);f.advance(60000);await f.obs(1,12);await f.obs(2,12);
+ assert.deepEqual(await f.read(),[]);f.advance(60000);
+ await f.obs(3,15,{segment:'sbbbbbbbbbbbbbbbb'});assert.deepEqual(await f.read(),[]);
+ await f.obs(3,15);let rows=await f.read();assert.equal(rows.length,1);assert.equal(rows[0].type,'heavy');assert.equal(rows[0].speed,12);
+ assert.deepEqual(Object.keys(rows[0]).sort(),['expiresAt','normal','segment','speed','type']);
+ await f.obs(4,12,{road:{key:'vector-abba',level:'1:bridge'}});assert.deepEqual(await f.read(),[]);
+ f.advance(300001);assert.deepEqual(await f.read(),[]);assert.equal(f.clears.length,0);
+ await assert.rejects(f.obs(1,12,{position:[101,3]}),e=>e.status===400);
+});
+test('one slow driver among moving traffic is smooth only with three independent fast traversals',async()=>{
+ const f=traffic();await f.obs(1,10);await f.obs(2,60,{passAgeMs:8000});await f.obs(3,55,{passAgeMs:5000});await f.obs(4,62);
+ assert.equal(f.clears.length,0);await f.obs(2,60,{passAgeMs:3000});assert.equal(f.clears.length,0);
+ await f.obs(4,60,{passAgeMs:8000});const [r]=await f.read();assert.equal(r.type,'smooth');
+ assert.equal(f.clears[0][2],982000);f.advance(300001);assert.deepEqual(await f.read(),[]);
+});
