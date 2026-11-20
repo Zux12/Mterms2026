@@ -2,7 +2,7 @@
 // Dedicated JALAN collections only. No location in request URLs or application logs.
 const crypto=require('node:crypto'),P=require('./report-policy');
 const {createFlowService,segmentOk}=require('./community-reports-flow');
-const publicEvent=e=>({id:e.id,type:e.type,...(e.trafficSeverity?{trafficSeverity:e.trafficSeverity}:{}),position:e.position,heading:e.heading,road:e.road,createdAt:e.createdAt,updatedAt:e.updatedAt,expiresAt:e.expiresAt,contributors:Array.isArray(e.contributors)?e.contributors.length:e.contributors,active:e.active,...(e.type==='traffic'?{status:(Array.isArray(e.contributors)?e.contributors.length:e.contributors)>1?'confirmed':'reported'}:{})});
+const publicEvent=e=>({id:e.id,type:e.type,...(segmentOk(e.segment)?{segment:e.segment}:{}),...(e.trafficSeverity?{trafficSeverity:e.trafficSeverity}:{}),position:e.position,heading:e.heading,road:e.road,createdAt:e.createdAt,updatedAt:e.updatedAt,expiresAt:e.expiresAt,contributors:Array.isArray(e.contributors)?e.contributors.length:e.contributors,active:e.active,...(e.type==='traffic'?{status:(Array.isArray(e.contributors)?e.contributors.length:e.contributors)>1?'confirmed':'reported'}:{})});
 function createService({repository,secret,now=Date.now,id=()=>crypto.randomUUID()}){
  const hash=value=>crypto.createHmac('sha256',secret).update(value).digest('hex');
  const token=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{20,80}$/.test(value);
@@ -53,7 +53,7 @@ function createRouter({express,mongoose,env=process.env}){
   const rows=await Model.aggregate([
    {$match:{expiresAt:{$gt:new Date(at)}}},{$unwind:'$events'},
    {$match:{'events.active':true,'events.expiresAt':{$gt:at},'events.position.0':{$gte:position[0]-.25,$lte:position[0]+.25},'events.position.1':{$gte:position[1]-.2,$lte:position[1]+.2}}},
-   {$project:{_id:0,event:{id:'$events.id',type:'$events.type',trafficSeverity:'$events.trafficSeverity',position:'$events.position',heading:'$events.heading',road:'$events.road',createdAt:'$events.createdAt',updatedAt:'$events.updatedAt',expiresAt:'$events.expiresAt',active:'$events.active',contributors:{$size:'$events.contributors'}}}},{$limit:200}
+   {$project:{_id:0,event:{id:'$events.id',type:'$events.type',segment:'$events.segment',trafficSeverity:'$events.trafficSeverity',position:'$events.position',heading:'$events.heading',road:'$events.road',createdAt:'$events.createdAt',updatedAt:'$events.updatedAt',expiresAt:'$events.expiresAt',active:'$events.active',contributors:{$size:'$events.contributors'}}}},{$limit:200}
   ]);return rows.map(r=>r.event);
  }};
  router.use((req,res,next)=>{res.set('Cache-Control','no-store');if(req.query&&Object.keys(req.query).length)return res.status(400).json({error:'Use JSON body; location query parameters are not accepted.'});if(req.get('origin')&&!['https://zux12.github.io','https://mterms2026.com','https://www.mterms2026.com'].includes(req.get('origin')))return res.status(403).json({error:'Origin not allowed.'});next();});
