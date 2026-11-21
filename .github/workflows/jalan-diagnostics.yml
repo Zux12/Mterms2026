@@ -36,3 +36,13 @@ jobs:
         run: npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund express@4 mongoose@8
       - name: Validate diagnostics without MongoDB writes
         run: node server/jalan/routing-diagnostics.test.js
+      - name: Validate draft KL POST transport with original global JSON parser
+        run: |
+          if [ -f server/jalan/kl-segment-v4102-private-post.test.js ]; then
+            node --check server/jalan/kl-segment-v4102.js
+            node --check server/jalan/kl-shared-ingress-v4102.js
+            node --check server/jalan/kl-segment-v4102-private-post.test.js
+            node --test server/jalan/kl-segment-v4102-private-post.test.js
+          else
+            echo 'No draft KL POST transport test in this ref; no POST verification claimed'
+          fi
