@@ -1,5 +1,14 @@
 # JALAN — independently sourced temporary road-control evidence (KL)
 
+## 21 November 2026 ~21:00 MYT — KLCCC primary overnight KL–Seremban resurfacing advisory, N09 evidence ONLY
+
+**New directly attributable authority-origin road-research evidence:** The [KLCCC / DBKL official public portal](https://klccc.dbkl.gov.my/) displays **“INFO PENURAPAN JALAN : KL SEREMBAN”**, dated **8 September 2026 to 2 February 2027**, at **KL–Seremban, from the SPE expressway slip-road vicinity toward the gate near Plaza Dunia Perabot, in both directions**, during **22:00–05:00**. The [official Bahasa Malaysia mirror](https://klccc.dbkl.gov.my/ms/) shows the same notice. This was independently found on **21 November 2026**, though the retrieved public page had been crawler-cached about **two weeks** earlier, not independently checked as an authenticated live closure feed at this hour.
+
+**Evidence grade / safe interpretation:** This is primary **road-resurfacing work advisory** with a date interval, area description, two directions and overnight time of day. It is **NOT** proof that either complete carriageway is closed, that a given lane/turn/entry is prohibited, which precise OSM directed edges correspond to the phrase “SUSUR LEBUHRAYA SPE KE PINTU GERBANG BERDEKATAN PLAZA DUNIA PERABOT,” or that the work occurs continuously every night. Do not assign an invented OSM geometry or permanent restriction, disable a road, or route based on this notice alone. It especially must **not** become a daytime 05:00–22:00 blanket ban: the stated **22:00–05:00** spans midnight. Do not infer nighttime closure either without signed lane schedule and fresh authority confirmation.
+
+**Concrete N09 / 20-case preparation:** Add an **overnight two-direction roadworks screening pair** in future KL candidate-route reviews, comparing current actual TomTom car-profile routes and independent lane/traffic-order evidence **inside** and **outside** the stated nightly window. Map each direction and SPE slip-to-gate extent only when externally verifiable authoritative coordinates or signage are available. Route notices should distinguish *works reported*, *partial restriction verified*, and *complete directed prohibition verified*; only the last with temporal/geometry proof could justify a hard legal-route exclusion. No live TomTom key, private Heroku full-route POST, ground sign or lane diagram was observed; **N06 legal turns NOT APPROVED, N09 PARTIAL, N10 0/20 independently accepted complete journeys, N15 FORMAL PHONE NOT READY**. No code/routing flag, Atlas record, private deployment or phone workflow changed.
+
+
 
 ## 20 November 2026 ~20:00 MYT — Additional time-sensitive central-KL screening leads, NOT authorized closures
 
