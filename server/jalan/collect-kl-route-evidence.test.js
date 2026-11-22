@@ -1,6 +1,11 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {collectEvidence,validateCases,endpointUrl}=require('./collect-kl-route-evidence');
+const {collectEvidence,validateCases,endpointUrl,verifyDedicatedPilotOrigin}=require('./collect-kl-route-evidence');
+const {APPS}=require('./audit-heroku-retention-metadata-readonly');
+const PRIVATE=APPS.find(a=>a.role==='private');
+const pilotCanonical='https://jalan-kl-private-pilot-5ac59f8ae0bd.herokuapp.com/';
+const mockHerokuGet=async(_url,_options)=>({status:200,json:async()=>({id:PRIVATE.id,name:PRIVATE.name,web_url:pilotCanonical})});
+const testHerokuKey='synthetic-operator-api-key-0123456789';
 const base={caseId:'kl-test-01',journeyType:'short-urban',expectedReachable:true,
  startLat:3.14,startLng:101.69,endLat:3.15,endLng:101.70};
 const url='https://experimental.example.invalid/api/jalan/kl/route';
@@ -51,7 +56,15 @@ test('dedicated Heroku collector uses both credentials and POST body, never URL 
  const pilotPassword='p'.repeat(32),pilotPreviewToken='t'.repeat(32);
  let captured;
  const out=await collectEvidence([base],origin,{
-  pilotPassword,pilotPreviewToken,fetchImpl:async(u,o)=>{
+  pilotPassword,pilotPreviewToken,herokuApiKey:testHerokuKey,
+  herokuFetchImpl:async(u,o)=>{
+   assert.equal(u,'https://api.heroku.com/apps/'+PRIVATE.id);
+   assert.equal(o.method,'GET');assert.equal(o.redirect,'error');
+   assert.equal(o.headers.Authorization,'Bearer '+testHerokuKey);
+   assert.ok(!JSON.stringify(o).includes(pilotPassword));
+   assert.ok(!JSON.stringify(o).includes(pilotPreviewToken));
+   return mockHerokuGet(u,o);
+  },fetchImpl:async(u,o)=>{
    captured={u,o};return reply(200,good)();
   }
  });
@@ -66,6 +79,69 @@ test('dedicated Heroku collector uses both credentials and POST body, never URL 
  assert.ok(!evidence.includes(pilotPassword)&&!evidence.includes(pilotPreviewToken));
  assert.ok(!evidence.includes('101.69'));
 });
+
+test('a lookalike private Heroku subdomain cannot receive pilot secrets or coordinates',async()=>{
+ const password='p'.repeat(32),token='t'.repeat(32);
+ let routeCalls=0,identityCalls=0;
+ const spoofed='https://jalan-kl-private-pilot-attacker.herokuapp.com/api/jalan/kl/route';
+ await assert.rejects(()=>collectEvidence([base],spoofed,{
+  pilotPassword:password,pilotPreviewToken:token,herokuApiKey:testHerokuKey,
+  herokuFetchImpl:async(u,o)=>{identityCalls++;return mockHerokuGet(u,o);},
+  fetchImpl:async()=>{routeCalls++;return reply(200,good)();}
+ }),/canonical origin mismatch/);
+ assert.equal(identityCalls,1,'only identity-pinned GET is permitted');
+ assert.equal(routeCalls,0,'private Basic/token and coordinates never reach lookalike host');
+});
+test('the exact private pilot origin requires immutable identity and Heroku API access',async()=>{
+ const origin=new URL(pilotCanonical+'api/jalan/kl/route');
+ const password='p'.repeat(32),token='t'.repeat(32);
+ let routeCalls=0;
+ const routeFetch=async()=>{routeCalls++;return reply(200,good)();};
+ for(const changes of [
+  {id:'00000000-0000-4000-8000-000000000000'},
+  {name:'jalan-kl-private-pilot-renamed'},
+  {web_url:'https://attacker.example/'},
+  {web_url:'http://jalan-kl-private-pilot-5ac59f8ae0bd.herokuapp.com/'},
+  {web_url:'https://jalan-kl-private-pilot-another.herokuapp.com/'}
+ ]){
+  await assert.rejects(()=>collectEvidence([base],origin.href,{
+   pilotPassword:password,pilotPreviewToken:token,herokuApiKey:testHerokuKey,
+   herokuFetchImpl:async()=>({status:200,json:async()=>({id:PRIVATE.id,name:PRIVATE.name,web_url:pilotCanonical,...changes})}),
+   fetchImpl:routeFetch
+  }),/identity mismatch|canonical origin mismatch/);
+ }
+ await assert.rejects(()=>collectEvidence([base],origin.href,{
+  pilotPassword:password,pilotPreviewToken:token,
+  herokuApiKey:'',herokuFetchImpl:mockHerokuGet,fetchImpl:routeFetch
+ }),/identity cannot be verified/);
+ await assert.rejects(()=>collectEvidence([base],origin.href,{
+  pilotPassword:password,pilotPreviewToken:token,
+  herokuApiKey:testHerokuKey,herokuFetchImpl:async()=>({status:401}),fetchImpl:routeFetch
+ }),/identity cannot be verified/);
+ assert.equal(routeCalls,0,'no private credential POST may occur without verified app identity');
+});
+test('verified Fir DNS-zone canonical host is allowed but no other zone or port is',async()=>{
+ const host='jalan-kl-private-pilot-5ac59f8ae0bd.redwood-oregon.herokuapp.com';
+ const canonical='https://'+host+'/';
+ const expected=new URL(canonical+'api/jalan/kl/route');
+ assert.equal(await verifyDedicatedPilotOrigin(expected,{
+  key:testHerokuKey,fetcher:async()=>({status:200,json:async()=>({
+   id:PRIVATE.id,name:PRIVATE.name,web_url:canonical
+  })})
+ }),true);
+ for(const hostname of [
+  'jalan-kl-private-pilot-5ac59f8ae0bd.other-zone.herokuapp.com',
+  host+':8443'
+ ]){
+  const target=new URL('https://'+hostname+'/api/jalan/kl/route');
+  await assert.rejects(()=>verifyDedicatedPilotOrigin(target,{
+   key:testHerokuKey,fetcher:async()=>({status:200,json:async()=>({
+    id:PRIVATE.id,name:PRIVATE.name,web_url:canonical
+   })})
+  }),/canonical origin mismatch/);
+ }
+});
+
 test('collector rejects URL coordinates and incorrect or incomplete private credentials before network',async()=>{
  const origin='https://jalan-kl-private-pilot-5ac59f8ae0bd.herokuapp.com/api/jalan/kl/route';
  assert.throws(()=>endpointUrl(url+'?startLat=3.14'),/Do not put/);
