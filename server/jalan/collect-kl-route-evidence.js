@@ -200,12 +200,15 @@ async function collectEvidence(cases,rawEndpoint,{
     typeof pilotPreviewToken!=='string'||pilotPreviewToken.length<32||
     pilotPassword===pilotPreviewToken)
    throw Error('Invalid dedicated pilot credentials');
-  // No route credentials or coordinates are transmitted before this GET-only
-  // immutable-app-ID/canonical URL comparison succeeds.
-  await verifyDedicatedPilotOrigin(endpoint,{fetcher:herokuFetchImpl,key:herokuApiKey});
+  // Identity is checked just in time for EACH POST below. A one-time
+  // preflight cannot protect a long sequential batch if the app is renamed,
+  // removed or its canonical URL changes after the first request.
  }
  if(!Number.isFinite(timeoutMs)||timeoutMs<1000||timeoutMs>60000)throw Error('Invalid request timeout');
  for(const c of cases){ // Sequential to avoid load spikes against experimental graph.
+  // Never reuse an earlier successful identity check for later coordinate/
+  // credential-bearing requests. Any missing/mismatched GET aborts the batch.
+  if(usePilot)await verifyDedicatedPilotOrigin(endpoint,{fetcher:herokuFetchImpl,key:herokuApiKey});
   const headers={accept:'application/json','content-type':'application/json','cache-control':'no-store'};
   if(usePilot){
    headers.Authorization='Basic '+Buffer.from('jalan-pilot:'+pilotPassword).toString('base64');
