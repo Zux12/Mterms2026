@@ -6,6 +6,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
 const {performance}=require('node:perf_hooks');
+const {APPS}=require('./audit-heroku-retention-metadata-readonly');
 const TYPES=new Set(['short-urban','long-corridor','one-way','overpass','disconnected']);
 function endpointUrl(raw){
  if(typeof raw!=='string'||!raw.trim())throw Error('JALAN_EXPERIMENTAL_ROUTE_URL is required');
@@ -16,6 +17,43 @@ function endpointUrl(raw){
  if(u.username||u.password)throw Error('Do not put credentials in the URL');
  if(u.search||u.hash)throw Error('Do not put coordinates, keys or fragments in the URL');
  return u;
+}
+
+/**
+ * A similar-looking Heroku hostname is NOT sufficient authority to receive
+ * Basic-auth and preview-token credentials. New Heroku apps use randomized
+ * default subdomains, and Fir apps can use a DNS-zone label. Bind the exact
+ * requested origin to the canonical web_url returned by a read-only GET of
+ * the previously approved immutable Heroku app UUID before ANY private POST.
+ * Missing API access, changed app identity or URL must fail closed.
+ */
+async function verifyDedicatedPilotOrigin(endpoint,{
+ fetcher=globalThis.fetch,key=process.env.HEROKU_API_KEY
+}={}){
+ const approved=APPS.find(a=>a.role==='private');
+ if(!approved?.id||approved.name!=='jalan-kl-private-pilot'||
+    typeof key!=='string'||key.length<16)
+  throw Error('Dedicated private pilot identity cannot be verified');
+ const response=await fetcher('https://api.heroku.com/apps/'+encodeURIComponent(approved.id),{
+  method:'GET',headers:{Authorization:'Bearer '+key,
+   Accept:'application/vnd.heroku+json; version=3'},
+  redirect:'error',signal:AbortSignal.timeout(15000)
+ });
+ if(!response||response.status!==200)
+  throw Error('Dedicated private pilot identity cannot be verified');
+ const app=await response.json();
+ if(app?.id!==approved.id||app?.name!==approved.name||
+    typeof app.web_url!=='string')
+  throw Error('Dedicated private pilot identity mismatch');
+ let canonical;
+ try{canonical=new URL(app.web_url);}catch(_){
+  throw Error('Dedicated private pilot canonical URL unavailable');
+ }
+ if(canonical.protocol!=='https:'||canonical.username||canonical.password||
+    !canonical.hostname.endsWith('.herokuapp.com')||
+    canonical.origin!==endpoint.origin)
+  throw Error('Dedicated private pilot canonical origin mismatch');
+ return true;
 }
 function validCoord(lat,lng){return Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=2.5&&lat<=3.8&&lng>=100.8&&lng<=102.3;}
 function validateCases(cases){
@@ -142,14 +180,17 @@ function appendServerTiming(row,body){
  }
 }
 async function collectEvidence(cases,rawEndpoint,{
- fetchImpl=globalThis.fetch,authHeader,authValue,pilotPassword,pilotPreviewToken,timeoutMs=20000
+ fetchImpl=globalThis.fetch,herokuFetchImpl=globalThis.fetch,herokuApiKey=process.env.HEROKU_API_KEY,
+ authHeader,authValue,pilotPassword,pilotPreviewToken,timeoutMs=20000
 }={}){
  validateCases(cases);const endpoint=endpointUrl(rawEndpoint),out=[];
  if((authHeader&&!authValue)||(!authHeader&&authValue))throw Error('Both authentication header name and value must be supplied');
  if(authHeader&&!/^[a-zA-Z0-9-]+$/.test(authHeader))throw Error('Invalid header name');
  if(authHeader&&new Set(['host','cookie','accept','cache-control','content-type','origin','referer']).has(authHeader.toLowerCase()))
   throw Error('Invalid authentication header name');
- const dedicated=/^jalan-kl-private-pilot(?:-[a-z0-9]+)?\.herokuapp\.com$/i.test(endpoint.hostname);
+ // This shape only distinguishes the dedicated credential mode. It is NOT
+ // proof of ownership: verify the exact Heroku canonical origin by app UUID.
+ const dedicated=/^jalan-kl-private-pilot(?:-[a-z0-9]+)?(?:\.[a-z0-9-]+)?\.herokuapp\.com$/i.test(endpoint.hostname);
  const usePilot=pilotPassword!==undefined||pilotPreviewToken!==undefined;
  if(dedicated&&!usePilot)throw Error('Dedicated private pilot requires Basic password and preview token');
  if(usePilot){
@@ -159,6 +200,9 @@ async function collectEvidence(cases,rawEndpoint,{
     typeof pilotPreviewToken!=='string'||pilotPreviewToken.length<32||
     pilotPassword===pilotPreviewToken)
    throw Error('Invalid dedicated pilot credentials');
+  // No route credentials or coordinates are transmitted before this GET-only
+  // immutable-app-ID/canonical URL comparison succeeds.
+  await verifyDedicatedPilotOrigin(endpoint,{fetcher:herokuFetchImpl,key:herokuApiKey});
  }
  if(!Number.isFinite(timeoutMs)||timeoutMs<1000||timeoutMs>60000)throw Error('Invalid request timeout');
  for(const c of cases){ // Sequential to avoid load spikes against experimental graph.
@@ -261,4 +305,4 @@ if(require.main===module)main().catch(e=>{
   /^(Usage:|Expected |Invalid |Coordinate |Both |Input and output|Do not |Endpoint |Use HTTPS|JALAN_EXPERIMENTAL_ROUTE_URL|Authentication)/.test(e.message)?e.message:'check local configuration and file permissions')+'\n');
  process.exitCode=1;
 });
-module.exports={endpointUrl,validateCases,verifiedGeometry,geometryMatchesJourney,routeReply,collectEvidence};
+module.exports={endpointUrl,verifyDedicatedPilotOrigin,validateCases,verifiedGeometry,geometryMatchesJourney,routeReply,collectEvidence};
