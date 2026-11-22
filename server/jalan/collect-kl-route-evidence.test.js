@@ -92,6 +92,32 @@ test('a lookalike private Heroku subdomain cannot receive pilot secrets or coord
  assert.equal(identityCalls,1,'only identity-pinned GET is permitted');
  assert.equal(routeCalls,0,'private Basic/token and coordinates never reach lookalike host');
 });
+test('a long private batch rechecks canonical identity before every credentialed POST',async()=>{
+ const origin=pilotCanonical+'api/jalan/kl/route';
+ const cases=[base,{...base,caseId:'kl-test-02'}];
+ const password='p'.repeat(32),token='t'.repeat(32);
+ let identityReads=0,credentialPosts=0;
+ await assert.rejects(()=>collectEvidence(cases,origin,{
+  pilotPassword:password,pilotPreviewToken:token,herokuApiKey:testHerokuKey,
+  herokuFetchImpl:async()=>{
+   identityReads++;
+   return {status:200,json:async()=>({
+    id:PRIVATE.id,name:PRIVATE.name,
+    web_url:identityReads===1?pilotCanonical:
+     'https://jalan-kl-private-pilot-reassigned.herokuapp.com/'
+   })};
+  },
+  fetchImpl:async(_url,options)=>{
+   credentialPosts++;
+   assert.equal(options.redirect,'error');
+   assert.equal(options.headers['x-jalan-preview-token'],token);
+   return reply(200,good)();
+  }
+ }),/canonical origin mismatch/);
+ assert.equal(identityReads,2,'revalidate exact app URL for each journey');
+ assert.equal(credentialPosts,1,'no second credential or coordinate POST after identity changes');
+});
+
 test('the exact private pilot origin requires immutable identity and Heroku API access',async()=>{
  const origin=new URL(pilotCanonical+'api/jalan/kl/route');
  const password='p'.repeat(32),token='t'.repeat(32);
