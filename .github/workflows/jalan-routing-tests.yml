@@ -15,6 +15,8 @@ on:
       - '.github/workflows/jalan-routing-tests.yml'
 jobs:
   test:
+    # Explicit N11 metadata dispatch must not repeat normal regression jobs.
+    if: github.event_name != 'workflow_dispatch' || inputs.original_community_retention != true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,7 +56,7 @@ jobs:
 
   kl-fullgraph:
     # Never expose Atlas credentials to untrusted PRs or development branches.
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    if: (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.original_community_retention != true)) && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
@@ -163,6 +165,8 @@ jobs:
         run: node server/jalan/audit-jalan-current-community-retention-readonly.js
 
   browser-preview:
+    # The original-app TTL audit is a separate metadata-only manual run.
+    if: github.event_name != 'workflow_dispatch' || inputs.original_community_retention != true
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -180,7 +184,7 @@ jobs:
 
   browser-realgraph:
     # Never expose Atlas credentials to untrusted PRs or development branches.
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    if: (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.original_community_retention != true)) && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     permissions:
