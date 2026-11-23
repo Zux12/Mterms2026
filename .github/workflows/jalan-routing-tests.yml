@@ -32,6 +32,7 @@ jobs:
       - run: node --test server/jalan/audit-heroku-pilot-release-config-readonly.test.js
       - run: node --test server/jalan/audit-heroku-pilot-config-readonly.test.js
       - run: node --test server/jalan/audit-jalan-traffic-retention-readonly.test.js
+      - run: node --test server/jalan/audit-jalan-current-community-retention-readonly.test.js
       - run: node --test server/jalan/traffic-ephemeral-ip-limiter.test.js
       - run: node --test server/jalan/audit-heroku-retention-metadata-readonly.test.js
       - run: node --test server/jalan/audit-dbkl-temporary-road-graph-readonly.test.js
@@ -121,6 +122,8 @@ jobs:
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Audit traffic-observation TTL index using Atlas read-only metadata (no observations)
         run: node server/jalan/audit-jalan-traffic-retention-readonly.js
+      - name: Audit CURRENT community flow/report TTL metadata only (not data documents)
+        run: node server/jalan/audit-jalan-current-community-retention-readonly.js
       - name: Compare DBKL dated road restrictions with imported named-road topology (advisory only)
         run: node server/jalan/audit-dbkl-temporary-road-graph-readonly.js
       - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
