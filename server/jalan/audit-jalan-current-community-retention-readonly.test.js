@@ -111,3 +111,24 @@ test('rejects wrong read-only username before Heroku or Mongo network',async()=>
   /isolated-readonly-credential-required/);
  assert.equal(contacted,false);
 });
+
+
+test('manual TTL-only dispatch excludes unrelated graph and browser jobs',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const workflow=fs.readFileSync(path.join(__dirname,'../../.github/workflows/jalan-routing-tests.yml'),'utf8');
+ function body(name){
+  const marker='\n  '+name+':\n',start=workflow.indexOf(marker);
+  assert.ok(start>=0,'missing job: '+name);
+  const remaining=workflow.slice(start+marker.length);
+  const next=remaining.search(/\n  [a-z][a-z0-9-]*:\n/);
+  return next<0?remaining:remaining.slice(0,next);
+ }
+ for(const name of ['test','kl-fullgraph','browser-preview','browser-realgraph']){
+  assert.match(body(name),/inputs\.original_community_retention != true/,
+   name+' must be skipped on explicit original-app TTL audit');
+ }
+ const auditJob=body('original-community-retention-readonly');
+ assert.match(auditJob,/inputs\.original_community_retention == true/);
+ assert.match(auditJob,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
+ assert.match(auditJob,/run: node server\/jalan\/audit-jalan-current-community-retention-readonly\.js/);
+});
