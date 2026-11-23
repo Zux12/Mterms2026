@@ -1,0 +1,34 @@
+name: Jalan routing regression tests
+
+# Registration-only workflow for GitHub's default-branch dispatch requirement.
+# The separately reviewed JALAN trusted branch owns all audit implementation,
+# authenticated metadata reads, secret references and test jobs.
+# DO NOT copy the privileged implementation or any secrets to shared main.
+on:
+  workflow_dispatch:
+    inputs:
+      original_community_retention:
+        description: 'Independent operator-approved original-app-bound N11 TTL index audit (read-only)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  registration-only:
+    # The trusted JALAN branch defines its own actual workflow jobs. This
+    # shared-main registration must never connect to Heroku or MongoDB.
+    if: github.ref != 'refs/heads/jalan-v4102-routing-regression-tests'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Explain protected N11 audit dispatch
+        run: |
+          echo "Registration only. No Heroku or MongoDB access from shared main."
+          echo "The original-community retention audit is not approved or deployed."
+          echo "Do not dispatch until PR82 is independently reviewed and integrated"
+          echo "on the trusted JALAN branch and the immutable original Heroku app"
+          echo "UUID/read-only datastore binding is approved by an operator."
+          echo "Select the trusted branch and explicitly opt in to the audit."
