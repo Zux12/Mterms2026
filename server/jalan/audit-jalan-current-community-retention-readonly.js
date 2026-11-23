@@ -12,7 +12,11 @@ function evaluate(indexes){
  if(!Array.isArray(indexes))throw Error('invalid-index-metadata');
  const ttl=indexes.filter(i=>Number.isInteger(i?.expireAfterSeconds));
  const exact=ttl.filter(i=>i.expireAfterSeconds===0 && i.key &&
-  Object.keys(i.key).length===1 && i.key.expiresAt===1);
+  Object.keys(i.key).length===1 && i.key.expiresAt===1 &&
+  // A partial TTL index deletes ONLY matching documents; it cannot prove
+  // retention for the entire flow/report collection (MongoDB docs).
+  !Object.prototype.hasOwnProperty.call(i,'partialFilterExpression') &&
+  i.sparse!==true);
  return {ttlZeroExpiryIndex:exact.length===1,ttlIndexCount:ttl.length};
 }
 
