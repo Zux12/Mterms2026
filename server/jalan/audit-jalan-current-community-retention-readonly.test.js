@@ -9,12 +9,15 @@ test('checks the current flow and report-bucket collections, never historical tr
  assert.equal(evaluate(good).ttlZeroExpiryIndex,true);
  assert.equal(evaluate(good).ttlIndexCount,1);
 });
-test('fails closed for absent, wrong TTL, compound-key and duplicate TTL indexes',()=>{
+test('fails closed for absent, partial, sparse, wrong, compound and duplicate TTL indexes',()=>{
  for(const indexes of [
   [],[{key:{expiresAt:1},expireAfterSeconds:300}],
   [{key:{at:1},expireAfterSeconds:900}],
   [{key:{expiresAt:1,region:1},expireAfterSeconds:0}],
-  [...good,{key:{expiresAt:1},expireAfterSeconds:0}]
+  [...good,{key:{expiresAt:1},expireAfterSeconds:0}],
+  [{key:{expiresAt:1},expireAfterSeconds:0,partialFilterExpression:{type:'traffic'}}],
+  [{key:{expiresAt:1},expireAfterSeconds:0,partialFilterExpression:{}}],
+  [{key:{expiresAt:1},expireAfterSeconds:0,sparse:true}]
  ])assert.equal(evaluate(indexes).ttlZeroExpiryIndex,false);
  assert.throws(()=>evaluate(null),/invalid-index-metadata/);
 });
