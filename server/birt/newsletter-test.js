@@ -47,7 +47,7 @@ router.post('/test-digest',requireAdmin,async(req,res)=>{
   const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{
    Authorization:'Bearer '+key,'Content-Type':'application/json',
    'Idempotency-Key':'birt-digest-full-test-'+issue+'-'+new Date().toISOString().slice(0,10)
-  },body:JSON.stringify({from:FROM,to:[RECIPIENT],subject:'[TEST] BIRT Lab Research Digest — '+issue,html,text}) ,signal:AbortSignal.timeout(20000)});
+  },body:JSON.stringify({from:FROM,to:[RECIPIENT],subject:'BIRT Lab Research Digest — '+issue,html,text}) ,signal:AbortSignal.timeout(20000)});
   const data=await response.json().catch(()=>({}));
   if(!response.ok){console.error('BIRT full digest test rejected',response.status,data.message||'');return res.status(502).json({status:'error',message:'Resend rejected full newsletter test',detail:data.message||null});}
   res.json({status:'submitted',recipient:RECIPIENT,issue,source,resendId:data.id||null,note:'Provider accepted request; inbox delivery not yet confirmed.'});
