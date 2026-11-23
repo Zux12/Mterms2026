@@ -1,15 +1,50 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {DB,COLLECTIONS,evaluate,audit}=require('./audit-jalan-current-community-retention-readonly');
+const {DB,COLLECTIONS,mongoEndpoint,verifyOriginalBinding,evaluate,audit}=
+ require('./audit-jalan-current-community-retention-readonly');
 const URI='mongodb+srv://jalan_readonly:fake@local.invalid/jalan_navigation';
+const HEROKU_KEY='test-heroku-credential-string';
+const APP_ID='123e4567-e89b-12d3-a456-426614174000';
 const good=[{name:'_id_',key:{_id:1}},{name:'expiresAt_1',key:{expiresAt:1},expireAfterSeconds:0}];
-test('checks the current flow and report-bucket collections, never historical traffic_observations',()=>{
+function appFetch({name='mterm2026',id=APP_ID,
+ database='mongodb+srv://owner:secret@local.invalid/other',
+ status=200}={}){
+ const calls=[];
+ const fetcher=async (url,options)=>{
+  calls.push({url,method:options.method,redirect:options.redirect});
+  assert.equal(options.method,'GET');
+  assert.equal(options.redirect,'error');
+  assert.ok(!url.includes('fake@')&&!url.includes('secret@'));
+  return {ok:status===200,status,async json(){
+   return url.endsWith('/config-vars')?{MTERM2026_DB_URI:database}:{name,id};
+  }};
+ };
+ return {fetcher,calls};
+}
+function mockMongo(indexes=good){
+ const calls=[];
+ const client={
+  async connect(){calls.push('connect');},
+  db(name){calls.push('db:'+name);return {collection(name){
+   calls.push('collection:'+name);
+   return {listIndexes(){calls.push('listIndexes:'+name);return {
+    async toArray(){calls.push('toArray:'+name);return indexes;}
+   };}};
+  }};},
+  async close(){calls.push('close');}
+ };
+ return {client,calls};
+}
+const params=(fetcher,client,log=()=>{})=>
+ ({uri:URI,expectedAppId:APP_ID,key:HEROKU_KEY,fetcher,connect:()=>client,log});
+
+test('checks current flow and report collections, never historical traffic_observations',()=>{
  assert.equal(DB,'jalan_navigation');
  assert.deepEqual(COLLECTIONS,['community_flow_segments','community_report_buckets']);
  assert.equal(evaluate(good).ttlZeroExpiryIndex,true);
  assert.equal(evaluate(good).ttlIndexCount,1);
 });
-test('fails closed for absent, partial, sparse, wrong, compound and duplicate TTL indexes',()=>{
+test('rejects absent, partial, sparse, wrong, compound and duplicate TTL metadata',()=>{
  for(const indexes of [
   [],[{key:{expiresAt:1},expireAfterSeconds:300}],
   [{key:{at:1},expireAfterSeconds:900}],
@@ -21,43 +56,58 @@ test('fails closed for absent, partial, sparse, wrong, compound and duplicate TT
  ])assert.equal(evaluate(indexes).ttlZeroExpiryIndex,false);
  assert.throws(()=>evaluate(null),/invalid-index-metadata/);
 });
-test('uses only listIndexes for both collections, never retrieves data or writes',async()=>{
- const calls=[],logs=[];
- const client={
-  async connect(){calls.push('connect');},
-  db(name){calls.push('db:'+name);return {collection(name){
-   calls.push('collection:'+name);
-   return {listIndexes(){calls.push('listIndexes:'+name);return {
-    async toArray(){calls.push('toArray:'+name);return good;}
-   };}};
-  }};},
-  async close(){calls.push('close');}
- };
- const result=await audit({uri:URI,connect:()=>client,log:s=>logs.push(s)});
+test('binds approved immutable original app UUID to same Mongo endpoint, with no secret output',async()=>{
+ const {fetcher,calls}=appFetch();
+ const result=await verifyOriginalBinding({uri:URI,expectedAppId:APP_ID,key:HEROKU_KEY,fetcher});
+ assert.equal(result,true);
+ assert.deepEqual(calls.map(x=>x.url),[
+  'https://api.heroku.com/apps/'+APP_ID,
+  'https://api.heroku.com/apps/'+APP_ID+'/config-vars']);
+ assert.equal(mongoEndpoint(URI),'mongodb+srv://local.invalid');
+ assert.equal(mongoEndpoint('mongodb+srv://owner:secret@local.invalid/other'),'mongodb+srv://local.invalid');
+ for(const value of ['junk','https://local.invalid/','mongodb+srv://nouser.local.invalid/'])
+  assert.throws(()=>mongoEndpoint(value),/invalid-mongodb-endpoint/);
+});
+test('rejects wrong app ID, aliases, Mongo endpoint, malformed credentials and Heroku HTTP before Mongo access',async()=>{
+ const scenarios=[
+  {expectedAppId:'mterm2026',fetcher:appFetch().fetcher},
+  {expectedAppId:'00000000-0000-0000-0000-000000000001',fetcher:appFetch().fetcher},
+  {expectedAppId:APP_ID,fetcher:appFetch({id:'00000000-0000-0000-0000-000000000001'}).fetcher},
+  {expectedAppId:APP_ID,fetcher:appFetch({name:'jalan-kl-private-pilot'}).fetcher},
+  {expectedAppId:APP_ID,fetcher:appFetch({database:'mongodb+srv://x:secret@unrelated.invalid/other'}).fetcher},
+  {expectedAppId:APP_ID,fetcher:appFetch({status:401}).fetcher}
+ ];
+ for(const s of scenarios){
+  const mongo=mockMongo();
+  const opts={...params(s.fetcher,mongo.client),expectedAppId:s.expectedAppId};
+  await assert.rejects(audit(opts),/approved|original-app|heroku|datastore/);
+  assert.deepEqual(mongo.calls,[]);
+ }
+});
+test('uses only listIndexes after immutable app binding; no user documents or writes',async()=>{
+ const m=mockMongo(),{fetcher,calls}=appFetch(),logs=[];
+ const result=await audit(params(fetcher,m.client,s=>logs.push(s)));
  assert.equal(result.ok,true);
- assert.deepEqual(calls,['connect','db:jalan_navigation',
+ assert.deepEqual(m.calls,['connect','db:jalan_navigation',
   'collection:community_flow_segments','listIndexes:community_flow_segments','toArray:community_flow_segments',
   'collection:community_report_buckets','listIndexes:community_report_buckets','toArray:community_report_buckets','close']);
+ assert.equal(calls.length,2);
  assert.equal(logs.length,2);
  assert.ok(!logs.join('').includes('fake@'));
+ assert.ok(!logs.join('').includes('local.invalid'));
 });
-test('failure closes DB and does not mistake historical index for current one',async()=>{
- let closed=false;
- const client={
-  async connect(){},
-  db(){return {collection(name){return {listIndexes(){return {async toArray(){
-   return name==='community_flow_segments'?[{key:{at:1},expireAfterSeconds:900}]:good;
-  }};}};}};},
-  async close(){closed=true;}
- };
- await assert.rejects(audit({uri:URI,connect:()=>client,log:()=>{}}),
+test('index failure closes DB and does not confuse retired TTL for current retention',async()=>{
+ const m=mockMongo([{key:{at:1},expireAfterSeconds:900}]);
+ await assert.rejects(audit(params(appFetch().fetcher,m.client)),
   /current-community-retention-index-not-verified/);
- assert.equal(closed,true);
+ assert.equal(m.calls.at(-1),'close');
 });
-test('rejects unapproved credential before Mongo connection',async()=>{
- let connected=false;
+test('rejects wrong read-only username before Heroku or Mongo network',async()=>{
+ let contacted=false;
  await assert.rejects(audit({uri:'mongodb://other:fake@localhost/db',
-  connect:()=>{connected=true;throw Error('must not call');},log:()=>{}}),
- /isolated-readonly-credential-required/);
- assert.equal(connected,false);
+  expectedAppId:APP_ID,key:HEROKU_KEY,
+  fetcher:()=>{contacted=true;throw Error('must not call');},
+  connect:()=>{contacted=true;throw Error('must not call');},log:()=>{}}),
+  /isolated-readonly-credential-required/);
+ assert.equal(contacted,false);
 });
