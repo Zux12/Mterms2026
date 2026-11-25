@@ -115,3 +115,36 @@ test('four rehearsal slots use one private inbox and never send after the reques
   await scheduleSlot(null, index, new Date(scheduledAt), 'mock', null);
  }
 });
+
+test('an editorial replacement confirms cancellation before scheduling clean copy to the owner', async () => {
+ const { scheduleSlot, slots } = require('../server/oilandgas/recognition-owner-rehearsal');
+ const job = { state: 'cancel-pending', providerMessageId: 'old', originalProviderMessageId: 'old',
+   subject: 'Industry Impact Spotlight', text: 'Congratulations.', html: '<p>Congratulations.</p>', pdf: 'JVBERi0=' };
+ const jobs = { async findOneAndUpdate() { return { ...job }; },
+   async updateOne(filter, update) { Object.assign(job, update.$set); } };
+ const now = new Date('2026-11-25T20:00:00Z');
+ await scheduleSlot(jobs, 1, now, 'mock', async (url) => {
+   assert.equal(url, 'https://api.resend.com/emails/old/cancel');
+   return { ok: false, status: 429, json: async () => ({name: 'rate_limit'}) };
+ });
+ assert.equal(job.state, 'cancel-pending');
+ await scheduleSlot(jobs, 1, now, 'mock', async (url) => {
+   assert.equal(url, 'https://api.resend.com/emails/old/cancel');
+   return { ok: true, json: async () => ({ id: 'old' }) };
+ });
+ assert.equal(job.state, 'replacement-ready');
+ await scheduleSlot(jobs, 1, now, 'mock', async (url, opts) => {
+   assert.equal(url, 'https://api.resend.com/emails');
+   assert.equal(opts.headers['Idempotency-Key'], 'WRRP-owner-20261125-2-editorial-v2');
+   const body = JSON.parse(opts.body);
+   assert.deepEqual(body.to, [TO]);
+   assert.ok(!body.cc && !body.bcc);
+   assert.equal(body.subject, job.subject);
+   assert.equal(body.scheduled_at, slots[1]);
+   assert.equal(body.attachments[0].filename, 'Letter of Recognition.pdf');
+   return { ok: true, json: async () => ({ id: 'new' }) };
+ });
+ assert.equal(job.state, 'scheduled');
+ assert.equal(job.providerMessageId, 'new');
+ assert.equal(job.originalProviderMessageId, 'old');
+});
