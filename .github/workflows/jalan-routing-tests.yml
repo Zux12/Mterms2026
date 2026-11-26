@@ -151,17 +151,21 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-    env:
-      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      JALAN_EXPECTED_ORIGINAL_APP_ID: ${{ secrets.JALAN_EXPECTED_ORIGINAL_APP_ID }}
-      JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
       - run: npm install --ignore-scripts --no-audit --no-fund
+      # Supply protected credentials only to the authorized audit process,
+      # never to checkout, toolchain setup or dependency installation.
       - name: Pin original Heroku app + live Mongo endpoint before index-only reads
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          JALAN_EXPECTED_ORIGINAL_APP_ID: ${{ secrets.JALAN_EXPECTED_ORIGINAL_APP_ID }}
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
         run: node server/jalan/audit-jalan-current-community-retention-readonly.js
 
   browser-preview:

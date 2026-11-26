@@ -132,3 +132,20 @@ test('manual TTL-only dispatch excludes unrelated graph and browser jobs',()=>{
  assert.match(auditJob,/github\.ref == 'refs\/heads\/jalan-v4102-routing-regression-tests'/);
  assert.match(auditJob,/run: node server\/jalan\/audit-jalan-current-community-retention-readonly\.js/);
 });
+
+test('manual original-app retention secrets are scoped only to audit execution',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const workflow=fs.readFileSync(path.join(__dirname,'../../.github/workflows/jalan-routing-tests.yml'),'utf8');
+ const job=workflow.split('\n  original-community-retention-readonly:\n')[1].split('\n  browser-preview:\n')[0];
+ const step='      - name: Pin original Heroku app + live Mongo endpoint before index-only reads\n';
+ const parts=job.split(step);
+ assert.equal(parts.length,2);
+ assert.doesNotMatch(parts[0],/\$\{\{\s*secrets\.|^\s*env:/m,'no secret exposure during setup or install');
+ assert.match(parts[0],/persist-credentials: false/);
+ assert.match(parts[0],/npm install --ignore-scripts --no-audit --no-fund/);
+ assert.match(parts[1],/^        env:\n/);
+ for(const name of ['HEROKU_API_KEY','JALAN_EXPECTED_ORIGINAL_APP_ID','JALAN_READONLY_MONGODB_URI']){
+  assert.ok(parts[1].includes(name+': $'+'{{ secrets.'+name+' }}'));
+ }
+ assert.match(parts[1],/run: node server\/jalan\/audit-jalan-current-community-retention-readonly\.js/);
+});
