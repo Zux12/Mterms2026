@@ -1084,6 +1084,7 @@ async function scheduledTick(){
 // All recognition launch flags default OFF. Only the separate, opt-in
 // ADMIN notification channel can send Friday previews; authors remain OFF.
 setInterval(scheduledTick,15*60000).unref();
+require('./recognition-owner-rehearsal').start(() => mongoose.connection.readyState === 1 ? db() : null);
 
 
 adminRouter.post('/withdraw',async(req,res,next)=>{try{
