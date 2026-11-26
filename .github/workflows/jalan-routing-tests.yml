@@ -1,6 +1,12 @@
 name: Jalan routing regression tests
 on:
   workflow_dispatch:
+    inputs:
+      original_community_retention:
+        description: 'Operator-approved original-app-bound current TTL metadata check (read-only)'
+        required: false
+        type: boolean
+        default: false
   push:
     branches: [jalan-v4102-routing-regression-tests]
   pull_request:
@@ -9,6 +15,8 @@ on:
       - '.github/workflows/jalan-routing-tests.yml'
 jobs:
   test:
+    # Explicit N11 metadata dispatch must not repeat normal regression jobs.
+    if: github.event_name != 'workflow_dispatch' || inputs.original_community_retention != true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,6 +40,7 @@ jobs:
       - run: node --test server/jalan/audit-heroku-pilot-release-config-readonly.test.js
       - run: node --test server/jalan/audit-heroku-pilot-config-readonly.test.js
       - run: node --test server/jalan/audit-jalan-traffic-retention-readonly.test.js
+      - run: node --test server/jalan/audit-jalan-current-community-retention-readonly.test.js
       - run: node --test server/jalan/traffic-ephemeral-ip-limiter.test.js
       - run: node --test server/jalan/audit-heroku-retention-metadata-readonly.test.js
       - run: node --test server/jalan/audit-dbkl-temporary-road-graph-readonly.test.js
@@ -47,7 +56,7 @@ jobs:
 
   kl-fullgraph:
     # Never expose Atlas credentials to untrusted PRs or development branches.
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    if: (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.original_community_retention != true)) && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
@@ -121,6 +130,8 @@ jobs:
         run: node server/jalan/kl-fullgraph-turn-readiness-v4102.js
       - name: Audit traffic-observation TTL index using Atlas read-only metadata (no observations)
         run: node server/jalan/audit-jalan-traffic-retention-readonly.js
+      # Current original-app community TTL is NOT a graph DB auto-push check.
+      # It requires an independent immutable original-Heroku-app identity pin.
       - name: Compare DBKL dated road restrictions with imported named-road topology (advisory only)
         run: node server/jalan/audit-dbkl-temporary-road-graph-readonly.js
       - name: Smoke-test isolated KL preview over real loopback HTTP (read-only)
@@ -131,7 +142,35 @@ jobs:
         if: always()
         run: rm -f /tmp/jalan-kl-cases.json /tmp/jalan-kl-sanitized.json
 
+  original-community-retention-readonly:
+    # Manual explicit opt-in ONLY, on protected trusted source. No PR secrets.
+    # An independently verified original app UUID must already be stored in
+    # JALAN_EXPECTED_ORIGINAL_APP_ID. Absence/mismatch fails before Mongo connect.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests' && inputs.original_community_retention == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      # Supply protected credentials only to the authorized audit process,
+      # never to checkout, toolchain setup or dependency installation.
+      - name: Pin original Heroku app + live Mongo endpoint before index-only reads
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          JALAN_EXPECTED_ORIGINAL_APP_ID: ${{ secrets.JALAN_EXPECTED_ORIGINAL_APP_ID }}
+          JALAN_READONLY_MONGODB_URI: ${{ secrets.JALAN_READONLY_MONGODB_URI }}
+        run: node server/jalan/audit-jalan-current-community-retention-readonly.js
+
   browser-preview:
+    # The original-app TTL audit is a separate metadata-only manual run.
+    if: github.event_name != 'workflow_dispatch' || inputs.original_community_retention != true
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -149,7 +188,7 @@ jobs:
 
   browser-realgraph:
     # Never expose Atlas credentials to untrusted PRs or development branches.
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
+    if: (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.original_community_retention != true)) && github.ref == 'refs/heads/jalan-v4102-routing-regression-tests'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     permissions:
